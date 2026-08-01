@@ -353,11 +353,11 @@
         <div class="problemLine">
           <span id="problemFraction"></span>
           <span class="equals">=</span>
-          <input id="wholeInput" class="answerBox active" aria-label="整数" autocomplete="off" inputmode="numeric" name="answer-whole" value="" />
+          <input id="wholeInput" class="answerBox active" aria-label="整数" autocomplete="off" inputmode="none" name="answer-whole" readonly value="" />
           <span class="answerFraction">
-            <input id="restInput" class="answerBox" aria-label="分子" autocomplete="off" inputmode="numeric" name="answer-rest" value="" />
+            <input id="restInput" class="answerBox" aria-label="分子" autocomplete="off" inputmode="none" name="answer-rest" readonly value="" />
             <i></i>
-            <input id="bottomInput" class="answerBox" aria-label="分母" autocomplete="off" inputmode="numeric" name="answer-bottom" value="" />
+            <input id="bottomInput" class="answerBox" aria-label="分母" autocomplete="off" inputmode="none" name="answer-bottom" readonly value="" />
           </span>
         </div>
 
@@ -567,7 +567,26 @@
         const deltaX = event.clientX - swipeStart.x;
         const deltaY = event.clientY - swipeStart.y;
         swipeStart = null;
-        if (Math.abs(deltaX) < 72 || Math.abs(deltaY) > 52) return;
+        if (deltaX > -72 || Math.abs(deltaY) > 52) return;
+
+        practiceCard.classList.add("swiped");
+        window.setTimeout(() => practiceCard.classList.remove("swiped"), 180);
+        nextProblem();
+      }
+
+      function startTouchSwipe(event) {
+        if (isInteractiveTarget(event.target) || event.touches.length !== 1) return;
+        const touch = event.touches[0];
+        swipeStart = { x: touch.clientX, y: touch.clientY };
+      }
+
+      function finishTouchSwipe(event) {
+        if (!swipeStart || event.changedTouches.length !== 1) return;
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - swipeStart.x;
+        const deltaY = touch.clientY - swipeStart.y;
+        swipeStart = null;
+        if (deltaX > -72 || Math.abs(deltaY) > 52) return;
 
         practiceCard.classList.add("swiped");
         window.setTimeout(() => practiceCard.classList.remove("swiped"), 180);
@@ -580,7 +599,23 @@
 
       Object.entries(inputs).forEach(([slot, input]) => {
         input.addEventListener("focus", () => setActive(slot));
-        input.addEventListener("input", () => setSlotValue(slot, input.value));
+        input.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          setActive(slot);
+        });
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (/^\d$/.test(event.key)) {
+          event.preventDefault();
+          setSlotValue(activeSlot, inputs[activeSlot].value + event.key);
+          return;
+        }
+
+        if (event.key === "Backspace" || event.key === "Delete") {
+          event.preventDefault();
+          document.querySelector("#backButton").click();
+        }
       });
 
       document.querySelectorAll("[data-digit]").forEach((button) => {
@@ -605,6 +640,11 @@
       practiceCard.addEventListener("pointerdown", startSwipe);
       practiceCard.addEventListener("pointerup", finishSwipe);
       practiceCard.addEventListener("pointercancel", () => {
+        swipeStart = null;
+      });
+      practiceCard.addEventListener("touchstart", startTouchSwipe, { passive: true });
+      practiceCard.addEventListener("touchend", finishTouchSwipe, { passive: true });
+      practiceCard.addEventListener("touchcancel", () => {
         swipeStart = null;
       });
       easyButton.addEventListener("click", () => {
