@@ -353,11 +353,11 @@
         <div class="problemLine">
           <span id="problemFraction"></span>
           <span class="equals">=</span>
-          <input id="wholeInput" class="answerBox active" aria-label="整数" autocomplete="off" inputmode="none" name="answer-whole" readonly value="" />
+          <input id="wholeInput" class="answerBox active" aria-label="整数" autocomplete="off" inputmode="none" name="answer-whole" readonly tabindex="-1" value="" />
           <span class="answerFraction">
-            <input id="restInput" class="answerBox" aria-label="分子" autocomplete="off" inputmode="none" name="answer-rest" readonly value="" />
+            <input id="restInput" class="answerBox" aria-label="分子" autocomplete="off" inputmode="none" name="answer-rest" readonly tabindex="-1" value="" />
             <i></i>
-            <input id="bottomInput" class="answerBox" aria-label="分母" autocomplete="off" inputmode="none" name="answer-bottom" readonly value="" />
+            <input id="bottomInput" class="answerBox" aria-label="分母" autocomplete="off" inputmode="none" name="answer-bottom" readonly tabindex="-1" value="" />
           </span>
         </div>
 
@@ -477,8 +477,8 @@
         activeSlot = slot;
         Object.entries(inputs).forEach(([key, input]) => {
           input.classList.toggle("active", key === slot);
+          input.blur();
         });
-        inputs[slot].focus();
       }
 
       function nextSlot(slot) {
