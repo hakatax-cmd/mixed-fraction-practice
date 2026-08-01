@@ -353,11 +353,11 @@
         <div class="problemLine">
           <span id="problemFraction"></span>
           <span class="equals">=</span>
-          <input id="wholeInput" class="answerBox active" aria-label="整数" autocomplete="off" inputmode="none" name="answer-whole" readonly tabindex="-1" value="" />
+          <button id="wholeInput" class="answerBox active" aria-label="整数" data-value="" type="button"></button>
           <span class="answerFraction">
-            <input id="restInput" class="answerBox" aria-label="分子" autocomplete="off" inputmode="none" name="answer-rest" readonly tabindex="-1" value="" />
+            <button id="restInput" class="answerBox" aria-label="分子" data-value="" type="button"></button>
             <i></i>
-            <input id="bottomInput" class="answerBox" aria-label="分母" autocomplete="off" inputmode="none" name="answer-bottom" readonly tabindex="-1" value="" />
+            <button id="bottomInput" class="answerBox" aria-label="分母" data-value="" type="button"></button>
           </span>
         </div>
 
@@ -488,14 +488,23 @@
 
       function setSlotValue(slot, rawValue) {
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
-        inputs[slot].value = value;
+        setAnswerValue(slot, value);
         if (value.length >= expected(slot).length) nextSlot(slot);
         checkState();
       }
 
+      function getAnswerValue(slot) {
+        return inputs[slot].dataset.value || "";
+      }
+
+      function setAnswerValue(slot, value) {
+        inputs[slot].dataset.value = value;
+        inputs[slot].textContent = value;
+      }
+
       function checkState() {
-        const complete = slotOrder.every((slot) => inputs[slot].value.length > 0);
-        const correct = slotOrder.every((slot) => inputs[slot].value === expected(slot));
+        const complete = slotOrder.every((slot) => getAnswerValue(slot).length > 0);
+        const correct = slotOrder.every((slot) => getAnswerValue(slot) === expected(slot));
         if (!complete) {
           feedback.innerHTML = "&nbsp;";
           visualReveal.classList.remove("show");
@@ -532,8 +541,7 @@
 
       function resetInputs() {
         slotOrder.forEach((slot) => {
-          inputs[slot].value = "";
-          inputs[slot].setAttribute("autocomplete", "off");
+          setAnswerValue(slot, "");
         });
         feedback.innerHTML = "&nbsp;";
         visualReveal.classList.remove("show");
@@ -598,17 +606,17 @@
       }
 
       Object.entries(inputs).forEach(([slot, input]) => {
-        input.addEventListener("focus", () => setActive(slot));
         input.addEventListener("pointerdown", (event) => {
           event.preventDefault();
           setActive(slot);
         });
+        input.addEventListener("click", () => setActive(slot));
       });
 
       document.addEventListener("keydown", (event) => {
         if (/^\d$/.test(event.key)) {
           event.preventDefault();
-          setSlotValue(activeSlot, inputs[activeSlot].value + event.key);
+          setSlotValue(activeSlot, getAnswerValue(activeSlot) + event.key);
           return;
         }
 
@@ -620,14 +628,14 @@
 
       document.querySelectorAll("[data-digit]").forEach((button) => {
         button.addEventListener("click", () => {
-          setSlotValue(activeSlot, inputs[activeSlot].value + button.dataset.digit);
+          setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit);
         });
       });
 
       document.querySelector("#backButton").addEventListener("click", () => {
-        const current = inputs[activeSlot].value;
+        const current = getAnswerValue(activeSlot);
         if (current.length > 0) {
-          inputs[activeSlot].value = current.slice(0, -1);
+          setAnswerValue(activeSlot, current.slice(0, -1));
           checkState();
           return;
         }
