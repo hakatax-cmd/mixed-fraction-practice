@@ -3,68 +3,44 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>帯分数れんしゅう</title>
+    <title>&#24111;&#20998;&#25968;&#12428;&#12435;&#12375;&#12421;&#12358;</title>
     <style>
       :root {
         --ink: #16202a;
         --muted: #607080;
         --line: #d9d2c0;
         --blue: #2563eb;
-        --green: #14966f;
-        --coral: #ef6048;
+        --coral: #e33a2f;
         --yellow: #ffd166;
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         min-height: 100vh;
         margin: 0;
-        background:
-          radial-gradient(circle at 12% 8%, rgba(255, 209, 102, 0.3), transparent 21rem),
-          radial-gradient(circle at 90% 16%, rgba(37, 99, 235, 0.13), transparent 20rem),
-          linear-gradient(135deg, #fff9ec 0%, #eef7ff 60%, #f3fff8 100%);
+        background: #f6fafb;
         color: var(--ink);
         font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", Arial, sans-serif;
       }
 
-      button,
-      input {
-        font: inherit;
-      }
+      button { cursor: pointer; font: inherit; }
 
-      button {
-        cursor: pointer;
-      }
-
-      .appShell {
-        width: min(980px, calc(100% - 28px));
-        margin: 0 auto;
-        padding: 24px 0;
-      }
+      .appShell { width: min(980px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0; }
 
       .practiceCard {
         min-height: calc(100vh - 48px);
         border: 2px solid rgba(22, 32, 42, 0.1);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.88);
+        background: #fff;
         box-shadow: 0 20px 48px rgba(22, 32, 42, 0.09);
         padding: 24px;
         touch-action: pan-y;
       }
 
-      .practiceCard.swiped {
-        animation: swipe-next 180ms ease-out;
-      }
+      .practiceCard.swiped { animation: swipe-next 180ms ease-out; }
 
-      .topBar {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        align-items: center;
-      }
+      .topBar { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
 
       .modeSwitch {
         display: grid;
@@ -76,30 +52,28 @@
         padding: 4px;
       }
 
-      .modeSwitch button,
-      .nextButton,
-      .keypad button {
+      .modeSwitch button, .keypad button, .restartButton {
         min-height: 52px;
         border: 0;
         border-radius: 6px;
         font-weight: 900;
       }
 
-      .modeSwitch button {
-        background: transparent;
-        color: var(--muted);
+      .modeSwitch button { background: transparent; color: var(--muted); }
+      .modeSwitch button.active { background: var(--blue); color: #fff; }
+
+      .progress {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 16px;
+        font-size: clamp(1rem, 2.8vw, 1.45rem);
+        font-weight: 900;
+        white-space: nowrap;
       }
 
-      .modeSwitch button.active {
-        background: var(--blue);
-        color: #fff;
-      }
-
-      .nextButton {
-        background: var(--ink);
-        color: #fff;
-        padding: 0 18px;
-      }
+      .streak { color: var(--coral); }
+      .timer { color: var(--ink); font-variant-numeric: tabular-nums; }
 
       .problemLine {
         display: flex;
@@ -114,12 +88,9 @@
         line-height: 1;
       }
 
-      .equals {
-        color: var(--muted);
-      }
+      .equals { color: var(--muted); }
 
-      .fraction,
-      .answerFraction {
+      .fraction, .answerFraction {
         display: inline-grid;
         grid-template-rows: auto 5px auto;
         justify-items: center;
@@ -127,8 +98,7 @@
         line-height: 0.88;
       }
 
-      .fraction i,
-      .answerFraction i {
+      .fraction i, .answerFraction i {
         display: block;
         width: 100%;
         min-width: 0.74em;
@@ -137,9 +107,7 @@
         background: currentColor;
       }
 
-      .answerFraction {
-        gap: 4px;
-      }
+      .answerFraction { gap: 4px; }
 
       .answerBox {
         width: clamp(76px, 13vw, 128px);
@@ -161,8 +129,7 @@
         font-size: clamp(2rem, 5vw, 4rem);
       }
 
-      .answerBox:focus,
-      .answerBox.active {
+      .answerBox:focus, .answerBox.active {
         border-color: var(--blue);
         outline: 5px solid rgba(37, 99, 235, 0.18);
       }
@@ -170,14 +137,20 @@
       .feedback {
         min-height: 42px;
         margin: 0 0 12px;
-        color: var(--coral);
-        font-size: clamp(1.5rem, 4vw, 2.4rem);
+        color: var(--muted);
+        font-size: clamp(1.15rem, 3vw, 1.65rem);
         font-weight: 900;
         text-align: center;
       }
 
-      .feedback.good {
-        color: var(--green);
+      .nextButton {
+        min-height: 52px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 22px;
+        background: var(--blue);
+        color: #fff;
+        font-weight: 900;
       }
 
       .keypad {
@@ -197,201 +170,152 @@
         box-shadow: 0 8px 0 rgba(22, 32, 42, 0.08);
       }
 
-      .keypad button:active {
-        transform: translateY(3px);
-        box-shadow: 0 5px 0 rgba(22, 32, 42, 0.08);
+      .keypad button:active { transform: translateY(3px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.08); }
+      .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: 1.2rem; }
+      button:disabled { cursor: default; opacity: 0.52; transform: none; }
+
+      .reaction {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 20;
       }
 
-      .keypad .toolButton {
-        background: #edf8ff;
-        color: #24507a;
-        font-size: 1.2rem;
+      .reaction.show { opacity: 1; }
+
+      .big-circle {
+        width: min(280px, 64vw);
+        aspect-ratio: 1;
+        border: 18px solid var(--coral);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: 0 10px 32px rgba(22, 32, 42, 0.14);
       }
 
-      .visualReveal {
-        display: none;
-        margin: 24px auto 0;
-        max-width: 820px;
-        border-top: 2px dashed var(--line);
-        padding-top: 22px;
-      }
-
-      .visualReveal.show {
-        display: block;
-      }
-
-      .mathSentence {
-        width: fit-content;
-        margin: 0 auto 18px;
-        border-radius: 8px;
-        background: #eafaf4;
-        color: var(--green);
-        font-size: clamp(1.3rem, 3vw, 2rem);
+      .big-cross {
+        color: var(--coral);
+        font-family: Arial, sans-serif;
+        font-size: min(300px, 72vw);
         font-weight: 900;
-        padding: 12px 16px;
+        line-height: 0.78;
+        text-shadow: 0 10px 24px rgba(22, 32, 42, 0.12);
       }
 
-      .groups {
+      .finishPanel {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-        gap: 14px;
-      }
-
-      .circleGroup {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 5px;
-        aspect-ratio: 1;
-        align-content: center;
-        justify-content: center;
-        border: 2px solid var(--line);
-        border-radius: 50%;
-        background: #fffdf8;
-        padding: 12px;
-      }
-
-      .piece {
-        aspect-ratio: 1;
-        border: 2px solid #c9c1ad;
-        border-radius: 50%;
-        background: #fff;
-      }
-
-      .piece.filled {
-        border-color: #ffb13b;
-        background: var(--yellow);
-      }
-
-      .note {
-        margin: 16px 0 0;
-        color: var(--muted);
-        font-weight: 800;
+        min-height: 440px;
+        place-content: center;
+        gap: 18px;
         text-align: center;
       }
 
-      button:hover {
-        filter: brightness(0.97);
-      }
+      .finishPanel[hidden], #gameArea[hidden] { display: none; }
+      .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
+      .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @keyframes swipe-next {
-        0% {
-          transform: translateX(0);
-        }
-
-        45% {
-          transform: translateX(-18px);
-        }
-
-        100% {
-          transform: translateX(0);
-        }
+        0% { transform: translateX(0); }
+        45% { transform: translateX(-18px); }
+        100% { transform: translateX(0); }
       }
 
       @media (max-width: 720px) {
-        .appShell {
-          width: min(100% - 18px, 560px);
-          padding: 9px 0 18px;
-        }
-
-        .practiceCard {
-          min-height: calc(100vh - 27px);
-          padding: 14px;
-        }
-
-        .topBar {
-          display: grid;
-          grid-template-columns: 1fr;
-        }
-
-        .modeSwitch {
-          width: 100%;
-        }
-
-        .problemLine {
-          min-height: 190px;
-          margin-top: 18px;
-        }
-
-        .keypad {
-          grid-template-columns: repeat(4, 1fr);
-        }
+        .appShell { width: min(100% - 18px, 560px); padding: 9px 0 18px; }
+        .practiceCard { min-height: calc(100vh - 27px); padding: 14px; }
+        .topBar { display: grid; grid-template-columns: 1fr; }
+        .modeSwitch { width: 100%; }
+        .progress { justify-content: space-between; }
+        .problemLine { min-height: 190px; margin-top: 18px; }
+        .keypad { grid-template-columns: repeat(4, 1fr); }
       }
 
       @media (max-width: 430px) {
-        .problemLine {
-          font-size: 3.1rem;
-          gap: 9px;
-        }
-
-        .answerBox {
-          width: 70px;
-          height: 70px;
-        }
-
-        .answerFraction .answerBox {
-          width: 62px;
-          height: 52px;
-        }
-
-        .keypad button {
-          min-height: 58px;
-        }
+        .problemLine { font-size: 3.1rem; gap: 9px; }
+        .answerBox { width: 70px; height: 70px; }
+        .answerFraction .answerBox { width: 62px; height: 52px; }
+        .keypad button { min-height: 58px; }
       }
     </style>
   </head>
   <body>
     <main class="appShell">
-      <section class="practiceCard" aria-label="帯分数の練習">
+      <section class="practiceCard" aria-label="&#24111;&#20998;&#25968;&#12398;&#32244;&#32722;">
         <div class="topBar">
-          <div class="modeSwitch" aria-label="問題のレベル">
-            <button id="easyButton" class="active" type="button">かんたん</button>
-            <button id="hardButton" type="button">むずかしい</button>
+          <div class="modeSwitch" aria-label="&#38627;&#26131;&#24230;&#12524;&#12505;&#12523;">
+            <button id="easyButton" class="active" type="button">&#12363;&#12435;&#12383;&#12435;</button>
+            <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
-          <button class="nextButton" id="nextButton" type="button">次の問題</button>
+          <div class="progress" aria-live="polite">
+            <span class="streak" id="streakLabel">&#36899;&#32154; 0&#21839;&#27491;&#35299;&#20013;</span>
+            <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0:00.0</time>
+          </div>
         </div>
 
-        <div class="problemLine">
-          <span id="problemFraction"></span>
-          <span class="equals">=</span>
-          <button id="wholeInput" class="answerBox active" aria-label="整数" data-value="" type="button"></button>
-          <span class="answerFraction">
-            <button id="restInput" class="answerBox" aria-label="分子" data-value="" type="button"></button>
-            <i></i>
-            <button id="bottomInput" class="answerBox" aria-label="分母" data-value="" type="button"></button>
-          </span>
+        <div id="gameArea">
+          <div class="problemLine">
+            <span id="problemFraction"></span>
+            <span class="equals">=</span>
+            <button id="wholeInput" class="answerBox active" aria-label="&#25972;&#25968;" data-value="" type="button"></button>
+            <span class="answerFraction">
+              <button id="restInput" class="answerBox" aria-label="&#20998;&#23376;" data-value="" type="button"></button>
+              <i></i>
+              <button id="bottomInput" class="answerBox" aria-label="&#20998;&#27597;" data-value="" type="button"></button>
+            </span>
+          </div>
+
+          <div class="feedback" id="feedback" aria-live="polite">
+            <button class="nextButton" id="nextButton" type="button" hidden>&#27425;&#12398;&#21839;&#38988;</button>
+          </div>
+
+          <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
+            <button type="button" data-digit="1">1</button>
+            <button type="button" data-digit="2">2</button>
+            <button type="button" data-digit="3">3</button>
+            <button type="button" data-digit="4">4</button>
+            <button type="button" data-digit="5">5</button>
+            <button type="button" data-digit="6">6</button>
+            <button type="button" data-digit="7">7</button>
+            <button type="button" data-digit="8">8</button>
+            <button type="button" data-digit="9">9</button>
+            <button type="button" data-digit="0">0</button>
+            <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
+            <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
+          </div>
         </div>
 
-        <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
-
-        <div class="keypad" aria-label="数字ボタン">
-          <button type="button" data-digit="1">1</button>
-          <button type="button" data-digit="2">2</button>
-          <button type="button" data-digit="3">3</button>
-          <button type="button" data-digit="4">4</button>
-          <button type="button" data-digit="5">5</button>
-          <button type="button" data-digit="6">6</button>
-          <button type="button" data-digit="7">7</button>
-          <button type="button" data-digit="8">8</button>
-          <button type="button" data-digit="9">9</button>
-          <button type="button" data-digit="0">0</button>
-          <button class="toolButton" id="backButton" type="button">消す</button>
-          <button class="toolButton" id="clearButton" type="button">やり直し</button>
-        </div>
-
-        <section class="visualReveal" id="visualReveal" aria-label="見える形">
-          <div class="mathSentence" id="mathSentence"></div>
-          <div class="groups" id="groups"></div>
-          <p class="note" id="note"></p>
+        <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
+          <h1>10&#21839;&#36899;&#32154;&#27491;&#35299;&#65281;</h1>
+          <p class="finishTime" id="finishTime">0:00.0</p>
+          <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
       </section>
     </main>
 
+    <div class="reaction" id="reaction" aria-hidden="true">
+      <div class="big-circle" id="correctMark"></div>
+      <div class="big-cross" id="wrongMark" hidden>&times;</div>
+    </div>
+
     <script>
+      const TARGET_STREAK = 10;
+      const AUTO_ADVANCE_MS = 1000;
+      const slotOrder = ["whole", "bottom", "rest"];
+
       let mode = "easy";
       let problem = createDifferentProblem(mode);
       let activeSlot = "whole";
+      let streak = 0;
+      let startedAt = Date.now();
+      let finalTime = 0;
+      let isAnswerLocked = false;
+      let isFinished = false;
+      let transitionTimer = null;
+      let swipeStart = null;
 
-      const slotOrder = ["whole", "bottom", "rest"];
       const inputs = {
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
@@ -399,22 +323,27 @@
       };
       const problemFraction = document.querySelector("#problemFraction");
       const feedback = document.querySelector("#feedback");
-      const visualReveal = document.querySelector("#visualReveal");
       const practiceCard = document.querySelector(".practiceCard");
-      const mathSentence = document.querySelector("#mathSentence");
-      const groups = document.querySelector("#groups");
-      const note = document.querySelector("#note");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
-      let swipeStart = null;
+      const streakLabel = document.querySelector("#streakLabel");
+      const timer = document.querySelector("#timer");
+      const gameArea = document.querySelector("#gameArea");
+      const finishPanel = document.querySelector("#finishPanel");
+      const finishTime = document.querySelector("#finishTime");
+      const reaction = document.querySelector("#reaction");
+      const correctMark = document.querySelector("#correctMark");
+      const wrongMark = document.querySelector("#wrongMark");
+      const keypad = document.querySelector("#keypad");
+      const nextButton = document.querySelector("#nextButton");
 
       function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
       function createProblem(level) {
-        const denominator = level === "easy" ? randomInt(2, 9) : randomInt(2, 11);
         if (level === "hard") {
+          const denominator = randomInt(2, 11);
           let numerator = randomInt(denominator + 1, 100);
           while (numerator % denominator === 0) {
             numerator = randomInt(denominator + 1, 100);
@@ -422,8 +351,9 @@
           return { numerator, denominator };
         }
 
-        const maxWhole = 9;
-        const whole = randomInt(1, maxWhole);
+        // 2-5 : 6-9 = 1 : 2, and whole-number groups 1-4 : 5-9 = 1 : 3.
+        const denominator = Math.random() < 1 / 3 ? randomInt(2, 5) : randomInt(6, 9);
+        const whole = Math.random() < 1 / 4 ? randomInt(1, 4) : randomInt(5, 9);
         const rest = randomInt(1, denominator - 1);
         return { numerator: whole * denominator + rest, denominator };
       }
@@ -448,8 +378,8 @@
         try {
           sessionStorage.setItem("lastMixedFractionProblem", problemKey(next));
         } catch {
+          // The exercise works even when storage is blocked.
         }
-
         return next;
       }
 
@@ -470,10 +400,47 @@
       }
 
       function fraction(top, bottom) {
-        return `<span class="fraction" aria-label="${bottom}ぶんの${top}"><span>${top}</span><i></i><span>${bottom}</span></span>`;
+        return `<span class="fraction" aria-label="${bottom}\u5206\u306e${top}"><span>${top}</span><i></i><span>${bottom}</span></span>`;
+      }
+
+      function formatTime(milliseconds) {
+        const totalTenths = Math.floor(milliseconds / 100);
+        const tenths = totalTenths % 10;
+        const totalSeconds = Math.floor(totalTenths / 10);
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        const minutes = Math.floor(totalSeconds / 60);
+        return `${minutes}:${seconds}.${tenths}`;
+      }
+
+      function elapsedTime() {
+        return startedAt ? Date.now() - startedAt : 0;
+      }
+
+      function updateProgress() {
+        streakLabel.textContent = `\u9023\u7d9a ${streak}\u554f\u6b63\u89e3\u4e2d`;
+        timer.textContent = formatTime(isFinished ? finalTime : elapsedTime());
+      }
+
+      function resetChallenge() {
+        streak = 0;
+        finalTime = 0;
+        startedAt = Date.now();
+        isFinished = false;
+        updateProgress();
+      }
+
+      function setLocked(locked) {
+        isAnswerLocked = locked;
+        keypad.querySelectorAll("button").forEach((button) => {
+          button.disabled = locked;
+        });
+        Object.values(inputs).forEach((input) => {
+          input.disabled = locked;
+        });
       }
 
       function setActive(slot) {
+        if (isAnswerLocked || isFinished) return;
         activeSlot = slot;
         Object.entries(inputs).forEach(([key, input]) => {
           input.classList.toggle("active", key === slot);
@@ -486,13 +453,6 @@
         if (index < slotOrder.length - 1) setActive(slotOrder[index + 1]);
       }
 
-      function setSlotValue(slot, rawValue) {
-        const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
-        setAnswerValue(slot, value);
-        if (value.length >= expected(slot).length) nextSlot(slot);
-        checkState();
-      }
-
       function getAnswerValue(slot) {
         return inputs[slot].dataset.value || "";
       }
@@ -502,49 +462,18 @@
         inputs[slot].textContent = value;
       }
 
-      function checkState() {
-        const complete = slotOrder.every((slot) => getAnswerValue(slot).length > 0);
-        const correct = slotOrder.every((slot) => getAnswerValue(slot) === expected(slot));
-        if (!complete) {
-          feedback.innerHTML = "&nbsp;";
-          visualReveal.classList.remove("show");
-          return;
-        }
-        feedback.textContent = correct ? "正解" : "もう一度";
-        feedback.className = correct ? "feedback good" : "feedback";
-        visualReveal.classList.toggle("show", correct);
-        if (correct) showVisual();
-      }
-
-      function showVisual() {
-        const result = solve();
-        mathSentence.textContent = `${problem.numerator} ÷ ${problem.denominator} = ${result.whole} あまり ${result.rest}`;
-        groups.innerHTML = "";
-        for (let i = 0; i < Math.min(result.whole, 10); i += 1) {
-          groups.appendChild(circleGroup(problem.denominator, problem.denominator, `${i + 1}こめの1`));
-        }
-        groups.appendChild(circleGroup(result.rest, problem.denominator, `あまり${result.rest}`));
-        note.textContent = result.whole > 10 ? "まるが多いので、はじめの10こまで表示中" : "";
-      }
-
-      function circleGroup(filled, total, label) {
-        const group = document.createElement("div");
-        group.className = "circleGroup";
-        group.setAttribute("aria-label", label);
-        for (let index = 0; index < total; index += 1) {
-          const piece = document.createElement("span");
-          piece.className = index < filled ? "piece filled" : "piece";
-          group.appendChild(piece);
-        }
-        return group;
+      function setSlotValue(slot, rawValue) {
+        if (isAnswerLocked || isFinished) return;
+        const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
+        setAnswerValue(slot, value);
+        if (value.length >= expected(slot).length) nextSlot(slot);
+        checkState();
       }
 
       function resetInputs() {
-        slotOrder.forEach((slot) => {
-          setAnswerValue(slot, "");
-        });
-        feedback.innerHTML = "&nbsp;";
-        visualReveal.classList.remove("show");
+        slotOrder.forEach((slot) => setAnswerValue(slot, ""));
+        nextButton.hidden = true;
+        setLocked(false);
         setActive("whole");
       }
 
@@ -555,18 +484,87 @@
         setTimeout(resetInputs, 240);
       }
 
-      function nextProblem() {
+      function showReaction(correct) {
+        correctMark.hidden = !correct;
+        wrongMark.hidden = correct;
+        reaction.classList.remove("show");
+        void reaction.offsetWidth;
+        reaction.classList.add("show");
+      }
+
+      function hideReaction() {
+        reaction.classList.remove("show");
+      }
+
+      function schedule(action) {
+        if (transitionTimer) clearTimeout(transitionTimer);
+        transitionTimer = window.setTimeout(() => {
+          transitionTimer = null;
+          action();
+        }, AUTO_ADVANCE_MS);
+      }
+
+      function checkState() {
+        if (isAnswerLocked || isFinished) return;
+        const complete = slotOrder.every((slot) => getAnswerValue(slot).length > 0);
+        if (!complete) return;
+
+        const correct = slotOrder.every((slot) => getAnswerValue(slot) === expected(slot));
+        setLocked(true);
+        showReaction(correct);
+
+        if (!correct) {
+          streak = 0;
+          startedAt = null;
+          updateProgress();
+          nextButton.hidden = false;
+          return;
+        }
+
+        streak += 1;
+        updateProgress();
+        if (streak === TARGET_STREAK) {
+          finalTime = elapsedTime();
+          isFinished = true;
+          updateProgress();
+          schedule(finishRound);
+          return;
+        }
+
+        schedule(() => {
+          hideReaction();
+          nextProblem(true);
+        });
+      }
+
+      function finishRound() {
+        hideReaction();
+        gameArea.hidden = true;
+        finishTime.textContent = formatTime(finalTime);
+        finishPanel.hidden = false;
+      }
+
+      function nextProblem(keepChallenge = false) {
+        if (!keepChallenge) resetChallenge();
+        if (keepChallenge && !startedAt) startedAt = Date.now();
         problem = createDifferentProblem(mode);
         renderProblem();
-        resetInputsAfterBrowserRestore();
+        resetInputs();
+      }
+
+      function restartRound() {
+        finishPanel.hidden = true;
+        gameArea.hidden = false;
+        hideReaction();
+        nextProblem();
       }
 
       function isInteractiveTarget(target) {
-        return Boolean(target.closest("button, input"));
+        return target instanceof Element && Boolean(target.closest("button"));
       }
 
       function startSwipe(event) {
-        if (event.pointerType !== "touch" || isInteractiveTarget(event.target)) return;
+        if (isAnswerLocked || isFinished || event.pointerType !== "touch" || isInteractiveTarget(event.target)) return;
         swipeStart = { x: event.clientX, y: event.clientY };
       }
 
@@ -576,14 +574,13 @@
         const deltaY = event.clientY - swipeStart.y;
         swipeStart = null;
         if (deltaX > -72 || Math.abs(deltaY) > 52) return;
-
         practiceCard.classList.add("swiped");
         window.setTimeout(() => practiceCard.classList.remove("swiped"), 180);
         nextProblem();
       }
 
       function startTouchSwipe(event) {
-        if (isInteractiveTarget(event.target) || event.touches.length !== 1) return;
+        if (isAnswerLocked || isFinished || isInteractiveTarget(event.target) || event.touches.length !== 1) return;
         const touch = event.touches[0];
         swipeStart = { x: touch.clientX, y: touch.clientY };
       }
@@ -595,7 +592,6 @@
         const deltaY = touch.clientY - swipeStart.y;
         swipeStart = null;
         if (deltaX > -72 || Math.abs(deltaY) > 52) return;
-
         practiceCard.classList.add("swiped");
         window.setTimeout(() => practiceCard.classList.remove("swiped"), 180);
         nextProblem();
@@ -614,12 +610,12 @@
       });
 
       document.addEventListener("keydown", (event) => {
+        if (isAnswerLocked || isFinished) return;
         if (/^\d$/.test(event.key)) {
           event.preventDefault();
           setSlotValue(activeSlot, getAnswerValue(activeSlot) + event.key);
           return;
         }
-
         if (event.key === "Backspace" || event.key === "Delete") {
           event.preventDefault();
           document.querySelector("#backButton").click();
@@ -627,34 +623,35 @@
       });
 
       document.querySelectorAll("[data-digit]").forEach((button) => {
-        button.addEventListener("click", () => {
-          setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit);
-        });
+        button.addEventListener("click", () => setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit));
       });
 
       document.querySelector("#backButton").addEventListener("click", () => {
+        if (isAnswerLocked || isFinished) return;
         const current = getAnswerValue(activeSlot);
         if (current.length > 0) {
           setAnswerValue(activeSlot, current.slice(0, -1));
-          checkState();
           return;
         }
         const index = slotOrder.indexOf(activeSlot);
         if (index > 0) setActive(slotOrder[index - 1]);
       });
 
-      document.querySelector("#clearButton").addEventListener("click", resetInputs);
-      document.querySelector("#nextButton").addEventListener("click", nextProblem);
+      document.querySelector("#clearButton").addEventListener("click", () => {
+        if (!isAnswerLocked && !isFinished) resetInputs();
+      });
+      nextButton.addEventListener("click", () => {
+        if (!isAnswerLocked || isFinished) return;
+        hideReaction();
+        nextProblem(true);
+      });
+      document.querySelector("#restartButton").addEventListener("click", restartRound);
       practiceCard.addEventListener("pointerdown", startSwipe);
       practiceCard.addEventListener("pointerup", finishSwipe);
-      practiceCard.addEventListener("pointercancel", () => {
-        swipeStart = null;
-      });
+      practiceCard.addEventListener("pointercancel", () => { swipeStart = null; });
       practiceCard.addEventListener("touchstart", startTouchSwipe, { passive: true });
       practiceCard.addEventListener("touchend", finishTouchSwipe, { passive: true });
-      practiceCard.addEventListener("touchcancel", () => {
-        swipeStart = null;
-      });
+      practiceCard.addEventListener("touchcancel", () => { swipeStart = null; });
       easyButton.addEventListener("click", () => {
         mode = "easy";
         easyButton.classList.add("active");
@@ -668,8 +665,10 @@
         nextProblem();
       });
 
+      window.setInterval(updateProgress, 100);
       renderProblem();
       resetInputsAfterBrowserRestore();
+      updateProgress();
       window.addEventListener("pageshow", resetInputsAfterBrowserRestore);
     </script>
   </body>
