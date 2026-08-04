@@ -194,6 +194,9 @@
         text-shadow: 0 10px 24px rgba(22, 32, 42, 0.12);
       }
 
+      .wrongReaction { display: grid; justify-items: center; gap: 12px; }
+      .correctAnswer { margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
+
       .finishPanel {
         display: grid;
         min-height: 440px;
@@ -241,7 +244,7 @@
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
           <div class="progress" aria-live="polite">
-            <span class="streak" id="streakLabel">&#36899;&#32154; 0&#21839;&#27491;&#35299;&#20013;</span>
+            <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 20</span>
             <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0:00.0</time>
           </div>
         </div>
@@ -278,7 +281,7 @@
 
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
           <div class="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;">&#10047;</div>
-          <h1>10&#21839;&#36899;&#32154;&#27491;&#35299;&#65281;</h1>
+          <h1>20&#21839;&#27491;&#35299;&#65281;</h1>
           <p class="finishTime" id="finishTime">0:00.0</p>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
@@ -287,19 +290,22 @@
 
     <div class="reaction" id="reaction" aria-hidden="true">
       <div class="big-circle" id="correctMark"></div>
-      <div class="big-cross" id="wrongMark" hidden>&times;</div>
+      <div class="wrongReaction" id="wrongReaction" hidden>
+        <div class="big-cross">&times;</div>
+        <p class="correctAnswer" id="correctAnswer"></p>
+      </div>
     </div>
 
     <script>
-      const TARGET_STREAK = 10;
+      const TARGET_CORRECT = 20;
       const AUTO_ADVANCE_MS = 500;
-      const WRONG_ADVANCE_MS = 2000;
+      const WRONG_ADVANCE_MS = 1000;
       const slotOrder = ["whole", "bottom", "rest"];
 
       let mode = "easy";
       let problem = createDifferentProblem(mode);
       let activeSlot = "whole";
-      let streak = 0;
+      let correctCount = 0;
       let startedAt = Date.now();
       let finalTime = 0;
       let isAnswerLocked = false;
@@ -324,7 +330,8 @@
       const finishTime = document.querySelector("#finishTime");
       const reaction = document.querySelector("#reaction");
       const correctMark = document.querySelector("#correctMark");
-      const wrongMark = document.querySelector("#wrongMark");
+      const wrongReaction = document.querySelector("#wrongReaction");
+      const correctAnswer = document.querySelector("#correctAnswer");
       const keypad = document.querySelector("#keypad");
 
       function randomInt(min, max) {
@@ -416,12 +423,12 @@
       }
 
       function updateProgress() {
-        streakLabel.textContent = `\u9023\u7d9a ${streak}\u554f\u6b63\u89e3\u4e2d`;
+        streakLabel.textContent = `\u6b63\u89e3 ${correctCount} / ${TARGET_CORRECT}`;
         timer.textContent = formatTime(isFinished ? finalTime : elapsedTime());
       }
 
       function resetChallenge() {
-        streak = 0;
+        correctCount = 0;
         finalTime = 0;
         startedAt = Date.now();
         isFinished = false;
@@ -484,7 +491,7 @@
 
       function showReaction(correct) {
         correctMark.hidden = !correct;
-        wrongMark.hidden = correct;
+        wrongReaction.hidden = correct;
         reaction.classList.remove("show");
         void reaction.offsetWidth;
         reaction.classList.add("show");
@@ -509,12 +516,11 @@
 
         const correct = slotOrder.every((slot) => getAnswerValue(slot) === expected(slot));
         setLocked(true);
-        showReaction(correct);
 
         if (!correct) {
-          streak = 0;
-          startedAt = null;
-          updateProgress();
+          const answer = solve();
+          correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
+          showReaction(false);
           schedule(() => {
             hideReaction();
             nextProblem(true);
@@ -522,9 +528,10 @@
           return;
         }
 
-        streak += 1;
+        showReaction(true);
+        correctCount += 1;
         updateProgress();
-        if (streak === TARGET_STREAK) {
+        if (correctCount === TARGET_CORRECT) {
           finalTime = elapsedTime();
           isFinished = true;
           updateProgress();
