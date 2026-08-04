@@ -209,6 +209,7 @@
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @keyframes swipe-next {
@@ -283,6 +284,7 @@
           <div class="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;">&#10047;</div>
           <h1>20&#21839;&#27491;&#35299;&#65281;</h1>
           <p class="finishTime" id="finishTime">0:00.0</p>
+          <p class="clearDate" id="clearDate"></p>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
       </section>
@@ -308,6 +310,7 @@
       let correctCount = 0;
       let startedAt = Date.now();
       let finalTime = 0;
+      let clearedAt = null;
       let isAnswerLocked = false;
       let isFinished = false;
       let transitionTimer = null;
@@ -328,6 +331,7 @@
       const gameArea = document.querySelector("#gameArea");
       const finishPanel = document.querySelector("#finishPanel");
       const finishTime = document.querySelector("#finishTime");
+      const clearDate = document.querySelector("#clearDate");
       const reaction = document.querySelector("#reaction");
       const correctMark = document.querySelector("#correctMark");
       const wrongReaction = document.querySelector("#wrongReaction");
@@ -418,6 +422,10 @@
         return `${minutes}:${seconds}.${tenths}`;
       }
 
+      function formatDateTime(date) {
+        return `${date.getFullYear()}\u5e74${date.getMonth() + 1}\u6708${date.getDate()}\u65e5 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+      }
+
       function elapsedTime() {
         return startedAt ? Date.now() - startedAt : 0;
       }
@@ -430,6 +438,7 @@
       function resetChallenge() {
         correctCount = 0;
         finalTime = 0;
+        clearedAt = null;
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -533,6 +542,7 @@
         updateProgress();
         if (correctCount === TARGET_CORRECT) {
           finalTime = elapsedTime();
+          clearedAt = new Date();
           isFinished = true;
           updateProgress();
           schedule(finishRound);
@@ -549,6 +559,7 @@
         hideReaction();
         gameArea.hidden = true;
         finishTime.textContent = formatTime(finalTime);
+        clearDate.textContent = clearedAt ? `\u30af\u30ea\u30a2\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
         finishPanel.hidden = false;
       }
 
