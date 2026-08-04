@@ -204,6 +204,7 @@
 
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
+      .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
@@ -276,6 +277,7 @@
         </div>
 
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
+          <div class="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;">&#10047;</div>
           <h1>10&#21839;&#36899;&#32154;&#27491;&#35299;&#65281;</h1>
           <p class="finishTime" id="finishTime">0:00.0</p>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
@@ -290,7 +292,7 @@
 
     <script>
       const TARGET_STREAK = 10;
-      const AUTO_ADVANCE_MS = 1000;
+      const AUTO_ADVANCE_MS = 500;
       const WRONG_ADVANCE_MS = 2000;
       const slotOrder = ["whole", "bottom", "rest"];
 
