@@ -143,16 +143,6 @@
         text-align: center;
       }
 
-      .nextButton {
-        min-height: 52px;
-        border: 0;
-        border-radius: 6px;
-        padding: 0 22px;
-        background: var(--blue);
-        color: #fff;
-        font-weight: 900;
-      }
-
       .keypad {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
@@ -267,9 +257,7 @@
             </span>
           </div>
 
-          <div class="feedback" id="feedback" aria-live="polite">
-            <button class="nextButton" id="nextButton" type="button" hidden>&#27425;&#12398;&#21839;&#38988;</button>
-          </div>
+          <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
 
           <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
             <button type="button" data-digit="1">1</button>
@@ -303,6 +291,7 @@
     <script>
       const TARGET_STREAK = 10;
       const AUTO_ADVANCE_MS = 1000;
+      const WRONG_ADVANCE_MS = 2000;
       const slotOrder = ["whole", "bottom", "rest"];
 
       let mode = "easy";
@@ -335,15 +324,21 @@
       const correctMark = document.querySelector("#correctMark");
       const wrongMark = document.querySelector("#wrongMark");
       const keypad = document.querySelector("#keypad");
-      const nextButton = document.querySelector("#nextButton");
 
       function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      function createProblem(level) {
+      function chooseDistantDenominator(options, previousDenominator) {
+        if (!previousDenominator) return options[randomInt(0, options.length - 1)];
+        const farthestDistance = Math.max(...options.map((value) => Math.abs(value - previousDenominator)));
+        const strongestChoices = options.filter((value) => Math.abs(value - previousDenominator) >= farthestDistance - 1);
+        return strongestChoices[randomInt(0, strongestChoices.length - 1)];
+      }
+
+      function createProblem(level, previousDenominator) {
         if (level === "hard") {
-          const denominator = randomInt(2, 11);
+          const denominator = chooseDistantDenominator([2, 3, 4, 5, 6, 7, 8, 9, 10, 11], previousDenominator);
           let numerator = randomInt(denominator + 1, 100);
           while (numerator % denominator === 0) {
             numerator = randomInt(denominator + 1, 100);
@@ -352,7 +347,8 @@
         }
 
         // 2-5 : 6-9 = 1 : 2, and whole-number groups 1-4 : 5-9 = 1 : 3.
-        const denominator = Math.random() < 1 / 3 ? randomInt(2, 5) : randomInt(6, 9);
+        const denominators = Math.random() < 1 / 3 ? [2, 3, 4, 5] : [6, 7, 8, 9];
+        const denominator = chooseDistantDenominator(denominators, previousDenominator);
         const whole = Math.random() < 1 / 4 ? randomInt(1, 4) : randomInt(5, 9);
         const rest = randomInt(1, denominator - 1);
         return { numerator: whole * denominator + rest, denominator };
@@ -370,9 +366,10 @@
           previous = "";
         }
 
-        let next = createProblem(level);
+        const previousDenominator = Number(previous.split("/")[1]) || 0;
+        let next = createProblem(level, previousDenominator);
         for (let attempt = 0; attempt < 20 && problemKey(next) === previous; attempt += 1) {
-          next = createProblem(level);
+          next = createProblem(level, previousDenominator);
         }
 
         try {
@@ -472,7 +469,6 @@
 
       function resetInputs() {
         slotOrder.forEach((slot) => setAnswerValue(slot, ""));
-        nextButton.hidden = true;
         setLocked(false);
         setActive("whole");
       }
@@ -496,12 +492,12 @@
         reaction.classList.remove("show");
       }
 
-      function schedule(action) {
+      function schedule(action, delay = AUTO_ADVANCE_MS) {
         if (transitionTimer) clearTimeout(transitionTimer);
         transitionTimer = window.setTimeout(() => {
           transitionTimer = null;
           action();
-        }, AUTO_ADVANCE_MS);
+        }, delay);
       }
 
       function checkState() {
@@ -517,7 +513,10 @@
           streak = 0;
           startedAt = null;
           updateProgress();
-          nextButton.hidden = false;
+          schedule(() => {
+            hideReaction();
+            nextProblem(true);
+          }, WRONG_ADVANCE_MS);
           return;
         }
 
@@ -639,11 +638,6 @@
 
       document.querySelector("#clearButton").addEventListener("click", () => {
         if (!isAnswerLocked && !isFinished) resetInputs();
-      });
-      nextButton.addEventListener("click", () => {
-        if (!isAnswerLocked || isFinished) return;
-        hideReaction();
-        nextProblem(true);
       });
       document.querySelector("#restartButton").addEventListener("click", restartRound);
       practiceCard.addEventListener("pointerdown", startSwipe);
