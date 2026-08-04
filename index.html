@@ -313,6 +313,7 @@
       let finalTime = 0;
       let clearedAt = null;
       let isAnswerLocked = false;
+      let modeLocked = false;
       let isFinished = false;
       let transitionTimer = null;
       let swipeStart = null;
@@ -455,6 +456,12 @@
         });
       }
 
+      function setModeLocked(locked) {
+        modeLocked = locked;
+        easyButton.disabled = locked;
+        hardButton.disabled = locked;
+      }
+
       function setActive(slot) {
         if (isAnswerLocked || isFinished) return;
         activeSlot = slot;
@@ -481,22 +488,24 @@
       function setSlotValue(slot, rawValue) {
         if (isAnswerLocked || isFinished) return;
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
+        if (value) setModeLocked(true);
         setAnswerValue(slot, value);
         if (value.length >= expected(slot).length) nextSlot(slot);
         checkState();
       }
 
-      function resetInputs() {
+      function resetInputs(resetModeLock = false) {
         slotOrder.forEach((slot) => setAnswerValue(slot, ""));
+        if (resetModeLock) setModeLocked(false);
         setLocked(false);
         setActive("whole");
       }
 
       function resetInputsAfterBrowserRestore() {
-        resetInputs();
-        requestAnimationFrame(resetInputs);
-        setTimeout(resetInputs, 80);
-        setTimeout(resetInputs, 240);
+        resetInputs(true);
+        requestAnimationFrame(() => resetInputs(true));
+        setTimeout(() => resetInputs(true), 80);
+        setTimeout(() => resetInputs(true), 240);
       }
 
       function showReaction(correct) {
@@ -569,7 +578,7 @@
         if (keepChallenge && !startedAt) startedAt = Date.now();
         problem = createDifferentProblem(mode);
         renderProblem();
-        resetInputs();
+        resetInputs(true);
       }
 
       function restartRound() {
@@ -668,12 +677,14 @@
       practiceCard.addEventListener("touchend", finishTouchSwipe, { passive: true });
       practiceCard.addEventListener("touchcancel", () => { swipeStart = null; });
       easyButton.addEventListener("click", () => {
+        if (modeLocked || isAnswerLocked) return;
         mode = "easy";
         easyButton.classList.add("active");
         hardButton.classList.remove("active");
         nextProblem();
       });
       hardButton.addEventListener("click", () => {
+        if (modeLocked || isAnswerLocked) return;
         mode = "hard";
         hardButton.classList.add("active");
         easyButton.classList.remove("active");
