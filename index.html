@@ -10,6 +10,7 @@
         --muted: #607080;
         --line: #d9d2c0;
         --blue: #2563eb;
+        --green: #14966f;
         --coral: #e33a2f;
         --yellow: #ffd166;
       }
@@ -164,6 +165,7 @@
       .keypad button:active { transform: translateY(3px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.08); }
       .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: 1.2rem; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
+      .goal { margin: 28px 0 0; color: var(--green); font-size: clamp(1.15rem, 3.5vw, 1.8rem); font-weight: 900; text-align: center; }
 
       .reaction {
         position: fixed;
@@ -209,6 +211,7 @@
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
+      .clearMessage { margin: 0; color: var(--green); font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; line-height: 1; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
@@ -241,7 +244,7 @@
     <main class="appShell">
       <section class="practiceCard" aria-label="&#24111;&#20998;&#25968;&#12398;&#32244;&#32722;">
         <div class="topBar">
-          <div class="modeSwitch" aria-label="&#38627;&#26131;&#24230;&#12524;&#12505;&#12523;">
+          <div class="modeSwitch" id="modeSwitch" aria-label="&#38627;&#26131;&#24230;&#12524;&#12505;&#12523;">
             <button id="easyButton" class="active" type="button">&#12363;&#12435;&#12383;&#12435;</button>
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
@@ -279,10 +282,12 @@
             <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
             <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
           </div>
+          <p class="goal">150&#31186;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
         </div>
 
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
           <div class="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;">&#10047;</div>
+          <p class="clearMessage" id="clearMessage" hidden>&#12463;&#12522;&#12450;&#65281;</p>
           <h1>12&#21839;&#27491;&#35299;&#65281;</h1>
           <p class="finishTime" id="finishTime">0:00.0</p>
           <p class="clearDate" id="clearDate"></p>
@@ -301,6 +306,7 @@
 
     <script>
       const TARGET_CORRECT = 12;
+      const CLEAR_LIMIT_MS = 150000;
       const AUTO_ADVANCE_MS = 500;
       const WRONG_ADVANCE_MS = 1000;
       const slotOrder = ["whole", "bottom", "rest"];
@@ -328,12 +334,14 @@
       const practiceCard = document.querySelector(".practiceCard");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
+      const modeSwitch = document.querySelector("#modeSwitch");
       const streakLabel = document.querySelector("#streakLabel");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
       const finishPanel = document.querySelector("#finishPanel");
       const finishTime = document.querySelector("#finishTime");
       const clearDate = document.querySelector("#clearDate");
+      const clearMessage = document.querySelector("#clearMessage");
       const reaction = document.querySelector("#reaction");
       const correctMark = document.querySelector("#correctMark");
       const wrongReaction = document.querySelector("#wrongReaction");
@@ -441,6 +449,7 @@
         correctCount = 0;
         finalTime = 0;
         clearedAt = null;
+        clearMessage.hidden = true;
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -460,6 +469,7 @@
         modeLocked = locked;
         easyButton.disabled = locked;
         hardButton.disabled = locked;
+        modeSwitch.hidden = locked;
       }
 
       function setActive(slot) {
@@ -569,6 +579,7 @@
         hideReaction();
         gameArea.hidden = true;
         finishTime.textContent = formatTime(finalTime);
+        clearMessage.hidden = finalTime > CLEAR_LIMIT_MS;
         clearDate.textContent = clearedAt ? `\u30af\u30ea\u30a2\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
         finishPanel.hidden = false;
       }
