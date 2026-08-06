@@ -211,7 +211,8 @@
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
-      .clearMessage { margin: 0; color: var(--green); font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; line-height: 1; }
+      .clearMessage { margin: 0; color: var(--green); font-size: clamp(5rem, 18vw, 11rem); font-weight: 900; line-height: 1; animation: bonus-clear 520ms cubic-bezier(0.18, 0.9, 0.28, 1.25) both; }
+      .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
@@ -220,6 +221,11 @@
         0% { transform: translateX(0); }
         45% { transform: translateX(-18px); }
         100% { transform: translateX(0); }
+      }
+
+      @keyframes bonus-clear {
+        from { opacity: 0; transform: scale(0.45) rotate(-8deg); }
+        to { opacity: 1; transform: scale(1) rotate(0); }
       }
 
       @media (max-width: 720px) {
@@ -249,8 +255,8 @@
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
           <div class="progress" aria-live="polite">
-            <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12</span>
-            <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0:00.0</time>
+            <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 2</span>
+            <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
           </div>
         </div>
 
@@ -282,14 +288,15 @@
             <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
             <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
           </div>
-          <p class="goal">150&#31186;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
+          <p class="goal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
         </div>
 
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
-          <div class="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;">&#10047;</div>
+          <div class="hanamaru" id="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;" hidden>&#10047;</div>
           <p class="clearMessage" id="clearMessage" hidden>&#12463;&#12522;&#12450;&#65281;</p>
-          <h1>12&#21839;&#27491;&#35299;&#65281;</h1>
-          <p class="finishTime" id="finishTime">0:00.0</p>
+          <p class="rewardMessage" id="rewardMessage" hidden>500&#20870;&#21048;</p>
+          <h1 id="finishTitle">&#32066;&#20102;</h1>
+          <p class="finishTime" id="finishTime">0.0&#31186;</p>
           <p class="clearDate" id="clearDate"></p>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
@@ -306,7 +313,8 @@
 
     <script>
       const TARGET_CORRECT = 12;
-      const CLEAR_LIMIT_MS = 150000;
+      const CLEAR_LIMIT_MS = 135000;
+      const MAX_MISTAKES = 2;
       const AUTO_ADVANCE_MS = 500;
       const WRONG_ADVANCE_MS = 1000;
       const slotOrder = ["whole", "bottom", "rest"];
@@ -315,6 +323,7 @@
       let problem = createDifferentProblem(mode);
       let activeSlot = "whole";
       let correctCount = 0;
+      let mistakeCount = 0;
       let startedAt = Date.now();
       let finalTime = 0;
       let clearedAt = null;
@@ -342,6 +351,9 @@
       const finishTime = document.querySelector("#finishTime");
       const clearDate = document.querySelector("#clearDate");
       const clearMessage = document.querySelector("#clearMessage");
+      const rewardMessage = document.querySelector("#rewardMessage");
+      const hanamaru = document.querySelector("#hanamaru");
+      const finishTitle = document.querySelector("#finishTitle");
       const reaction = document.querySelector("#reaction");
       const correctMark = document.querySelector("#correctMark");
       const wrongReaction = document.querySelector("#wrongReaction");
@@ -424,12 +436,7 @@
       }
 
       function formatTime(milliseconds) {
-        const totalTenths = Math.floor(milliseconds / 100);
-        const tenths = totalTenths % 10;
-        const totalSeconds = Math.floor(totalTenths / 10);
-        const seconds = String(totalSeconds % 60).padStart(2, "0");
-        const minutes = Math.floor(totalSeconds / 60);
-        return `${minutes}:${seconds}.${tenths}`;
+        return `${(Math.floor(milliseconds / 100) / 10).toFixed(1)}\u79d2`;
       }
 
       function formatDateTime(date) {
@@ -441,15 +448,23 @@
       }
 
       function updateProgress() {
-        streakLabel.textContent = `\u6b63\u89e3 ${correctCount} / ${TARGET_CORRECT}`;
+        if (!isFinished && startedAt && elapsedTime() >= CLEAR_LIMIT_MS) {
+          endChallengeFailure();
+          return;
+        }
+        streakLabel.textContent = `\u6b63\u89e3 ${correctCount} / ${TARGET_CORRECT} \u30fb \u30df\u30b9 ${mistakeCount} / ${MAX_MISTAKES}`;
         timer.textContent = formatTime(isFinished ? finalTime : elapsedTime());
       }
 
       function resetChallenge() {
         correctCount = 0;
+        mistakeCount = 0;
         finalTime = 0;
         clearedAt = null;
         clearMessage.hidden = true;
+        rewardMessage.hidden = true;
+        hanamaru.hidden = true;
+        finishTitle.hidden = false;
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -547,9 +562,15 @@
         setLocked(true);
 
         if (!correct) {
+          mistakeCount += 1;
+          updateProgress();
           const answer = solve();
           correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
           showReaction(false);
+          if (mistakeCount > MAX_MISTAKES) {
+            schedule(endChallengeFailure, WRONG_ADVANCE_MS);
+            return;
+          }
           schedule(() => {
             hideReaction();
             nextProblem(true);
@@ -579,9 +600,23 @@
         hideReaction();
         gameArea.hidden = true;
         finishTime.textContent = formatTime(finalTime);
-        clearMessage.hidden = finalTime > CLEAR_LIMIT_MS;
-        clearDate.textContent = clearedAt ? `\u30af\u30ea\u30a2\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
+        const clearedBonus = finalTime <= CLEAR_LIMIT_MS && mistakeCount <= MAX_MISTAKES;
+        clearMessage.hidden = !clearedBonus;
+        rewardMessage.hidden = !clearedBonus;
+        hanamaru.hidden = !clearedBonus;
+        finishTitle.hidden = clearedBonus;
+        clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
         finishPanel.hidden = false;
+      }
+
+      function endChallengeFailure() {
+        if (isFinished) return;
+        finalTime = elapsedTime();
+        clearedAt = new Date();
+        isFinished = true;
+        setLocked(true);
+        hideReaction();
+        finishRound();
       }
 
       function nextProblem(keepChallenge = false) {
