@@ -560,6 +560,28 @@
         setTimeout(() => resetInputs(true), 240);
       }
 
+      function showCoverScreen() {
+        if (transitionTimer) {
+          clearTimeout(transitionTimer);
+          transitionTimer = null;
+        }
+        hasStarted = false;
+        startedAt = null;
+        finalTime = 0;
+        clearedAt = null;
+        isFinished = false;
+        correctCount = 0;
+        mistakeCount = 0;
+        cover.hidden = false;
+        challengeView.hidden = true;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
+        timer.textContent = "0.0\u79d2";
+        hideReaction();
+        resetInputsAfterBrowserRestore();
+      }
+
       function showReaction(correct) {
         correctMark.hidden = !correct;
         wrongReaction.hidden = correct;
@@ -671,6 +693,7 @@
         cover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
+        finishPanel.hidden = true;
         resetChallenge();
         problem = createDifferentProblem(mode);
         renderProblem();
@@ -780,7 +803,8 @@
       });
 
       window.setInterval(updateProgress, 100);
-      resetInputsAfterBrowserRestore();
+      showCoverScreen();
+      window.addEventListener("pageshow", showCoverScreen);
     </script>
   </body>
 </html>
