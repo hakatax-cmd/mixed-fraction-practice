@@ -168,23 +168,38 @@
 
       .keypad {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(5, minmax(70px, 1fr));
+        gap: 14px;
         margin: 0 auto;
-        max-width: 720px;
+        max-width: 760px;
       }
 
       .keypad button {
-        min-height: 68px;
+        min-height: 86px;
         background: #fff;
-        border: 2px solid var(--line);
+        border: 3px solid var(--line);
+        border-radius: 8px;
         color: var(--ink);
-        font-size: 1.8rem;
-        box-shadow: 0 8px 0 rgba(22, 32, 42, 0.08);
+        font-size: clamp(2.1rem, 5.5vw, 3.2rem);
+        line-height: 1;
+        box-shadow: 0 9px 0 rgba(22, 32, 42, 0.1);
+        touch-action: manipulation;
       }
 
-      .keypad button:active { transform: translateY(3px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.08); }
-      .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: 1.2rem; }
+      .keypad button:active { transform: translateY(4px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.1); }
+      .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: clamp(1.05rem, 2.8vw, 1.4rem); }
+      .keypad [data-key="0"] { grid-column: 1; grid-row: 1; }
+      .keypad [data-key="1"] { grid-column: 2; grid-row: 1; }
+      .keypad [data-key="2"] { grid-column: 3; grid-row: 1; }
+      .keypad [data-key="3"] { grid-column: 4; grid-row: 1; }
+      .keypad [data-key="4"] { grid-column: 2; grid-row: 2; }
+      .keypad [data-key="5"] { grid-column: 3; grid-row: 2; }
+      .keypad [data-key="6"] { grid-column: 4; grid-row: 2; }
+      .keypad [data-key="7"] { grid-column: 2; grid-row: 3; }
+      .keypad [data-key="8"] { grid-column: 3; grid-row: 3; }
+      .keypad [data-key="9"] { grid-column: 4; grid-row: 3; }
+      .keypad #backButton { grid-column: 5; grid-row: 1; }
+      .keypad #clearButton { grid-column: 5; grid-row: 2; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
       .goal { margin: 28px 0 0; color: var(--green); font-size: clamp(1.15rem, 3.5vw, 1.8rem); font-weight: 900; text-align: center; }
 
@@ -258,14 +273,15 @@
         .appChoices { grid-template-columns: 1fr; }
         .progress { justify-content: space-between; }
         .problemLine { min-height: 190px; margin-top: 18px; }
-        .keypad { grid-template-columns: repeat(4, 1fr); }
+        .keypad { grid-template-columns: repeat(5, 1fr); max-width: 100%; gap: 10px; }
       }
 
       @media (max-width: 430px) {
         .problemLine { font-size: 3.1rem; gap: 9px; }
         .answerBox { width: 70px; height: 70px; }
         .answerFraction .answerBox { width: 62px; height: 52px; }
-        .keypad button { min-height: 58px; }
+        .keypad button { min-height: 64px; }
+        .keypad .toolButton { font-size: 0.95rem; }
       }
     </style>
   </head>
@@ -332,16 +348,16 @@
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
 
           <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
-            <button type="button" data-digit="1">1</button>
-            <button type="button" data-digit="2">2</button>
-            <button type="button" data-digit="3">3</button>
-            <button type="button" data-digit="4">4</button>
-            <button type="button" data-digit="5">5</button>
-            <button type="button" data-digit="6">6</button>
-            <button type="button" data-digit="7">7</button>
-            <button type="button" data-digit="8">8</button>
-            <button type="button" data-digit="9">9</button>
-            <button type="button" data-digit="0">0</button>
+            <button type="button" data-digit="0" data-key="0">0</button>
+            <button type="button" data-digit="1" data-key="1">1</button>
+            <button type="button" data-digit="2" data-key="2">2</button>
+            <button type="button" data-digit="3" data-key="3">3</button>
+            <button type="button" data-digit="4" data-key="4">4</button>
+            <button type="button" data-digit="5" data-key="5">5</button>
+            <button type="button" data-digit="6" data-key="6">6</button>
+            <button type="button" data-digit="7" data-key="7">7</button>
+            <button type="button" data-digit="8" data-key="8">8</button>
+            <button type="button" data-digit="9" data-key="9">9</button>
             <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
             <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
           </div>
