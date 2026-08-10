@@ -111,6 +111,7 @@
 
       .equals { color: var(--muted); }
       .multiplicationFormula { font-size: clamp(4.2rem, 13vw, 9rem); font-weight: 900; }
+      .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
 
       .fraction, .answerFraction {
         display: inline-grid;
@@ -272,7 +273,7 @@
     <main class="appShell">
       <section class="practiceCard" aria-label="&#12373;&#12435;&#12377;&#12358;&#12398;&#32244;&#32722;">
         <section class="cover" id="appMenu">
-          <h1>&#12373;&#12435;&#12377;&#12358;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
+          <h1>&#31639;&#25968;&#32244;&#32722;</h1>
           <p class="coverPrompt">&#12393;&#12387;&#12385;&#12434;&#12420;&#12427;&#65311;</p>
           <div class="appChoices">
             <button class="menuButton" id="chooseMultiplication" type="button">&#20061;&#20061;</button>
@@ -322,7 +323,10 @@
           <div class="problemLine" id="multiplicationProblemLine" hidden>
             <span class="multiplicationFormula" id="multiplicationFormula"></span>
             <span class="equals">=</span>
-            <button id="productInput" class="answerBox active" aria-label="&#31572;&#12360;" data-value="" type="button"></button>
+            <span class="productAnswer">
+              <button id="productTensInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+              <button id="productOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+            </span>
           </div>
 
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
@@ -373,7 +377,7 @@
       const AUTO_ADVANCE_MS = 300;
       const WRONG_ADVANCE_MS = 1000;
       const FRACTION_SLOTS = ["whole", "bottom", "rest"];
-      const MULTIPLICATION_SLOTS = ["product"];
+      const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
 
       let selectedApp = "menu";
@@ -401,7 +405,8 @@
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
         bottom: document.querySelector("#bottomInput"),
-        product: document.querySelector("#productInput"),
+        productTens: document.querySelector("#productTensInput"),
+        productOnes: document.querySelector("#productOnesInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
       const multiplicationFormula = document.querySelector("#multiplicationFormula");
@@ -532,13 +537,20 @@
       }
 
       function expected(slot) {
-        if (selectedApp === "multiplication") return String(multiplicationAnswer());
+        if (selectedApp === "multiplication") {
+          const answer = String(multiplicationAnswer());
+          return {
+            productTens: answer[0],
+            productOnes: answer[1],
+          }[slot];
+        }
         const result = solve();
         return {
           whole: String(result.whole),
           rest: String(result.rest),
           bottom: String(problem.denominator),
-          product: String(multiplicationAnswer()),
+          productTens: String(multiplicationAnswer())[0],
+          productOnes: String(multiplicationAnswer())[1],
         }[slot];
       }
 
