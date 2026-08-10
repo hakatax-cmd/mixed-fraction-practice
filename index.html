@@ -168,14 +168,14 @@
 
       .keypad {
         display: grid;
-        grid-template-columns: repeat(5, minmax(70px, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(4, minmax(92px, 1fr));
+        gap: 16px;
         margin: 0 auto;
-        max-width: 760px;
+        max-width: 680px;
       }
 
       .keypad button {
-        min-height: 86px;
+        min-height: 98px;
         background: #fff;
         border: 3px solid var(--line);
         border-radius: 8px;
@@ -188,20 +188,21 @@
 
       .keypad button:active { transform: translateY(4px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.1); }
       .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: clamp(1.05rem, 2.8vw, 1.4rem); }
-      .keypad [data-key="0"] { grid-column: 1; grid-row: 1; }
-      .keypad [data-key="1"] { grid-column: 2; grid-row: 1; }
-      .keypad [data-key="2"] { grid-column: 3; grid-row: 1; }
-      .keypad [data-key="3"] { grid-column: 4; grid-row: 1; }
-      .keypad [data-key="4"] { grid-column: 2; grid-row: 2; }
-      .keypad [data-key="5"] { grid-column: 3; grid-row: 2; }
-      .keypad [data-key="6"] { grid-column: 4; grid-row: 2; }
-      .keypad [data-key="7"] { grid-column: 2; grid-row: 3; }
-      .keypad [data-key="8"] { grid-column: 3; grid-row: 3; }
-      .keypad [data-key="9"] { grid-column: 4; grid-row: 3; }
-      .keypad #backButton { grid-column: 5; grid-row: 1; }
-      .keypad #clearButton { grid-column: 5; grid-row: 2; }
+      .keypad [data-key="1"] { grid-column: 1; grid-row: 1; }
+      .keypad [data-key="2"] { grid-column: 2; grid-row: 1; }
+      .keypad [data-key="3"] { grid-column: 3; grid-row: 1; }
+      .keypad [data-key="4"] { grid-column: 1; grid-row: 2; }
+      .keypad [data-key="5"] { grid-column: 2; grid-row: 2; }
+      .keypad [data-key="6"] { grid-column: 3; grid-row: 2; }
+      .keypad [data-key="7"] { grid-column: 1; grid-row: 3; }
+      .keypad [data-key="8"] { grid-column: 2; grid-row: 3; }
+      .keypad [data-key="9"] { grid-column: 3; grid-row: 3; }
+      .keypad #backButton { grid-column: 4; grid-row: 1; }
+      .keypad #clearButton { grid-column: 4; grid-row: 2; }
+      .keypad [data-key="0"] { grid-column: 4; grid-row: 3; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
-      .goal { margin: 28px 0 0; color: var(--green); font-size: clamp(1.15rem, 3.5vw, 1.8rem); font-weight: 900; text-align: center; }
+      .goal { margin: 12px 0 0; color: var(--green); font-size: clamp(1.15rem, 3.5vw, 1.8rem); font-weight: 900; text-align: center; }
+      .goal.placeholder { visibility: hidden; }
 
       .reaction {
         position: fixed;
@@ -273,14 +274,14 @@
         .appChoices { grid-template-columns: 1fr; }
         .progress { justify-content: space-between; }
         .problemLine { min-height: 190px; margin-top: 18px; }
-        .keypad { grid-template-columns: repeat(5, 1fr); max-width: 100%; gap: 10px; }
+        .keypad { grid-template-columns: repeat(4, 1fr); max-width: 100%; gap: 12px; }
       }
 
       @media (max-width: 430px) {
         .problemLine { font-size: 3.1rem; gap: 9px; }
         .answerBox { width: 70px; height: 70px; }
         .answerFraction .answerBox { width: 62px; height: 52px; }
-        .keypad button { min-height: 64px; }
+        .keypad button { min-height: 72px; }
         .keypad .toolButton { font-size: 0.95rem; }
       }
     </style>
@@ -324,6 +325,7 @@
               <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
             </div>
           </div>
+          <p class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
 
         <div id="gameArea">
           <div class="problemLine" id="fractionProblemLine">
@@ -348,20 +350,19 @@
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
 
           <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
-            <button type="button" data-digit="0" data-key="0">0</button>
             <button type="button" data-digit="1" data-key="1">1</button>
             <button type="button" data-digit="2" data-key="2">2</button>
             <button type="button" data-digit="3" data-key="3">3</button>
+            <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
             <button type="button" data-digit="4" data-key="4">4</button>
             <button type="button" data-digit="5" data-key="5">5</button>
             <button type="button" data-digit="6" data-key="6">6</button>
+            <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
             <button type="button" data-digit="7" data-key="7">7</button>
             <button type="button" data-digit="8" data-key="8">8</button>
             <button type="button" data-digit="9" data-key="9">9</button>
-            <button class="toolButton" id="backButton" type="button">1&#12388;&#28040;&#12377;</button>
-            <button class="toolButton" id="clearButton" type="button">&#20840;&#37096;&#28040;&#12377;</button>
+            <button type="button" data-digit="0" data-key="0">0</button>
           </div>
-          <p class="goal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
         </div>
 
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
@@ -447,6 +448,7 @@
       const finishPanel = document.querySelector("#finishPanel");
       const finishTime = document.querySelector("#finishTime");
       const bestTime = document.querySelector("#bestTime");
+      const fractionGoal = document.querySelector("#fractionGoal");
       const clearDate = document.querySelector("#clearDate");
       const clearMessage = document.querySelector("#clearMessage");
       const rewardMessage = document.querySelector("#rewardMessage");
@@ -718,6 +720,7 @@
         challengeView.hidden = true;
         gameArea.hidden = false;
         finishPanel.hidden = true;
+        fractionGoal.hidden = true;
         streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
         timer.textContent = "0.0\u79d2";
         hideReaction();
@@ -813,6 +816,7 @@
       function finishRound() {
         hideReaction();
         gameArea.hidden = true;
+        fractionGoal.hidden = true;
         finishTime.textContent = formatTime(finalTime);
         if (selectedApp === "multiplication") {
           previousMultiplicationBest = readMultiplicationBest();
@@ -984,6 +988,8 @@
       function renderProblem() {
         fractionProblemLine.hidden = selectedApp !== "fraction";
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
+        fractionGoal.hidden = false;
+        fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
         if (selectedApp === "multiplication") {
           multiplicationFormula.textContent = `${multiplicationProblem.first}\u00d7${multiplicationProblem.second}`;
         } else {
