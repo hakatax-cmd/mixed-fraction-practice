@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="app-loading">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,6 +17,10 @@
 
       * { box-sizing: border-box; }
       [hidden] { display: none !important; }
+      html.app-loading .appShell,
+      html.app-loading .reaction {
+        visibility: hidden;
+      }
 
       html {
         height: 100%;
@@ -308,6 +312,10 @@
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1.2rem, 3.4vw, 1.9rem); font-weight: 900; }
+      .mistakeSummary { width: min(100%, 580px); margin: 0 auto; text-align: left; }
+      .mistakeSummary h2 { margin: 0 0 8px; font-size: clamp(1.05rem, 3vw, 1.5rem); }
+      .mistakeList { display: grid; max-height: min(24dvh, 190px); gap: 6px; overflow-y: auto; overscroll-behavior: contain; padding: 2px 4px 2px 0; touch-action: pan-y; }
+      .mistakeItem { border-bottom: 1px solid var(--line); padding: 5px 2px; font-size: clamp(1rem, 3vw, 1.35rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @media (max-width: 720px) {
@@ -349,6 +357,43 @@
         .practiceCard {
           width: min(100vw, calc(100dvh * 16 / 9));
           height: min(100dvh, calc(100vw * 9 / 16));
+        }
+      }
+
+      @supports (height: 100svh) {
+        body {
+          height: 100svh;
+          min-height: 100svh;
+        }
+
+        .appShell {
+          height: 100svh;
+        }
+
+        .practiceCard {
+          width: min(100vw, calc(100svh * 3 / 4));
+          height: min(100svh, calc(100vw * 4 / 3));
+        }
+
+        @media (orientation: landscape) {
+          .practiceCard {
+            width: min(100vw, calc(100svh * 4 / 3));
+            height: min(100svh, calc(100vw * 3 / 4));
+          }
+        }
+
+        @media (orientation: portrait) and (max-width: 600px) {
+          .practiceCard {
+            width: min(100vw, calc(100svh * 9 / 16));
+            height: min(100svh, calc(100vw * 16 / 9));
+          }
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+          .practiceCard {
+            width: min(100vw, calc(100svh * 16 / 9));
+            height: min(100svh, calc(100vw * 9 / 16));
+          }
         }
       }
     </style>
@@ -442,6 +487,10 @@
           <p class="finishTime" id="finishTime">0.0&#31186;</p>
           <p class="bestTime" id="bestTime"></p>
           <p class="clearDate" id="clearDate"></p>
+          <section class="mistakeSummary" id="mistakeSummary" hidden>
+            <h2>&#12414;&#12385;&#12364;&#12360;&#12383;&#21839;&#38988;</h2>
+            <div class="mistakeList" id="mistakeList"></div>
+          </section>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
         </div>
@@ -457,12 +506,6 @@
     </div>
 
     <script>
-      const TARGET_CORRECT = 12;
-      const CLEAR_LIMIT_MS = 135000;
-      const MAX_MISTAKES = 2;
-      const AUTO_ADVANCE_MS = 300;
-      const WRONG_ADVANCE_MS = 1000;
-      const FRACTION_SLOTS = ["whole", "bottom", "rest"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
 
@@ -486,6 +529,7 @@
       let isFinished = false;
       let transitionTimer = null;
       let swipeStart = null;
+      let mistakes = [];
 
       const inputs = {
         whole: document.querySelector("#wholeInput"),
@@ -528,6 +572,8 @@
       const wrongReaction = document.querySelector("#wrongReaction");
       const correctAnswer = document.querySelector("#correctAnswer");
       const keypad = document.querySelector("#keypad");
+      const mistakeSummary = document.querySelector("#mistakeSummary");
+      const mistakeList = document.querySelector("#mistakeList");
 
       function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -691,6 +737,7 @@
       function resetChallenge() {
         correctCount = 0;
         mistakeCount = 0;
+        mistakes = [];
         finalTime = 0;
         clearedAt = null;
         multiplicationBestUpdated = false;
@@ -797,6 +844,15 @@
         resetInputsAfterBrowserRestore();
       }
 
+      function revealApp() {
+        const reveal = () => document.documentElement.classList.remove("app-loading");
+        if ("requestAnimationFrame" in window) {
+          requestAnimationFrame(() => requestAnimationFrame(reveal));
+          return;
+        }
+        setTimeout(reveal, 50);
+      }
+
       function showReaction(correct) {
         correctMark.hidden = !correct;
         wrongReaction.hidden = correct;
@@ -828,6 +884,7 @@
 
         if (!correct) {
           mistakeCount += 1;
+          recordMistake();
           updateProgress();
           if (selectedApp === "multiplication") {
             correctAnswer.textContent = `\u7b54\u3048\u306f ${multiplicationAnswer()}`;
@@ -911,7 +968,36 @@
           bestTime.textContent = "";
           clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
         }
+        renderMistakes();
         finishPanel.hidden = false;
+      }
+
+      function recordMistake() {
+        if (selectedApp === "multiplication") {
+          mistakes.push({
+            problem: `${multiplicationProblem.first}×${multiplicationProblem.second}`,
+            answer: String(multiplicationAnswer()),
+          });
+          return;
+        }
+        const answer = solve();
+        mistakes.push({
+          problem: `${problem.numerator}/${problem.denominator}`,
+          answer: `${answer.whole} ${answer.rest}/${problem.denominator}`,
+        });
+      }
+
+      function renderMistakes() {
+        mistakeList.replaceChildren();
+        mistakeSummary.hidden = mistakes.length === 0;
+        mistakes.forEach((mistake) => {
+          const item = document.createElement("div");
+          item.className = "mistakeItem";
+          const question = document.createElement("div");
+          question.textContent = `${mistake.problem} = ${mistake.answer}`;
+          item.append(question);
+          mistakeList.append(item);
+        });
       }
 
       function endChallengeFailure() {
@@ -1162,7 +1248,11 @@
 
       window.setInterval(updateProgress, 100);
       showCoverScreen();
-      window.addEventListener("pageshow", showCoverScreen);
+      revealApp();
+      window.addEventListener("pageshow", () => {
+        showCoverScreen();
+        revealApp();
+      });
     </script>
   </body>
 </html>
