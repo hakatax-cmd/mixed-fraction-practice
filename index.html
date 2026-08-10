@@ -18,9 +18,18 @@
       * { box-sizing: border-box; }
       [hidden] { display: none !important; }
 
+      html {
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
       body {
-        min-height: 100vh;
+        height: 100dvh;
+        min-height: 100dvh;
         margin: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
         background: #f6fafb;
         color: var(--ink);
         font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", Arial, sans-serif;
@@ -28,21 +37,29 @@
 
       button { cursor: pointer; font: inherit; }
 
-      .appShell { width: min(980px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0; }
+      .appShell { width: min(980px, calc(100% - 18px)); height: 100dvh; margin: 0 auto; padding: 8px 0; }
 
       .practiceCard {
-        min-height: calc(100vh - 48px);
+        height: calc(100dvh - 16px);
+        min-height: 0;
+        overflow: hidden;
         border: 2px solid rgba(22, 32, 42, 0.1);
         border-radius: 8px;
         background: #fff;
         box-shadow: 0 20px 48px rgba(22, 32, 42, 0.09);
-        padding: 24px;
-        touch-action: pan-y;
+        padding: 14px;
+        touch-action: none;
       }
 
-      .practiceCard.swiped { animation: swipe-next 180ms ease-out; }
+      .practiceCard.swiped { animation: none; }
 
-      .topBar { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+      #challengeView {
+        height: 100%;
+        display: grid;
+        grid-template-rows: 34px minmax(0, 1fr);
+        overflow: hidden;
+      }
+      .topBar { display: flex; justify-content: space-between; gap: 14px; align-items: center; min-height: 34px; }
 
       .modeSwitch {
         display: grid;
@@ -84,32 +101,37 @@
       .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
 
       .progress {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(12em, 1fr) 5.8em minmax(18em, 1fr);
         align-items: center;
-        justify-content: flex-end;
         gap: 16px;
         font-size: clamp(1rem, 2.8vw, 1.45rem);
         font-weight: 900;
         white-space: nowrap;
+        width: 100%;
       }
 
       .streak { color: var(--coral); }
-      .timer { color: var(--ink); font-variant-numeric: tabular-nums; }
+      .timer { color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
 
       .problemLine {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         gap: clamp(10px, 2.4vw, 26px);
         align-items: center;
-        justify-content: center;
-        min-height: 220px;
-        margin: 28px 0 4px;
+        justify-content: stretch;
+        min-height: 144px;
+        height: 144px;
+        margin: 8px 0 0;
         font-size: clamp(3.3rem, 9vw, 7rem);
         font-weight: 900;
         line-height: 1;
       }
 
-      .equals { color: var(--muted); }
+      #problemFraction, .multiplicationFormula { grid-column: 1; justify-self: end; font-variant-numeric: tabular-nums; }
+      .equals { grid-column: 2; justify-self: center; color: var(--muted); }
+      .mixedAnswer, .productAnswer { grid-column: 3; justify-self: start; }
+      .mixedAnswer { display: inline-flex; align-items: center; gap: clamp(10px, 2.4vw, 26px); }
       .multiplicationFormula { font-size: clamp(4.2rem, 13vw, 9rem); font-weight: 900; }
       .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
 
@@ -158,8 +180,9 @@
       }
 
       .feedback {
-        min-height: 42px;
-        margin: 0 0 12px;
+        height: 20px;
+        min-height: 20px;
+        margin: 0 0 6px;
         color: var(--muted);
         font-size: clamp(1.15rem, 3vw, 1.65rem);
         font-weight: 900;
@@ -169,13 +192,14 @@
       .keypad {
         display: grid;
         grid-template-columns: repeat(4, minmax(92px, 1fr));
-        gap: 16px;
+        gap: 10px;
         margin: 0 auto;
         max-width: 680px;
       }
 
       .keypad button {
-        min-height: 98px;
+        height: 82px;
+        min-height: 0;
         background: #fff;
         border: 3px solid var(--line);
         border-radius: 8px;
@@ -186,7 +210,7 @@
         touch-action: manipulation;
       }
 
-      .keypad button:active { transform: translateY(4px); box-shadow: 0 5px 0 rgba(22, 32, 42, 0.1); }
+      .keypad button:active { transform: none; box-shadow: 0 9px 0 rgba(22, 32, 42, 0.1); }
       .keypad .toolButton { background: #edf8ff; color: #24507a; font-size: clamp(1.05rem, 2.8vw, 1.4rem); }
       .keypad [data-key="1"] { grid-column: 1; grid-row: 1; }
       .keypad [data-key="2"] { grid-column: 2; grid-row: 1; }
@@ -201,8 +225,15 @@
       .keypad #clearButton { grid-column: 4; grid-row: 2; }
       .keypad [data-key="0"] { grid-column: 4; grid-row: 3; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
-      .goal { margin: 12px 0 0; color: var(--green); font-size: clamp(1.15rem, 3.5vw, 1.8rem); font-weight: 900; text-align: center; }
+      .goal { margin: 0; color: var(--green); font-size: clamp(1rem, 2.6vw, 1.45rem); font-weight: 900; text-align: center; white-space: nowrap; }
       .goal.placeholder { visibility: hidden; }
+
+      #gameArea {
+        display: grid;
+        grid-template-rows: 152px 26px 266px;
+        align-content: start;
+        height: 100%;
+      }
 
       .reaction {
         position: fixed;
@@ -248,40 +279,33 @@
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
-      .clearMessage { margin: 0; color: var(--green); font-size: clamp(5rem, 18vw, 11rem); font-weight: 900; line-height: 1; animation: bonus-clear 520ms cubic-bezier(0.18, 0.9, 0.28, 1.25) both; }
+      .clearMessage { margin: 0; color: var(--green); font-size: clamp(5rem, 18vw, 11rem); font-weight: 900; line-height: 1; animation: none; }
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1.2rem, 3.4vw, 1.9rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
-      @keyframes swipe-next {
-        0% { transform: translateX(0); }
-        45% { transform: translateX(-18px); }
-        100% { transform: translateX(0); }
-      }
-
-      @keyframes bonus-clear {
-        from { opacity: 0; transform: scale(0.45) rotate(-8deg); }
-        to { opacity: 1; transform: scale(1) rotate(0); }
-      }
-
       @media (max-width: 720px) {
-        .appShell { width: min(100% - 18px, 560px); padding: 9px 0 18px; }
-        .practiceCard { min-height: calc(100vh - 27px); padding: 14px; }
+        .appShell { width: min(100% - 12px, 560px); padding: 6px 0; }
+        .practiceCard { height: calc(100dvh - 12px); padding: 10px; }
+        #challengeView { grid-template-rows: 60px minmax(0, 1fr); }
         .topBar { display: grid; grid-template-columns: 1fr; }
         .modeSwitch { width: 100%; }
         .appChoices { grid-template-columns: 1fr; }
-        .progress { justify-content: space-between; }
-        .problemLine { min-height: 190px; margin-top: 18px; }
-        .keypad { grid-template-columns: repeat(4, 1fr); max-width: 100%; gap: 12px; }
+        .progress { grid-template-columns: minmax(10em, 1fr) 5.4em minmax(13em, 1fr); gap: 8px; }
+        .problemLine { min-height: 128px; height: 128px; margin-top: 6px; }
+        #gameArea { grid-template-rows: 136px 24px 240px; }
+        .keypad { grid-template-columns: repeat(4, 1fr); max-width: 100%; gap: 8px; }
+        .keypad button { height: 74px; }
       }
 
       @media (max-width: 430px) {
         .problemLine { font-size: 3.1rem; gap: 9px; }
         .answerBox { width: 70px; height: 70px; }
         .answerFraction .answerBox { width: 62px; height: 52px; }
-        .keypad button { min-height: 72px; }
+        #gameArea { grid-template-rows: 118px 22px 216px; }
+        .keypad button { height: 66px; }
         .keypad .toolButton { font-size: 0.95rem; }
       }
     </style>
@@ -323,19 +347,21 @@
             <div class="progress" aria-live="polite">
               <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 2</span>
               <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
+              <span class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</span>
             </div>
           </div>
-          <p class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</p>
 
         <div id="gameArea">
           <div class="problemLine" id="fractionProblemLine">
             <span id="problemFraction"></span>
             <span class="equals">=</span>
-            <button id="wholeInput" class="answerBox active" aria-label="&#25972;&#25968;" data-value="" type="button"></button>
-            <span class="answerFraction">
-              <button id="restInput" class="answerBox" aria-label="&#20998;&#23376;" data-value="" type="button"></button>
-              <i></i>
-              <button id="bottomInput" class="answerBox" aria-label="&#20998;&#27597;" data-value="" type="button"></button>
+            <span class="mixedAnswer">
+              <button id="wholeInput" class="answerBox active" aria-label="&#25972;&#25968;" data-value="" type="button"></button>
+              <span class="answerFraction">
+                <button id="restInput" class="answerBox" aria-label="&#20998;&#23376;" data-value="" type="button"></button>
+                <i></i>
+                <button id="bottomInput" class="answerBox" aria-label="&#20998;&#27597;" data-value="" type="button"></button>
+              </span>
             </span>
           </div>
           <div class="problemLine" id="multiplicationProblemLine" hidden>
