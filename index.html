@@ -37,7 +37,13 @@
         place-items: center;
       }
 
-      button { cursor: pointer; font: inherit; }
+      button {
+        cursor: pointer;
+        font: inherit;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
 
       .appShell {
         display: grid;
@@ -1068,24 +1074,30 @@
         input.addEventListener("click", () => setActive(slot));
       });
 
-      document.addEventListener("keydown", (event) => {
-        if (!hasStarted || isAnswerLocked || isFinished) return;
-        if (/^\d$/.test(event.key)) {
+      function bindFastPress(button, action) {
+        let ignoreClick = false;
+        let lastPressAt = 0;
+        const press = (event) => {
           event.preventDefault();
-          setSlotValue(activeSlot, getAnswerValue(activeSlot) + event.key);
-          return;
-        }
-        if (event.key === "Backspace" || event.key === "Delete") {
-          event.preventDefault();
-          document.querySelector("#backButton").click();
-        }
-      });
+          const now = Date.now();
+          if (now - lastPressAt < 90) return;
+          lastPressAt = now;
+          ignoreClick = true;
+          action();
+          window.setTimeout(() => { ignoreClick = false; }, 350);
+        };
+        button.addEventListener("pointerdown", press);
+        button.addEventListener("touchstart", press, { passive: false });
+        button.addEventListener("click", (event) => {
+          if (ignoreClick) {
+            event.preventDefault();
+            return;
+          }
+          action();
+        });
+      }
 
-      document.querySelectorAll("[data-digit]").forEach((button) => {
-        button.addEventListener("click", () => setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit));
-      });
-
-      document.querySelector("#backButton").addEventListener("click", () => {
+      function backspaceAnswer() {
         if (isAnswerLocked || isFinished) return;
         const current = getAnswerValue(activeSlot);
         if (current.length > 0) {
@@ -1095,11 +1107,32 @@
         const slots = activeSlotOrder();
         const index = slots.indexOf(activeSlot);
         if (index > 0) setActive(slots[index - 1]);
+      }
+
+      function clearAnswer() {
+        if (!isAnswerLocked && !isFinished) resetInputs();
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (!hasStarted || isAnswerLocked || isFinished) return;
+        if (/^\d$/.test(event.key)) {
+          event.preventDefault();
+          setSlotValue(activeSlot, getAnswerValue(activeSlot) + event.key);
+          return;
+        }
+        if (event.key === "Backspace" || event.key === "Delete") {
+          event.preventDefault();
+          backspaceAnswer();
+        }
       });
 
-      document.querySelector("#clearButton").addEventListener("click", () => {
-        if (!isAnswerLocked && !isFinished) resetInputs();
+      document.querySelectorAll("[data-digit]").forEach((button) => {
+        bindFastPress(button, () => setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit));
       });
+
+      bindFastPress(document.querySelector("#backButton"), backspaceAnswer);
+
+      bindFastPress(document.querySelector("#clearButton"), clearAnswer);
       chooseMultiplication.addEventListener("click", showMultiplicationCover);
       chooseFraction.addEventListener("click", showFractionCover);
       document.querySelector("#restartButton").addEventListener("click", restartRound);
