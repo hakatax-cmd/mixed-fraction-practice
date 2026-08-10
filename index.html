@@ -54,7 +54,7 @@
         padding: 4px;
       }
 
-      .modeSwitch button, .keypad button, .restartButton {
+      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton {
         min-height: 52px;
         border: 0;
         border-radius: 6px;
@@ -77,6 +77,11 @@
       .cover .modeSwitch { width: min(100%, 440px); margin: 0 auto; }
       .coverGoal { margin: 12px 0 0; color: var(--coral); font-size: clamp(1.7rem, 5vw, 3rem); font-weight: 900; line-height: 1.35; }
       .startButton { min-height: 72px; border: 0; border-radius: 8px; background: var(--blue); color: #fff; font: inherit; font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 900; padding: 0 36px; }
+      .appChoices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: min(100%, 520px); margin: 0 auto; }
+      .menuButton { min-height: 112px; background: #fffdf8; border: 3px solid var(--line); color: var(--ink); font-size: clamp(1.8rem, 6vw, 3.2rem); box-shadow: 0 10px 0 rgba(22, 32, 42, 0.08); }
+      .menuButton:first-child { border-color: rgba(20, 150, 111, 0.48); }
+      .menuButton:last-child { border-color: rgba(37, 99, 235, 0.45); }
+      .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
 
       .progress {
         display: flex;
@@ -105,6 +110,7 @@
       }
 
       .equals { color: var(--muted); }
+      .multiplicationFormula { font-size: clamp(4.2rem, 13vw, 9rem); font-weight: 900; }
 
       .fraction, .answerFraction {
         display: inline-grid;
@@ -229,6 +235,7 @@
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
+      .bestTime { margin: 0; color: var(--green); font-size: clamp(1.2rem, 3.4vw, 1.9rem); font-weight: 900; }
       .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @keyframes swipe-next {
@@ -247,6 +254,7 @@
         .practiceCard { min-height: calc(100vh - 27px); padding: 14px; }
         .topBar { display: grid; grid-template-columns: 1fr; }
         .modeSwitch { width: 100%; }
+        .appChoices { grid-template-columns: 1fr; }
         .progress { justify-content: space-between; }
         .problemLine { min-height: 190px; margin-top: 18px; }
         .keypad { grid-template-columns: repeat(4, 1fr); }
@@ -262,8 +270,25 @@
   </head>
   <body>
     <main class="appShell">
-      <section class="practiceCard" aria-label="&#24111;&#20998;&#25968;&#12398;&#32244;&#32722;">
-        <section class="cover" id="cover">
+      <section class="practiceCard" aria-label="&#12373;&#12435;&#12377;&#12358;&#12398;&#32244;&#32722;">
+        <section class="cover" id="appMenu">
+          <h1>&#12373;&#12435;&#12377;&#12358;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
+          <p class="coverPrompt">&#12393;&#12387;&#12385;&#12434;&#12420;&#12427;&#65311;</p>
+          <div class="appChoices">
+            <button class="menuButton" id="chooseMultiplication" type="button">&#20061;&#20061;</button>
+            <button class="menuButton" id="chooseFraction" type="button">&#24111;&#20998;&#25968;</button>
+          </div>
+        </section>
+
+        <section class="cover" id="multiplicationCover" hidden>
+          <h1>&#20061;&#20061;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
+          <p class="coverPrompt">&#20840;&#31278;&#39006;&#12434;&#12471;&#12515;&#12483;&#12501;&#12523;</p>
+          <p class="coverGoal">32&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="multiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="cover" hidden>
           <h1>&#24111;&#20998;&#25968;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
           <p class="coverPrompt">&#12514;&#12540;&#12489;&#12434;&#12360;&#12425;&#12412;&#12358;</p>
           <div class="modeSwitch" id="modeSwitch" aria-label="&#38627;&#26131;&#24230;&#12524;&#12505;&#12523;">
@@ -272,6 +297,7 @@
           </div>
           <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
         <div id="challengeView" hidden>
@@ -283,7 +309,7 @@
           </div>
 
         <div id="gameArea">
-          <div class="problemLine">
+          <div class="problemLine" id="fractionProblemLine">
             <span id="problemFraction"></span>
             <span class="equals">=</span>
             <button id="wholeInput" class="answerBox active" aria-label="&#25972;&#25968;" data-value="" type="button"></button>
@@ -292,6 +318,11 @@
               <i></i>
               <button id="bottomInput" class="answerBox" aria-label="&#20998;&#27597;" data-value="" type="button"></button>
             </span>
+          </div>
+          <div class="problemLine" id="multiplicationProblemLine" hidden>
+            <span class="multiplicationFormula" id="multiplicationFormula"></span>
+            <span class="equals">=</span>
+            <button id="productInput" class="answerBox active" aria-label="&#31572;&#12360;" data-value="" type="button"></button>
           </div>
 
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
@@ -319,6 +350,7 @@
           <p class="rewardMessage" id="rewardMessage" hidden>500&#20870;&#21048;</p>
           <h1 id="finishTitle">&#32066;&#20102;</h1>
           <p class="finishTime" id="finishTime">0.0&#31186;</p>
+          <p class="bestTime" id="bestTime"></p>
           <p class="clearDate" id="clearDate"></p>
           <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
         </section>
@@ -338,12 +370,18 @@
       const TARGET_CORRECT = 12;
       const CLEAR_LIMIT_MS = 135000;
       const MAX_MISTAKES = 2;
-      const AUTO_ADVANCE_MS = 500;
+      const AUTO_ADVANCE_MS = 300;
       const WRONG_ADVANCE_MS = 1000;
-      const slotOrder = ["whole", "bottom", "rest"];
+      const FRACTION_SLOTS = ["whole", "bottom", "rest"];
+      const MULTIPLICATION_SLOTS = ["product"];
+      const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
 
+      let selectedApp = "menu";
       let mode = "easy";
       let problem = createDifferentProblem(mode);
+      let multiplicationDeck = [];
+      let multiplicationIndex = 0;
+      let multiplicationProblem = null;
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -351,6 +389,8 @@
       let hasStarted = false;
       let finalTime = 0;
       let clearedAt = null;
+      let multiplicationBestUpdated = false;
+      let previousMultiplicationBest = null;
       let isAnswerLocked = false;
       let modeLocked = false;
       let isFinished = false;
@@ -361,21 +401,31 @@
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
         bottom: document.querySelector("#bottomInput"),
+        product: document.querySelector("#productInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
+      const multiplicationFormula = document.querySelector("#multiplicationFormula");
       const feedback = document.querySelector("#feedback");
       const practiceCard = document.querySelector(".practiceCard");
+      const appMenu = document.querySelector("#appMenu");
+      const multiplicationCover = document.querySelector("#multiplicationCover");
+      const chooseMultiplication = document.querySelector("#chooseMultiplication");
+      const chooseFraction = document.querySelector("#chooseFraction");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
       const modeSwitch = document.querySelector("#modeSwitch");
       const cover = document.querySelector("#cover");
       const challengeView = document.querySelector("#challengeView");
       const startButton = document.querySelector("#startButton");
+      const multiplicationStartButton = document.querySelector("#multiplicationStartButton");
+      const fractionProblemLine = document.querySelector("#fractionProblemLine");
+      const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
       const finishPanel = document.querySelector("#finishPanel");
       const finishTime = document.querySelector("#finishTime");
+      const bestTime = document.querySelector("#bestTime");
       const clearDate = document.querySelector("#clearDate");
       const clearMessage = document.querySelector("#clearMessage");
       const rewardMessage = document.querySelector("#rewardMessage");
@@ -389,6 +439,30 @@
 
       function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function shuffle(items) {
+        const shuffled = [...items];
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+          const swapIndex = randomInt(0, index);
+          [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+        }
+        return shuffled;
+      }
+
+      function createMultiplicationDeck() {
+        const deck = [];
+        for (let first = 1; first <= 9; first += 1) {
+          for (let second = first; second <= 9; second += 1) {
+            if (first * second >= 10) deck.push({ first, second });
+          }
+        }
+        return shuffle(deck).map((item) => {
+          if (item.first !== item.second && Math.random() < 0.5) {
+            return { first: item.second, second: item.first };
+          }
+          return item;
+        });
       }
 
       function chooseDistantDenominator(options, previousDenominator) {
@@ -449,12 +523,22 @@
         };
       }
 
+      function multiplicationAnswer() {
+        return multiplicationProblem ? multiplicationProblem.first * multiplicationProblem.second : 0;
+      }
+
+      function activeSlotOrder() {
+        return selectedApp === "multiplication" ? MULTIPLICATION_SLOTS : FRACTION_SLOTS;
+      }
+
       function expected(slot) {
+        if (selectedApp === "multiplication") return String(multiplicationAnswer());
         const result = solve();
         return {
           whole: String(result.whole),
           rest: String(result.rest),
           bottom: String(problem.denominator),
+          product: String(multiplicationAnswer()),
         }[slot];
       }
 
@@ -474,13 +558,34 @@
         return startedAt ? Date.now() - startedAt : 0;
       }
 
+      function readMultiplicationBest() {
+        try {
+          const value = Number(localStorage.getItem(MULTIPLICATION_BEST_KEY));
+          return Number.isFinite(value) && value > 0 ? value : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function saveMultiplicationBest(time) {
+        try {
+          localStorage.setItem(MULTIPLICATION_BEST_KEY, String(time));
+        } catch {
+          // Best time display is optional when storage is blocked.
+        }
+      }
+
       function updateProgress() {
         if (!hasStarted) return;
-        if (!isFinished && startedAt && elapsedTime() >= CLEAR_LIMIT_MS) {
+        if (selectedApp === "fraction" && !isFinished && startedAt && elapsedTime() >= CLEAR_LIMIT_MS) {
           endChallengeFailure();
           return;
         }
-        streakLabel.textContent = `\u6b63\u89e3 ${correctCount} / ${TARGET_CORRECT} \u30fb \u30df\u30b9 ${mistakeCount} / ${MAX_MISTAKES}`;
+        if (selectedApp === "multiplication") {
+          streakLabel.textContent = `\u554f\u984c ${Math.min(multiplicationIndex + 1, multiplicationDeck.length)} / ${multiplicationDeck.length} \u30fb \u30df\u30b9 ${mistakeCount}`;
+        } else {
+          streakLabel.textContent = `\u6b63\u89e3 ${correctCount} / ${TARGET_CORRECT} \u30fb \u30df\u30b9 ${mistakeCount} / ${MAX_MISTAKES}`;
+        }
         timer.textContent = formatTime(isFinished ? finalTime : elapsedTime());
       }
 
@@ -489,10 +594,13 @@
         mistakeCount = 0;
         finalTime = 0;
         clearedAt = null;
+        multiplicationBestUpdated = false;
+        previousMultiplicationBest = null;
         clearMessage.hidden = true;
         rewardMessage.hidden = true;
         hanamaru.hidden = true;
         finishTitle.hidden = false;
+        bestTime.textContent = "";
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -524,8 +632,9 @@
       }
 
       function nextSlot(slot) {
-        const index = slotOrder.indexOf(slot);
-        if (index < slotOrder.length - 1) setActive(slotOrder[index + 1]);
+        const slots = activeSlotOrder();
+        const index = slots.indexOf(slot);
+        if (index < slots.length - 1) setActive(slots[index + 1]);
       }
 
       function getAnswerValue(slot) {
@@ -540,17 +649,17 @@
       function setSlotValue(slot, rawValue) {
         if (isAnswerLocked || isFinished) return;
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
-        if (value) setModeLocked(true);
+        if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
         if (value.length >= expected(slot).length) nextSlot(slot);
         checkState();
       }
 
       function resetInputs(resetModeLock = false) {
-        slotOrder.forEach((slot) => setAnswerValue(slot, ""));
-        if (resetModeLock) setModeLocked(false);
+        Object.keys(inputs).forEach((slot) => setAnswerValue(slot, ""));
+        if (resetModeLock && selectedApp === "fraction") setModeLocked(false);
         setLocked(false);
-        setActive("whole");
+        setActive(activeSlotOrder()[0]);
       }
 
       function resetInputsAfterBrowserRestore() {
@@ -565,20 +674,26 @@
           clearTimeout(transitionTimer);
           transitionTimer = null;
         }
+        selectedApp = "menu";
         hasStarted = false;
         startedAt = null;
         finalTime = 0;
         clearedAt = null;
+        multiplicationBestUpdated = false;
+        previousMultiplicationBest = null;
         isFinished = false;
         correctCount = 0;
         mistakeCount = 0;
-        cover.hidden = false;
+        appMenu.hidden = false;
+        multiplicationCover.hidden = true;
+        cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
         finishPanel.hidden = true;
         streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
         timer.textContent = "0.0\u79d2";
         hideReaction();
+        setModeLocked(false);
         resetInputsAfterBrowserRestore();
       }
 
@@ -604,19 +719,32 @@
 
       function checkState() {
         if (isAnswerLocked || isFinished) return;
-        const complete = slotOrder.every((slot) => getAnswerValue(slot).length > 0);
+        const slots = activeSlotOrder();
+        const complete = slots.every((slot) => getAnswerValue(slot).length > 0);
         if (!complete) return;
 
-        const correct = slotOrder.every((slot) => getAnswerValue(slot) === expected(slot));
+        const correct = slots.every((slot) => getAnswerValue(slot) === expected(slot));
         setLocked(true);
 
         if (!correct) {
           mistakeCount += 1;
           updateProgress();
-          const answer = solve();
-          correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
+          if (selectedApp === "multiplication") {
+            correctAnswer.textContent = `\u7b54\u3048\u306f ${multiplicationAnswer()}`;
+          } else {
+            const answer = solve();
+            correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
+          }
           showReaction(false);
-          if (mistakeCount > MAX_MISTAKES) {
+          if (selectedApp === "multiplication" && multiplicationIndex >= multiplicationDeck.length - 1) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            updateProgress();
+            schedule(finishRound, WRONG_ADVANCE_MS);
+            return;
+          }
+          if (selectedApp === "fraction" && mistakeCount > MAX_MISTAKES) {
             schedule(endChallengeFailure, WRONG_ADVANCE_MS);
             return;
           }
@@ -630,7 +758,16 @@
         showReaction(true);
         correctCount += 1;
         updateProgress();
-        if (correctCount === TARGET_CORRECT) {
+        if (selectedApp === "fraction" && correctCount === TARGET_CORRECT) {
+          finalTime = elapsedTime();
+          clearedAt = new Date();
+          isFinished = true;
+          updateProgress();
+          schedule(finishRound);
+          return;
+        }
+
+        if (selectedApp === "multiplication" && multiplicationIndex >= multiplicationDeck.length - 1) {
           finalTime = elapsedTime();
           clearedAt = new Date();
           isFinished = true;
@@ -649,12 +786,30 @@
         hideReaction();
         gameArea.hidden = true;
         finishTime.textContent = formatTime(finalTime);
-        const clearedBonus = finalTime <= CLEAR_LIMIT_MS && mistakeCount <= MAX_MISTAKES;
-        clearMessage.hidden = !clearedBonus;
-        rewardMessage.hidden = !clearedBonus;
-        hanamaru.hidden = !clearedBonus;
-        finishTitle.hidden = clearedBonus;
-        clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
+        if (selectedApp === "multiplication") {
+          previousMultiplicationBest = readMultiplicationBest();
+          multiplicationBestUpdated = mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
+          if (multiplicationBestUpdated) saveMultiplicationBest(finalTime);
+          clearMessage.textContent = "\u81ea\u5df1\u30d9\u30b9\u30c8\uff01";
+          clearMessage.hidden = !multiplicationBestUpdated;
+          rewardMessage.hidden = true;
+          hanamaru.hidden = true;
+          finishTitle.hidden = multiplicationBestUpdated;
+          bestTime.textContent = previousMultiplicationBest
+            ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(multiplicationBestUpdated ? finalTime : previousMultiplicationBest)}`
+            : multiplicationBestUpdated ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(finalTime)}` : "";
+          clearDate.textContent = clearedAt ? `\u7d42\u4e86\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
+        } else {
+          const clearedBonus = finalTime <= CLEAR_LIMIT_MS && mistakeCount <= MAX_MISTAKES;
+          clearMessage.textContent = "\u30af\u30ea\u30a2\uff01";
+          rewardMessage.textContent = "500\u5186\u5238";
+          clearMessage.hidden = !clearedBonus;
+          rewardMessage.hidden = !clearedBonus;
+          hanamaru.hidden = !clearedBonus;
+          finishTitle.hidden = clearedBonus;
+          bestTime.textContent = "";
+          clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
+        }
         finishPanel.hidden = false;
       }
 
@@ -671,7 +826,19 @@
       function nextProblem(keepChallenge = false) {
         if (!keepChallenge) resetChallenge();
         if (keepChallenge && !startedAt) startedAt = Date.now();
-        problem = createDifferentProblem(mode);
+        if (selectedApp === "multiplication") {
+          if (keepChallenge) multiplicationIndex += 1;
+          if (multiplicationIndex >= multiplicationDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          multiplicationProblem = multiplicationDeck[multiplicationIndex];
+        } else {
+          problem = createDifferentProblem(mode);
+        }
         renderProblem();
         resetInputs(true);
       }
@@ -679,7 +846,11 @@
       function restartRound() {
         finishPanel.hidden = true;
         challengeView.hidden = true;
-        cover.hidden = false;
+        if (selectedApp === "multiplication") {
+          multiplicationCover.hidden = false;
+        } else {
+          cover.hidden = false;
+        }
         hideReaction();
         hasStarted = false;
         startedAt = null;
@@ -689,7 +860,10 @@
       }
 
       function startChallenge() {
+        selectedApp = "fraction";
         hasStarted = true;
+        appMenu.hidden = true;
+        multiplicationCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
@@ -697,6 +871,47 @@
         resetChallenge();
         problem = createDifferentProblem(mode);
         renderProblem();
+        resetInputs(true);
+      }
+
+      function startMultiplicationChallenge() {
+        selectedApp = "multiplication";
+        hasStarted = true;
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        multiplicationDeck = createMultiplicationDeck();
+        multiplicationIndex = 0;
+        multiplicationProblem = multiplicationDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
+      function showFractionCover() {
+        selectedApp = "fraction";
+        appMenu.hidden = true;
+        multiplicationCover.hidden = true;
+        cover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
+      function showMultiplicationCover() {
+        selectedApp = "multiplication";
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
         resetInputs(true);
       }
 
@@ -739,7 +954,13 @@
       }
 
       function renderProblem() {
-        problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
+        fractionProblemLine.hidden = selectedApp !== "fraction";
+        multiplicationProblemLine.hidden = selectedApp !== "multiplication";
+        if (selectedApp === "multiplication") {
+          multiplicationFormula.textContent = `${multiplicationProblem.first}\u00d7${multiplicationProblem.second}`;
+        } else {
+          problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
+        }
       }
 
       Object.entries(inputs).forEach(([slot, input]) => {
@@ -774,15 +995,22 @@
           setAnswerValue(activeSlot, current.slice(0, -1));
           return;
         }
-        const index = slotOrder.indexOf(activeSlot);
-        if (index > 0) setActive(slotOrder[index - 1]);
+        const slots = activeSlotOrder();
+        const index = slots.indexOf(activeSlot);
+        if (index > 0) setActive(slots[index - 1]);
       });
 
       document.querySelector("#clearButton").addEventListener("click", () => {
         if (!isAnswerLocked && !isFinished) resetInputs();
       });
+      chooseMultiplication.addEventListener("click", showMultiplicationCover);
+      chooseFraction.addEventListener("click", showFractionCover);
       document.querySelector("#restartButton").addEventListener("click", restartRound);
       startButton.addEventListener("click", startChallenge);
+      multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
+      document.querySelectorAll("[data-back-menu]").forEach((button) => {
+        button.addEventListener("click", showCoverScreen);
+      });
       practiceCard.addEventListener("pointerdown", startSwipe);
       practiceCard.addEventListener("pointerup", finishSwipe);
       practiceCard.addEventListener("pointercancel", () => { swipeStart = null; });
