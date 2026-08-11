@@ -484,7 +484,7 @@
         <section class="cover" id="longMultiplicationCover" hidden>
           <h1>&#20108;&#12369;&#12383;&#12398;&#25499;&#12369;&#31639;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
-          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="longMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -496,7 +496,7 @@
             <button id="easyButton" class="active" type="button">&#12405;&#12388;&#12358;</button>
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
-          <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
+          <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -504,9 +504,9 @@
         <div id="challengeView" hidden>
           <div class="topBar">
             <div class="progress" aria-live="polite">
-              <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 2</span>
+              <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 1</span>
               <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
-              <span class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;2&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</span>
+              <span class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</span>
             </div>
           </div>
 
@@ -592,15 +592,15 @@
     <script>
       const TARGET_CORRECT = 12;
       const CLEAR_LIMIT_MS = 135000;
-      const MAX_MISTAKES = 2;
+      const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
       const WRONG_ADVANCE_MS = 1000;
       const FRACTION_SLOTS = ["whole", "bottom", "rest"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
-      const LONG_MULTIPLICATION_TARGET = 10;
+      const LONG_MULTIPLICATION_TARGET = 12;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longHundreds", "longTens"];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
-      const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMs";
+      const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV2";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -897,10 +897,6 @@
 
       function updateProgress() {
         if (!hasStarted) return;
-        if (selectedApp === "fraction" && !isFinished && startedAt && elapsedTime() >= CLEAR_LIMIT_MS) {
-          endChallengeFailure();
-          return;
-        }
         if (isTimedProblemApp()) {
           streakLabel.textContent = `\u554f\u984c ${Math.min(currentTimedIndex() + 1, currentTimedLength())} / ${currentTimedLength()} \u30fb \u30df\u30b9 ${mistakeCount}`;
         } else {
@@ -921,6 +917,7 @@
         rewardMessage.hidden = true;
         hanamaru.hidden = true;
         finishTitle.hidden = false;
+        finishTitle.textContent = "\u7d42\u4e86";
         bestTime.textContent = "";
         startedAt = Date.now();
         isFinished = false;
@@ -1077,10 +1074,6 @@
             schedule(finishRound, WRONG_ADVANCE_MS);
             return;
           }
-          if (selectedApp === "fraction" && mistakeCount > MAX_MISTAKES) {
-            schedule(endChallengeFailure, WRONG_ADVANCE_MS);
-            return;
-          }
           schedule(() => {
             hideReaction();
             nextProblem(true);
@@ -1130,18 +1123,21 @@
           rewardMessage.hidden = true;
           hanamaru.hidden = true;
           finishTitle.hidden = multiplicationBestUpdated;
+          finishTitle.textContent = "\u7d42\u4e86";
           bestTime.textContent = previousMultiplicationBest
             ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(multiplicationBestUpdated ? finalTime : previousMultiplicationBest)}`
             : multiplicationBestUpdated ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(finalTime)}` : "";
           clearDate.textContent = clearedAt ? `\u7d42\u4e86\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
         } else {
-          const clearedBonus = finalTime <= CLEAR_LIMIT_MS && mistakeCount <= MAX_MISTAKES;
+          const timeOver = finalTime > CLEAR_LIMIT_MS;
+          const clearedBonus = !timeOver && mistakeCount <= MAX_MISTAKES;
           clearMessage.textContent = "\u30af\u30ea\u30a2\uff01";
           rewardMessage.textContent = "500\u5186\u5238";
           clearMessage.hidden = !clearedBonus;
           rewardMessage.hidden = !clearedBonus;
           hanamaru.hidden = !clearedBonus;
           finishTitle.hidden = clearedBonus;
+          finishTitle.textContent = clearedBonus ? "\u7d42\u4e86" : timeOver ? "\u30bf\u30a4\u30e0\u30aa\u30fc\u30d0\u30fc" : "\u30c1\u30e3\u30ec\u30f3\u30b8\u5931\u6557";
           bestTime.textContent = "";
           clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
         }
@@ -1182,16 +1178,6 @@
           item.append(question);
           mistakeList.append(item);
         });
-      }
-
-      function endChallengeFailure() {
-        if (isFinished) return;
-        finalTime = elapsedTime();
-        clearedAt = new Date();
-        isFinished = true;
-        setLocked(true);
-        hideReaction();
-        finishRound();
       }
 
       function nextProblem(keepChallenge = false) {
