@@ -114,6 +114,16 @@
       }
 
       .cover h1 { margin: 0; font-size: clamp(3rem, 11vw, 7rem); }
+      .coverIllustration {
+        display: block;
+        width: min(88%, 620px);
+        height: clamp(120px, 25vh, 240px);
+        height: clamp(120px, 25svh, 240px);
+        aspect-ratio: 16 / 9;
+        margin: 0 auto;
+        border-radius: 8px;
+        object-fit: cover;
+      }
       .coverPrompt { margin: 0; color: var(--muted); font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: 900; }
       .cover .modeSwitch { width: min(100%, 440px); margin: 0 auto; }
       .coverGoal { margin: 12px 0 0; color: var(--coral); font-size: clamp(1.7rem, 5vw, 3rem); font-weight: 900; line-height: 1.35; }
@@ -442,6 +452,7 @@
       <section class="practiceCard" aria-label="&#12373;&#12435;&#12377;&#12358;&#12398;&#32244;&#32722;">
         <section class="cover" id="appMenu">
           <h1>算数練習</h1>
+          <img class="coverIllustration" src="assets/undokai-cover.png" alt="&#36939;&#21205;&#20250;&#12398;&#12452;&#12521;&#12473;&#12488;" width="1536" height="864" />
           <p class="coverPrompt">&#12393;&#12387;&#12385;&#12434;&#12420;&#12427;&#65311;</p>
           <div class="appChoices">
             <button class="menuButton" id="chooseMultiplication" type="button">&#20061;&#20061;</button>
