@@ -128,7 +128,7 @@
       .cover .modeSwitch { width: min(100%, 440px); margin: 0 auto; }
       .coverGoal { margin: 12px 0 0; color: var(--coral); font-size: clamp(1.7rem, 5vw, 3rem); font-weight: 900; line-height: 1.35; }
       .startButton { min-height: 72px; border: 0; border-radius: 8px; background: var(--blue); color: #fff; font: inherit; font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 900; padding: 0 36px; }
-      .appChoices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: min(100%, 720px); margin: 0 auto; }
+      .appChoices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width: min(100%, 680px); margin: 0 auto; }
       .menuButton { min-height: 112px; background: #fffdf8; border: 3px solid var(--line); color: var(--ink); font-size: clamp(1.8rem, 6vw, 3.2rem); box-shadow: 0 10px 0 rgba(22, 32, 42, 0.08); }
       .menuButton:first-child { border-color: rgba(20, 150, 111, 0.48); }
       .menuButton:nth-child(2) { border-color: rgba(37, 99, 235, 0.45); }
@@ -206,6 +206,61 @@
         display: inline-flex;
         justify-content: end;
         gap: clamp(8px, 1.7vmin, 14px);
+      }
+
+      .doubleProblemLine {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        min-height: 0;
+      }
+
+      .doubleVerticalProblem {
+        --double-cell: clamp(42px, 7vmin, 76px);
+        display: inline-grid;
+        grid-template-columns: auto repeat(4, var(--double-cell));
+        align-items: end;
+        justify-content: center;
+        column-gap: clamp(6px, 1.2vmin, 10px);
+        row-gap: clamp(3px, 0.8vmin, 8px);
+        color: var(--ink);
+        font-size: clamp(2.4rem, 8vmin, 5.2rem);
+        font-weight: 900;
+        line-height: 0.9;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .doubleVerticalProblem .topNumber,
+      .doubleVerticalProblem .bottomNumber {
+        grid-column: 2 / 6;
+        justify-self: end;
+      }
+
+      .doubleVerticalProblem .timesSign { grid-column: 1; justify-self: center; color: var(--muted); }
+      .doubleVerticalProblem .bar {
+        grid-column: 1 / -1;
+        width: 100%;
+        height: 4px;
+        margin: 2px 0;
+        border-radius: 999px;
+        background: var(--ink);
+      }
+
+      .doubleInputRow {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: var(--double-cell);
+        gap: clamp(6px, 1.2vmin, 10px);
+      }
+
+      .doublePartialOne { grid-column: 3 / 6; }
+      .doublePartialTwo { grid-column: 2 / 5; }
+      .doubleTotal { grid-column: 2 / 6; }
+      .doubleVerticalProblem .answerBox {
+        width: var(--double-cell);
+        height: var(--double-cell);
+        border-width: 3px;
+        font-size: clamp(1.7rem, 4.9vmin, 3.4rem);
       }
 
       .fraction, .answerFraction {
@@ -470,6 +525,7 @@
             <button class="menuButton" id="chooseMultiplication" type="button">&#20061;&#20061;</button>
             <button class="menuButton" id="chooseFraction" type="button">&#24111;&#20998;&#25968;</button>
             <button class="menuButton" id="chooseLongMultiplication" type="button">&#20108;&#12369;&#12383;&#12398;<br />&#25499;&#12369;&#31639;</button>
+            <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
           </div>
         </section>
 
@@ -486,6 +542,14 @@
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
           <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="longMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="doubleMultiplicationCover" hidden>
+          <h1>&#20108;&#12369;&#12383;&times;&#20108;&#12369;&#12383;</h1>
+          <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
+          <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="doubleMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -544,6 +608,31 @@
               </span>
             </div>
           </div>
+          <div class="doubleProblemLine" id="doubleMultiplicationProblemLine" hidden>
+            <div class="doubleVerticalProblem">
+              <span class="topNumber" id="doubleMultiplicationTop"></span>
+              <span class="timesSign">&times;</span>
+              <span class="bottomNumber" id="doubleMultiplicationBottom"></span>
+              <span class="bar"></span>
+              <span class="doubleInputRow doublePartialOne">
+                <button id="doubleP1HundredsInput" class="answerBox" aria-label="1&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleP1TensInput" class="answerBox" aria-label="1&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleP1OnesInput" class="answerBox active" aria-label="1&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
+              <span class="doubleInputRow doublePartialTwo">
+                <button id="doubleP2HundredsInput" class="answerBox" aria-label="2&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleP2TensInput" class="answerBox" aria-label="2&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleP2OnesInput" class="answerBox" aria-label="2&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
+              <span class="bar"></span>
+              <span class="doubleInputRow doubleTotal">
+                <button id="doubleTotalThousandsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21315;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleTotalHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleTotalTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="doubleTotalOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
+            </div>
+          </div>
 
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
 
@@ -599,8 +688,15 @@
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const LONG_MULTIPLICATION_TARGET = 12;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longHundreds", "longTens"];
+      const DOUBLE_MULTIPLICATION_TARGET = 12;
+      const DOUBLE_MULTIPLICATION_SLOTS = [
+        "doubleP1Ones", "doubleP1Hundreds", "doubleP1Tens",
+        "doubleP2Ones", "doubleP2Hundreds", "doubleP2Tens",
+        "doubleTotalOnes", "doubleTotalTens", "doubleTotalHundreds", "doubleTotalThousands",
+      ];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
       const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV2";
+      const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -611,6 +707,9 @@
       let longMultiplicationDeck = [];
       let longMultiplicationIndex = 0;
       let longMultiplicationProblem = null;
+      let doubleMultiplicationDeck = [];
+      let doubleMultiplicationIndex = 0;
+      let doubleMultiplicationProblem = null;
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -636,19 +735,33 @@
         longHundreds: document.querySelector("#longHundredsInput"),
         longTens: document.querySelector("#longTensInput"),
         longOnes: document.querySelector("#longOnesInput"),
+        doubleP1Hundreds: document.querySelector("#doubleP1HundredsInput"),
+        doubleP1Tens: document.querySelector("#doubleP1TensInput"),
+        doubleP1Ones: document.querySelector("#doubleP1OnesInput"),
+        doubleP2Hundreds: document.querySelector("#doubleP2HundredsInput"),
+        doubleP2Tens: document.querySelector("#doubleP2TensInput"),
+        doubleP2Ones: document.querySelector("#doubleP2OnesInput"),
+        doubleTotalThousands: document.querySelector("#doubleTotalThousandsInput"),
+        doubleTotalHundreds: document.querySelector("#doubleTotalHundredsInput"),
+        doubleTotalTens: document.querySelector("#doubleTotalTensInput"),
+        doubleTotalOnes: document.querySelector("#doubleTotalOnesInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
       const multiplicationFormula = document.querySelector("#multiplicationFormula");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
+      const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
+      const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
       const feedback = document.querySelector("#feedback");
       const practiceCard = document.querySelector(".practiceCard");
       const appMenu = document.querySelector("#appMenu");
       const multiplicationCover = document.querySelector("#multiplicationCover");
       const longMultiplicationCover = document.querySelector("#longMultiplicationCover");
+      const doubleMultiplicationCover = document.querySelector("#doubleMultiplicationCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseFraction = document.querySelector("#chooseFraction");
       const chooseLongMultiplication = document.querySelector("#chooseLongMultiplication");
+      const chooseDoubleMultiplication = document.querySelector("#chooseDoubleMultiplication");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
       const modeSwitch = document.querySelector("#modeSwitch");
@@ -657,9 +770,11 @@
       const startButton = document.querySelector("#startButton");
       const multiplicationStartButton = document.querySelector("#multiplicationStartButton");
       const longMultiplicationStartButton = document.querySelector("#longMultiplicationStartButton");
+      const doubleMultiplicationStartButton = document.querySelector("#doubleMultiplicationStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
       const longMultiplicationProblemLine = document.querySelector("#longMultiplicationProblemLine");
+      const doubleMultiplicationProblemLine = document.querySelector("#doubleMultiplicationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
@@ -736,6 +851,27 @@
         return deck;
       }
 
+      function createDoubleMultiplicationDeck() {
+        const deck = [];
+        const used = new Set();
+        while (deck.length < DOUBLE_MULTIPLICATION_TARGET) {
+          const top = randomInt(22, 99);
+          if (hasDigitOne(top)) continue;
+          const tens = randomInt(2, 9);
+          const ones = randomInt(2, 9);
+          const bottom = tens * 10 + ones;
+          const firstPartial = top * ones;
+          const secondPartial = top * tens;
+          const answer = top * bottom;
+          if (firstPartial < 100 || secondPartial < 100 || answer < 1000) continue;
+          const key = `${top}x${bottom}`;
+          if (used.has(key)) continue;
+          used.add(key);
+          deck.push({ top, bottom });
+        }
+        return deck;
+      }
+
       function chooseDistantDenominator(options, previousDenominator) {
         if (!previousDenominator) return options[randomInt(0, options.length - 1)];
         const farthestDistance = Math.max(...options.map((value) => Math.abs(value - previousDenominator)));
@@ -802,15 +938,31 @@
         return longMultiplicationProblem ? longMultiplicationProblem.top * longMultiplicationProblem.bottom : 0;
       }
 
+      function doubleMultiplicationAnswer() {
+        return doubleMultiplicationProblem ? doubleMultiplicationProblem.top * doubleMultiplicationProblem.bottom : 0;
+      }
+
+      function doubleMultiplicationPartials() {
+        if (!doubleMultiplicationProblem) return { first: 0, second: 0 };
+        const ones = doubleMultiplicationProblem.bottom % 10;
+        const tens = Math.floor(doubleMultiplicationProblem.bottom / 10);
+        return {
+          first: doubleMultiplicationProblem.top * ones,
+          second: doubleMultiplicationProblem.top * tens,
+        };
+      }
+
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "longMultiplication";
+        return selectedApp === "multiplication" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication";
       }
 
       function currentTimedIndex() {
+        if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
 
       function currentTimedLength() {
+        if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
 
@@ -819,12 +971,14 @@
       }
 
       function currentTimedAnswer() {
+        if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
 
       function activeSlotOrder() {
         if (selectedApp === "multiplication") return MULTIPLICATION_SLOTS;
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
+        if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         return FRACTION_SLOTS;
       }
 
@@ -842,6 +996,24 @@
             longHundreds: answer[0],
             longTens: answer[1],
             longOnes: answer[2],
+          }[slot];
+        }
+        if (selectedApp === "doubleMultiplication") {
+          const partials = doubleMultiplicationPartials();
+          const first = String(partials.first).padStart(3, "0");
+          const second = String(partials.second).padStart(3, "0");
+          const total = String(doubleMultiplicationAnswer()).padStart(4, "0");
+          return {
+            doubleP1Hundreds: first[0],
+            doubleP1Tens: first[1],
+            doubleP1Ones: first[2],
+            doubleP2Hundreds: second[0],
+            doubleP2Tens: second[1],
+            doubleP2Ones: second[2],
+            doubleTotalThousands: total[0],
+            doubleTotalHundreds: total[1],
+            doubleTotalTens: total[2],
+            doubleTotalOnes: total[3],
           }[slot];
         }
         const result = solve();
@@ -1005,6 +1177,7 @@
         appMenu.hidden = false;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -1114,7 +1287,9 @@
         fractionGoal.hidden = true;
         finishTime.textContent = formatTime(finalTime);
         if (isTimedProblemApp()) {
-          const bestKey = selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
+          const bestKey = selectedApp === "doubleMultiplication"
+            ? DOUBLE_MULTIPLICATION_BEST_KEY
+            : selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
           previousMultiplicationBest = readBest(bestKey);
           multiplicationBestUpdated = mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
           if (multiplicationBestUpdated) saveBest(bestKey, finalTime);
@@ -1157,6 +1332,13 @@
           mistakes.push({
             problem: `${longMultiplicationProblem.top}×${longMultiplicationProblem.bottom}`,
             answer: String(longMultiplicationAnswer()),
+          });
+          return;
+        }
+        if (selectedApp === "doubleMultiplication") {
+          mistakes.push({
+            problem: `${doubleMultiplicationProblem.top}×${doubleMultiplicationProblem.bottom}`,
+            answer: String(doubleMultiplicationAnswer()),
           });
           return;
         }
@@ -1203,6 +1385,16 @@
             return;
           }
           longMultiplicationProblem = longMultiplicationDeck[longMultiplicationIndex];
+        } else if (selectedApp === "doubleMultiplication") {
+          if (keepChallenge) doubleMultiplicationIndex += 1;
+          if (doubleMultiplicationIndex >= doubleMultiplicationDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          doubleMultiplicationProblem = doubleMultiplicationDeck[doubleMultiplicationIndex];
         } else {
           problem = createDifferentProblem(mode);
         }
@@ -1217,6 +1409,8 @@
           multiplicationCover.hidden = false;
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationCover.hidden = false;
+        } else if (selectedApp === "doubleMultiplication") {
+          doubleMultiplicationCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -1234,6 +1428,7 @@
         appMenu.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
@@ -1251,6 +1446,7 @@
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
@@ -1269,6 +1465,7 @@
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
@@ -1280,11 +1477,31 @@
         resetInputs(true);
       }
 
+      function startDoubleMultiplicationChallenge() {
+        selectedApp = "doubleMultiplication";
+        hasStarted = true;
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        doubleMultiplicationDeck = createDoubleMultiplicationDeck();
+        doubleMultiplicationIndex = 0;
+        doubleMultiplicationProblem = doubleMultiplicationDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
         appMenu.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         cover.hidden = false;
         challengeView.hidden = true;
         finishPanel.hidden = true;
@@ -1299,6 +1516,7 @@
         cover.hidden = true;
         multiplicationCover.hidden = false;
         longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -1312,6 +1530,21 @@
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = false;
+        doubleMultiplicationCover.hidden = true;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
+      function showDoubleMultiplicationCover() {
+        selectedApp = "doubleMultiplication";
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = false;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -1361,6 +1594,7 @@
         fractionProblemLine.hidden = selectedApp !== "fraction";
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
         longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication";
+        doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
         if (selectedApp === "multiplication") {
@@ -1368,6 +1602,9 @@
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationTop.textContent = longMultiplicationProblem.top;
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
+        } else if (selectedApp === "doubleMultiplication") {
+          doubleMultiplicationTop.textContent = doubleMultiplicationProblem.top;
+          doubleMultiplicationBottom.textContent = doubleMultiplicationProblem.bottom;
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
         }
@@ -1443,10 +1680,12 @@
       chooseMultiplication.addEventListener("click", showMultiplicationCover);
       chooseFraction.addEventListener("click", showFractionCover);
       chooseLongMultiplication.addEventListener("click", showLongMultiplicationCover);
+      chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       document.querySelector("#restartButton").addEventListener("click", restartRound);
       startButton.addEventListener("click", startChallenge);
       multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
       longMultiplicationStartButton.addEventListener("click", startLongMultiplicationChallenge);
+      doubleMultiplicationStartButton.addEventListener("click", startDoubleMultiplicationChallenge);
       document.querySelectorAll("[data-back-menu]").forEach((button) => {
         button.addEventListener("click", showCoverScreen);
       });
