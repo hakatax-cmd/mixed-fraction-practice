@@ -291,10 +291,12 @@
       }
 
       .doubleInputRow {
+        --double-gap: clamp(6px, 1.2vmin, 10px);
+        position: relative;
         display: grid;
         grid-auto-flow: column;
         grid-auto-columns: var(--double-cell);
-        gap: clamp(6px, 1.2vmin, 10px);
+        gap: var(--double-gap);
       }
 
       .doublePartialOne { grid-column: 3 / 6; }
@@ -306,6 +308,73 @@
         border-width: 3px;
         font-size: clamp(1.7rem, 4.9vmin, 3.4rem);
       }
+
+      .decimalNumber {
+        position: relative;
+        display: inline-grid;
+        grid-template-columns: repeat(2, 0.62em);
+        justify-content: end;
+        width: 1.24em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .decimalNumber::before {
+        content: "0.";
+        position: absolute;
+        right: calc(100% + 0.04em);
+        bottom: 0.02em;
+        display: none;
+        font-size: 0.62em;
+        line-height: 1;
+      }
+
+      .decimalNumber[data-decimals="2"]::before { display: block; }
+
+      .problemDecimalPoint {
+        position: absolute;
+        left: 50%;
+        bottom: 0.03em;
+        width: 0.16em;
+        height: 0.16em;
+        border-radius: 50%;
+        background: currentColor;
+        transform: translateX(-50%);
+      }
+
+      .decimalPointChoice {
+        position: absolute;
+        bottom: calc(var(--double-cell) * -0.2);
+        width: calc(var(--double-cell) * 0.34);
+        height: calc(var(--double-cell) * 0.34);
+        min-height: 0;
+        padding: 0;
+        border: 2px solid rgba(96, 112, 128, 0.4);
+        border-radius: 5px;
+        background: #fff;
+        box-shadow: none;
+      }
+
+      .decimalPointChoice::after {
+        content: "";
+        position: absolute;
+        inset: 35%;
+        border-radius: 50%;
+        background: var(--muted);
+      }
+
+      .decimalPointChoice.selected {
+        border-color: var(--blue);
+        background: #eff6ff;
+        outline: 4px solid rgba(37, 99, 235, 0.16);
+      }
+
+      .decimalPointChoice.selected::after { background: var(--coral); }
+      .decimalPointChoice:disabled { opacity: 0.35; }
+      .decimalPointChoice[hidden] { display: none; }
+      .decimalPointChoice[data-decimal-position="0"] { left: calc(var(--double-cell) * -0.2); }
+      .decimalPointChoice[data-decimal-position="1"] { left: calc((var(--double-cell) + var(--double-gap)) * 1 - var(--double-cell) * 0.2); }
+      .decimalPointChoice[data-decimal-position="2"] { left: calc((var(--double-cell) + var(--double-gap)) * 2 - var(--double-cell) * 0.2); }
+      .decimalPointChoice[data-decimal-position="3"] { left: calc((var(--double-cell) + var(--double-gap)) * 3 - var(--double-cell) * 0.2); }
 
       .fraction, .answerFraction {
         display: inline-grid;
@@ -531,12 +600,46 @@
           width: min(100vw, calc(100dvh * 9 / 16));
           height: min(100dvh, calc(100vw * 16 / 9));
         }
+
+        #challengeView { padding-top: clamp(18px, 4.2vw, 28px); }
+        #gameArea {
+          grid-template-rows: minmax(0, 1fr) clamp(14px, 3.4vw, 22px) minmax(180px, 240px);
+          gap: clamp(3px, 1.4vw, 7px);
+        }
+
+        .doubleProblemLine { padding-top: clamp(0px, 1vw, 8px); }
+        .doubleVerticalProblem {
+          --double-cell: clamp(40px, 11.8vw, 62px);
+          row-gap: clamp(1px, 1vw, 5px);
+          font-size: clamp(2.45rem, 12.8vw, 4.9rem);
+        }
+        .doubleVerticalProblem .answerBox {
+          font-size: clamp(1.9rem, 9.4vw, 3.4rem);
+        }
       }
 
       @media (orientation: landscape) and (max-height: 600px) {
         .practiceCard {
           width: min(100vw, calc(100dvh * 16 / 9));
           height: min(100dvh, calc(100vw * 9 / 16));
+        }
+
+        .appShell { visibility: hidden; }
+        body::before {
+          content: "\6a2a\753b\9762\306f\975e\5bfe\5fdc\3067\3059\3002\7e26\5411\304d\3067\4f7f\3063\3066\304f\3060\3055\3044\3002";
+          position: fixed;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          padding: 24px;
+          background: #000;
+          color: #fff;
+          font-size: clamp(1.7rem, 7vw, 4rem);
+          font-weight: 900;
+          line-height: 1.35;
+          text-align: center;
+          visibility: visible;
+          z-index: 999;
         }
       }
 
@@ -694,6 +797,10 @@
                 <button id="doubleTotalHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
                 <button id="doubleTotalTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
                 <button id="doubleTotalOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                <button class="decimalPointChoice" data-decimal-position="0" aria-label="&#23567;&#25968;&#28857;&#12398;&#20301;&#32622;1" type="button" hidden></button>
+                <button class="decimalPointChoice" data-decimal-position="1" aria-label="&#23567;&#25968;&#28857;&#12398;&#20301;&#32622;2" type="button" hidden></button>
+                <button class="decimalPointChoice" data-decimal-position="2" aria-label="&#23567;&#25968;&#28857;&#12398;&#20301;&#32622;3" type="button" hidden></button>
+                <button class="decimalPointChoice" data-decimal-position="3" aria-label="&#23567;&#25968;&#28857;&#12398;&#20301;&#32622;4" type="button" hidden></button>
               </span>
             </div>
           </div>
@@ -789,6 +896,7 @@
       let transitionTimer = null;
       let swipeStart = null;
       let mistakes = [];
+      let selectedDoubleDecimalPosition = null;
 
       const inputs = {
         whole: document.querySelector("#wholeInput"),
@@ -858,6 +966,7 @@
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
       const mistakeList = document.querySelector("#mistakeList");
+      const doubleDecimalChoices = [...document.querySelectorAll(".decimalPointChoice")];
 
       function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -898,6 +1007,26 @@
         return String(value).includes("1");
       }
 
+      function hasSameTwoDigits(value) {
+        const text = String(value);
+        return text.length === 2 && text[0] === text[1];
+      }
+
+      function chooseDoubleDecimalPattern() {
+        const patterns = [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [1, 1],
+          [2, 0],
+          [0, 2],
+          [2, 1],
+          [1, 2],
+          [2, 2],
+        ];
+        return patterns[randomInt(0, patterns.length - 1)];
+      }
+
       function createLongMultiplicationDeck() {
         const deck = [];
         const used = new Set();
@@ -920,18 +1049,20 @@
         const used = new Set();
         while (deck.length < DOUBLE_MULTIPLICATION_TARGET) {
           const top = randomInt(22, 99);
-          if (hasDigitOne(top)) continue;
+          if (hasDigitOne(top) || hasSameTwoDigits(top)) continue;
           const tens = randomInt(2, 9);
           const ones = randomInt(2, 9);
+          if (tens === ones) continue;
           const bottom = tens * 10 + ones;
           const firstPartial = top * ones;
           const secondPartial = top * tens;
           const answer = top * bottom;
           if (firstPartial < 100 || secondPartial < 100 || answer < 1000) continue;
-          const key = `${top}x${bottom}`;
+          const [topDecimals, bottomDecimals] = chooseDoubleDecimalPattern();
+          const key = `${top}x${bottom}d${topDecimals}${bottomDecimals}`;
           if (used.has(key)) continue;
           used.add(key);
-          deck.push({ top, bottom });
+          deck.push({ top, bottom, topDecimals, bottomDecimals });
         }
         return deck;
       }
@@ -1006,6 +1137,29 @@
         return doubleMultiplicationProblem ? doubleMultiplicationProblem.top * doubleMultiplicationProblem.bottom : 0;
       }
 
+      function doubleDecimalPlaces() {
+        if (!doubleMultiplicationProblem) return 0;
+        return (doubleMultiplicationProblem.topDecimals || 0) + (doubleMultiplicationProblem.bottomDecimals || 0);
+      }
+
+      function expectedDoubleDecimalPosition() {
+        const places = doubleDecimalPlaces();
+        return places > 0 ? 4 - places : null;
+      }
+
+      function formatDecimalAnswer(rawValue, decimalPlaces) {
+        if (!decimalPlaces) return String(rawValue);
+        const padded = String(rawValue).padStart(decimalPlaces + 1, "0");
+        const whole = padded.slice(0, -decimalPlaces).replace(/^0+(?=\d)/, "") || "0";
+        return `${whole}.${padded.slice(-decimalPlaces)}`;
+      }
+
+      function decimalNumberHtml(value, decimalPlaces) {
+        const digits = String(value).padStart(2, "0");
+        const point = decimalPlaces === 1 ? '<span class="problemDecimalPoint" aria-hidden="true"></span>' : "";
+        return `<span class="decimalNumber" data-decimals="${decimalPlaces}"><span>${digits[0]}</span><span>${digits[1]}</span>${point}</span>`;
+      }
+
       function doubleMultiplicationPartials() {
         if (!doubleMultiplicationProblem) return { first: 0, second: 0 };
         const ones = doubleMultiplicationProblem.bottom % 10;
@@ -1037,6 +1191,13 @@
       function currentTimedAnswer() {
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
+      }
+
+      function currentTimedAnswerText() {
+        if (selectedApp === "doubleMultiplication") {
+          return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
+        }
+        return String(currentTimedAnswer());
       }
 
       function activeSlotOrder() {
@@ -1165,6 +1326,9 @@
         keypad.querySelectorAll("button").forEach((button) => {
           button.disabled = locked;
         });
+        doubleDecimalChoices.forEach((button) => {
+          button.disabled = locked || !isDoubleTotalComplete();
+        });
         Object.values(inputs).forEach((input) => {
           input.disabled = locked;
         });
@@ -1200,20 +1364,44 @@
         inputs[slot].textContent = value;
       }
 
+      function isDoubleTotalComplete() {
+        return DOUBLE_MULTIPLICATION_SLOTS.every((slot) => getAnswerValue(slot).length > 0);
+      }
+
+      function resetDoubleDecimalChoice() {
+        selectedDoubleDecimalPosition = null;
+        doubleDecimalChoices.forEach((button) => {
+          button.classList.remove("selected");
+        });
+      }
+
+      function updateDoubleDecimalChoices() {
+        const shouldShow = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
+        const canChoose = shouldShow && isDoubleTotalComplete() && !isAnswerLocked && !isFinished;
+        doubleDecimalChoices.forEach((button) => {
+          button.hidden = !shouldShow;
+          button.disabled = !canChoose;
+          button.classList.toggle("selected", Number(button.dataset.decimalPosition) === selectedDoubleDecimalPosition);
+        });
+      }
+
       function setSlotValue(slot, rawValue) {
         if (isAnswerLocked || isFinished) return;
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
         if (value.length >= expected(slot).length) nextSlot(slot);
+        if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
         checkState();
       }
 
       function resetInputs(resetModeLock = false) {
         Object.keys(inputs).forEach((slot) => setAnswerValue(slot, ""));
+        resetDoubleDecimalChoice();
         if (resetModeLock && selectedApp === "fraction") setModeLocked(false);
         setLocked(false);
         setActive(activeSlotOrder()[0]);
+        updateDoubleDecimalChoices();
       }
 
       function resetInputsAfterBrowserRestore() {
@@ -1289,7 +1477,15 @@
         const complete = slots.every((slot) => getAnswerValue(slot).length > 0);
         if (!complete) return;
 
-        const correct = slots.every((slot) => getAnswerValue(slot) === expected(slot));
+        const needsDecimalPoint = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
+        if (needsDecimalPoint && selectedDoubleDecimalPosition === null) {
+          updateDoubleDecimalChoices();
+          return;
+        }
+
+        const correctDigits = slots.every((slot) => getAnswerValue(slot) === expected(slot));
+        const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
+        const correct = correctDigits && correctDecimal;
         setLocked(true);
 
         if (!correct) {
@@ -1297,7 +1493,7 @@
           recordMistake();
           updateProgress();
           if (isTimedProblemApp()) {
-            correctAnswer.textContent = `\u7b54\u3048\u306f ${currentTimedAnswer()}`;
+            correctAnswer.textContent = `\u7b54\u3048\u306f ${currentTimedAnswerText()}`;
           } else {
             const answer = solve();
             correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
@@ -1401,8 +1597,8 @@
         }
         if (selectedApp === "doubleMultiplication") {
           mistakes.push({
-            problem: `${doubleMultiplicationProblem.top}×${doubleMultiplicationProblem.bottom}`,
-            answer: String(doubleMultiplicationAnswer()),
+            problem: `${formatDecimalAnswer(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0)}×${formatDecimalAnswer(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0)}`,
+            answer: formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces()),
           });
           return;
         }
@@ -1667,8 +1863,10 @@
           longMultiplicationTop.textContent = longMultiplicationProblem.top;
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
         } else if (selectedApp === "doubleMultiplication") {
-          doubleMultiplicationTop.textContent = doubleMultiplicationProblem.top;
-          doubleMultiplicationBottom.textContent = doubleMultiplicationProblem.bottom;
+          doubleMultiplicationTop.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0);
+          doubleMultiplicationBottom.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0);
+          resetDoubleDecimalChoice();
+          updateDoubleDecimalChoices();
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
         }
@@ -1707,14 +1905,17 @@
 
       function backspaceAnswer() {
         if (isAnswerLocked || isFinished) return;
+        if (selectedApp === "doubleMultiplication") resetDoubleDecimalChoice();
         const current = getAnswerValue(activeSlot);
         if (current.length > 0) {
           setAnswerValue(activeSlot, current.slice(0, -1));
+          updateDoubleDecimalChoices();
           return;
         }
         const slots = activeSlotOrder();
         const index = slots.indexOf(activeSlot);
         if (index > 0) setActive(slots[index - 1]);
+        updateDoubleDecimalChoices();
       }
 
       function clearAnswer() {
@@ -1736,6 +1937,15 @@
 
       document.querySelectorAll("[data-digit]").forEach((button) => {
         bindFastPress(button, () => setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit));
+      });
+
+      doubleDecimalChoices.forEach((button) => {
+        bindFastPress(button, () => {
+          if (selectedApp !== "doubleMultiplication" || isAnswerLocked || isFinished || !isDoubleTotalComplete()) return;
+          selectedDoubleDecimalPosition = Number(button.dataset.decimalPosition);
+          updateDoubleDecimalChoices();
+          checkState();
+        });
       });
 
       bindFastPress(document.querySelector("#backButton"), backspaceAnswer);
