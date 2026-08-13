@@ -380,6 +380,14 @@
       }
 
       .decimalPointChoice.selected::after { background: var(--coral); }
+      .decimalPointChoice.correction,
+      .decimalPointChoice.correction:disabled {
+        border-color: var(--coral);
+        background: #fff1f0;
+        opacity: 1;
+        outline: 4px solid rgba(227, 58, 47, 0.18);
+      }
+      .decimalPointChoice.correction::after { background: var(--coral); }
       .decimalPointChoice:disabled { opacity: 0.35; }
       .decimalPointChoice[hidden] { display: none; }
       .decimalPointChoice[data-decimal-position="0"] { left: calc(var(--double-cell) * -0.2); }
@@ -430,6 +438,16 @@
         border-color: var(--blue);
         outline: 5px solid rgba(37, 99, 235, 0.18);
         animation: activeAnswerPulse 0.85s ease-in-out infinite;
+      }
+
+      .answerBox.correction,
+      .answerBox.correction:disabled {
+        border-color: var(--coral);
+        background: #fff1f0;
+        color: var(--coral);
+        opacity: 1;
+        outline: 5px solid rgba(227, 58, 47, 0.16);
+        animation: none;
       }
 
       @keyframes activeAnswerPulse {
@@ -865,7 +883,7 @@
       const CLEAR_LIMIT_MS = 135000;
       const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
-      const WRONG_ADVANCE_MS = 1000;
+      const WRONG_ADVANCE_MS = 2500;
       const FRACTION_SLOTS = ["whole", "bottom", "rest"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const LONG_MULTIPLICATION_TARGET = 12;
@@ -1388,6 +1406,7 @@
         selectedDoubleDecimalPosition = null;
         doubleDecimalChoices.forEach((button) => {
           button.classList.remove("selected");
+          button.classList.remove("correction");
         });
       }
 
@@ -1406,6 +1425,24 @@
         });
       }
 
+      function showAnswerCorrections() {
+        activeSlotOrder().forEach((slot) => {
+          if (getAnswerValue(slot) === expected(slot)) return;
+          setAnswerValue(slot, expected(slot));
+          inputs[slot].classList.add("correction");
+        });
+
+        const needsDecimalPoint = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
+        const expectedPosition = expectedDoubleDecimalPosition();
+        if (needsDecimalPoint && selectedDoubleDecimalPosition !== expectedPosition) {
+          selectedDoubleDecimalPosition = expectedPosition;
+          updateDoubleDecimalChoices();
+          doubleDecimalChoices.forEach((button) => {
+            button.classList.toggle("correction", Number(button.dataset.decimalPosition) === expectedPosition);
+          });
+        }
+      }
+
       function setSlotValue(slot, rawValue) {
         if (isAnswerLocked || isFinished) return;
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
@@ -1417,7 +1454,12 @@
       }
 
       function resetInputs(resetModeLock = false) {
-        Object.keys(inputs).forEach((slot) => setAnswerValue(slot, ""));
+        Object.keys(inputs).forEach((slot) => {
+          inputs[slot].classList.remove("correction");
+          setAnswerValue(slot, "");
+        });
+        correctAnswer.hidden = true;
+        correctAnswer.textContent = "";
         resetDoubleDecimalChoice();
         if (resetModeLock && selectedApp === "fraction") setModeLocked(false);
         setLocked(false);
@@ -1513,12 +1555,9 @@
           mistakeCount += 1;
           recordMistake();
           updateProgress();
-          if (isTimedProblemApp()) {
-            correctAnswer.textContent = `\u7b54\u3048\u306f ${currentTimedAnswerText()}`;
-          } else {
-            const answer = solve();
-            correctAnswer.textContent = `\u7b54\u3048\u306f ${answer.whole} ${answer.rest}/${problem.denominator}`;
-          }
+          correctAnswer.hidden = true;
+          correctAnswer.textContent = "";
+          showAnswerCorrections();
           showReaction(false);
           if (isTimedProblemApp() && isLastTimedProblem()) {
             finalTime = elapsedTime();
