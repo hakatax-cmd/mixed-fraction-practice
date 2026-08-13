@@ -76,13 +76,19 @@
       #challengeView {
         height: 100%;
         display: grid;
-        grid-template-rows: 10% 90%;
+        grid-template-rows: 1fr;
+        position: relative;
         overflow: hidden;
+        padding-top: clamp(30px, 4.8vmin, 50px);
       }
       .topBar {
-        display: grid;
-        align-items: center;
+        position: absolute;
+        top: clamp(4px, 1vmin, 10px);
+        left: clamp(8px, 1.8vmin, 18px);
+        right: clamp(8px, 1.8vmin, 18px);
         min-height: 0;
+        z-index: 4;
+        pointer-events: none;
       }
 
       .modeSwitch {
@@ -158,18 +164,26 @@
       .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
 
       .progress {
-        display: grid;
-        grid-template-columns: minmax(12em, 1fr) 5.8em minmax(18em, 1fr);
-        align-items: center;
-        gap: clamp(6px, 1.5vmin, 16px);
-        font-size: clamp(0.95rem, 2.3vmin, 1.45rem);
+        position: relative;
+        display: block;
+        min-height: clamp(34px, 5vmin, 54px);
+        padding-right: clamp(72px, 14vmin, 118px);
+        font-size: clamp(0.85rem, 1.9vmin, 1.2rem);
         font-weight: 900;
         white-space: nowrap;
         width: 100%;
       }
 
-      .streak { color: var(--coral); }
-      .timer { color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+      .streak { display: block; color: var(--coral); }
+      .timer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        color: var(--ink);
+        font-size: clamp(1.05rem, 2.4vmin, 1.55rem);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
 
       .problemLine {
         display: grid;
@@ -180,6 +194,7 @@
         min-height: 0;
         height: 100%;
         margin: 0;
+        overflow: hidden;
         font-size: clamp(3.2rem, 11vmin, 7.6rem);
         font-weight: 900;
         line-height: 1;
@@ -197,6 +212,7 @@
         place-items: center;
         height: 100%;
         min-height: 0;
+        overflow: hidden;
       }
 
       .verticalProblem {
@@ -235,10 +251,11 @@
         place-items: center;
         height: 100%;
         min-height: 0;
+        overflow: hidden;
       }
 
       .doubleVerticalProblem {
-        --double-cell: clamp(42px, 7vmin, 76px);
+        --double-cell: clamp(36px, 6.2vmin, 64px);
         display: inline-grid;
         grid-template-columns: auto repeat(4, var(--double-cell));
         align-items: end;
@@ -246,7 +263,7 @@
         column-gap: clamp(6px, 1.2vmin, 10px);
         row-gap: clamp(3px, 0.8vmin, 8px);
         color: var(--ink);
-        font-size: clamp(2.55rem, 8.5vmin, 5.7rem);
+        font-size: clamp(2.1rem, 7.3vmin, 4.8rem);
         font-weight: 900;
         line-height: 0.9;
         font-variant-numeric: tabular-nums;
@@ -356,7 +373,8 @@
         grid-template-columns: repeat(4, minmax(74px, 1fr));
         grid-template-rows: repeat(3, 1fr);
         gap: clamp(8px, 1.6vmin, 14px);
-        height: 100%;
+        align-self: start;
+        height: min(100%, 272px);
         margin: 0 auto;
         width: min(100%, 544px);
         max-width: 544px;
@@ -390,12 +408,21 @@
       .keypad #clearButton { grid-column: 4; grid-row: 2; }
       .keypad [data-key="0"] { grid-column: 4; grid-row: 3; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
-      .goal { margin: 0; color: var(--green); font-size: clamp(1rem, 2.6vw, 1.45rem); font-weight: 900; text-align: center; white-space: nowrap; }
+      .goal {
+        display: block;
+        margin: 0;
+        color: var(--green);
+        font-size: clamp(0.78rem, 1.8vmin, 1.12rem);
+        font-weight: 900;
+        text-align: left;
+        white-space: nowrap;
+      }
       .goal.placeholder { visibility: hidden; }
 
       #gameArea {
         display: grid;
-        grid-template-rows: 51% 6% 43%;
+        grid-template-rows: minmax(0, 1fr) clamp(18px, 3.2vmin, 30px) minmax(200px, 272px);
+        gap: clamp(4px, 1vmin, 8px);
         align-content: start;
         height: 100%;
         min-height: 0;
@@ -461,14 +488,23 @@
         .modeSwitch { width: 100%; }
         .appChoices { grid-template-columns: 1fr; }
         #appMenu .appChoices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .progress { grid-template-columns: minmax(9em, 1fr) 5.2em minmax(12em, 1fr); gap: 6px; }
+        .progress {
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-areas:
+            "streak timer"
+            "goal timer";
+          gap: 4px 8px;
+        }
         .keypad { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
       }
 
       @media (max-width: 430px) {
         .progress {
-          grid-template-columns: minmax(0, 1fr) 4.2em minmax(0, 1.35fr);
-          gap: 4px;
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-areas:
+            "streak timer"
+            "goal timer";
+          gap: 3px 6px;
           font-size: clamp(0.62rem, 2.25vw, 0.9rem);
         }
         .goal { font-size: inherit; }
