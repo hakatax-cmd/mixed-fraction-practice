@@ -302,6 +302,17 @@
       .doublePartialOne { grid-column: 3 / 6; }
       .doublePartialTwo { grid-column: 2 / 5; }
       .doubleTotal { grid-column: 2 / 6; }
+      .doubleTotal[data-selected-decimal="0"]::before {
+        content: "0.";
+        position: absolute;
+        left: calc(var(--double-cell) * -0.86);
+        bottom: calc(var(--double-cell) * 0.02);
+        color: var(--ink);
+        font-size: calc(var(--double-cell) * 0.58);
+        font-weight: 900;
+        line-height: 1;
+        pointer-events: none;
+      }
       .doubleVerticalProblem .answerBox {
         width: var(--double-cell);
         height: var(--double-cell);
@@ -966,6 +977,7 @@
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
       const mistakeList = document.querySelector("#mistakeList");
+      const doubleTotalRow = document.querySelector(".doubleTotal");
       const doubleDecimalChoices = [...document.querySelectorAll(".decimalPointChoice")];
 
       function randomInt(min, max) {
@@ -1005,6 +1017,10 @@
 
       function hasDigitOne(value) {
         return String(value).includes("1");
+      }
+
+      function hasDigitZero(value) {
+        return String(value).includes("0");
       }
 
       function hasSameTwoDigits(value) {
@@ -1049,7 +1065,7 @@
         const used = new Set();
         while (deck.length < DOUBLE_MULTIPLICATION_TARGET) {
           const top = randomInt(22, 99);
-          if (hasDigitOne(top) || hasSameTwoDigits(top)) continue;
+          if (hasDigitOne(top) || hasDigitZero(top) || hasSameTwoDigits(top)) continue;
           const tens = randomInt(2, 9);
           const ones = randomInt(2, 9);
           if (tens === ones) continue;
@@ -1378,6 +1394,11 @@
       function updateDoubleDecimalChoices() {
         const shouldShow = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
         const canChoose = shouldShow && isDoubleTotalComplete() && !isAnswerLocked && !isFinished;
+        if (shouldShow && selectedDoubleDecimalPosition === 0) {
+          doubleTotalRow.dataset.selectedDecimal = "0";
+        } else {
+          delete doubleTotalRow.dataset.selectedDecimal;
+        }
         doubleDecimalChoices.forEach((button) => {
           button.hidden = !shouldShow;
           button.disabled = !canChoose;
