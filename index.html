@@ -79,7 +79,7 @@
         grid-template-rows: 1fr;
         position: relative;
         overflow: hidden;
-        padding-top: clamp(30px, 4.8vmin, 50px);
+        padding-top: clamp(22px, 3.6vmin, 38px);
       }
       .topBar {
         position: absolute;
@@ -189,13 +189,14 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         gap: clamp(10px, 2.4vw, 26px);
-        align-items: center;
+        align-items: start;
         justify-content: stretch;
         min-height: 0;
         height: 100%;
         margin: 0;
         overflow: hidden;
-        font-size: clamp(3.2rem, 11vmin, 7.6rem);
+        padding-top: clamp(24px, 4.6vmin, 54px);
+        font-size: clamp(3.45rem, 11.8vmin, 8.2rem);
         font-weight: 900;
         line-height: 1;
       }
@@ -204,15 +205,17 @@
       .equals { grid-column: 2; justify-self: center; color: var(--muted); }
       .mixedAnswer, .productAnswer { grid-column: 3; justify-self: start; }
       .mixedAnswer { display: inline-flex; align-items: center; gap: clamp(10px, 2.4vw, 26px); }
-      .multiplicationFormula { font-size: clamp(4.4rem, 13vmin, 9rem); font-weight: 900; }
+      .multiplicationFormula { font-size: clamp(4.8rem, 14vmin, 9.8rem); font-weight: 900; }
       .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
 
       .longProblemLine {
         display: grid;
-        place-items: center;
+        align-items: start;
+        justify-items: center;
         height: 100%;
         min-height: 0;
         overflow: hidden;
+        padding-top: clamp(18px, 3.5vmin, 42px);
       }
 
       .verticalProblem {
@@ -221,7 +224,7 @@
         align-items: end;
         column-gap: clamp(12px, 2.2vmin, 22px);
         color: var(--ink);
-        font-size: clamp(3.3rem, 11vmin, 7.4rem);
+        font-size: clamp(3.55rem, 11.8vmin, 8rem);
         font-weight: 900;
         line-height: 0.95;
         font-variant-numeric: tabular-nums;
@@ -248,10 +251,12 @@
 
       .doubleProblemLine {
         display: grid;
-        place-items: center;
+        align-items: start;
+        justify-items: center;
         height: 100%;
         min-height: 0;
         overflow: hidden;
+        padding-top: clamp(8px, 1.8vmin, 22px);
       }
 
       .doubleVerticalProblem {
@@ -263,7 +268,7 @@
         column-gap: clamp(6px, 1.2vmin, 10px);
         row-gap: clamp(3px, 0.8vmin, 8px);
         color: var(--ink);
-        font-size: clamp(2.1rem, 7.3vmin, 4.8rem);
+        font-size: clamp(2.2rem, 7.7vmin, 5.1rem);
         font-weight: 900;
         line-height: 0.9;
         font-variant-numeric: tabular-nums;
