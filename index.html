@@ -542,6 +542,10 @@
       }
 
       .reaction.show { opacity: 1; }
+      .reaction.wrong {
+        place-items: start center;
+        padding-top: clamp(42px, 8vmin, 88px);
+      }
 
       .big-circle {
         width: min(280px, 64vw);
@@ -561,8 +565,15 @@
         text-shadow: 0 10px 24px rgba(22, 32, 42, 0.12);
       }
 
+      .reaction.wrong .big-cross {
+        font-size: min(170px, 34vw);
+        background: rgba(255, 255, 255, 0.72);
+        border-radius: 8px;
+        padding: 0 18px 10px;
+      }
+
       .wrongReaction { display: grid; justify-items: center; gap: 12px; }
-      .correctAnswer { margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
+      .correctAnswer { display: none !important; margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
 
       .finishPanel {
         display: grid;
@@ -1517,6 +1528,9 @@
       function showReaction(correct) {
         correctMark.hidden = !correct;
         wrongReaction.hidden = correct;
+        correctAnswer.hidden = true;
+        correctAnswer.textContent = "";
+        reaction.classList.toggle("wrong", !correct);
         reaction.classList.remove("show");
         void reaction.offsetWidth;
         reaction.classList.add("show");
@@ -1524,6 +1538,7 @@
 
       function hideReaction() {
         reaction.classList.remove("show");
+        reaction.classList.remove("wrong");
       }
 
       function schedule(action, delay = AUTO_ADVANCE_MS) {
