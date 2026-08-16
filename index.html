@@ -323,9 +323,9 @@
       .decimalNumber {
         position: relative;
         display: inline-grid;
-        grid-template-columns: repeat(2, 0.62em);
+        grid-template-columns: repeat(2, 0.69em);
         justify-content: end;
-        width: 1.24em;
+        width: 1.38em;
         font-variant-numeric: tabular-nums;
       }
 
@@ -344,9 +344,9 @@
       .problemDecimalPoint {
         position: absolute;
         left: 50%;
-        bottom: 0.03em;
-        width: 0.16em;
-        height: 0.16em;
+        bottom: 0.02em;
+        width: 0.21em;
+        height: 0.21em;
         border-radius: 50%;
         background: currentColor;
         transform: translateX(-50%);
@@ -912,6 +912,8 @@
       let selectedApp = "menu";
       let mode = "easy";
       let problem = createDifferentProblem(mode);
+      let fractionDenominatorDeck = [];
+      let fractionDenominatorIndex = 0;
       let multiplicationDeck = [];
       let multiplicationIndex = 0;
       let multiplicationProblem = null;
@@ -1119,7 +1121,40 @@
         return strongestChoices[randomInt(0, strongestChoices.length - 1)];
       }
 
-      function createProblem(level, previousDenominator) {
+      function createEasyDenominatorDeck(previousDenominator = 0) {
+        const base = [2, 3, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9];
+        let best = shuffle(base);
+        let bestScore = Infinity;
+
+        for (let attempt = 0; attempt < 80; attempt += 1) {
+          const candidate = shuffle(base);
+          let score = previousDenominator && candidate[0] === previousDenominator ? 3 : 0;
+          for (let index = 1; index < candidate.length; index += 1) {
+            if (candidate[index] === candidate[index - 1]) score += 2;
+            if (Math.abs(candidate[index] - candidate[index - 1]) <= 1) score += 0.2;
+          }
+          if (score < bestScore) {
+            best = candidate;
+            bestScore = score;
+            if (score === 0) break;
+          }
+        }
+
+        return best;
+      }
+
+      function nextEasyDenominator() {
+        if (fractionDenominatorIndex >= fractionDenominatorDeck.length) {
+          const previous = fractionDenominatorDeck[fractionDenominatorDeck.length - 1] || 0;
+          fractionDenominatorDeck = createEasyDenominatorDeck(previous);
+          fractionDenominatorIndex = 0;
+        }
+        const denominator = fractionDenominatorDeck[fractionDenominatorIndex];
+        fractionDenominatorIndex += 1;
+        return denominator;
+      }
+
+      function createProblem(level, previousDenominator, forcedDenominator = null) {
         if (level === "hard") {
           const denominator = chooseDistantDenominator([2, 3, 4, 5, 6, 7, 8, 9, 10, 11], previousDenominator);
           let numerator = randomInt(denominator + 1, 100);
@@ -1131,7 +1166,7 @@
 
         // 2-5 : 6-9 = 1 : 2, and whole-number groups 1-4 : 5-9 = 1 : 3.
         const denominators = Math.random() < 1 / 3 ? [2, 3, 4, 5] : [6, 7, 8, 9];
-        const denominator = chooseDistantDenominator(denominators, previousDenominator);
+        const denominator = forcedDenominator || chooseDistantDenominator(denominators, previousDenominator);
         const whole = Math.random() < 1 / 4 ? randomInt(1, 4) : randomInt(5, 9);
         const rest = randomInt(1, denominator - 1);
         return { numerator: whole * denominator + rest, denominator };
@@ -1161,6 +1196,19 @@
           // The exercise works even when storage is blocked.
         }
         return next;
+      }
+
+      function createNextFractionProblem() {
+        if (mode === "easy") {
+          const next = createProblem("easy", 0, nextEasyDenominator());
+          try {
+            sessionStorage.setItem("lastMixedFractionProblem", problemKey(next));
+          } catch {
+            // The exercise works even when storage is blocked.
+          }
+          return next;
+        }
+        return createDifferentProblem(mode);
       }
 
       function solve() {
@@ -1731,7 +1779,7 @@
           }
           doubleMultiplicationProblem = doubleMultiplicationDeck[doubleMultiplicationIndex];
         } else {
-          problem = createDifferentProblem(mode);
+          problem = createNextFractionProblem();
         }
         renderProblem();
         resetInputs(true);
@@ -1769,7 +1817,9 @@
         gameArea.hidden = false;
         finishPanel.hidden = true;
         resetChallenge();
-        problem = createDifferentProblem(mode);
+        fractionDenominatorDeck = mode === "easy" ? createEasyDenominatorDeck() : [];
+        fractionDenominatorIndex = 0;
+        problem = createNextFractionProblem();
         renderProblem();
         resetInputs(true);
       }
