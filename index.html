@@ -150,14 +150,14 @@
         height: clamp(86px, 18svh, 170px);
       }
       #appMenu .appChoices {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: clamp(8px, 1.5vmin, 12px);
-        width: min(100%, 920px);
+        width: min(100%, 1040px);
       }
       #appMenu .menuButton {
         min-height: clamp(64px, 11vh, 98px);
         min-height: clamp(64px, 11svh, 98px);
-        font-size: clamp(1rem, 3.2vmin, 2rem);
+        font-size: clamp(0.9rem, 2.8vmin, 1.8rem);
         line-height: 1.1;
         box-shadow: 0 6px 0 rgba(22, 32, 42, 0.08);
       }
@@ -318,6 +318,74 @@
         height: var(--double-cell);
         border-width: 3px;
         font-size: clamp(1.7rem, 4.9vmin, 3.4rem);
+      }
+
+      .divisionProblemLine {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        padding-top: clamp(4px, 1vmin, 14px);
+      }
+
+      .divisionWork {
+        --division-cell: clamp(24px, 4.4vmin, 42px);
+        --division-gap: clamp(4px, 0.8vmin, 8px);
+        display: inline-grid;
+        grid-template-columns: repeat(7, var(--division-cell));
+        grid-auto-rows: var(--division-cell);
+        gap: var(--division-gap);
+        align-items: center;
+        justify-items: center;
+        color: var(--ink);
+        font-size: clamp(1.25rem, 4vmin, 2.65rem);
+        font-weight: 900;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .divisionNumber {
+        display: contents;
+      }
+
+      .divisionDigit,
+      .divisionSymbol {
+        display: grid;
+        place-items: center;
+        width: var(--division-cell);
+        height: var(--division-cell);
+      }
+
+      .divisionAnswer {
+        width: calc(var(--division-cell) * 0.92);
+        height: calc(var(--division-cell) * 0.92);
+        border-width: 3px;
+        font-size: clamp(1.05rem, 3.4vmin, 2.2rem);
+      }
+
+      .divisionBracket {
+        grid-column: 3 / 8;
+        grid-row: 2;
+        justify-self: stretch;
+        align-self: stretch;
+        border-left: 4px solid var(--ink);
+        border-top: 4px solid var(--ink);
+        border-radius: 8px 0 0 0;
+      }
+
+      .divisionMinus {
+        color: var(--muted);
+        font-size: 0.82em;
+      }
+
+      .divisionBar {
+        align-self: end;
+        justify-self: stretch;
+        width: 100%;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--ink);
       }
 
       .decimalNumber {
@@ -638,6 +706,28 @@
           width: min(100vw, calc(100dvh * 4 / 3));
           height: min(100dvh, calc(100vw * 3 / 4));
         }
+
+        #challengeView.divisionMode #gameArea {
+          grid-template-columns: minmax(0, 1fr) minmax(300px, 42%);
+          grid-template-rows: minmax(0, 1fr) clamp(18px, 4vmin, 32px);
+          gap: clamp(6px, 1.6vmin, 14px);
+        }
+
+        #challengeView.divisionMode .divisionProblemLine {
+          grid-column: 1;
+          grid-row: 1 / 3;
+        }
+
+        #challengeView.divisionMode .feedback {
+          grid-column: 2;
+          grid-row: 2;
+        }
+
+        #challengeView.divisionMode .keypad {
+          grid-column: 2;
+          grid-row: 1;
+          align-self: center;
+        }
       }
 
       @media (orientation: portrait) and (max-width: 600px) {
@@ -660,6 +750,11 @@
         }
         .doubleVerticalProblem .answerBox {
           font-size: clamp(1.9rem, 9.4vw, 3.4rem);
+        }
+
+        .divisionWork {
+          --division-cell: clamp(26px, 8.2vw, 40px);
+          --division-gap: clamp(3px, 1vw, 6px);
         }
       }
 
@@ -738,6 +833,7 @@
             <button class="menuButton" id="chooseFraction" type="button">&#24111;&#20998;&#25968;</button>
             <button class="menuButton" id="chooseLongMultiplication" type="button">&#20108;&#12369;&#12383;&#12398;<br />&#25499;&#12369;&#31639;</button>
             <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
+            <button class="menuButton" id="chooseDivision" type="button">&#20116;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
           </div>
         </section>
 
@@ -765,6 +861,14 @@
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
+        <section class="cover" id="divisionCover" hidden>
+          <h1>&#20116;&#12369;&#12383;&divide;&#20108;&#12369;&#12383;</h1>
+          <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="divisionStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
         <section class="cover" id="cover" hidden>
           <h1>&#24111;&#20998;&#25968;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
           <p class="coverPrompt">&#12514;&#12540;&#12489;&#12434;&#12360;&#12425;&#12412;&#12358;</p>
@@ -773,6 +877,7 @@
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
           <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
+          <p class="coverPrompt">10&#21839;&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -849,6 +954,44 @@
               </span>
             </div>
           </div>
+          <div class="divisionProblemLine" id="divisionProblemLine" hidden>
+            <div class="divisionWork">
+              <button id="divisionQHundredsInput" class="answerBox divisionAnswer active" aria-label="&#21830;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 1;"></button>
+              <button id="divisionQTensInput" class="answerBox divisionAnswer" aria-label="&#21830;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 1;"></button>
+              <button id="divisionQOnesInput" class="answerBox divisionAnswer" aria-label="&#21830;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 7; grid-row: 1;"></button>
+              <span class="divisionDigit" id="divisionDivisorTens" style="grid-column: 1; grid-row: 2;"></span>
+              <span class="divisionDigit" id="divisionDivisorOnes" style="grid-column: 2; grid-row: 2;"></span>
+              <span class="divisionBracket" aria-hidden="true"></span>
+              <span class="divisionDigit" id="divisionDividendD1" style="grid-column: 3; grid-row: 2;"></span>
+              <span class="divisionDigit" id="divisionDividendD2" style="grid-column: 4; grid-row: 2;"></span>
+              <span class="divisionDigit" id="divisionDividendD3" style="grid-column: 5; grid-row: 2;"></span>
+              <span class="divisionDigit" id="divisionDividendD4" style="grid-column: 6; grid-row: 2;"></span>
+              <span class="divisionDigit" id="divisionDividendD5" style="grid-column: 7; grid-row: 2;"></span>
+              <span class="divisionSymbol divisionMinus" style="grid-column: 2; grid-row: 3;">-</span>
+              <button id="divisionP1HundredsInput" class="answerBox divisionAnswer" aria-label="1&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 3; grid-row: 3;"></button>
+              <button id="divisionP1TensInput" class="answerBox divisionAnswer" aria-label="1&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 3;"></button>
+              <button id="divisionP1OnesInput" class="answerBox divisionAnswer" aria-label="1&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 3;"></button>
+              <span class="divisionBar" style="grid-column: 3 / 6; grid-row: 4;"></span>
+              <button id="divisionC2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 5;"></button>
+              <button id="divisionC2TensInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 5;"></button>
+              <button id="divisionC2OnesInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 5;"></button>
+              <span class="divisionSymbol divisionMinus" style="grid-column: 3; grid-row: 6;">-</span>
+              <button id="divisionP2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 6;"></button>
+              <button id="divisionP2TensInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 6;"></button>
+              <button id="divisionP2OnesInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 6;"></button>
+              <span class="divisionBar" style="grid-column: 4 / 7; grid-row: 7;"></span>
+              <button id="divisionC3HundredsInput" class="answerBox divisionAnswer" aria-label="3&#22238;&#30446;&#12398;&#25968;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 8;"></button>
+              <button id="divisionC3TensInput" class="answerBox divisionAnswer" aria-label="3&#22238;&#30446;&#12398;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 8;"></button>
+              <button id="divisionC3OnesInput" class="answerBox divisionAnswer" aria-label="3&#22238;&#30446;&#12398;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 7; grid-row: 8;"></button>
+              <span class="divisionSymbol divisionMinus" style="grid-column: 4; grid-row: 9;">-</span>
+              <button id="divisionP3HundredsInput" class="answerBox divisionAnswer" aria-label="3&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 9;"></button>
+              <button id="divisionP3TensInput" class="answerBox divisionAnswer" aria-label="3&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 9;"></button>
+              <button id="divisionP3OnesInput" class="answerBox divisionAnswer" aria-label="3&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 7; grid-row: 9;"></button>
+              <span class="divisionBar" style="grid-column: 5 / 8; grid-row: 10;"></span>
+              <button id="divisionRemainderTensInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 11;"></button>
+              <button id="divisionRemainderOnesInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 7; grid-row: 11;"></button>
+            </div>
+          </div>
 
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
 
@@ -895,7 +1038,7 @@
     </div>
 
     <script>
-      const TARGET_CORRECT = 12;
+      const TARGET_CORRECT = 10;
       const CLEAR_LIMIT_MS = 135000;
       const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
@@ -910,9 +1053,22 @@
         "doubleP2Ones", "doubleP2Hundreds", "doubleP2Tens",
         "doubleTotalOnes", "doubleTotalTens", "doubleTotalHundreds", "doubleTotalThousands",
       ];
+      const DIVISION_TARGET = 10;
+      const DIVISION_SLOTS = [
+        "divisionQHundreds",
+        "divisionP1Hundreds", "divisionP1Tens", "divisionP1Ones",
+        "divisionC2Hundreds", "divisionC2Tens", "divisionC2Ones",
+        "divisionQTens",
+        "divisionP2Hundreds", "divisionP2Tens", "divisionP2Ones",
+        "divisionC3Hundreds", "divisionC3Tens", "divisionC3Ones",
+        "divisionQOnes",
+        "divisionP3Hundreds", "divisionP3Tens", "divisionP3Ones",
+        "divisionRemainderTens", "divisionRemainderOnes",
+      ];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
       const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV2";
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
+      const DIVISION_BEST_KEY = "divisionBestTimeMs";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -928,6 +1084,9 @@
       let doubleMultiplicationDeck = [];
       let doubleMultiplicationIndex = 0;
       let doubleMultiplicationProblem = null;
+      let divisionDeck = [];
+      let divisionIndex = 0;
+      let divisionProblem = null;
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -966,6 +1125,26 @@
         doubleTotalHundreds: document.querySelector("#doubleTotalHundredsInput"),
         doubleTotalTens: document.querySelector("#doubleTotalTensInput"),
         doubleTotalOnes: document.querySelector("#doubleTotalOnesInput"),
+        divisionQHundreds: document.querySelector("#divisionQHundredsInput"),
+        divisionQTens: document.querySelector("#divisionQTensInput"),
+        divisionQOnes: document.querySelector("#divisionQOnesInput"),
+        divisionP1Hundreds: document.querySelector("#divisionP1HundredsInput"),
+        divisionP1Tens: document.querySelector("#divisionP1TensInput"),
+        divisionP1Ones: document.querySelector("#divisionP1OnesInput"),
+        divisionC2Hundreds: document.querySelector("#divisionC2HundredsInput"),
+        divisionC2Tens: document.querySelector("#divisionC2TensInput"),
+        divisionC2Ones: document.querySelector("#divisionC2OnesInput"),
+        divisionP2Hundreds: document.querySelector("#divisionP2HundredsInput"),
+        divisionP2Tens: document.querySelector("#divisionP2TensInput"),
+        divisionP2Ones: document.querySelector("#divisionP2OnesInput"),
+        divisionC3Hundreds: document.querySelector("#divisionC3HundredsInput"),
+        divisionC3Tens: document.querySelector("#divisionC3TensInput"),
+        divisionC3Ones: document.querySelector("#divisionC3OnesInput"),
+        divisionP3Hundreds: document.querySelector("#divisionP3HundredsInput"),
+        divisionP3Tens: document.querySelector("#divisionP3TensInput"),
+        divisionP3Ones: document.querySelector("#divisionP3OnesInput"),
+        divisionRemainderTens: document.querySelector("#divisionRemainderTensInput"),
+        divisionRemainderOnes: document.querySelector("#divisionRemainderOnesInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
       const multiplicationFormula = document.querySelector("#multiplicationFormula");
@@ -973,16 +1152,27 @@
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
       const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
       const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
+      const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
+      const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
+      const divisionDividendDigits = [
+        document.querySelector("#divisionDividendD1"),
+        document.querySelector("#divisionDividendD2"),
+        document.querySelector("#divisionDividendD3"),
+        document.querySelector("#divisionDividendD4"),
+        document.querySelector("#divisionDividendD5"),
+      ];
       const feedback = document.querySelector("#feedback");
       const practiceCard = document.querySelector(".practiceCard");
       const appMenu = document.querySelector("#appMenu");
       const multiplicationCover = document.querySelector("#multiplicationCover");
       const longMultiplicationCover = document.querySelector("#longMultiplicationCover");
       const doubleMultiplicationCover = document.querySelector("#doubleMultiplicationCover");
+      const divisionCover = document.querySelector("#divisionCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseFraction = document.querySelector("#chooseFraction");
       const chooseLongMultiplication = document.querySelector("#chooseLongMultiplication");
       const chooseDoubleMultiplication = document.querySelector("#chooseDoubleMultiplication");
+      const chooseDivision = document.querySelector("#chooseDivision");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
       const modeSwitch = document.querySelector("#modeSwitch");
@@ -992,10 +1182,12 @@
       const multiplicationStartButton = document.querySelector("#multiplicationStartButton");
       const longMultiplicationStartButton = document.querySelector("#longMultiplicationStartButton");
       const doubleMultiplicationStartButton = document.querySelector("#doubleMultiplicationStartButton");
+      const divisionStartButton = document.querySelector("#divisionStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
       const longMultiplicationProblemLine = document.querySelector("#longMultiplicationProblemLine");
       const doubleMultiplicationProblemLine = document.querySelector("#doubleMultiplicationProblemLine");
+      const divisionProblemLine = document.querySelector("#divisionProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
@@ -1168,7 +1360,7 @@
       }
 
       function createEasyDenominatorDeck(previousDenominator = 0) {
-        const base = [2, 3, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9];
+        const base = [...shuffle([2, 3, 4, 5]).slice(0, 2), 6, 6, 7, 7, 8, 8, 9, 9];
         let best = shuffle(base);
         let bestScore = Infinity;
 
@@ -1309,16 +1501,90 @@
         };
       }
 
+      function divisionSteps(item = divisionProblem) {
+        if (!item) {
+          return {
+            digits: [0, 0, 0, 0, 0],
+            qDigits: [0, 0, 0],
+            cur1: 0,
+            p1: 0,
+            cur2: 0,
+            p2: 0,
+            cur3: 0,
+            p3: 0,
+            remainder: 0,
+          };
+        }
+        const digits = String(item.dividend).padStart(5, "0").split("").map(Number);
+        const qDigits = String(item.quotient).padStart(3, "0").split("").map(Number);
+        const cur1 = digits[0] * 100 + digits[1] * 10 + digits[2];
+        const p1 = item.divisor * qDigits[0];
+        const cur2 = (cur1 - p1) * 10 + digits[3];
+        const p2 = item.divisor * qDigits[1];
+        const cur3 = (cur2 - p2) * 10 + digits[4];
+        const p3 = item.divisor * qDigits[2];
+        return {
+          digits,
+          qDigits,
+          cur1,
+          p1,
+          cur2,
+          p2,
+          cur3,
+          p3,
+          remainder: cur3 - p3,
+        };
+      }
+
+      function createDivisionProblem() {
+        for (let attempt = 0; attempt < 10000; attempt += 1) {
+          const divisor = randomInt(22, 98);
+          if (hasDigitOne(divisor) || hasDigitZero(divisor) || hasSameTwoDigits(divisor)) continue;
+          const hundreds = randomInt(3, 9);
+          const tens = randomInt(2, 9);
+          const ones = randomInt(2, 9);
+          const quotient = hundreds * 100 + tens * 10 + ones;
+          const remainder = randomInt(10, divisor - 1);
+          const dividend = divisor * quotient + remainder;
+          if (dividend < 10000 || dividend > 99999) continue;
+          const steps = divisionSteps({ divisor, dividend, quotient, remainder });
+          const values = [steps.cur1, steps.p1, steps.cur2, steps.p2, steps.cur3, steps.p3];
+          if (values.some((value) => value < 100 || value > 999)) continue;
+          if (steps.remainder < 10 || steps.remainder >= divisor) continue;
+          return { divisor, dividend, quotient, remainder };
+        }
+        return { divisor: 23, dividend: 12775, quotient: 555, remainder: 10 };
+      }
+
+      function createDivisionDeck() {
+        const deck = [];
+        const used = new Set();
+        while (deck.length < DIVISION_TARGET) {
+          const item = createDivisionProblem();
+          const key = `${item.dividend}/${item.divisor}`;
+          if (used.has(key)) continue;
+          used.add(key);
+          deck.push(item);
+        }
+        return deck;
+      }
+
+      function divisionAnswerText() {
+        return divisionProblem ? `${divisionProblem.quotient} \u3042\u307e\u308a ${divisionProblem.remainder}` : "";
+      }
+
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication";
+        return selectedApp === "multiplication" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division";
       }
 
       function currentTimedIndex() {
+        if (selectedApp === "division") return divisionIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
 
       function currentTimedLength() {
+        if (selectedApp === "division") return divisionDeck.length;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -1328,11 +1594,13 @@
       }
 
       function currentTimedAnswer() {
+        if (selectedApp === "division") return divisionProblem ? divisionProblem.quotient : 0;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
 
       function currentTimedAnswerText() {
+        if (selectedApp === "division") return divisionAnswerText();
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -1343,6 +1611,7 @@
         if (selectedApp === "multiplication") return MULTIPLICATION_SLOTS;
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
+        if (selectedApp === "division") return DIVISION_SLOTS;
         return FRACTION_SLOTS;
       }
 
@@ -1378,6 +1647,38 @@
             doubleTotalHundreds: total[1],
             doubleTotalTens: total[2],
             doubleTotalOnes: total[3],
+          }[slot];
+        }
+        if (selectedApp === "division") {
+          const steps = divisionSteps();
+          const quotient = String(divisionProblem.quotient).padStart(3, "0");
+          const p1 = String(steps.p1).padStart(3, "0");
+          const cur2 = String(steps.cur2).padStart(3, "0");
+          const p2 = String(steps.p2).padStart(3, "0");
+          const cur3 = String(steps.cur3).padStart(3, "0");
+          const p3 = String(steps.p3).padStart(3, "0");
+          const remainder = String(steps.remainder).padStart(2, "0");
+          return {
+            divisionQHundreds: quotient[0],
+            divisionQTens: quotient[1],
+            divisionQOnes: quotient[2],
+            divisionP1Hundreds: p1[0],
+            divisionP1Tens: p1[1],
+            divisionP1Ones: p1[2],
+            divisionC2Hundreds: cur2[0],
+            divisionC2Tens: cur2[1],
+            divisionC2Ones: cur2[2],
+            divisionP2Hundreds: p2[0],
+            divisionP2Tens: p2[1],
+            divisionP2Ones: p2[2],
+            divisionC3Hundreds: cur3[0],
+            divisionC3Tens: cur3[1],
+            divisionC3Ones: cur3[2],
+            divisionP3Hundreds: p3[0],
+            divisionP3Tens: p3[1],
+            divisionP3Ones: p3[2],
+            divisionRemainderTens: remainder[0],
+            divisionRemainderOnes: remainder[1],
           }[slot];
         }
         const result = solve();
@@ -1652,9 +1953,11 @@
         correctCount = 0;
         mistakeCount = 0;
         appMenu.hidden = false;
+        challengeView.classList.remove("divisionMode");
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -1782,9 +2085,11 @@
         fractionGoal.hidden = true;
         finishTime.textContent = formatTime(finalTime);
         if (isTimedProblemApp()) {
-          const bestKey = selectedApp === "doubleMultiplication"
-            ? DOUBLE_MULTIPLICATION_BEST_KEY
-            : selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
+          const bestKey = selectedApp === "division"
+            ? DIVISION_BEST_KEY
+            : selectedApp === "doubleMultiplication"
+              ? DOUBLE_MULTIPLICATION_BEST_KEY
+              : selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
           previousMultiplicationBest = readBest(bestKey);
           multiplicationBestUpdated = mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
           if (multiplicationBestUpdated) saveBest(bestKey, finalTime);
@@ -1834,6 +2139,13 @@
           mistakes.push({
             problem: `${formatDecimalAnswer(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0)}×${formatDecimalAnswer(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0)}`,
             answer: formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces()),
+          });
+          return;
+        }
+        if (selectedApp === "division") {
+          mistakes.push({
+            problem: `${divisionProblem.dividend}\u00f7${divisionProblem.divisor}`,
+            answer: divisionAnswerText(),
           });
           return;
         }
@@ -1890,6 +2202,16 @@
             return;
           }
           doubleMultiplicationProblem = doubleMultiplicationDeck[doubleMultiplicationIndex];
+        } else if (selectedApp === "division") {
+          if (keepChallenge) divisionIndex += 1;
+          if (divisionIndex >= divisionDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          divisionProblem = divisionDeck[divisionIndex];
         } else {
           problem = createNextFractionProblem();
         }
@@ -1900,12 +2222,15 @@
       function restartRound() {
         finishPanel.hidden = true;
         challengeView.hidden = true;
+        challengeView.classList.remove("divisionMode");
         if (selectedApp === "multiplication") {
           multiplicationCover.hidden = false;
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationCover.hidden = false;
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationCover.hidden = false;
+        } else if (selectedApp === "division") {
+          divisionCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -1920,10 +2245,12 @@
       function startChallenge() {
         selectedApp = "fraction";
         hasStarted = true;
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
@@ -1939,11 +2266,13 @@
       function startMultiplicationChallenge() {
         selectedApp = "multiplication";
         hasStarted = true;
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
@@ -1958,11 +2287,13 @@
       function startLongMultiplicationChallenge() {
         selectedApp = "longMultiplication";
         hasStarted = true;
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
@@ -1977,11 +2308,13 @@
       function startDoubleMultiplicationChallenge() {
         selectedApp = "doubleMultiplication";
         hasStarted = true;
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
@@ -1993,12 +2326,35 @@
         resetInputs(true);
       }
 
+      function startDivisionChallenge() {
+        selectedApp = "division";
+        hasStarted = true;
+        challengeView.classList.add("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        divisionDeck = createDivisionDeck();
+        divisionIndex = 0;
+        divisionProblem = divisionDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         cover.hidden = false;
         challengeView.hidden = true;
         finishPanel.hidden = true;
@@ -2009,11 +2365,13 @@
 
       function showMultiplicationCover() {
         selectedApp = "multiplication";
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = false;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -2023,11 +2381,13 @@
 
       function showLongMultiplicationCover() {
         selectedApp = "longMultiplication";
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = false;
         doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -2037,11 +2397,29 @@
 
       function showDoubleMultiplicationCover() {
         selectedApp = "doubleMultiplication";
+        challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = false;
+        divisionCover.hidden = true;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
+      function showDivisionCover() {
+        selectedApp = "division";
+        challengeView.classList.remove("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = false;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -2092,6 +2470,8 @@
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
         longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication";
         doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
+        divisionProblemLine.hidden = selectedApp !== "division";
+        challengeView.classList.toggle("divisionMode", selectedApp === "division");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
         if (selectedApp === "multiplication") {
@@ -2104,6 +2484,14 @@
           doubleMultiplicationBottom.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0);
           resetDoubleDecimalChoice();
           updateDoubleDecimalChoices();
+        } else if (selectedApp === "division") {
+          const divisor = String(divisionProblem.divisor).padStart(2, "0");
+          const dividendDigits = String(divisionProblem.dividend).padStart(5, "0").split("");
+          divisionDivisorTens.textContent = divisor[0];
+          divisionDivisorOnes.textContent = divisor[1];
+          divisionDividendDigits.forEach((digit, index) => {
+            digit.textContent = dividendDigits[index];
+          });
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
         }
@@ -2197,11 +2585,13 @@
       chooseFraction.addEventListener("click", showFractionCover);
       chooseLongMultiplication.addEventListener("click", showLongMultiplicationCover);
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
+      chooseDivision.addEventListener("click", showDivisionCover);
       document.querySelector("#restartButton").addEventListener("click", restartRound);
       startButton.addEventListener("click", startChallenge);
       multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
       longMultiplicationStartButton.addEventListener("click", startLongMultiplicationChallenge);
       doubleMultiplicationStartButton.addEventListener("click", startDoubleMultiplicationChallenge);
+      divisionStartButton.addEventListener("click", startDivisionChallenge);
       document.querySelectorAll("[data-back-menu]").forEach((button) => {
         button.addEventListener("click", showCoverScreen);
       });
