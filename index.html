@@ -334,7 +334,15 @@
         --division-gap: clamp(1px, 0.55vmin, 4px);
         display: inline-grid;
         grid-template-columns: repeat(6, var(--division-cell));
-        grid-template-rows: repeat(6, var(--division-cell));
+        grid-template-rows:
+          var(--division-cell)
+          var(--division-cell)
+          var(--division-cell)
+          14px
+          var(--division-cell)
+          var(--division-cell)
+          14px
+          var(--division-cell);
         gap: var(--division-gap);
         align-items: center;
         justify-items: center;
@@ -380,13 +388,12 @@
       }
 
       .divisionBar {
-        align-self: start;
+        align-self: center;
         justify-self: stretch;
         width: 100%;
         height: 4px;
         border-radius: 999px;
         background: var(--ink);
-        transform: translateY(calc(var(--division-cell) * -0.30));
       }
 
       .decimalNumber {
@@ -1001,16 +1008,16 @@
               <button id="divisionP1TensInput" class="answerBox divisionAnswer" aria-label="1&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 3;"></button>
               <button id="divisionP1OnesInput" class="answerBox divisionAnswer" aria-label="1&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 3;"></button>
               <span class="divisionBar" style="grid-column: 3 / 6; grid-row: 4;"></span>
-              <button id="divisionC2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 4;"></button>
-              <button id="divisionC2TensInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 4;"></button>
-              <button id="divisionC2OnesInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 4;"></button>
-              <span class="divisionSymbol divisionMinus" style="grid-column: 3; grid-row: 5;">-</span>
-              <button id="divisionP2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 5;"></button>
-              <button id="divisionP2TensInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 5;"></button>
-              <button id="divisionP2OnesInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 5;"></button>
-              <span class="divisionBar" style="grid-column: 4 / 7; grid-row: 6;"></span>
-              <button id="divisionRemainderTensInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 6;"></button>
-              <button id="divisionRemainderOnesInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 6;"></button>
+              <button id="divisionC2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 5;"></button>
+              <button id="divisionC2TensInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 5;"></button>
+              <button id="divisionC2OnesInput" class="answerBox divisionAnswer" aria-label="2&#22238;&#30446;&#12398;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 5;"></button>
+              <span class="divisionSymbol divisionMinus" style="grid-column: 3; grid-row: 6;">-</span>
+              <button id="divisionP2HundredsInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" style="grid-column: 4; grid-row: 6;"></button>
+              <button id="divisionP2TensInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 6;"></button>
+              <button id="divisionP2OnesInput" class="answerBox divisionAnswer" aria-label="2&#27573;&#30446;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 6;"></button>
+              <span class="divisionBar" style="grid-column: 4 / 7; grid-row: 7;"></span>
+              <button id="divisionRemainderTensInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 8;"></button>
+              <button id="divisionRemainderOnesInput" class="answerBox divisionAnswer" aria-label="&#12354;&#12414;&#12426;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button" style="grid-column: 6; grid-row: 8;"></button>
             </div>
           </div>
 
@@ -1078,7 +1085,7 @@
       const DIVISION_SLOTS = [
         "divisionQTens",
         "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
-        "divisionC2Ones", "divisionC2Tens", "divisionC2Hundreds",
+        "divisionC2Tens", "divisionC2Hundreds", "divisionC2Ones",
         "divisionQOnes",
         "divisionP2Ones", "divisionP2Hundreds", "divisionP2Tens",
         "divisionRemainderOnes", "divisionRemainderTens",
