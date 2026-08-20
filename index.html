@@ -471,6 +471,11 @@
         text-align: center;
       }
 
+      .feedback.confirming {
+        color: var(--coral);
+        font-size: clamp(1.05rem, 3vmin, 1.65rem);
+      }
+
       .keypad {
         display: grid;
         grid-template-columns: repeat(4, minmax(74px, 1fr));
@@ -747,7 +752,7 @@
         <section class="cover" id="longMultiplicationCover" hidden>
           <h1>&#20108;&#12369;&#12383;&#12398;&#25499;&#12369;&#31639;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
-          <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="longMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -755,7 +760,7 @@
         <section class="cover" id="doubleMultiplicationCover" hidden>
           <h1>&#20108;&#12369;&#12383;&times;&#20108;&#12369;&#12383;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
-          <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="doubleMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -897,9 +902,9 @@
       const WRONG_ADVANCE_MS = 2500;
       const FRACTION_SLOTS = ["whole", "bottom", "rest"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
-      const LONG_MULTIPLICATION_TARGET = 12;
+      const LONG_MULTIPLICATION_TARGET = 10;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longHundreds", "longTens"];
-      const DOUBLE_MULTIPLICATION_TARGET = 12;
+      const DOUBLE_MULTIPLICATION_TARGET = 10;
       const DOUBLE_MULTIPLICATION_SLOTS = [
         "doubleP1Ones", "doubleP1Hundreds", "doubleP1Tens",
         "doubleP2Ones", "doubleP2Hundreds", "doubleP2Tens",
@@ -936,6 +941,8 @@
       let modeLocked = false;
       let isFinished = false;
       let transitionTimer = null;
+      let confirmationTimer = null;
+      let pendingWrongSignature = "";
       let swipeStart = null;
       let mistakes = [];
       let selectedDoubleDecimalPosition = null;
@@ -1031,12 +1038,51 @@
             if (first * second >= 10) deck.push({ first, second });
           }
         }
-        return shuffle(deck).map((item) => {
-          if (item.first !== item.second && Math.random() < 0.5) {
-            return { first: item.second, second: item.first };
+
+        const arrangeWithoutSameFirst = (items) => {
+          const remaining = [...items];
+          const arranged = [];
+          while (remaining.length > 0) {
+            const lastFirst = arranged.length ? arranged[arranged.length - 1].first : null;
+            const counts = new Map();
+            remaining.forEach((item) => {
+              counts.set(item.first, (counts.get(item.first) || 0) + 1);
+            });
+            const candidates = remaining
+              .map((item, index) => ({ item, index, count: counts.get(item.first), order: Math.random() }))
+              .filter((candidate) => candidate.item.first !== lastFirst)
+              .sort((a, b) => b.count - a.count || a.order - b.order);
+            if (!candidates.length) return null;
+            const chosen = candidates[0];
+            arranged.push(chosen.item);
+            remaining.splice(chosen.index, 1);
           }
-          return item;
-        });
+          return arranged;
+        };
+
+        let best = [];
+        let bestScore = Infinity;
+        for (let attempt = 0; attempt < 240; attempt += 1) {
+          const candidate = shuffle(deck).map((item) => {
+            if (item.first !== item.second && Math.random() < 0.5) {
+              return { first: item.second, second: item.first };
+            }
+            return item;
+          });
+          const arranged = arrangeWithoutSameFirst(candidate);
+          if (arranged) return arranged;
+
+          let score = 0;
+          for (let index = 1; index < candidate.length; index += 1) {
+            if (candidate[index].first === candidate[index - 1].first) score += 1;
+          }
+          if (score < bestScore) {
+            best = candidate;
+            bestScore = score;
+            if (score === 0) break;
+          }
+        }
+        return best;
       }
 
       function chooseLongMultiplier() {
@@ -1157,9 +1203,9 @@
       function createProblem(level, previousDenominator, forcedDenominator = null) {
         if (level === "hard") {
           const denominator = chooseDistantDenominator([2, 3, 4, 5, 6, 7, 8, 9, 10, 11], previousDenominator);
-          let numerator = randomInt(denominator + 1, 100);
+          let numerator = randomInt(denominator * 2 + 1, 100);
           while (numerator % denominator === 0) {
-            numerator = randomInt(denominator + 1, 100);
+            numerator = randomInt(denominator * 2 + 1, 100);
           }
           return { numerator, denominator };
         }
@@ -1167,7 +1213,7 @@
         // 2-5 : 6-9 = 1 : 2, and whole-number groups 1-4 : 5-9 = 1 : 3.
         const denominators = Math.random() < 1 / 3 ? [2, 3, 4, 5] : [6, 7, 8, 9];
         const denominator = forcedDenominator || chooseDistantDenominator(denominators, previousDenominator);
-        const whole = Math.random() < 1 / 4 ? randomInt(1, 4) : randomInt(5, 9);
+        const whole = Math.random() < 1 / 4 ? randomInt(2, 4) : randomInt(5, 9);
         const rest = randomInt(1, denominator - 1);
         return { numerator: whole * denominator + rest, denominator };
       }
@@ -1502,6 +1548,51 @@
         }
       }
 
+      function answerSignature() {
+        const values = activeSlotOrder().map((slot) => getAnswerValue(slot)).join("|");
+        const decimal = selectedApp === "doubleMultiplication" ? selectedDoubleDecimalPosition ?? "" : "";
+        return `${selectedApp}:${values}:${decimal}`;
+      }
+
+      function removeLastAnswerStep() {
+        const needsDecimalPoint = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
+        if (needsDecimalPoint && selectedDoubleDecimalPosition !== null) {
+          selectedDoubleDecimalPosition = null;
+          updateDoubleDecimalChoices();
+          return;
+        }
+
+        const slots = activeSlotOrder();
+        for (let index = slots.length - 1; index >= 0; index -= 1) {
+          const slot = slots[index];
+          const current = getAnswerValue(slot);
+          if (!current) continue;
+          setAnswerValue(slot, current.slice(0, -1));
+          setActive(slot);
+          break;
+        }
+        if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
+      }
+
+      function clearConfirmationMessage() {
+        feedback.classList.remove("confirming");
+        feedback.textContent = "\u00a0";
+      }
+
+      function showWrongConfirmation(signature) {
+        pendingWrongSignature = signature;
+        if (confirmationTimer) clearTimeout(confirmationTimer);
+        setLocked(true);
+        feedback.textContent = "\u672c\u5f53\u306b\u305d\u308c\u3067\u3044\u3044\uff1f";
+        feedback.classList.add("confirming");
+        confirmationTimer = window.setTimeout(() => {
+          confirmationTimer = null;
+          setLocked(false);
+          clearConfirmationMessage();
+          removeLastAnswerStep();
+        }, 1500);
+      }
+
       function setSlotValue(slot, rawValue) {
         if (isAnswerLocked || isFinished) return;
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
@@ -1513,6 +1604,12 @@
       }
 
       function resetInputs(resetModeLock = false) {
+        if (confirmationTimer) {
+          clearTimeout(confirmationTimer);
+          confirmationTimer = null;
+        }
+        pendingWrongSignature = "";
+        clearConfirmationMessage();
         Object.keys(inputs).forEach((slot) => {
           inputs[slot].classList.remove("correction");
           setAnswerValue(slot, "");
@@ -1538,6 +1635,12 @@
           clearTimeout(transitionTimer);
           transitionTimer = null;
         }
+        if (confirmationTimer) {
+          clearTimeout(confirmationTimer);
+          confirmationTimer = null;
+        }
+        pendingWrongSignature = "";
+        clearConfirmationMessage();
         selectedApp = "menu";
         hasStarted = false;
         startedAt = null;
@@ -1612,9 +1715,16 @@
         const correctDigits = slots.every((slot) => getAnswerValue(slot) === expected(slot));
         const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
         const correct = correctDigits && correctDecimal;
-        setLocked(true);
 
         if (!correct) {
+          const signature = answerSignature();
+          if (pendingWrongSignature !== signature) {
+            showWrongConfirmation(signature);
+            return;
+          }
+
+          pendingWrongSignature = "";
+          setLocked(true);
           mistakeCount += 1;
           recordMistake();
           updateProgress();
@@ -1637,6 +1747,8 @@
           return;
         }
 
+        pendingWrongSignature = "";
+        setLocked(true);
         showReaction(true);
         correctCount += 1;
         updateProgress();
@@ -2030,6 +2142,8 @@
 
       function backspaceAnswer() {
         if (isAnswerLocked || isFinished) return;
+        pendingWrongSignature = "";
+        clearConfirmationMessage();
         if (selectedApp === "doubleMultiplication") resetDoubleDecimalChoice();
         const current = getAnswerValue(activeSlot);
         if (current.length > 0) {
@@ -2044,7 +2158,10 @@
       }
 
       function clearAnswer() {
-        if (!isAnswerLocked && !isFinished) resetInputs();
+        if (!isAnswerLocked && !isFinished) {
+          pendingWrongSignature = "";
+          resetInputs();
+        }
       }
 
       document.addEventListener("keydown", (event) => {
