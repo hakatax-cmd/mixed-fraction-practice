@@ -386,7 +386,7 @@
         height: 4px;
         border-radius: 999px;
         background: var(--ink);
-        transform: translateY(calc(var(--division-gap) * -0.5));
+        transform: translateY(calc(var(--division-cell) * -0.30));
       }
 
       .decimalNumber {
@@ -1077,11 +1077,11 @@
       const DIVISION_TARGET = 10;
       const DIVISION_SLOTS = [
         "divisionQTens",
-        "divisionP1Hundreds", "divisionP1Tens", "divisionP1Ones",
-        "divisionC2Hundreds", "divisionC2Tens", "divisionC2Ones",
+        "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
+        "divisionC2Ones", "divisionC2Tens", "divisionC2Hundreds",
         "divisionQOnes",
-        "divisionP2Hundreds", "divisionP2Tens", "divisionP2Ones",
-        "divisionRemainderTens", "divisionRemainderOnes",
+        "divisionP2Ones", "divisionP2Hundreds", "divisionP2Tens",
+        "divisionRemainderOnes", "divisionRemainderTens",
       ];
       const MULTIPLICATION_BEST_KEY = "kukuBestTimeMs";
       const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV2";
