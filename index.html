@@ -518,6 +518,36 @@
         animation: none;
       }
 
+      .divisionWork .divisionAnswer,
+      .divisionWork .divisionAnswer:disabled {
+        width: var(--division-cell);
+        height: var(--division-cell);
+        border: 4px solid var(--ink);
+        border-radius: 3px;
+        background: #fff;
+        color: var(--ink);
+        font-size: inherit;
+        font-weight: 900;
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      .divisionWork .divisionAnswer:focus,
+      .divisionWork .divisionAnswer.active {
+        border-color: var(--ink);
+        outline: 4px solid rgba(37, 99, 235, 0.28);
+        animation: none;
+        box-shadow: none;
+      }
+
+      .divisionWork .divisionAnswer.correction,
+      .divisionWork .divisionAnswer.correction:disabled {
+        border-color: var(--coral);
+        background: #fff1f0;
+        color: var(--coral);
+        outline: 4px solid rgba(227, 58, 47, 0.18);
+      }
+
       @keyframes activeAnswerPulse {
         0%, 100% {
           box-shadow: inset 0 -8px 0 rgba(22, 32, 42, 0.04), 0 0 0 0 rgba(37, 99, 235, 0.2);
@@ -877,7 +907,7 @@
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
           <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
-          <p class="coverPrompt">10&#21839;&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <p class="coverPrompt">12&#21839;&#12391;135&#31186;&#20197;&#20869; 500&#20870;&#21048;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -1038,7 +1068,7 @@
     </div>
 
     <script>
-      const TARGET_CORRECT = 10;
+      const TARGET_CORRECT = 12;
       const CLEAR_LIMIT_MS = 135000;
       const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
@@ -1360,7 +1390,7 @@
       }
 
       function createEasyDenominatorDeck(previousDenominator = 0) {
-        const base = [...shuffle([2, 3, 4, 5]).slice(0, 2), 6, 6, 7, 7, 8, 8, 9, 9];
+        const base = [2, 3, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9];
         let best = shuffle(base);
         let bestScore = Infinity;
 
