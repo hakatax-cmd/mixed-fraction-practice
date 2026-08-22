@@ -189,7 +189,7 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         gap: clamp(10px, 2.4vw, 26px);
-        align-items: start;
+        align-items: center;
         justify-content: stretch;
         min-height: 0;
         height: 100%;
@@ -208,6 +208,14 @@
       .improperAnswer { display: inline-flex; align-items: center; }
       .multiplicationFormula { font-size: clamp(4.8rem, 14vmin, 9.8rem); font-weight: 900; }
       .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
+
+      #fractionProblemLine,
+      #improperFractionProblemLine {
+        --fraction-box-width: clamp(68px, 10.2vmin, 108px);
+        --fraction-box-height: clamp(82px, 12vmin, 128px);
+        padding-top: clamp(6px, 1.5vmin, 20px);
+        font-size: clamp(3.9rem, 12.6vmin, 8.8rem);
+      }
 
       .longProblemLine {
         display: grid;
@@ -475,6 +483,22 @@
         line-height: 0.88;
       }
 
+      #fractionProblemLine .fraction,
+      #fractionProblemLine .answerFraction,
+      #improperFractionProblemLine .fraction,
+      #improperFractionProblemLine .answerFraction {
+        grid-template-rows: var(--fraction-box-height) 5px var(--fraction-box-height);
+        align-items: center;
+        line-height: 1;
+      }
+
+      #fractionProblemLine .fraction > span,
+      #improperFractionProblemLine .fraction > span {
+        display: grid;
+        min-height: var(--fraction-box-height);
+        place-items: center;
+      }
+
       .fraction i, .answerFraction i {
         display: block;
         width: 100%;
@@ -508,6 +532,13 @@
         width: clamp(58px, 9.5vmin, 100px);
         height: clamp(50px, 7.5vmin, 78px);
         font-size: clamp(1.9rem, 5.4vmin, 3.8rem);
+      }
+
+      #fractionProblemLine .answerBox,
+      #improperFractionProblemLine .answerBox {
+        width: var(--fraction-box-width);
+        height: var(--fraction-box-height);
+        font-size: clamp(3rem, 7.6vmin, 5.1rem);
       }
 
       .answerBox:focus, .answerBox.active {
