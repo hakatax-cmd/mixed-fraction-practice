@@ -485,6 +485,10 @@
       }
 
       .answerFraction { gap: 4px; }
+      .answerFraction .twoDigitNumerator {
+        display: inline-flex;
+        gap: clamp(4px, 0.8vmin, 8px);
+      }
 
       .answerBox {
         width: clamp(64px, 11vmin, 118px);
@@ -952,7 +956,10 @@
             <span class="equals">=</span>
             <span class="improperAnswer">
               <span class="answerFraction">
-                <button id="improperNumeratorInput" class="answerBox" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;" data-value="" type="button"></button>
+                <span class="twoDigitNumerator">
+                  <button id="improperNumeratorTensInput" class="answerBox" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                  <button id="improperNumeratorOnesInput" class="answerBox" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                </span>
                 <i></i>
                 <button id="improperDenominatorInput" class="answerBox active" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#27597;" data-value="" type="button"></button>
               </span>
@@ -1087,7 +1094,7 @@
       const WRONG_ADVANCE_MS = 2500;
       const FRACTION_SLOTS = ["whole", "bottom", "rest"];
       const IMPROPER_FRACTION_TARGET = 12;
-      const IMPROPER_FRACTION_SLOTS = ["improperDenominator", "improperNumerator"];
+      const IMPROPER_FRACTION_SLOTS = ["improperDenominator", "improperNumeratorTens", "improperNumeratorOnes"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const LONG_MULTIPLICATION_TARGET = 10;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longHundreds", "longTens"];
@@ -1155,7 +1162,8 @@
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
         bottom: document.querySelector("#bottomInput"),
-        improperNumerator: document.querySelector("#improperNumeratorInput"),
+        improperNumeratorTens: document.querySelector("#improperNumeratorTensInput"),
+        improperNumeratorOnes: document.querySelector("#improperNumeratorOnesInput"),
         improperDenominator: document.querySelector("#improperDenominatorInput"),
         productTens: document.querySelector("#productTensInput"),
         productOnes: document.querySelector("#productOnesInput"),
@@ -1494,9 +1502,18 @@
       }
 
       function createImproperFractionProblem(denominator) {
+        for (let attempt = 0; attempt < 80; attempt += 1) {
+          const item = {
+            whole: randomInt(2, 9),
+            rest: randomInt(1, denominator - 1),
+            denominator,
+          };
+          const numerator = item.whole * item.denominator + item.rest;
+          if (numerator >= 10 && numerator <= 99) return item;
+        }
         return {
-          whole: randomInt(2, 9),
-          rest: randomInt(1, denominator - 1),
+          whole: Math.max(2, Math.ceil((10 - 1) / denominator)),
+          rest: 1,
           denominator,
         };
       }
@@ -1694,9 +1711,11 @@
           }[slot];
         }
         if (selectedApp === "improperFraction") {
+          const answer = String(improperFractionAnswer()).padStart(2, "0");
           return {
             improperDenominator: String(improperFractionProblem.denominator),
-            improperNumerator: String(improperFractionAnswer()),
+            improperNumeratorTens: answer[0],
+            improperNumeratorOnes: answer[1],
           }[slot];
         }
         if (selectedApp === "longMultiplication") {
