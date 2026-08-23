@@ -729,6 +729,7 @@
 
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
+      .finishApp { margin: 0; color: var(--ink); font-size: clamp(1.5rem, 4.6vw, 2.8rem); font-weight: 900; }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .clearMessage { margin: 0; color: var(--green); font-size: clamp(5rem, 18vw, 11rem); font-weight: 900; line-height: 1; animation: none; }
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
@@ -1098,6 +1099,7 @@
           <p class="clearMessage" id="clearMessage" hidden>&#12463;&#12522;&#12450;&#65281;</p>
           <p class="rewardMessage" id="rewardMessage" hidden>500&#20870;&#21048;</p>
           <h1 id="finishTitle">&#32066;&#20102;</h1>
+          <p class="finishApp" id="finishApp"></p>
           <p class="finishTime" id="finishTime">0.0&#31186;</p>
           <p class="bestTime" id="bestTime"></p>
           <p class="clearDate" id="clearDate"></p>
@@ -1277,6 +1279,7 @@
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
       const finishPanel = document.querySelector("#finishPanel");
+      const finishApp = document.querySelector("#finishApp");
       const finishTime = document.querySelector("#finishTime");
       const bestTime = document.querySelector("#bestTime");
       const fractionGoal = document.querySelector("#fractionGoal");
@@ -1822,6 +1825,17 @@
         return `${date.getFullYear()}\u5e74${date.getMonth() + 1}\u6708${date.getDate()}\u65e5 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       }
 
+      function currentAppLabel() {
+        return {
+          fraction: "\u5e2f\u5206\u6570\u306b\u3059\u308b",
+          improperFraction: "\u4eee\u5206\u6570\u306b\u3059\u308b",
+          multiplication: "\u4e5d\u4e5d",
+          longMultiplication: "\u4e8c\u3051\u305f\u306e\u639b\u3051\u7b97",
+          doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
+          division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
+        }[selectedApp] || "";
+      }
+
       function elapsedTime() {
         return startedAt ? Date.now() - startedAt : 0;
       }
@@ -1874,6 +1888,7 @@
         hanamaru.hidden = true;
         finishTitle.hidden = false;
         finishTitle.textContent = "\u7d42\u4e86";
+        finishApp.textContent = "";
         bestTime.textContent = "";
         startedAt = Date.now();
         isFinished = false;
@@ -2203,6 +2218,7 @@
         hideReaction();
         gameArea.hidden = true;
         fractionGoal.hidden = true;
+        finishApp.textContent = currentAppLabel();
         finishTime.textContent = formatTime(finalTime);
         if (isTimedProblemApp()) {
           const bestKey = selectedApp === "improperFraction"
