@@ -735,7 +735,7 @@
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
-      .bestTime { margin: 0; color: var(--green); font-size: clamp(1.2rem, 3.4vw, 1.9rem); font-weight: 900; }
+      .bestTime { margin: 0; color: var(--green); font-size: clamp(1rem, 2.9vw, 1.75rem); font-weight: 900; white-space: nowrap; }
       .mistakeSummary { width: min(100%, 580px); margin: 0 auto; text-align: left; }
       .mistakeSummary h2 { margin: 0 0 8px; font-size: clamp(1.05rem, 3vw, 1.5rem); }
       .mistakeList { display: grid; max-height: min(24dvh, 190px); gap: 6px; overflow-y: auto; overscroll-behavior: contain; padding: 2px 4px 2px 0; touch-action: pan-y; }
@@ -1107,7 +1107,7 @@
             <h2>&#12414;&#12385;&#12364;&#12360;&#12383;&#21839;&#38988;</h2>
             <div class="mistakeList" id="mistakeList"></div>
           </section>
-          <button class="restartButton" id="restartButton" type="button">&#12418;&#12358;1&#22238;</button>
+          <button class="restartButton" id="restartButton" type="button">&#12514;&#12540;&#12489;&#36984;&#25246;</button>
         </section>
         </div>
       </section>
@@ -2796,7 +2796,7 @@
       chooseLongMultiplication.addEventListener("click", showLongMultiplicationCover);
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       chooseDivision.addEventListener("click", showDivisionCover);
-      document.querySelector("#restartButton").addEventListener("click", restartRound);
+      document.querySelector("#restartButton").addEventListener("click", showCoverScreen);
       startButton.addEventListener("click", startChallenge);
       improperFractionStartButton.addEventListener("click", startImproperFractionChallenge);
       multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
