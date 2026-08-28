@@ -211,18 +211,18 @@
 
       .basicDivisionProblemLine {
         display: grid;
-        place-items: center;
+        place-items: start center;
         height: 100%;
         min-height: 0;
         overflow: hidden;
-        padding-top: clamp(6px, 1.5vmin, 20px);
+        padding-top: clamp(0px, 0.7vmin, 10px);
       }
 
       .basicDivisionStack {
         display: grid;
-        gap: clamp(8px, 1.6vmin, 16px);
+        gap: clamp(5px, 1.1vmin, 12px);
         color: var(--ink);
-        font-size: clamp(3.7rem, 12.4vmin, 8.7rem);
+        font-size: clamp(3.1rem, 10.2vmin, 7.2rem);
         font-weight: 900;
         line-height: 1;
         font-variant-numeric: tabular-nums;
@@ -243,6 +243,28 @@
 
       .basicDivisionDividend {
         justify-self: end;
+      }
+
+      .basicDivisionFractionRow {
+        grid-template-columns: 0.8em auto;
+        align-items: center;
+      }
+
+      .basicDivisionFraction {
+        display: inline-grid;
+        grid-template-rows: 0.78em 5px 0.78em;
+        justify-items: center;
+        align-items: center;
+        min-width: 1.45em;
+        line-height: 0.88;
+      }
+
+      .basicDivisionFraction i {
+        display: block;
+        width: 100%;
+        height: 5px;
+        border-radius: 99px;
+        background: currentColor;
       }
 
       .basicDivisionRow .answerBox {
@@ -618,10 +640,13 @@
 
       .divisionWork .divisionAnswer:focus,
       .divisionWork .divisionAnswer.active {
-        border-color: var(--ink);
-        outline: 4px solid rgba(37, 99, 235, 0.28);
+        border-color: #e23b1e;
+        border-width: 6px;
+        background: #fff3ed;
+        color: #c92f16;
+        outline: 7px solid rgba(226, 59, 30, 0.22);
         animation: none;
-        box-shadow: none;
+        box-shadow: inset 0 0 0 4px rgba(226, 59, 30, 0.16);
       }
 
       .divisionWork .divisionAnswer.correction,
@@ -1067,11 +1092,13 @@
                 <span class="basicDivisionOperator">&divide;</span>
                 <span id="basicDivisionDivisorTop"></span>
               </div>
-              <div class="basicDivisionRow">
+              <div class="basicDivisionRow basicDivisionFractionRow">
                 <span class="basicDivisionEquals">=</span>
-                <span class="basicDivisionDividend" id="basicDivisionDividendFraction"></span>
-                <span class="basicDivisionOperator">/</span>
-                <span id="basicDivisionDivisorFraction"></span>
+                <span class="basicDivisionFraction">
+                  <span id="basicDivisionDividendFraction"></span>
+                  <i aria-hidden="true"></i>
+                  <span id="basicDivisionDivisorFraction"></span>
+                </span>
               </div>
               <div class="basicDivisionRow">
                 <span class="basicDivisionEquals">=</span>
