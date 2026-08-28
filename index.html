@@ -1453,10 +1453,12 @@
 
       function createBasicDivisionDeck() {
         const deck = [];
-        for (let divisor = 1; divisor <= 9; divisor += 1) {
-          for (let answer = divisor; answer <= 9; answer += 1) {
-            const dividend = divisor * answer;
-            if (dividend >= 10 && answer !== 1) {
+        for (let first = 1; first <= 9; first += 1) {
+          for (let second = first; second <= 9; second += 1) {
+            const dividend = first * second;
+            if (dividend >= 10) {
+              const divisor = Math.random() < 0.5 ? first : second;
+              const answer = divisor === first ? second : first;
               deck.push({ dividend, divisor, answer });
             }
           }
