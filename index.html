@@ -581,6 +581,13 @@
         gap: clamp(4px, 0.8vmin, 8px);
       }
 
+      .answerFraction .fixedDenominator {
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        line-height: 1;
+      }
+
       .answerBox {
         width: clamp(64px, 11vmin, 118px);
         height: clamp(64px, 11vmin, 118px);
@@ -605,6 +612,12 @@
       #improperFractionProblemLine .answerBox {
         width: var(--fraction-box-width);
         height: var(--fraction-box-height);
+        font-size: clamp(3rem, 7.6vmin, 5.1rem);
+      }
+
+      #fractionProblemLine .fixedDenominator,
+      #improperFractionProblemLine .fixedDenominator {
+        min-height: var(--fraction-box-height);
         font-size: clamp(3rem, 7.6vmin, 5.1rem);
       }
 
@@ -1058,7 +1071,7 @@
               <span class="answerFraction">
                 <button id="restInput" class="answerBox" aria-label="&#20998;&#23376;" data-value="" type="button"></button>
                 <i></i>
-                <button id="bottomInput" class="answerBox" aria-label="&#20998;&#27597;" data-value="" type="button"></button>
+                <span id="fractionAnswerDenominator" class="fixedDenominator"></span>
               </span>
             </span>
           </div>
@@ -1068,11 +1081,11 @@
             <span class="improperAnswer">
               <span class="answerFraction">
                 <span class="twoDigitNumerator">
-                  <button id="improperNumeratorTensInput" class="answerBox" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                  <button id="improperNumeratorTensInput" class="answerBox active" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
                   <button id="improperNumeratorOnesInput" class="answerBox" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#23376;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
                 <i></i>
-                <button id="improperDenominatorInput" class="answerBox active" aria-label="&#20206;&#20998;&#25968;&#12398;&#20998;&#27597;" data-value="" type="button"></button>
+                <span id="improperAnswerDenominator" class="fixedDenominator"></span>
               </span>
             </span>
           </div>
@@ -1226,9 +1239,9 @@
       const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
       const WRONG_ADVANCE_MS = 2500;
-      const FRACTION_SLOTS = ["whole", "bottom", "rest"];
+      const FRACTION_SLOTS = ["whole", "rest"];
       const IMPROPER_FRACTION_TARGET = 12;
-      const IMPROPER_FRACTION_SLOTS = ["improperDenominator", "improperNumeratorTens", "improperNumeratorOnes"];
+      const IMPROPER_FRACTION_SLOTS = ["improperNumeratorTens", "improperNumeratorOnes"];
       const MULTIPLICATION_SLOTS = ["productTens", "productOnes"];
       const BASIC_DIVISION_SLOTS = ["basicDivisionAnswer"];
       const LONG_MULTIPLICATION_TARGET = 10;
@@ -1300,10 +1313,8 @@
       const inputs = {
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
-        bottom: document.querySelector("#bottomInput"),
         improperNumeratorTens: document.querySelector("#improperNumeratorTensInput"),
         improperNumeratorOnes: document.querySelector("#improperNumeratorOnesInput"),
-        improperDenominator: document.querySelector("#improperDenominatorInput"),
         productTens: document.querySelector("#productTensInput"),
         productOnes: document.querySelector("#productOnesInput"),
         basicDivisionAnswer: document.querySelector("#basicDivisionAnswerInput"),
@@ -1341,6 +1352,8 @@
       const basicDivisionDivisorTop = document.querySelector("#basicDivisionDivisorTop");
       const basicDivisionDividendFraction = document.querySelector("#basicDivisionDividendFraction");
       const basicDivisionDivisorFraction = document.querySelector("#basicDivisionDivisorFraction");
+      const fractionAnswerDenominator = document.querySelector("#fractionAnswerDenominator");
+      const improperAnswerDenominator = document.querySelector("#improperAnswerDenominator");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
       const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
@@ -1917,7 +1930,6 @@
         if (selectedApp === "improperFraction") {
           const answer = String(improperFractionAnswer()).padStart(2, "0");
           return {
-            improperDenominator: String(improperFractionProblem.denominator),
             improperNumeratorTens: answer[0],
             improperNumeratorOnes: answer[1],
           }[slot];
@@ -1975,7 +1987,6 @@
         return {
           whole: String(result.whole),
           rest: String(result.rest),
-          bottom: String(problem.denominator),
           productTens: String(multiplicationAnswer())[0],
           productOnes: String(multiplicationAnswer())[1],
         }[slot];
@@ -2935,6 +2946,7 @@
           basicDivisionDivisorFraction.textContent = basicDivisionProblem.divisor;
         } else if (selectedApp === "improperFraction") {
           improperMixedQuestion.innerHTML = `<span>${improperFractionProblem.whole}</span>${fraction(improperFractionProblem.rest, improperFractionProblem.denominator)}`;
+          improperAnswerDenominator.textContent = improperFractionProblem.denominator;
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationTop.textContent = longMultiplicationProblem.top;
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
@@ -2953,6 +2965,7 @@
           });
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
+          fractionAnswerDenominator.textContent = problem.denominator;
         }
       }
 
