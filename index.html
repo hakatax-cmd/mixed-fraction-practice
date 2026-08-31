@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>&#31639;&#25968;&#32244;&#32722;&#65372;&#20061;&#20061;&#12539;&#24111;&#20998;&#25968;&#12539;&#12363;&#12369;&#31639;&#12539;&#12431;&#12426;&#31639;</title>
+    <title>&#31639;&#25968;&#32244;&#32722;&#65372;&#20061;&#20061;&#12539;&#24111;&#20998;&#25968;&#12539;&#12363;&#12369;&#31639;&#12539;&#12431;&#12426;&#31639;&#12539;&#20998;&#25968;&#12398;&#35336;&#31639;</title>
     <style>
       :root {
         --ink: #16202a;
@@ -101,7 +101,7 @@
         padding: 4px;
       }
 
-      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton {
+      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton, .nextMistakeButton {
         min-height: 52px;
         border: 0;
         border-radius: 6px;
@@ -208,6 +208,35 @@
       .improperAnswer { display: inline-flex; align-items: center; }
       .multiplicationFormula { font-size: clamp(4.8rem, 14vmin, 9.8rem); font-weight: 900; }
       .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
+
+      #fractionCalculationProblemLine {
+        --fraction-box-width: clamp(76px, 11vmin, 132px);
+        --fraction-box-height: clamp(58px, 8.4vmin, 92px);
+        grid-template-columns: auto auto auto;
+        justify-content: center;
+        gap: clamp(8px, 1.8vw, 20px);
+        padding-top: clamp(0px, 0.7vmin, 10px);
+        font-size: clamp(2.25rem, 6.8vmin, 4.85rem);
+      }
+
+      .fractionCalcQuestion {
+        grid-column: 1;
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(8px, 1.8vw, 18px);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .fractionCalcOperator {
+        color: var(--muted);
+        line-height: 1;
+      }
+
+      .fractionCalcAnswer {
+        grid-column: 3;
+        justify-self: start;
+      }
 
       .basicDivisionProblemLine {
         display: grid;
@@ -553,14 +582,17 @@
       #fractionProblemLine .fraction,
       #fractionProblemLine .answerFraction,
       #improperFractionProblemLine .fraction,
-      #improperFractionProblemLine .answerFraction {
+      #improperFractionProblemLine .answerFraction,
+      #fractionCalculationProblemLine .fraction,
+      #fractionCalculationProblemLine .answerFraction {
         grid-template-rows: var(--fraction-box-height) 5px var(--fraction-box-height);
         align-items: center;
         line-height: 1;
       }
 
       #fractionProblemLine .fraction > span,
-      #improperFractionProblemLine .fraction > span {
+      #improperFractionProblemLine .fraction > span,
+      #fractionCalculationProblemLine .fraction > span {
         display: grid;
         min-height: var(--fraction-box-height);
         place-items: center;
@@ -579,6 +611,16 @@
       .answerFraction .twoDigitNumerator {
         display: inline-flex;
         gap: clamp(4px, 0.8vmin, 8px);
+      }
+
+      .answerFraction .answerDigits {
+        display: inline-flex;
+        justify-content: center;
+        gap: clamp(4px, 0.8vmin, 8px);
+      }
+
+      .answerFraction .answerDigits .answerBox[hidden] {
+        display: none;
       }
 
       .answerFraction .fixedDenominator {
@@ -609,7 +651,8 @@
       }
 
       #fractionProblemLine .answerBox,
-      #improperFractionProblemLine .answerBox {
+      #improperFractionProblemLine .answerBox,
+      #fractionCalculationProblemLine .answerBox {
         width: var(--fraction-box-width);
         height: var(--fraction-box-height);
         font-size: clamp(3rem, 7.6vmin, 5.1rem);
@@ -694,6 +737,23 @@
       .feedback.confirming {
         color: var(--coral);
         font-size: clamp(1.05rem, 3vmin, 1.65rem);
+      }
+
+      .nextMistakeButton {
+        grid-row: 2;
+        justify-self: center;
+        align-self: center;
+        z-index: 5;
+        min-width: clamp(120px, 28vmin, 190px);
+        padding: 0 24px;
+        background: var(--coral);
+        color: #fff;
+        font-size: clamp(1.15rem, 3.2vmin, 1.8rem);
+        box-shadow: 0 8px 0 rgba(136, 33, 21, 0.18);
+      }
+
+      .nextMistakeButton[hidden] {
+        display: none;
       }
 
       .keypad {
@@ -989,6 +1049,7 @@
             <button class="menuButton" id="chooseLongMultiplication" type="button">&#20108;&#12369;&#12383;&#12398;<br />&#25499;&#12369;&#31639;</button>
             <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
+            <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#35336;&#31639;</button>
           </div>
         </section>
 
@@ -1029,6 +1090,14 @@
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="divisionStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="fractionCalculationCover" hidden>
+          <h1>&#20998;&#25968;&#12398;&#35336;&#31639;</h1>
+          <p class="coverPrompt">&#12363;&#12369;&#31639;&#12392;&#12431;&#12426;&#31639;&#12434;&#20132;&#20114;&#12395;</p>
+          <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="fractionCalculationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -1095,6 +1164,23 @@
             <span class="productAnswer">
               <button id="productTensInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
               <button id="productOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+            </span>
+          </div>
+          <div class="problemLine" id="fractionCalculationProblemLine" hidden>
+            <span class="fractionCalcQuestion" id="fractionCalculationQuestion"></span>
+            <span class="equals">=</span>
+            <span class="answerFraction fractionCalcAnswer">
+              <span class="answerDigits">
+                <button id="fractionCalcNumeratorHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#20998;&#23376;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                <button id="fractionCalcNumeratorTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#20998;&#23376;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                <button id="fractionCalcNumeratorOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#20998;&#23376;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
+              <i></i>
+              <span class="answerDigits">
+                <button id="fractionCalcDenominatorHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#20998;&#27597;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                <button id="fractionCalcDenominatorTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#20998;&#27597;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                <button id="fractionCalcDenominatorOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#20998;&#27597;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
             </span>
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
@@ -1189,6 +1275,7 @@
           </div>
 
           <div class="feedback" id="feedback" aria-live="polite">&nbsp;</div>
+          <button class="nextMistakeButton" id="nextMistakeButton" type="button" hidden>&#12388;&#12366;&#12408;</button>
 
           <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
             <button type="button" data-digit="1" data-key="1">1</button>
@@ -1253,6 +1340,9 @@
         "doubleTotalOnes", "doubleTotalTens", "doubleTotalHundreds", "doubleTotalThousands",
       ];
       const DIVISION_TARGET = 10;
+      const FRACTION_CALCULATION_TARGET = 12;
+      const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
+      const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
       const DIVISION_SLOTS = [
         "divisionQTens",
         "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
@@ -1267,6 +1357,7 @@
       const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV2";
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
+      const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -1291,6 +1382,9 @@
       let divisionDeck = [];
       let divisionIndex = 0;
       let divisionProblem = null;
+      let fractionCalculationDeck = [];
+      let fractionCalculationIndex = 0;
+      let fractionCalculationProblem = null;
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -1305,6 +1399,7 @@
       let isFinished = false;
       let transitionTimer = null;
       let confirmationTimer = null;
+      let manualNextAction = null;
       let pendingWrongSignature = "";
       let swipeStart = null;
       let mistakes = [];
@@ -1331,6 +1426,12 @@
         doubleTotalHundreds: document.querySelector("#doubleTotalHundredsInput"),
         doubleTotalTens: document.querySelector("#doubleTotalTensInput"),
         doubleTotalOnes: document.querySelector("#doubleTotalOnesInput"),
+        fractionCalcNumeratorHundreds: document.querySelector("#fractionCalcNumeratorHundredsInput"),
+        fractionCalcNumeratorTens: document.querySelector("#fractionCalcNumeratorTensInput"),
+        fractionCalcNumeratorOnes: document.querySelector("#fractionCalcNumeratorOnesInput"),
+        fractionCalcDenominatorHundreds: document.querySelector("#fractionCalcDenominatorHundredsInput"),
+        fractionCalcDenominatorTens: document.querySelector("#fractionCalcDenominatorTensInput"),
+        fractionCalcDenominatorOnes: document.querySelector("#fractionCalcDenominatorOnesInput"),
         divisionQTens: document.querySelector("#divisionQTensInput"),
         divisionQOnes: document.querySelector("#divisionQOnesInput"),
         divisionP1Hundreds: document.querySelector("#divisionP1HundredsInput"),
@@ -1358,6 +1459,7 @@
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
       const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
       const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
+      const fractionCalculationQuestion = document.querySelector("#fractionCalculationQuestion");
       const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
       const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
       const divisionDividendDigits = [
@@ -1375,6 +1477,7 @@
       const longMultiplicationCover = document.querySelector("#longMultiplicationCover");
       const doubleMultiplicationCover = document.querySelector("#doubleMultiplicationCover");
       const divisionCover = document.querySelector("#divisionCover");
+      const fractionCalculationCover = document.querySelector("#fractionCalculationCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -1382,6 +1485,7 @@
       const chooseLongMultiplication = document.querySelector("#chooseLongMultiplication");
       const chooseDoubleMultiplication = document.querySelector("#chooseDoubleMultiplication");
       const chooseDivision = document.querySelector("#chooseDivision");
+      const chooseFractionCalculation = document.querySelector("#chooseFractionCalculation");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
       const modeSwitch = document.querySelector("#modeSwitch");
@@ -1394,6 +1498,7 @@
       const longMultiplicationStartButton = document.querySelector("#longMultiplicationStartButton");
       const doubleMultiplicationStartButton = document.querySelector("#doubleMultiplicationStartButton");
       const divisionStartButton = document.querySelector("#divisionStartButton");
+      const fractionCalculationStartButton = document.querySelector("#fractionCalculationStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -1401,6 +1506,7 @@
       const longMultiplicationProblemLine = document.querySelector("#longMultiplicationProblemLine");
       const doubleMultiplicationProblemLine = document.querySelector("#doubleMultiplicationProblemLine");
       const divisionProblemLine = document.querySelector("#divisionProblemLine");
+      const fractionCalculationProblemLine = document.querySelector("#fractionCalculationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
@@ -1418,6 +1524,7 @@
       const correctMark = document.querySelector("#correctMark");
       const wrongReaction = document.querySelector("#wrongReaction");
       const correctAnswer = document.querySelector("#correctAnswer");
+      const nextMistakeButton = document.querySelector("#nextMistakeButton");
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
       const mistakeList = document.querySelector("#mistakeList");
@@ -1435,6 +1542,58 @@
           [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
         }
         return shuffled;
+      }
+
+      function gcd(left, right) {
+        let a = Math.abs(left);
+        let b = Math.abs(right);
+        while (b !== 0) {
+          const next = a % b;
+          a = b;
+          b = next;
+        }
+        return a;
+      }
+
+      function createFractionCalculationProblem(operator, used) {
+        for (let attempt = 0; attempt < 1200; attempt += 1) {
+          const twoDigitIndex = operator === "multiply" && Math.random() < 0.5 ? randomInt(0, 3) : -1;
+          const values = [0, 1, 2, 3].map((index) => {
+            if (operator === "divide" || index !== twoDigitIndex) return randomInt(index % 2 === 0 ? 1 : 2, 9);
+            return randomInt(10, 19);
+          });
+          const [a, b, c, d] = values;
+          if (b === 0 || d === 0) continue;
+
+          const answerNumerator = operator === "multiply" ? a * c : a * d;
+          const answerDenominator = operator === "multiply" ? b * d : b * c;
+          if (answerDenominator === 0 || gcd(answerNumerator, answerDenominator) !== 1) continue;
+
+          const item = {
+            operator,
+            first: { numerator: a, denominator: b },
+            second: { numerator: c, denominator: d },
+            answer: { numerator: answerNumerator, denominator: answerDenominator },
+          };
+          const key = fractionCalculationProblemText(item);
+          if (used.has(key)) continue;
+          used.add(key);
+          return item;
+        }
+        return operator === "multiply"
+          ? { operator, first: { numerator: 2, denominator: 3 }, second: { numerator: 5, denominator: 7 }, answer: { numerator: 10, denominator: 21 } }
+          : { operator, first: { numerator: 2, denominator: 3 }, second: { numerator: 5, denominator: 7 }, answer: { numerator: 14, denominator: 15 } };
+      }
+
+      function createFractionCalculationDeck() {
+        const used = new Set();
+        const deck = [];
+        const startWithMultiply = Math.random() < 0.5;
+        for (let index = 0; index < FRACTION_CALCULATION_TARGET; index += 1) {
+          const operator = (index % 2 === 0) === startWithMultiply ? "multiply" : "divide";
+          deck.push(createFractionCalculationProblem(operator, used));
+        }
+        return deck;
       }
 
       function createMultiplicationDeck() {
@@ -1862,14 +2021,61 @@
         return divisionProblem ? `${divisionProblem.quotient} \u3042\u307e\u308a ${divisionProblem.remainder}` : "";
       }
 
+      function fractionCalculationAnswer(item = fractionCalculationProblem) {
+        return item ? item.answer : { numerator: 0, denominator: 1 };
+      }
+
+      function fractionCalculationAnswerText(item = fractionCalculationProblem) {
+        const answer = fractionCalculationAnswer(item);
+        return `${answer.numerator}/${answer.denominator}`;
+      }
+
+      function fractionCalculationProblemText(item = fractionCalculationProblem) {
+        if (!item) return "";
+        const sign = item.operator === "multiply" ? "\u00d7" : "\u00f7";
+        return `${item.first.numerator}/${item.first.denominator}${sign}${item.second.numerator}/${item.second.denominator}`;
+      }
+
+      function visibleDigitSlots(slots, value) {
+        return slots.slice(slots.length - String(value).length);
+      }
+
+      function fractionCalculationExpected(slot) {
+        const answer = fractionCalculationAnswer();
+        const expectedValues = new Map();
+        [
+          [FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator],
+          [FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator],
+        ].forEach(([slots, value]) => {
+          const digits = String(value);
+          visibleDigitSlots(slots, value).forEach((digitSlot, index) => {
+            expectedValues.set(digitSlot, digits[index]);
+          });
+        });
+        return expectedValues.get(slot);
+      }
+
+      function updateFractionCalculationSlots() {
+        if (!fractionCalculationProblem) return;
+        const answer = fractionCalculationAnswer();
+        const visible = new Set([
+          ...visibleDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
+          ...visibleDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator),
+        ]);
+        [...FRACTION_CALC_NUMERATOR_SLOTS, ...FRACTION_CALC_DENOMINATOR_SLOTS].forEach((slot) => {
+          inputs[slot].hidden = !visible.has(slot);
+        });
+      }
+
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation";
       }
 
       function currentTimedIndex() {
         if (selectedApp === "basicDivision") return basicDivisionIndex;
         if (selectedApp === "improperFraction") return improperFractionIndex;
         if (selectedApp === "division") return divisionIndex;
+        if (selectedApp === "fractionCalculation") return fractionCalculationIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -1878,6 +2084,7 @@
         if (selectedApp === "basicDivision") return basicDivisionDeck.length;
         if (selectedApp === "improperFraction") return improperFractionDeck.length || IMPROPER_FRACTION_TARGET;
         if (selectedApp === "division") return divisionDeck.length;
+        if (selectedApp === "fractionCalculation") return fractionCalculationDeck.length || FRACTION_CALCULATION_TARGET;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -1890,6 +2097,7 @@
         if (selectedApp === "basicDivision") return basicDivisionAnswer();
         if (selectedApp === "improperFraction") return improperFractionAnswer();
         if (selectedApp === "division") return divisionProblem ? divisionProblem.quotient : 0;
+        if (selectedApp === "fractionCalculation") return fractionCalculationAnswer().numerator;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
@@ -1898,6 +2106,7 @@
         if (selectedApp === "basicDivision") return String(basicDivisionAnswer());
         if (selectedApp === "improperFraction") return `${improperFractionAnswer()}/${improperFractionProblem.denominator}`;
         if (selectedApp === "division") return divisionAnswerText();
+        if (selectedApp === "fractionCalculation") return fractionCalculationAnswerText();
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -1908,6 +2117,13 @@
         if (selectedApp === "multiplication") return MULTIPLICATION_SLOTS;
         if (selectedApp === "basicDivision") return BASIC_DIVISION_SLOTS;
         if (selectedApp === "improperFraction") return IMPROPER_FRACTION_SLOTS;
+        if (selectedApp === "fractionCalculation") {
+          const answer = fractionCalculationAnswer();
+          return [
+            ...visibleDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator),
+            ...visibleDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
+          ];
+        }
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
@@ -1934,6 +2150,7 @@
             improperNumeratorOnes: answer[1],
           }[slot];
         }
+        if (selectedApp === "fractionCalculation") return fractionCalculationExpected(slot);
         if (selectedApp === "longMultiplication") {
           const answer = String(longMultiplicationAnswer()).padStart(3, "0");
           return {
@@ -2013,6 +2230,7 @@
           longMultiplication: "\u4e8c\u3051\u305f\u306e\u639b\u3051\u7b97",
           doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
           division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
+          fractionCalculation: "\u5206\u6570\u306e\u8a08\u7b97",
         }[selectedApp] || "";
       }
 
@@ -2192,6 +2410,15 @@
       function clearConfirmationMessage() {
         feedback.classList.remove("confirming");
         feedback.textContent = "\u00a0";
+        nextMistakeButton.hidden = true;
+        manualNextAction = null;
+      }
+
+      function showManualNext(action) {
+        manualNextAction = action;
+        feedback.textContent = "\u6b63\u89e3\u3092\u305f\u3057\u304b\u3081\u3066\u306d";
+        feedback.classList.add("confirming");
+        nextMistakeButton.hidden = false;
       }
 
       function showWrongConfirmation(signature) {
@@ -2274,6 +2501,7 @@
         longMultiplicationCover.hidden = true;
         doubleMultiplicationCover.hidden = true;
         divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -2336,6 +2564,31 @@
         const correct = correctDigits && correctDecimal;
 
         if (!correct) {
+          if (selectedApp === "fractionCalculation") {
+            pendingWrongSignature = "";
+            setLocked(true);
+            mistakeCount += 1;
+            recordMistake();
+            updateProgress();
+            correctAnswer.hidden = true;
+            correctAnswer.textContent = "";
+            showAnswerCorrections();
+            showReaction(false);
+            if (isLastTimedProblem()) {
+              finalTime = elapsedTime();
+              clearedAt = new Date();
+              isFinished = true;
+              updateProgress();
+              showManualNext(finishRound);
+              return;
+            }
+            showManualNext(() => {
+              hideReaction();
+              nextProblem(true);
+            });
+            return;
+          }
+
           const signature = answerSignature();
           if (pendingWrongSignature !== signature) {
             showWrongConfirmation(signature);
@@ -2408,6 +2661,8 @@
             ? IMPROPER_FRACTION_BEST_KEY
             : selectedApp === "division"
             ? DIVISION_BEST_KEY
+            : selectedApp === "fractionCalculation"
+            ? FRACTION_CALCULATION_BEST_KEY
             : selectedApp === "doubleMultiplication"
               ? DOUBLE_MULTIPLICATION_BEST_KEY
               : selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
@@ -2481,6 +2736,13 @@
           mistakes.push({
             problem: `${divisionProblem.dividend}\u00f7${divisionProblem.divisor}`,
             answer: divisionAnswerText(),
+          });
+          return;
+        }
+        if (selectedApp === "fractionCalculation") {
+          mistakes.push({
+            problem: fractionCalculationProblemText(),
+            answer: fractionCalculationAnswerText(),
           });
           return;
         }
@@ -2567,6 +2829,16 @@
             return;
           }
           divisionProblem = divisionDeck[divisionIndex];
+        } else if (selectedApp === "fractionCalculation") {
+          if (keepChallenge) fractionCalculationIndex += 1;
+          if (fractionCalculationIndex >= fractionCalculationDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          fractionCalculationProblem = fractionCalculationDeck[fractionCalculationIndex];
         } else {
           problem = createNextFractionProblem();
         }
@@ -2590,6 +2862,8 @@
           doubleMultiplicationCover.hidden = false;
         } else if (selectedApp === "division") {
           divisionCover.hidden = false;
+        } else if (selectedApp === "fractionCalculation") {
+          fractionCalculationCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -2762,6 +3036,30 @@
         resetInputs(true);
       }
 
+      function startFractionCalculationChallenge() {
+        selectedApp = "fractionCalculation";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        fractionCalculationDeck = createFractionCalculationDeck();
+        fractionCalculationIndex = 0;
+        fractionCalculationProblem = fractionCalculationDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
         challengeView.classList.remove("divisionMode");
@@ -2888,6 +3186,25 @@
         resetInputs(true);
       }
 
+      function showFractionCalculationCover() {
+        selectedApp = "fractionCalculation";
+        challengeView.classList.remove("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function isInteractiveTarget(target) {
         return target instanceof Element && Boolean(target.closest("button"));
       }
@@ -2934,6 +3251,7 @@
         longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication";
         doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
         divisionProblemLine.hidden = selectedApp !== "division";
+        fractionCalculationProblemLine.hidden = selectedApp !== "fractionCalculation";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -2963,6 +3281,10 @@
           divisionDividendDigits.forEach((digit, index) => {
             digit.textContent = dividendDigits[index];
           });
+        } else if (selectedApp === "fractionCalculation") {
+          const sign = fractionCalculationProblem.operator === "multiply" ? "\u00d7" : "\u00f7";
+          fractionCalculationQuestion.innerHTML = `${fraction(fractionCalculationProblem.first.numerator, fractionCalculationProblem.first.denominator)}<span class="fractionCalcOperator">${sign}</span>${fraction(fractionCalculationProblem.second.numerator, fractionCalculationProblem.second.denominator)}`;
+          updateFractionCalculationSlots();
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
           fractionAnswerDenominator.textContent = problem.denominator;
@@ -3060,6 +3382,7 @@
       chooseLongMultiplication.addEventListener("click", showLongMultiplicationCover);
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       chooseDivision.addEventListener("click", showDivisionCover);
+      chooseFractionCalculation.addEventListener("click", showFractionCalculationCover);
       document.querySelector("#restartButton").addEventListener("click", showCoverScreen);
       startButton.addEventListener("click", startChallenge);
       improperFractionStartButton.addEventListener("click", startImproperFractionChallenge);
@@ -3068,6 +3391,16 @@
       longMultiplicationStartButton.addEventListener("click", startLongMultiplicationChallenge);
       doubleMultiplicationStartButton.addEventListener("click", startDoubleMultiplicationChallenge);
       divisionStartButton.addEventListener("click", startDivisionChallenge);
+      fractionCalculationStartButton.addEventListener("click", startFractionCalculationChallenge);
+      nextMistakeButton.addEventListener("click", () => {
+        if (!manualNextAction) return;
+        const action = manualNextAction;
+        nextMistakeButton.hidden = true;
+        manualNextAction = null;
+        clearConfirmationMessage();
+        hideReaction();
+        action();
+      });
       document.querySelectorAll("[data-back-menu]").forEach((button) => {
         button.addEventListener("click", showCoverScreen);
       });
