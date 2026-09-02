@@ -240,27 +240,26 @@
 
       .basicDivisionProblemLine {
         display: grid;
-        place-items: start center;
+        place-items: center;
         height: 100%;
         min-height: 0;
         overflow: hidden;
-        padding-top: clamp(0px, 0.7vmin, 10px);
+        padding-top: clamp(0px, 1vmin, 14px);
       }
 
       .basicDivisionStack {
         display: grid;
-        gap: clamp(5px, 1.1vmin, 12px);
         color: var(--ink);
-        font-size: clamp(3.1rem, 10.2vmin, 7.2rem);
+        font-size: clamp(3.4rem, 11vmin, 8rem);
         font-weight: 900;
         line-height: 1;
         font-variant-numeric: tabular-nums;
       }
 
       .basicDivisionRow {
-        display: grid;
-        grid-template-columns: 0.8em 2ch auto 1ch;
-        column-gap: clamp(10px, 2vmin, 22px);
+        display: inline-grid;
+        grid-template-columns: auto auto auto auto auto;
+        column-gap: clamp(8px, 1.8vmin, 20px);
         align-items: center;
       }
 
@@ -271,7 +270,7 @@
       }
 
       .basicDivisionDividend {
-        justify-self: end;
+        justify-self: start;
       }
 
       .basicDivisionFractionRow {
@@ -297,7 +296,6 @@
       }
 
       .basicDivisionRow .answerBox {
-        grid-column: 2;
         width: clamp(72px, 11vmin, 116px);
         height: clamp(82px, 12vmin, 128px);
         font-size: clamp(3rem, 7.6vmin, 5.1rem);
@@ -1186,22 +1184,11 @@
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
               <div class="basicDivisionRow">
-                <span class="basicDivisionEquals"></span>
-                <span class="basicDivisionDividend" id="basicDivisionDividendTop"></span>
-                <span class="basicDivisionOperator">&divide;</span>
                 <span id="basicDivisionDivisorTop"></span>
-              </div>
-              <div class="basicDivisionRow basicDivisionFractionRow">
-                <span class="basicDivisionEquals">=</span>
-                <span class="basicDivisionFraction">
-                  <span id="basicDivisionDividendFraction"></span>
-                  <i aria-hidden="true"></i>
-                  <span id="basicDivisionDivisorFraction"></span>
-                </span>
-              </div>
-              <div class="basicDivisionRow">
-                <span class="basicDivisionEquals">=</span>
+                <span class="basicDivisionOperator">&times;</span>
                 <button id="basicDivisionAnswerInput" class="answerBox active" aria-label="&#21106;&#12426;&#31639;&#12398;&#31572;&#12360;" data-value="" type="button"></button>
+                <span class="basicDivisionEquals">=</span>
+                <span class="basicDivisionDividend" id="basicDivisionDividendTop"></span>
               </div>
             </div>
           </div>
@@ -1451,8 +1438,6 @@
       const multiplicationFormula = document.querySelector("#multiplicationFormula");
       const basicDivisionDividendTop = document.querySelector("#basicDivisionDividendTop");
       const basicDivisionDivisorTop = document.querySelector("#basicDivisionDivisorTop");
-      const basicDivisionDividendFraction = document.querySelector("#basicDivisionDividendFraction");
-      const basicDivisionDivisorFraction = document.querySelector("#basicDivisionDivisorFraction");
       const fractionAnswerDenominator = document.querySelector("#fractionAnswerDenominator");
       const improperAnswerDenominator = document.querySelector("#improperAnswerDenominator");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
@@ -2706,7 +2691,7 @@
         }
         if (selectedApp === "basicDivision") {
           mistakes.push({
-            problem: `${basicDivisionProblem.dividend}\u00f7${basicDivisionProblem.divisor}`,
+            problem: `${basicDivisionProblem.divisor}\u00d7\u25a1=${basicDivisionProblem.dividend}`,
             answer: String(basicDivisionAnswer()),
           });
           return;
@@ -3260,8 +3245,6 @@
         } else if (selectedApp === "basicDivision") {
           basicDivisionDividendTop.textContent = basicDivisionProblem.dividend;
           basicDivisionDivisorTop.textContent = basicDivisionProblem.divisor;
-          basicDivisionDividendFraction.textContent = basicDivisionProblem.dividend;
-          basicDivisionDivisorFraction.textContent = basicDivisionProblem.divisor;
         } else if (selectedApp === "improperFraction") {
           improperMixedQuestion.innerHTML = `<span>${improperFractionProblem.whole}</span>${fraction(improperFractionProblem.rest, improperFractionProblem.denominator)}`;
           improperAnswerDenominator.textContent = improperFractionProblem.denominator;
