@@ -2,7 +2,7 @@
 <html lang="ja" class="app-loading">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>&#31639;&#25968;&#32244;&#32722;&#65372;&#20061;&#20061;&#12539;&#24111;&#20998;&#25968;&#12539;&#12363;&#12369;&#31639;&#12539;&#12431;&#12426;&#31639;&#12539;&#20998;&#25968;&#12398;&#35336;&#31639;</title>
     <style>
       :root {
@@ -249,6 +249,8 @@
 
       .basicDivisionStack {
         display: grid;
+        justify-items: center;
+        row-gap: clamp(10px, 1.8vmin, 20px);
         color: var(--ink);
         font-size: clamp(3.4rem, 11vmin, 8rem);
         font-weight: 900;
@@ -263,6 +265,15 @@
         align-items: center;
       }
 
+      .basicDivisionKnownFactor { grid-column: 1; }
+      .basicDivisionOperator { grid-column: 2; }
+      .basicDivisionRow .answerBox { grid-column: 3; }
+      .basicDivisionEquals { grid-column: 4; }
+      .basicDivisionDividend { grid-column: 5; }
+
+      .basicDivisionRow.blankFirst .answerBox { grid-column: 1; }
+      .basicDivisionRow.blankFirst .basicDivisionKnownFactor { grid-column: 3; }
+
       .basicDivisionEquals,
       .basicDivisionOperator {
         color: var(--muted);
@@ -274,30 +285,32 @@
       }
 
       .basicDivisionFractionRow {
-        grid-template-columns: 0.8em auto;
-        align-items: center;
-      }
-
-      .basicDivisionFraction {
         display: inline-grid;
-        grid-template-rows: 0.78em 5px 0.78em;
-        justify-items: center;
+        grid-template-columns: auto auto auto;
+        column-gap: clamp(8px, 1.4vmin, 16px);
         align-items: center;
-        min-width: 1.45em;
-        line-height: 0.88;
+        justify-content: center;
+        color: var(--ink);
+        font-size: clamp(2.1rem, 5.6vmin, 4.4rem);
+        font-weight: 850;
       }
 
-      .basicDivisionFraction i {
-        display: block;
-        width: 100%;
-        height: 5px;
-        border-radius: 99px;
-        background: currentColor;
+      .basicDivisionFractionEquals {
+        color: var(--muted);
+      }
+
+      .basicDivisionFractionRow .fraction {
+        grid-template-rows: auto 4px auto;
+        min-width: 1.35em;
+      }
+
+      .basicDivisionFractionRow .fraction i {
+        height: 4px;
       }
 
       .basicDivisionRow .answerBox {
-        width: clamp(72px, 11vmin, 116px);
         height: clamp(82px, 12vmin, 128px);
+        width: clamp(72px, 11vmin, 116px);
         font-size: clamp(3rem, 7.6vmin, 5.1rem);
       }
 
@@ -1183,12 +1196,17 @@
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
-              <div class="basicDivisionRow">
-                <span id="basicDivisionDivisorTop"></span>
+              <div class="basicDivisionRow" id="basicDivisionRow">
+                <span class="basicDivisionKnownFactor" id="basicDivisionDivisorTop"></span>
                 <span class="basicDivisionOperator">&times;</span>
                 <button id="basicDivisionAnswerInput" class="answerBox active" aria-label="&#21106;&#12426;&#31639;&#12398;&#31572;&#12360;" data-value="" type="button"></button>
                 <span class="basicDivisionEquals">=</span>
                 <span class="basicDivisionDividend" id="basicDivisionDividendTop"></span>
+              </div>
+              <div class="basicDivisionFractionRow" id="basicDivisionFractionRow" aria-label="&#21106;&#12426;&#31639;&#12434;&#20998;&#25968;&#12391;&#34920;&#12375;&#12383;&#24335;">
+                <span class="basicDivisionFractionBlank">&#9633;</span>
+                <span class="basicDivisionFractionEquals">=</span>
+                <span id="basicDivisionFraction"></span>
               </div>
             </div>
           </div>
@@ -1436,8 +1454,10 @@
       const problemFraction = document.querySelector("#problemFraction");
       const improperMixedQuestion = document.querySelector("#improperMixedQuestion");
       const multiplicationFormula = document.querySelector("#multiplicationFormula");
+      const basicDivisionRow = document.querySelector("#basicDivisionRow");
       const basicDivisionDividendTop = document.querySelector("#basicDivisionDividendTop");
       const basicDivisionDivisorTop = document.querySelector("#basicDivisionDivisorTop");
+      const basicDivisionFraction = document.querySelector("#basicDivisionFraction");
       const fractionAnswerDenominator = document.querySelector("#fractionAnswerDenominator");
       const improperAnswerDenominator = document.querySelector("#improperAnswerDenominator");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
@@ -1540,19 +1560,27 @@
         return a;
       }
 
+      function createFractionCalculationValues(operator) {
+        if (operator === "divide") {
+          return [randomInt(1, 9), randomInt(2, 9), randomInt(1, 9), randomInt(2, 9)];
+        }
+
+        if (Math.random() < 0.5) {
+          return [randomInt(10, 19), randomInt(2, 9), randomInt(2, 9), randomInt(2, 9)];
+        }
+        return [randomInt(2, 9), randomInt(10, 19), randomInt(2, 9), randomInt(2, 9)];
+      }
+
       function createFractionCalculationProblem(operator, used) {
         for (let attempt = 0; attempt < 1200; attempt += 1) {
-          const twoDigitIndex = operator === "multiply" && Math.random() < 0.5 ? randomInt(0, 3) : -1;
-          const values = [0, 1, 2, 3].map((index) => {
-            if (operator === "divide" || index !== twoDigitIndex) return randomInt(index % 2 === 0 ? 1 : 2, 9);
-            return randomInt(10, 19);
-          });
+          const values = createFractionCalculationValues(operator);
           const [a, b, c, d] = values;
           if (b === 0 || d === 0) continue;
 
           const answerNumerator = operator === "multiply" ? a * c : a * d;
           const answerDenominator = operator === "multiply" ? b * d : b * c;
           if (answerDenominator === 0 || gcd(answerNumerator, answerDenominator) !== 1) continue;
+          if (operator === "multiply" && answerNumerator > 81 && answerDenominator > 81) continue;
 
           const item = {
             operator,
@@ -1648,6 +1676,11 @@
           }
         }
 
+        const addBlankPositionPattern = (items) => {
+          const offset = Math.random() < 0.5 ? 0 : 1;
+          return items.map((item, index) => ({ ...item, blankFirst: index % 2 === offset }));
+        };
+
         const arrangeWithoutSameDivisor = (items) => {
           const remaining = [...items];
           const arranged = [];
@@ -1671,9 +1704,9 @@
 
         for (let attempt = 0; attempt < 240; attempt += 1) {
           const arranged = arrangeWithoutSameDivisor(shuffle(deck));
-          if (arranged) return arranged;
+          if (arranged) return addBlankPositionPattern(arranged);
         }
-        return shuffle(deck);
+        return addBlankPositionPattern(shuffle(deck));
       }
 
       function chooseLongMultiplier() {
@@ -1900,6 +1933,13 @@
         return basicDivisionProblem ? basicDivisionProblem.answer : 0;
       }
 
+      function basicDivisionProblemText(item = basicDivisionProblem) {
+        if (!item) return "";
+        return item.blankFirst
+          ? `\u25a1\u00d7${item.divisor}=${item.dividend}`
+          : `${item.divisor}\u00d7\u25a1=${item.dividend}`;
+      }
+
       function longMultiplicationAnswer() {
         return longMultiplicationProblem ? longMultiplicationProblem.top * longMultiplicationProblem.bottom : 0;
       }
@@ -2025,6 +2065,10 @@
         return slots.slice(slots.length - String(value).length);
       }
 
+      function inputDigitSlots(slots, value) {
+        return [...visibleDigitSlots(slots, value)].reverse();
+      }
+
       function fractionCalculationExpected(slot) {
         const answer = fractionCalculationAnswer();
         const expectedValues = new Map();
@@ -2105,8 +2149,8 @@
         if (selectedApp === "fractionCalculation") {
           const answer = fractionCalculationAnswer();
           return [
-            ...visibleDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator),
-            ...visibleDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
+            ...inputDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator),
+            ...inputDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
           ];
         }
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
@@ -2691,7 +2735,7 @@
         }
         if (selectedApp === "basicDivision") {
           mistakes.push({
-            problem: `${basicDivisionProblem.divisor}\u00d7\u25a1=${basicDivisionProblem.dividend}`,
+            problem: basicDivisionProblemText(),
             answer: String(basicDivisionAnswer()),
           });
           return;
@@ -3245,6 +3289,8 @@
         } else if (selectedApp === "basicDivision") {
           basicDivisionDividendTop.textContent = basicDivisionProblem.dividend;
           basicDivisionDivisorTop.textContent = basicDivisionProblem.divisor;
+          basicDivisionFraction.innerHTML = fraction(basicDivisionProblem.dividend, basicDivisionProblem.divisor);
+          basicDivisionRow.classList.toggle("blankFirst", Boolean(basicDivisionProblem.blankFirst));
         } else if (selectedApp === "improperFraction") {
           improperMixedQuestion.innerHTML = `<span>${improperFractionProblem.whole}</span>${fraction(improperFractionProblem.rest, improperFractionProblem.denominator)}`;
           improperAnswerDenominator.textContent = improperFractionProblem.denominator;
@@ -3393,6 +3439,13 @@
       practiceCard.addEventListener("touchstart", startTouchSwipe, { passive: true });
       practiceCard.addEventListener("touchend", finishTouchSwipe, { passive: true });
       practiceCard.addEventListener("touchcancel", () => { swipeStart = null; });
+      document.addEventListener("gesturestart", (event) => event.preventDefault());
+      document.addEventListener("gesturechange", (event) => event.preventDefault());
+      document.addEventListener("gestureend", (event) => event.preventDefault());
+      document.addEventListener("dblclick", (event) => event.preventDefault());
+      document.addEventListener("touchmove", (event) => {
+        if (event.touches.length > 1) event.preventDefault();
+      }, { passive: false });
       easyButton.addEventListener("click", () => {
         if (hasStarted || modeLocked || isAnswerLocked) return;
         mode = "easy";
