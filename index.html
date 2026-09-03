@@ -248,7 +248,11 @@
       }
 
       .basicDivisionStack {
-        display: grid;
+        display: inline-grid;
+        grid-template-columns: auto auto auto auto auto;
+        column-gap: clamp(8px, 1.8vmin, 20px);
+        align-items: center;
+        justify-content: center;
         justify-items: center;
         row-gap: clamp(10px, 1.8vmin, 20px);
         color: var(--ink);
@@ -259,10 +263,7 @@
       }
 
       .basicDivisionRow {
-        display: inline-grid;
-        grid-template-columns: auto auto auto auto auto;
-        column-gap: clamp(8px, 1.8vmin, 20px);
-        align-items: center;
+        display: contents;
       }
 
       .basicDivisionKnownFactor,
@@ -293,18 +294,28 @@
       }
 
       .basicDivisionFractionRow {
-        display: inline-grid;
-        grid-template-columns: auto auto auto;
-        column-gap: clamp(8px, 1.4vmin, 16px);
-        align-items: center;
-        justify-content: center;
+        display: contents;
         color: var(--ink);
         font-size: clamp(2.1rem, 5.6vmin, 4.4rem);
         font-weight: 850;
       }
 
+      .basicDivisionFractionBlank {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
       .basicDivisionFractionEquals {
         color: var(--muted);
+        grid-column: 4;
+        grid-row: 2;
+        text-align: center;
+      }
+
+      #basicDivisionFraction {
+        grid-column: 5;
+        grid-row: 2;
+        justify-self: start;
       }
 
       .basicDivisionFractionRow .fraction {
