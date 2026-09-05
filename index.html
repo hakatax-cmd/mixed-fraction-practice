@@ -1585,9 +1585,13 @@
         }
 
         if (Math.random() < 0.5) {
-          return [randomInt(10, 19), randomInt(2, 9), randomInt(2, 9), randomInt(2, 9)];
+          return [randomFractionCalculationTwoDigit(), randomInt(2, 9), randomInt(2, 9), randomInt(2, 9)];
         }
-        return [randomInt(2, 9), randomInt(10, 19), randomInt(2, 9), randomInt(2, 9)];
+        return [randomInt(2, 9), randomFractionCalculationTwoDigit(), randomInt(2, 9), randomInt(2, 9)];
+      }
+
+      function randomFractionCalculationTwoDigit() {
+        return randomInt(12, 99);
       }
 
       function createFractionCalculationProblem(operator, used) {
