@@ -2084,8 +2084,26 @@
         return slots.slice(slots.length - String(value).length);
       }
 
-      function inputDigitSlots(slots, value) {
-        return [...visibleDigitSlots(slots, value)].reverse();
+      function fractionCalculationProductFactors(part, item = fractionCalculationProblem) {
+        if (!item) return [1, 1];
+        if (part === "denominator") {
+          return item.operator === "multiply"
+            ? [item.first.denominator, item.second.denominator]
+            : [item.first.denominator, item.second.numerator];
+        }
+        return item.operator === "multiply"
+          ? [item.first.numerator, item.second.numerator]
+          : [item.first.numerator, item.second.denominator];
+      }
+
+      function inputDigitSlots(slots, value, factors = [1, 1]) {
+        const visible = visibleDigitSlots(slots, value);
+        const hasTwoDigitFactor = factors.some((factor) => factor >= 10);
+        const hasOneDigitFactor = factors.some((factor) => factor >= 1 && factor <= 9);
+        if (!hasTwoDigitFactor || !hasOneDigitFactor) return visible;
+        if (visible.length === 3) return [visible[2], visible[0], visible[1]];
+        if (visible.length === 2) return [visible[1], visible[0]];
+        return visible;
       }
 
       function fractionCalculationExpected(slot) {
@@ -2168,8 +2186,8 @@
         if (selectedApp === "fractionCalculation") {
           const answer = fractionCalculationAnswer();
           return [
-            ...inputDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator),
-            ...inputDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
+            ...inputDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator, fractionCalculationProductFactors("denominator")),
+            ...inputDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator, fractionCalculationProductFactors("numerator")),
           ];
         }
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
