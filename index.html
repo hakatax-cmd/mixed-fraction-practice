@@ -18,7 +18,8 @@
       * { box-sizing: border-box; }
       [hidden] { display: none !important; }
       html.app-loading .appShell,
-      html.app-loading .reaction {
+      html.app-loading .reaction,
+      html.app-loading .bestConfetti {
         visibility: hidden;
       }
 
@@ -101,7 +102,7 @@
         padding: 4px;
       }
 
-      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton, .nextMistakeButton {
+      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton, .nextMistakeButton, .skipRecordButton, .clearRecordsButton, .pinPad button, .pinCancelButton {
         min-height: 52px;
         border: 0;
         border-radius: 6px;
@@ -113,6 +114,7 @@
 
       .cover {
         display: grid;
+        position: relative;
         min-height: 100%;
         place-content: center;
         gap: 20px;
@@ -139,6 +141,19 @@
       .menuButton:first-child { border-color: rgba(20, 150, 111, 0.48); }
       .menuButton:nth-child(2) { border-color: rgba(37, 99, 235, 0.45); }
       .menuButton:last-child { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.35rem, 4.6vw, 2.55rem); }
+      .clearRecordsButton {
+        position: absolute;
+        top: clamp(6px, 1.4vmin, 12px);
+        right: clamp(6px, 1.4vmin, 12px);
+        z-index: 5;
+        min-height: 40px;
+        padding: 0 14px;
+        background: #fff1f0;
+        border: 2px solid rgba(227, 58, 47, 0.32);
+        color: var(--coral);
+        font-size: clamp(0.78rem, 1.9vmin, 1.05rem);
+        white-space: nowrap;
+      }
       #appMenu {
         align-content: center;
         gap: clamp(8px, 1.5vmin, 14px);
@@ -166,21 +181,39 @@
       .progress {
         position: relative;
         display: block;
-        min-height: clamp(34px, 5vmin, 54px);
-        padding-right: clamp(72px, 14vmin, 118px);
-        font-size: clamp(0.85rem, 1.9vmin, 1.2rem);
+        min-height: clamp(52px, 7vmin, 76px);
+        padding-right: clamp(138px, 22vmin, 190px);
+        font-size: clamp(1.02rem, 2.45vmin, 1.45rem);
         font-weight: 900;
         white-space: nowrap;
         width: 100%;
       }
 
       .streak { display: block; color: var(--coral); }
-      .timer {
+      .skipRecordButton {
         position: absolute;
         top: 0;
         right: 0;
+        min-height: clamp(24px, 3.5vmin, 34px);
+        padding: 0 clamp(8px, 1.6vmin, 14px);
+        background: #fff;
+        border: 2px solid var(--line);
+        color: var(--muted);
+        font-size: clamp(0.72rem, 1.65vmin, 0.98rem);
+        pointer-events: auto;
+        white-space: nowrap;
+      }
+      .skipRecordButton.active {
+        background: #fff1a8;
+        border-color: var(--coral);
         color: var(--ink);
-        font-size: clamp(1.05rem, 2.4vmin, 1.55rem);
+      }
+      .timer {
+        position: absolute;
+        top: clamp(28px, 3.9vmin, 40px);
+        right: 0;
+        color: var(--ink);
+        font-size: clamp(1.35rem, 3.3vmin, 2.15rem);
         font-variant-numeric: tabular-nums;
         text-align: right;
       }
@@ -862,6 +895,125 @@
         padding-top: clamp(42px, 8vmin, 88px);
       }
 
+      .bestConfetti {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 30;
+      }
+
+      .bestPetal {
+        position: absolute;
+        top: -12vh;
+        left: var(--left);
+        width: var(--petal-width);
+        height: var(--petal-height);
+        border-radius: 80% 20% 70% 30%;
+        background: var(--petal-color);
+        opacity: 0;
+        animation: bestPetalFall var(--duration) linear var(--delay) forwards;
+        transform-origin: 50% 50%;
+        box-shadow: 0 2px 8px rgba(22, 32, 42, 0.12);
+      }
+
+      @keyframes bestPetalFall {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, -12vh, 0) rotate(0deg);
+        }
+        8% { opacity: 0.95; }
+        92% { opacity: 0.95; }
+        100% {
+          opacity: 0;
+          transform: translate3d(var(--drift), 118vh, 0) rotate(var(--spin));
+        }
+      }
+
+      .pinOverlay {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(22, 32, 42, 0.42);
+        z-index: 70;
+      }
+
+      .pinOverlay[hidden] { display: none; }
+
+      .pinPanel {
+        display: grid;
+        width: min(92vw, 420px);
+        gap: 14px;
+        padding: clamp(18px, 4vw, 28px);
+        border-radius: 8px;
+        background: #fffdf8;
+        box-shadow: 0 24px 70px rgba(22, 32, 42, 0.25);
+        text-align: center;
+      }
+
+      .pinPanel h2 {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(1.45rem, 5vw, 2.2rem);
+      }
+
+      .pinBoxes {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .pinBoxes span {
+        display: grid;
+        min-height: 58px;
+        place-items: center;
+        border: 3px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-size: clamp(1.8rem, 7vw, 2.8rem);
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .pinMessage {
+        min-height: 1.35em;
+        margin: 0;
+        color: var(--coral);
+        font-size: clamp(0.95rem, 3.4vw, 1.25rem);
+        font-weight: 900;
+      }
+
+      .pinPad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .pinPad button {
+        min-height: 58px;
+        background: #fff;
+        border: 3px solid var(--line);
+        color: var(--ink);
+        font-size: clamp(1.7rem, 7vw, 2.7rem);
+        box-shadow: 0 5px 0 rgba(22, 32, 42, 0.08);
+      }
+
+      .pinPad .pinToolButton {
+        background: #edf8ff;
+        color: #24507a;
+        font-size: clamp(0.9rem, 3.6vw, 1.25rem);
+      }
+
+      .pinCancelButton {
+        min-height: 46px;
+        background: #f6f0e8;
+        color: var(--muted);
+        font-size: clamp(0.95rem, 3.4vw, 1.2rem);
+      }
+
       .big-circle {
         width: min(280px, 64vw);
         aspect-ratio: 1;
@@ -939,24 +1091,21 @@
         .appChoices { grid-template-columns: 1fr; }
         #appMenu .appChoices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .progress {
-          grid-template-columns: minmax(0, 1fr) auto;
-          grid-template-areas:
-            "streak timer"
-            "goal timer";
-          gap: 4px 8px;
+          min-height: clamp(50px, 8.4vmin, 70px);
+          padding-right: clamp(126px, 27vmin, 176px);
+          font-size: clamp(0.96rem, 2.6vmin, 1.28rem);
         }
         .keypad { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
       }
 
       @media (max-width: 430px) {
         .progress {
-          grid-template-columns: minmax(0, 1fr) auto;
-          grid-template-areas:
-            "streak timer"
-            "goal timer";
-          gap: 3px 6px;
-          font-size: clamp(0.62rem, 2.25vw, 0.9rem);
+          min-height: 58px;
+          padding-right: 128px;
+          font-size: clamp(0.86rem, 3.35vw, 1.02rem);
         }
+        .skipRecordButton { min-height: 28px; padding: 0 8px; font-size: clamp(0.66rem, 2.6vw, 0.82rem); }
+        .timer { top: 31px; font-size: clamp(1.18rem, 4.9vw, 1.5rem); }
         .goal { font-size: inherit; }
         .problemLine { font-size: clamp(2.9rem, 11vmin, 4.1rem); gap: 8px; }
         .answerBox { width: clamp(54px, 14vmin, 70px); height: clamp(54px, 14vmin, 70px); }
@@ -1101,6 +1250,7 @@
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#35336;&#31639;</button>
           </div>
+          <button class="clearRecordsButton" id="clearRecordsButton" type="button">&#35352;&#37682;&#12434;&#20840;&#37096;&#28040;&#12377;</button>
         </section>
 
         <section class="cover" id="multiplicationCover" hidden>
@@ -1158,8 +1308,8 @@
             <button id="easyButton" class="active" type="button">&#12405;&#12388;&#12358;</button>
             <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
           </div>
-          <p class="coverGoal">135&#31186;&#20197;&#20869;&#12391;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;<br />500&#20870;&#21048;</p>
-          <p class="coverPrompt">12&#21839;&#12391;135&#31186;&#20197;&#20869; 500&#20870;&#21048;</p>
+          <p class="coverGoal">12&#21839;<br />135&#31186;&#20197;&#20869;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;</p>
+          <p class="coverPrompt">&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -1176,6 +1326,7 @@
           <div class="topBar">
             <div class="progress" aria-live="polite">
               <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 1</span>
+              <button class="skipRecordButton" id="skipRecordButton" type="button" aria-pressed="false">&#35352;&#37682;&#12395;&#21547;&#12417;&#12394;&#12356;</button>
               <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
               <span class="goal" id="fractionGoal">135&#31186;&#20197;&#20869;&#12539;&#12511;&#12473;1&#21839;&#20197;&#20869;&#12391;&#12463;&#12522;&#12450;&#65281;</span>
             </div>
@@ -1340,7 +1491,7 @@
         <section class="finishPanel" id="finishPanel" hidden aria-live="polite">
           <div class="hanamaru" id="hanamaru" aria-label="&#12399;&#12394;&#12414;&#12427;" hidden>&#10047;</div>
           <p class="clearMessage" id="clearMessage" hidden>&#12463;&#12522;&#12450;&#65281;</p>
-          <p class="rewardMessage" id="rewardMessage" hidden>500&#20870;&#21048;</p>
+          <p class="rewardMessage" id="rewardMessage" hidden></p>
           <h1 id="finishTitle">&#32066;&#20102;</h1>
           <p class="finishApp" id="finishApp"></p>
           <p class="finishTime" id="finishTime">0.0&#31186;</p>
@@ -1377,6 +1528,34 @@
         <div class="big-cross">&times;</div>
         <p class="correctAnswer" id="correctAnswer"></p>
       </div>
+    </div>
+    <div class="bestConfetti" id="bestConfetti" aria-hidden="true" hidden></div>
+    <div class="pinOverlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle" hidden>
+      <section class="pinPanel">
+        <h2 id="pinTitle">&#26263;&#35388;&#30058;&#21495;</h2>
+        <div class="pinBoxes" id="pinBoxes" aria-label="&#26263;&#35388;&#30058;&#21495;&#12398;&#20837;&#21147;">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <p class="pinMessage" id="pinMessage"></p>
+        <div class="pinPad" id="pinPad">
+          <button type="button" data-pin-digit="1">1</button>
+          <button type="button" data-pin-digit="2">2</button>
+          <button type="button" data-pin-digit="3">3</button>
+          <button type="button" data-pin-digit="4">4</button>
+          <button type="button" data-pin-digit="5">5</button>
+          <button type="button" data-pin-digit="6">6</button>
+          <button type="button" data-pin-digit="7">7</button>
+          <button type="button" data-pin-digit="8">8</button>
+          <button type="button" data-pin-digit="9">9</button>
+          <button class="pinToolButton" type="button" data-pin-back>&#28040;&#12377;</button>
+          <button type="button" data-pin-digit="0">0</button>
+          <button class="pinToolButton" type="button" data-pin-clear>&#20840;&#28040;&#12375;</button>
+        </div>
+        <button class="pinCancelButton" id="pinCancelButton" type="button">&#12420;&#12417;&#12427;</button>
+      </section>
     </div>
 
     <script>
@@ -1417,7 +1596,20 @@
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
       const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
+      const FRACTION_BEST_KEY = "mixedFractionBestTimeMs";
+      const BEST_KEYS = [
+        MULTIPLICATION_BEST_KEY,
+        BASIC_DIVISION_BEST_KEY,
+        IMPROPER_FRACTION_BEST_KEY,
+        LONG_MULTIPLICATION_BEST_KEY,
+        DOUBLE_MULTIPLICATION_BEST_KEY,
+        DIVISION_BEST_KEY,
+        FRACTION_CALCULATION_BEST_KEY,
+        FRACTION_BEST_KEY,
+        "longMultiplicationBestTimeMs",
+      ];
       const PLAY_RECORD_PREFIX = "playRecords:";
+      const RECORD_DELETE_PIN = "3512";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -1461,6 +1653,9 @@
       let isFinished = false;
       let transitionTimer = null;
       let confirmationTimer = null;
+      let bestConfettiTimer = null;
+      let shouldSaveCurrentPlay = true;
+      let pinValue = "";
       let manualNextAction = null;
       let pendingWrongSignature = "";
       let swipeStart = null;
@@ -1548,6 +1743,7 @@
       const chooseDoubleMultiplication = document.querySelector("#chooseDoubleMultiplication");
       const chooseDivision = document.querySelector("#chooseDivision");
       const chooseFractionCalculation = document.querySelector("#chooseFractionCalculation");
+      const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
       const modeSwitch = document.querySelector("#modeSwitch");
@@ -1570,6 +1766,7 @@
       const divisionProblemLine = document.querySelector("#divisionProblemLine");
       const fractionCalculationProblemLine = document.querySelector("#fractionCalculationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
+      const skipRecordButton = document.querySelector("#skipRecordButton");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
       const finishPanel = document.querySelector("#finishPanel");
@@ -1586,6 +1783,12 @@
       const correctMark = document.querySelector("#correctMark");
       const wrongReaction = document.querySelector("#wrongReaction");
       const correctAnswer = document.querySelector("#correctAnswer");
+      const bestConfetti = document.querySelector("#bestConfetti");
+      const pinOverlay = document.querySelector("#pinOverlay");
+      const pinBoxes = [...document.querySelectorAll("#pinBoxes span")];
+      const pinMessage = document.querySelector("#pinMessage");
+      const pinPad = document.querySelector("#pinPad");
+      const pinCancelButton = document.querySelector("#pinCancelButton");
       const nextMistakeButton = document.querySelector("#nextMistakeButton");
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
@@ -2365,6 +2568,7 @@
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
+        if (app === "fraction") return FRACTION_BEST_KEY;
         return null;
       }
 
@@ -2379,11 +2583,84 @@
       }
 
       function saveBest(key, time) {
+        if (!key) return;
         try {
           localStorage.setItem(key, String(time));
         } catch {
           // Best time display is optional when storage is blocked.
         }
+      }
+
+      function updateSkipRecordButton() {
+        skipRecordButton.classList.toggle("active", !shouldSaveCurrentPlay);
+        skipRecordButton.setAttribute("aria-pressed", String(!shouldSaveCurrentPlay));
+        skipRecordButton.textContent = shouldSaveCurrentPlay
+          ? "\u8a18\u9332\u306b\u542b\u3081\u306a\u3044"
+          : "\u8a18\u9332\u3057\u306a\u3044\u4e2d";
+      }
+
+      function renderPinBoxes() {
+        pinBoxes.forEach((box, index) => {
+          box.textContent = index < pinValue.length ? "\u25cf" : "";
+        });
+      }
+
+      function showDeletePin() {
+        pinValue = "";
+        pinMessage.textContent = "";
+        renderPinBoxes();
+        pinOverlay.hidden = false;
+      }
+
+      function hideDeletePin() {
+        pinOverlay.hidden = true;
+        pinValue = "";
+        pinMessage.textContent = "";
+        renderPinBoxes();
+      }
+
+      function clearAllRecords() {
+        try {
+          Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith(PLAY_RECORD_PREFIX) || BEST_KEYS.includes(key)) {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch {
+          pinMessage.textContent = "\u8a18\u9332\u3092\u6d88\u305b\u307e\u305b\u3093\u3067\u3057\u305f";
+          return;
+        }
+
+        currentPlayRecord = null;
+        currentPlayRecordRank = null;
+        previousMultiplicationBest = null;
+        multiplicationBestUpdated = false;
+        stopBestConfetti();
+        recordSummary.hidden = true;
+        recordTableBody.replaceChildren();
+        bestTime.textContent = "";
+        bestTime.hidden = true;
+        pinMessage.textContent = "\u8a18\u9332\u3092\u5168\u90e8\u6d88\u3057\u307e\u3057\u305f";
+        window.setTimeout(hideDeletePin, 700);
+      }
+
+      function enterDeletePinDigit(digit) {
+        if (pinOverlay.hidden || pinValue.length >= RECORD_DELETE_PIN.length) return;
+        pinValue += digit;
+        renderPinBoxes();
+        if (pinValue.length < RECORD_DELETE_PIN.length) return;
+
+        if (pinValue === RECORD_DELETE_PIN) {
+          clearAllRecords();
+          return;
+        }
+
+        pinMessage.textContent = "\u3061\u304c\u3044\u307e\u3059";
+        window.setTimeout(() => {
+          pinValue = "";
+          pinMessage.textContent = "";
+          renderPinBoxes();
+        }, 650);
       }
 
       function recordKey(app = selectedApp) {
@@ -2441,6 +2718,12 @@
 
       function recordCurrentPlay() {
         if (!clearedAt || finalTime <= 0) return [];
+        if (!shouldSaveCurrentPlay) {
+          currentPlayRecord = null;
+          currentPlayRecordRank = null;
+          return recordsWithLegacyBest(readPlayRecords());
+        }
+
         const record = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           playedAt: clearedAt.toISOString(),
@@ -2475,6 +2758,7 @@
       }
 
       function resetChallenge() {
+        stopBestConfetti();
         correctCount = 0;
         mistakeCount = 0;
         mistakes = [];
@@ -2484,6 +2768,8 @@
         previousMultiplicationBest = null;
         currentPlayRecord = null;
         currentPlayRecordRank = null;
+        shouldSaveCurrentPlay = true;
+        updateSkipRecordButton();
         clearMessage.hidden = true;
         rewardMessage.hidden = true;
         hanamaru.hidden = true;
@@ -2681,6 +2967,7 @@
       }
 
       function showCoverScreen() {
+        stopBestConfetti();
         if (transitionTimer) {
           clearTimeout(transitionTimer);
           transitionTimer = null;
@@ -2700,6 +2987,8 @@
         previousMultiplicationBest = null;
         currentPlayRecord = null;
         currentPlayRecordRank = null;
+        shouldSaveCurrentPlay = true;
+        updateSkipRecordButton();
         isFinished = false;
         correctCount = 0;
         mistakeCount = 0;
@@ -2751,6 +3040,37 @@
       function hideReaction() {
         reaction.classList.remove("show");
         reaction.classList.remove("wrong");
+      }
+
+      function stopBestConfetti() {
+        if (bestConfettiTimer) {
+          clearTimeout(bestConfettiTimer);
+          bestConfettiTimer = null;
+        }
+        bestConfetti.replaceChildren();
+        bestConfetti.hidden = true;
+      }
+
+      function startBestConfetti() {
+        stopBestConfetti();
+        const colors = ["#ff6b8a", "#ffb3c7", "#ffd166", "#f9a8d4", "#ffffff"];
+        const fragment = document.createDocumentFragment();
+        for (let index = 0; index < 150; index += 1) {
+          const petal = document.createElement("span");
+          petal.className = "bestPetal";
+          petal.style.setProperty("--left", `${randomInt(-5, 105)}vw`);
+          petal.style.setProperty("--drift", `${randomInt(-180, 180)}px`);
+          petal.style.setProperty("--spin", `${randomInt(240, 1080)}deg`);
+          petal.style.setProperty("--duration", `${randomInt(4200, 6800)}ms`);
+          petal.style.setProperty("--delay", `${randomInt(0, 5600)}ms`);
+          petal.style.setProperty("--petal-width", `${randomInt(8, 16)}px`);
+          petal.style.setProperty("--petal-height", `${randomInt(13, 24)}px`);
+          petal.style.setProperty("--petal-color", colors[randomInt(0, colors.length - 1)]);
+          fragment.append(petal);
+        }
+        bestConfetti.hidden = false;
+        bestConfetti.append(fragment);
+        bestConfettiTimer = window.setTimeout(stopBestConfetti, 10000);
       }
 
       function schedule(action, delay = AUTO_ADVANCE_MS) {
@@ -2869,38 +3189,25 @@
         finishApp.textContent = currentAppLabel();
         finishTime.textContent = formatTime(finalTime);
         const playRecords = recordCurrentPlay();
-        if (isTimedProblemApp()) {
-          const bestKey = bestKeyForApp();
-          previousMultiplicationBest = readBest(bestKey);
-          multiplicationBestUpdated = mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
-          if (multiplicationBestUpdated) saveBest(bestKey, finalTime);
-          clearMessage.textContent = "\u30d9\u30b9\u30c8\uff01";
-          clearMessage.hidden = !multiplicationBestUpdated;
-          rewardMessage.hidden = true;
-          hanamaru.hidden = true;
-          finishTitle.hidden = true;
-          finishTitle.textContent = "\u7d42\u4e86";
-          bestTime.textContent = "";
-          clearDate.textContent = "";
-        } else {
-          const timeOver = finalTime > CLEAR_LIMIT_MS;
-          const clearedBonus = !timeOver && mistakeCount <= MAX_MISTAKES;
-          clearMessage.textContent = "\u30af\u30ea\u30a2\uff01";
-          rewardMessage.textContent = "500\u5186\u5238";
-          clearMessage.hidden = !clearedBonus;
-          rewardMessage.hidden = !clearedBonus;
-          hanamaru.hidden = !clearedBonus;
-          finishTitle.hidden = true;
-          finishTitle.textContent = clearedBonus ? "\u7d42\u4e86" : timeOver ? "\u30bf\u30a4\u30e0\u30aa\u30fc\u30d0\u30fc" : "\u30c1\u30e3\u30ec\u30f3\u30b8\u5931\u6557";
-          bestTime.textContent = "";
-          clearDate.textContent = "";
-        }
+        const bestKey = bestKeyForApp();
+        previousMultiplicationBest = readBest(bestKey);
+        multiplicationBestUpdated = shouldSaveCurrentPlay && mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
+        if (multiplicationBestUpdated) saveBest(bestKey, finalTime);
+        clearMessage.textContent = "";
+        clearMessage.hidden = true;
+        rewardMessage.textContent = "";
+        rewardMessage.hidden = true;
+        hanamaru.hidden = true;
+        finishTitle.hidden = true;
+        finishTitle.textContent = "\u7d42\u4e86";
+        bestTime.textContent = "";
         bestTime.hidden = true;
         clearDate.textContent = clearedAt ? formatDateTime(clearedAt) : "";
         clearDate.hidden = !clearedAt;
         renderPlayRecords(playRecords);
         renderMistakes();
         finishPanel.hidden = false;
+        if (multiplicationBestUpdated) startBestConfetti();
       }
 
       function recordMistake() {
@@ -2976,14 +3283,14 @@
       function renderPlayRecords(records) {
         recordTableBody.replaceChildren();
         const hasCurrentRecord = currentPlayRecord && currentPlayRecordRank;
-        recordSummary.hidden = !hasCurrentRecord || records.length === 0;
+        recordSummary.hidden = records.length === 0;
         if (recordSummary.hidden) return;
 
         recordRank.textContent = "";
         recordRank.hidden = true;
         records.forEach((record, index) => {
           const row = document.createElement("tr");
-          if (record.id === currentPlayRecord.id) row.className = "currentRecord";
+          if (hasCurrentRecord && record.id === currentPlayRecord.id) row.className = "currentRecord";
 
           const rankCell = document.createElement("td");
           rankCell.textContent = `${index + 1}\u4f4d`;
@@ -3614,6 +3921,26 @@
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       chooseDivision.addEventListener("click", showDivisionCover);
       chooseFractionCalculation.addEventListener("click", showFractionCalculationCover);
+      clearRecordsButton.addEventListener("click", showDeletePin);
+      pinPad.querySelectorAll("[data-pin-digit]").forEach((button) => {
+        bindFastPress(button, () => enterDeletePinDigit(button.dataset.pinDigit));
+      });
+      bindFastPress(pinPad.querySelector("[data-pin-back]"), () => {
+        pinValue = pinValue.slice(0, -1);
+        pinMessage.textContent = "";
+        renderPinBoxes();
+      });
+      bindFastPress(pinPad.querySelector("[data-pin-clear]"), () => {
+        pinValue = "";
+        pinMessage.textContent = "";
+        renderPinBoxes();
+      });
+      pinCancelButton.addEventListener("click", hideDeletePin);
+      skipRecordButton.addEventListener("click", () => {
+        if (!hasStarted || isFinished) return;
+        shouldSaveCurrentPlay = !shouldSaveCurrentPlay;
+        updateSkipRecordButton();
+      });
       document.querySelector("#restartButton").addEventListener("click", showCoverScreen);
       startButton.addEventListener("click", startChallenge);
       improperFractionStartButton.addEventListener("click", startImproperFractionChallenge);
