@@ -102,7 +102,7 @@
         padding: 4px;
       }
 
-      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton, .nextMistakeButton, .skipRecordButton, .clearRecordsButton, .pinPad button, .pinCancelButton {
+      .modeSwitch button, .keypad button, .restartButton, .menuButton, .backToMenuButton, .nextMistakeButton, .skipRecordButton, .recordMenuButton, .pinPad button, .pinCancelButton, .recordsCloseButton {
         min-height: 52px;
         border: 0;
         border-radius: 6px;
@@ -141,18 +141,30 @@
       .menuButton:first-child { border-color: rgba(20, 150, 111, 0.48); }
       .menuButton:nth-child(2) { border-color: rgba(37, 99, 235, 0.45); }
       .menuButton:last-child { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.35rem, 4.6vw, 2.55rem); }
-      .clearRecordsButton {
+      .recordActions {
         position: absolute;
         top: clamp(6px, 1.4vmin, 12px);
         right: clamp(6px, 1.4vmin, 12px);
+        display: flex;
+        gap: 6px;
         z-index: 5;
+      }
+      .recordMenuButton {
         min-height: 40px;
         padding: 0 14px;
-        background: #fff1f0;
-        border: 2px solid rgba(227, 58, 47, 0.32);
-        color: var(--coral);
+        border: 2px solid;
         font-size: clamp(0.78rem, 1.9vmin, 1.05rem);
         white-space: nowrap;
+      }
+      .recordViewButton {
+        background: #edf8ff;
+        border-color: rgba(37, 99, 235, 0.28);
+        color: #24507a;
+      }
+      .clearRecordsButton {
+        background: #fff1f0;
+        border-color: rgba(227, 58, 47, 0.32);
+        color: var(--coral);
       }
       #appMenu {
         align-content: center;
@@ -1014,6 +1026,96 @@
         font-size: clamp(0.95rem, 3.4vw, 1.2rem);
       }
 
+      .recordsOverlay {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 14px;
+        background: rgba(22, 32, 42, 0.42);
+        z-index: 65;
+      }
+
+      .recordsOverlay[hidden] { display: none; }
+
+      .recordsPanel {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        width: min(94vw, 760px);
+        height: min(88svh, 760px);
+        gap: 12px;
+        padding: clamp(14px, 3vw, 24px);
+        border-radius: 8px;
+        background: #fffdf8;
+        box-shadow: 0 24px 70px rgba(22, 32, 42, 0.25);
+        box-sizing: border-box;
+      }
+
+      .recordsHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .recordsHeader h2 {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        font-weight: 900;
+      }
+
+      .recordsCloseButton {
+        min-height: 42px;
+        padding: 0 16px;
+        background: #f6f0e8;
+        color: var(--muted);
+        font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+      }
+
+      .allRecordsList {
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 2px;
+        touch-action: pan-y;
+      }
+
+      .recordsAppBlock {
+        border-bottom: 2px solid var(--line);
+        padding-bottom: 10px;
+      }
+
+      .recordsAppBlock h3 {
+        margin: 0 0 6px;
+        color: var(--ink);
+        font-size: clamp(1.15rem, 4vw, 1.6rem);
+        font-weight: 900;
+      }
+
+      .recordsMiniTable {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .recordsMiniTable td {
+        padding: 5px 4px;
+        color: var(--ink);
+        font-size: clamp(0.98rem, 3.4vw, 1.28rem);
+        font-weight: 850;
+        line-height: 1.15;
+      }
+
+      .recordsMiniTable td:first-child { width: 16%; color: var(--coral); }
+      .recordsMiniTable td:nth-child(2) { width: 56%; }
+      .recordsMiniTable td:last-child { width: 28%; text-align: right; }
+      .recordsEmpty { color: var(--muted); }
+
       .big-circle {
         width: min(280px, 64vw);
         aspect-ratio: 1;
@@ -1044,10 +1146,11 @@
 
       .finishPanel {
         display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
         width: 100%;
         height: 100%;
         min-height: 0;
-        align-content: start;
+        align-content: stretch;
         justify-items: center;
         gap: clamp(8px, 1.35vmin, 14px);
         box-sizing: border-box;
@@ -1059,6 +1162,9 @@
 
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
+      .finishPanel .hanamaru,
+      .finishPanel .clearMessage,
+      .finishPanel .rewardMessage { display: none !important; }
       .finishApp { margin: 0; color: var(--ink); font-size: clamp(1.8rem, 5.1vw, 3.55rem); font-weight: 900; line-height: 1.05; }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .clearMessage { margin: 0; color: var(--green); font-size: clamp(4.2rem, 16vw, 10rem); font-weight: 900; line-height: 1; animation: none; white-space: nowrap; }
@@ -1066,9 +1172,9 @@
       .finishTime { margin: 0; font-size: clamp(2.9rem, 10vw, 6.4rem); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(0.98rem, 2.5vw, 1.35rem); font-weight: 900; line-height: 1.1; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1rem, 2.9vw, 1.75rem); font-weight: 900; white-space: nowrap; }
-      .recordSummary { width: min(100%, 1080px); min-height: 0; justify-self: stretch; margin: 0 auto; text-align: left; }
+      .recordSummary { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(100%, 1080px); min-height: 0; align-self: stretch; justify-self: stretch; margin: 0 auto; text-align: left; }
       .recordSummary h2 { margin: 0 0 8px; color: var(--ink); font-size: clamp(1.25rem, 3.8vw, 2rem); }
-      .recordTableWrap { width: 100%; max-height: min(48dvh, 470px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+      .recordTableWrap { width: 100%; height: 100%; max-height: none; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
       .recordTable { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
       .recordTable th,
       .recordTable td { border-bottom: 1px solid var(--line); padding: 8px 10px; font-size: clamp(1.12rem, 3.45vw, 1.72rem); font-weight: 850; line-height: 1.14; }
@@ -1087,7 +1193,7 @@
       .mistakeSummary h2 { margin: 0 0 4px; font-size: clamp(0.95rem, 2.5vw, 1.25rem); }
       .mistakeList { display: grid; max-height: min(13dvh, 120px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding: 1px 4px 1px 0; touch-action: pan-y; }
       .mistakeItem { border-bottom: 1px solid var(--line); padding: 3px 2px; font-size: clamp(0.92rem, 2.55vw, 1.18rem); font-weight: 900; }
-      .restartButton { min-width: 180px; min-height: 44px; margin: 2px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
+      .restartButton { min-width: 180px; min-height: 44px; align-self: end; margin: 2px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @media (max-width: 720px) {
         .practiceCard { padding: clamp(7px, 1.7vmin, 12px); }
@@ -1254,7 +1360,10 @@
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#35336;&#31639;</button>
           </div>
-          <button class="clearRecordsButton" id="clearRecordsButton" type="button">&#35352;&#37682;&#12434;&#20840;&#37096;&#28040;&#12377;</button>
+          <div class="recordActions">
+            <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
+            <button class="recordMenuButton clearRecordsButton" id="clearRecordsButton" type="button">&#35352;&#37682;&#12434;&#20840;&#37096;&#28040;&#12377;</button>
+          </div>
         </section>
 
         <section class="cover" id="multiplicationCover" hidden>
@@ -1561,6 +1670,15 @@
         <button class="pinCancelButton" id="pinCancelButton" type="button">&#12420;&#12417;&#12427;</button>
       </section>
     </div>
+    <div class="recordsOverlay" id="recordsOverlay" role="dialog" aria-modal="true" aria-labelledby="recordsTitle" hidden>
+      <section class="recordsPanel">
+        <header class="recordsHeader">
+          <h2 id="recordsTitle">&#35352;&#37682;</h2>
+          <button class="recordsCloseButton" id="recordsCloseButton" type="button">&#38281;&#12376;&#12427;</button>
+        </header>
+        <div class="allRecordsList" id="allRecordsList"></div>
+      </section>
+    </div>
 
     <script>
       const TARGET_CORRECT = 12;
@@ -1614,6 +1732,26 @@
       ];
       const PLAY_RECORD_PREFIX = "playRecords:";
       const RECORD_DELETE_PIN = "3512";
+      const APP_LABELS = {
+        fraction: "\u5e2f\u5206\u6570\u306b\u3059\u308b",
+        improperFraction: "\u4eee\u5206\u6570\u306b\u3059\u308b",
+        multiplication: "\u4e5d\u4e5d",
+        basicDivision: "\u5272\u308a\u7b97",
+        longMultiplication: "\u4e8c\u3051\u305f\u306e\u639b\u3051\u7b97",
+        doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
+        division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
+        fractionCalculation: "\u5206\u6570\u306e\u8a08\u7b97",
+      };
+      const APP_ORDER = [
+        "multiplication",
+        "basicDivision",
+        "fraction",
+        "improperFraction",
+        "longMultiplication",
+        "doubleMultiplication",
+        "division",
+        "fractionCalculation",
+      ];
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -1747,6 +1885,7 @@
       const chooseDoubleMultiplication = document.querySelector("#chooseDoubleMultiplication");
       const chooseDivision = document.querySelector("#chooseDivision");
       const chooseFractionCalculation = document.querySelector("#chooseFractionCalculation");
+      const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const easyButton = document.querySelector("#easyButton");
       const hardButton = document.querySelector("#hardButton");
@@ -1794,6 +1933,9 @@
       const pinMessage = document.querySelector("#pinMessage");
       const pinPad = document.querySelector("#pinPad");
       const pinCancelButton = document.querySelector("#pinCancelButton");
+      const recordsOverlay = document.querySelector("#recordsOverlay");
+      const allRecordsList = document.querySelector("#allRecordsList");
+      const recordsCloseButton = document.querySelector("#recordsCloseButton");
       const nextMistakeButton = document.querySelector("#nextMistakeButton");
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
@@ -2540,17 +2682,12 @@
         return `${date.getFullYear()}\u5e74${date.getMonth() + 1}\u6708${date.getDate()}\u65e5 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       }
 
+      function appLabel(app) {
+        return APP_LABELS[app] || "";
+      }
+
       function currentAppLabel() {
-        return {
-          fraction: "\u5e2f\u5206\u6570\u306b\u3059\u308b",
-          improperFraction: "\u4eee\u5206\u6570\u306b\u3059\u308b",
-          multiplication: "\u4e5d\u4e5d",
-          basicDivision: "\u5272\u308a\u7b97",
-          longMultiplication: "\u4e8c\u3051\u305f\u306e\u639b\u3051\u7b97",
-          doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
-          division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
-          fractionCalculation: "\u5206\u6570\u306e\u8a08\u7b97",
-        }[selectedApp] || "";
+        return appLabel(selectedApp);
       }
 
       function elapsedTime() {
@@ -2643,6 +2780,7 @@
         stopBestConfetti();
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        renderAllRecords();
         bestTime.textContent = "";
         bestTime.hidden = true;
         pinMessage.textContent = "\u8a18\u9332\u3092\u5168\u90e8\u6d88\u3057\u307e\u3057\u305f";
@@ -3020,6 +3158,8 @@
         streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
         timer.textContent = "0.0\u79d2";
         hideReaction();
+        hideDeletePin();
+        hideAllRecords();
         setModeLocked(false);
         resetInputsAfterBrowserRestore();
       }
@@ -3310,6 +3450,55 @@
           row.append(rankCell, dateCell, timeCell);
           recordTableBody.append(row);
         });
+      }
+
+      function renderAllRecords() {
+        allRecordsList.replaceChildren();
+        APP_ORDER.forEach((app) => {
+          const block = document.createElement("section");
+          block.className = "recordsAppBlock";
+
+          const title = document.createElement("h3");
+          title.textContent = appLabel(app);
+          block.append(title);
+
+          const records = recordsWithLegacyBest(readPlayRecords(app), app).slice(0, 3);
+          if (records.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "recordsEmpty";
+            empty.textContent = "\u8a18\u9332\u306a\u3057";
+            block.append(empty);
+            allRecordsList.append(block);
+            return;
+          }
+
+          const table = document.createElement("table");
+          table.className = "recordsMiniTable";
+          const body = document.createElement("tbody");
+          records.forEach((record, index) => {
+            const row = document.createElement("tr");
+            const rankCell = document.createElement("td");
+            rankCell.textContent = `${index + 1}\u4f4d`;
+            const dateCell = document.createElement("td");
+            dateCell.textContent = formatRecordDate(record.playedAt);
+            const timeCell = document.createElement("td");
+            timeCell.textContent = formatTime(record.time);
+            row.append(rankCell, dateCell, timeCell);
+            body.append(row);
+          });
+          table.append(body);
+          block.append(table);
+          allRecordsList.append(block);
+        });
+      }
+
+      function showAllRecords() {
+        renderAllRecords();
+        recordsOverlay.hidden = false;
+      }
+
+      function hideAllRecords() {
+        recordsOverlay.hidden = true;
       }
 
       function nextProblem(keepChallenge = false) {
@@ -3929,6 +4118,8 @@
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       chooseDivision.addEventListener("click", showDivisionCover);
       chooseFractionCalculation.addEventListener("click", showFractionCalculationCover);
+      viewRecordsButton.addEventListener("click", showAllRecords);
+      recordsCloseButton.addEventListener("click", hideAllRecords);
       clearRecordsButton.addEventListener("click", showDeletePin);
       pinPad.querySelectorAll("[data-pin-digit]").forEach((button) => {
         bindFastPress(button, () => enterDeletePinDigit(button.dataset.pinDigit));
