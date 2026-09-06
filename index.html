@@ -892,28 +892,38 @@
 
       .finishPanel {
         display: grid;
+        width: 100%;
         min-height: 440px;
-        place-content: center;
-        gap: 18px;
+        align-content: center;
+        justify-items: center;
+        gap: 14px;
+        box-sizing: border-box;
+        padding-inline: clamp(2px, 0.8vmin, 8px);
         text-align: center;
       }
 
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
-      .finishApp { margin: 0; color: var(--ink); font-size: clamp(1.5rem, 4.6vw, 2.8rem); font-weight: 900; }
+      .finishApp { margin: 0; color: var(--ink); font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .clearMessage { margin: 0; color: var(--green); font-size: clamp(4.2rem, 16vw, 10rem); font-weight: 900; line-height: 1; animation: none; white-space: nowrap; }
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1rem, 2.9vw, 1.75rem); font-weight: 900; white-space: nowrap; }
-      .recordSummary { width: min(100%, 640px); margin: 0 auto; text-align: left; }
-      .recordSummary h2 { margin: 0 0 8px; color: var(--ink); font-size: clamp(1.05rem, 3vw, 1.5rem); }
-      .recordTableWrap { max-height: min(24dvh, 210px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
-      .recordTable { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+      .recordSummary { width: min(100%, 1080px); justify-self: stretch; margin: 0 auto; text-align: left; }
+      .recordSummary h2 { margin: 0 0 8px; color: var(--ink); font-size: clamp(1.25rem, 3.8vw, 2rem); }
+      .recordTableWrap { width: 100%; max-height: min(36dvh, 360px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+      .recordTable { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
       .recordTable th,
-      .recordTable td { border-bottom: 1px solid var(--line); padding: 7px 8px; font-size: clamp(0.92rem, 2.55vw, 1.15rem); font-weight: 850; }
+      .recordTable td { border-bottom: 1px solid var(--line); padding: 12px 10px; font-size: clamp(1.25rem, 4vw, 1.9rem); font-weight: 850; }
       .recordTable th { color: var(--muted); text-align: left; }
+      .recordTable th:nth-child(1),
+      .recordTable td:nth-child(1) { width: 18%; }
+      .recordTable th:nth-child(2),
+      .recordTable td:nth-child(2) { width: 54%; }
+      .recordTable th:nth-child(3),
+      .recordTable td:nth-child(3) { width: 28%; }
       .recordTable td:last-child,
       .recordTable th:last-child { text-align: right; }
       .recordTable .currentRecord td { background: #fff1a8; }
@@ -1337,7 +1347,7 @@
           <p class="bestTime" id="bestTime"></p>
           <p class="clearDate" id="clearDate"></p>
           <section class="recordSummary" id="recordSummary" hidden>
-            <h2 id="recordRank"></h2>
+            <h2 id="recordRank" hidden></h2>
             <div class="recordTableWrap">
               <table class="recordTable">
                 <thead>
@@ -1407,7 +1417,6 @@
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
       const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
-      const PLAY_RECORD_LIMIT = 50;
       const PLAY_RECORD_PREFIX = "playRecords:";
 
       let selectedApp = "menu";
@@ -2348,7 +2357,19 @@
         saveBest(MULTIPLICATION_BEST_KEY, time);
       }
 
+      function bestKeyForApp(app = selectedApp) {
+        if (app === "basicDivision") return BASIC_DIVISION_BEST_KEY;
+        if (app === "improperFraction") return IMPROPER_FRACTION_BEST_KEY;
+        if (app === "division") return DIVISION_BEST_KEY;
+        if (app === "fractionCalculation") return FRACTION_CALCULATION_BEST_KEY;
+        if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
+        if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
+        if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
+        return null;
+      }
+
       function readBest(key) {
+        if (!key) return null;
         try {
           const value = Number(localStorage.getItem(key));
           return Number.isFinite(value) && value > 0 ? value : null;
@@ -2395,7 +2416,27 @@
       }
 
       function sortedPlayRecords(records) {
-        return [...records].sort((a, b) => a.time - b.time || Date.parse(a.playedAt) - Date.parse(b.playedAt));
+        return [...records].sort((a, b) => {
+          const leftDate = Date.parse(a.playedAt);
+          const rightDate = Date.parse(b.playedAt);
+          const leftTime = Number.isNaN(leftDate) ? Infinity : leftDate;
+          const rightTime = Number.isNaN(rightDate) ? Infinity : rightDate;
+          return a.time - b.time || leftTime - rightTime;
+        });
+      }
+
+      function recordsWithLegacyBest(records, app = selectedApp) {
+        const legacyBest = readBest(bestKeyForApp(app));
+        if (!legacyBest || records.some((record) => record.time === legacyBest)) return records;
+        return sortedPlayRecords([
+          ...records,
+          {
+            id: `legacy-best-${app}`,
+            playedAt: "",
+            time: legacyBest,
+            legacyBest: true,
+          },
+        ]);
       }
 
       function recordCurrentPlay() {
@@ -2406,17 +2447,19 @@
           time: finalTime,
         };
         const records = sortedPlayRecords([...readPlayRecords(), record]);
+        const rankingRecords = recordsWithLegacyBest(records);
         currentPlayRecord = record;
-        currentPlayRecordRank = records.findIndex((item) => item.id === record.id) + 1;
+        currentPlayRecordRank = rankingRecords.findIndex((item) => item.id === record.id) + 1;
         if (!savePlayRecords(records)) {
           currentPlayRecord = null;
           currentPlayRecordRank = null;
           return [];
         }
-        return records;
+        return rankingRecords;
       }
 
       function formatRecordDate(isoText) {
+        if (!isoText) return "\u4ee5\u524d\u306e\u81ea\u5df1\u30d9\u30b9\u30c8";
         const date = new Date(isoText);
         return Number.isNaN(date.getTime()) ? isoText : formatDateTime(date);
       }
@@ -2448,6 +2491,9 @@
         finishTitle.textContent = "\u7d42\u4e86";
         finishApp.textContent = "";
         bestTime.textContent = "";
+        bestTime.hidden = true;
+        clearDate.textContent = "";
+        clearDate.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
         startedAt = Date.now();
@@ -2672,6 +2718,8 @@
         finishPanel.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        bestTime.hidden = true;
+        clearDate.hidden = true;
         fractionGoal.hidden = true;
         streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
         timer.textContent = "0.0\u79d2";
@@ -2822,17 +2870,7 @@
         finishTime.textContent = formatTime(finalTime);
         const playRecords = recordCurrentPlay();
         if (isTimedProblemApp()) {
-          const bestKey = selectedApp === "basicDivision"
-            ? BASIC_DIVISION_BEST_KEY
-            : selectedApp === "improperFraction"
-            ? IMPROPER_FRACTION_BEST_KEY
-            : selectedApp === "division"
-            ? DIVISION_BEST_KEY
-            : selectedApp === "fractionCalculation"
-            ? FRACTION_CALCULATION_BEST_KEY
-            : selectedApp === "doubleMultiplication"
-              ? DOUBLE_MULTIPLICATION_BEST_KEY
-              : selectedApp === "longMultiplication" ? LONG_MULTIPLICATION_BEST_KEY : MULTIPLICATION_BEST_KEY;
+          const bestKey = bestKeyForApp();
           previousMultiplicationBest = readBest(bestKey);
           multiplicationBestUpdated = mistakeCount === 0 && (!previousMultiplicationBest || finalTime < previousMultiplicationBest);
           if (multiplicationBestUpdated) saveBest(bestKey, finalTime);
@@ -2840,12 +2878,10 @@
           clearMessage.hidden = !multiplicationBestUpdated;
           rewardMessage.hidden = true;
           hanamaru.hidden = true;
-          finishTitle.hidden = multiplicationBestUpdated;
+          finishTitle.hidden = true;
           finishTitle.textContent = "\u7d42\u4e86";
-          bestTime.textContent = previousMultiplicationBest
-            ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(multiplicationBestUpdated ? finalTime : previousMultiplicationBest)}`
-            : multiplicationBestUpdated ? `\u81ea\u5df1\u30d9\u30b9\u30c8: ${formatTime(finalTime)}` : "";
-          clearDate.textContent = clearedAt ? `\u7d42\u4e86\u65e5\u6642: ${formatDateTime(clearedAt)}` : "";
+          bestTime.textContent = "";
+          clearDate.textContent = "";
         } else {
           const timeOver = finalTime > CLEAR_LIMIT_MS;
           const clearedBonus = !timeOver && mistakeCount <= MAX_MISTAKES;
@@ -2854,11 +2890,14 @@
           clearMessage.hidden = !clearedBonus;
           rewardMessage.hidden = !clearedBonus;
           hanamaru.hidden = !clearedBonus;
-          finishTitle.hidden = clearedBonus;
+          finishTitle.hidden = true;
           finishTitle.textContent = clearedBonus ? "\u7d42\u4e86" : timeOver ? "\u30bf\u30a4\u30e0\u30aa\u30fc\u30d0\u30fc" : "\u30c1\u30e3\u30ec\u30f3\u30b8\u5931\u6557";
           bestTime.textContent = "";
-          clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
+          clearDate.textContent = "";
         }
+        bestTime.hidden = true;
+        clearDate.textContent = clearedAt ? formatDateTime(clearedAt) : "";
+        clearDate.hidden = !clearedAt;
         renderPlayRecords(playRecords);
         renderMistakes();
         finishPanel.hidden = false;
@@ -2940,7 +2979,8 @@
         recordSummary.hidden = !hasCurrentRecord || records.length === 0;
         if (recordSummary.hidden) return;
 
-        recordRank.textContent = `\u4eca\u56de\u306e\u8a18\u9332: \u53f2\u4e0a${currentPlayRecordRank}\u4f4d`;
+        recordRank.textContent = "";
+        recordRank.hidden = true;
         records.forEach((record, index) => {
           const row = document.createElement("tr");
           if (record.id === currentPlayRecord.id) row.className = "currentRecord";
