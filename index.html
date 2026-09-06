@@ -907,6 +907,16 @@
       .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1rem, 2.9vw, 1.75rem); font-weight: 900; white-space: nowrap; }
+      .recordSummary { width: min(100%, 640px); margin: 0 auto; text-align: left; }
+      .recordSummary h2 { margin: 0 0 8px; color: var(--ink); font-size: clamp(1.05rem, 3vw, 1.5rem); }
+      .recordTableWrap { max-height: min(24dvh, 210px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+      .recordTable { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+      .recordTable th,
+      .recordTable td { border-bottom: 1px solid var(--line); padding: 7px 8px; font-size: clamp(0.92rem, 2.55vw, 1.15rem); font-weight: 850; }
+      .recordTable th { color: var(--muted); text-align: left; }
+      .recordTable td:last-child,
+      .recordTable th:last-child { text-align: right; }
+      .recordTable .currentRecord td { background: #fff1a8; }
       .mistakeSummary { width: min(100%, 580px); margin: 0 auto; text-align: left; }
       .mistakeSummary h2 { margin: 0 0 8px; font-size: clamp(1.05rem, 3vw, 1.5rem); }
       .mistakeList { display: grid; max-height: min(24dvh, 190px); gap: 6px; overflow-y: auto; overscroll-behavior: contain; padding: 2px 4px 2px 0; touch-action: pan-y; }
@@ -1326,6 +1336,21 @@
           <p class="finishTime" id="finishTime">0.0&#31186;</p>
           <p class="bestTime" id="bestTime"></p>
           <p class="clearDate" id="clearDate"></p>
+          <section class="recordSummary" id="recordSummary" hidden>
+            <h2 id="recordRank"></h2>
+            <div class="recordTableWrap">
+              <table class="recordTable">
+                <thead>
+                  <tr>
+                    <th>&#38918;&#20301;</th>
+                    <th>&#26085;&#26178;</th>
+                    <th>&#12479;&#12452;&#12512;</th>
+                  </tr>
+                </thead>
+                <tbody id="recordTableBody"></tbody>
+              </table>
+            </div>
+          </section>
           <section class="mistakeSummary" id="mistakeSummary" hidden>
             <h2>&#12414;&#12385;&#12364;&#12360;&#12383;&#21839;&#38988;</h2>
             <div class="mistakeList" id="mistakeList"></div>
@@ -1363,7 +1388,7 @@
         "doubleP2Ones", "doubleP2Hundreds", "doubleP2Tens",
         "doubleTotalOnes", "doubleTotalTens", "doubleTotalHundreds", "doubleTotalThousands",
       ];
-      const DIVISION_TARGET = 10;
+      const DIVISION_TARGET = 5;
       const FRACTION_CALCULATION_TARGET = 12;
       const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
       const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
@@ -1382,6 +1407,8 @@
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
       const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
+      const PLAY_RECORD_LIMIT = 50;
+      const PLAY_RECORD_PREFIX = "playRecords:";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -1418,6 +1445,8 @@
       let clearedAt = null;
       let multiplicationBestUpdated = false;
       let previousMultiplicationBest = null;
+      let currentPlayRecord = null;
+      let currentPlayRecordRank = null;
       let isAnswerLocked = false;
       let modeLocked = false;
       let isFinished = false;
@@ -1552,6 +1581,9 @@
       const keypad = document.querySelector("#keypad");
       const mistakeSummary = document.querySelector("#mistakeSummary");
       const mistakeList = document.querySelector("#mistakeList");
+      const recordSummary = document.querySelector("#recordSummary");
+      const recordRank = document.querySelector("#recordRank");
+      const recordTableBody = document.querySelector("#recordTableBody");
       const doubleTotalRow = document.querySelector(".doubleTotal");
       const doubleDecimalChoices = [...document.querySelectorAll(".decimalPointChoice")];
 
@@ -2333,6 +2365,62 @@
         }
       }
 
+      function recordKey(app = selectedApp) {
+        return `${PLAY_RECORD_PREFIX}${app}`;
+      }
+
+      function readPlayRecords(app = selectedApp) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(recordKey(app)) || "[]");
+          if (!Array.isArray(parsed)) return [];
+          return parsed
+            .filter((record) => record && Number.isFinite(Number(record.time)) && record.playedAt)
+            .map((record) => ({
+              id: String(record.id || `${record.playedAt}-${record.time}`),
+              playedAt: String(record.playedAt),
+              time: Number(record.time),
+            }));
+        } catch {
+          return [];
+        }
+      }
+
+      function savePlayRecords(records, app = selectedApp) {
+        try {
+          localStorage.setItem(recordKey(app), JSON.stringify(records));
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      function sortedPlayRecords(records) {
+        return [...records].sort((a, b) => a.time - b.time || Date.parse(a.playedAt) - Date.parse(b.playedAt));
+      }
+
+      function recordCurrentPlay() {
+        if (!clearedAt || finalTime <= 0) return [];
+        const record = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          playedAt: clearedAt.toISOString(),
+          time: finalTime,
+        };
+        const records = sortedPlayRecords([...readPlayRecords(), record]);
+        currentPlayRecord = record;
+        currentPlayRecordRank = records.findIndex((item) => item.id === record.id) + 1;
+        if (!savePlayRecords(records)) {
+          currentPlayRecord = null;
+          currentPlayRecordRank = null;
+          return [];
+        }
+        return records;
+      }
+
+      function formatRecordDate(isoText) {
+        const date = new Date(isoText);
+        return Number.isNaN(date.getTime()) ? isoText : formatDateTime(date);
+      }
+
       function updateProgress() {
         if (!hasStarted) return;
         if (isTimedProblemApp()) {
@@ -2351,6 +2439,8 @@
         clearedAt = null;
         multiplicationBestUpdated = false;
         previousMultiplicationBest = null;
+        currentPlayRecord = null;
+        currentPlayRecordRank = null;
         clearMessage.hidden = true;
         rewardMessage.hidden = true;
         hanamaru.hidden = true;
@@ -2358,6 +2448,8 @@
         finishTitle.textContent = "\u7d42\u4e86";
         finishApp.textContent = "";
         bestTime.textContent = "";
+        recordSummary.hidden = true;
+        recordTableBody.replaceChildren();
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -2560,6 +2652,8 @@
         clearedAt = null;
         multiplicationBestUpdated = false;
         previousMultiplicationBest = null;
+        currentPlayRecord = null;
+        currentPlayRecordRank = null;
         isFinished = false;
         correctCount = 0;
         mistakeCount = 0;
@@ -2576,6 +2670,8 @@
         challengeView.hidden = true;
         gameArea.hidden = false;
         finishPanel.hidden = true;
+        recordSummary.hidden = true;
+        recordTableBody.replaceChildren();
         fractionGoal.hidden = true;
         streakLabel.textContent = `\u6b63\u89e3 0 / ${TARGET_CORRECT} \u30fb \u30df\u30b9 0 / ${MAX_MISTAKES}`;
         timer.textContent = "0.0\u79d2";
@@ -2724,6 +2820,7 @@
         fractionGoal.hidden = true;
         finishApp.textContent = currentAppLabel();
         finishTime.textContent = formatTime(finalTime);
+        const playRecords = recordCurrentPlay();
         if (isTimedProblemApp()) {
           const bestKey = selectedApp === "basicDivision"
             ? BASIC_DIVISION_BEST_KEY
@@ -2762,6 +2859,7 @@
           bestTime.textContent = "";
           clearDate.textContent = clearedAt ? `${clearedBonus ? "\u30af\u30ea\u30a2\u65e5\u6642" : "\u7d42\u4e86\u65e5\u6642"}: ${formatDateTime(clearedAt)}` : "";
         }
+        renderPlayRecords(playRecords);
         renderMistakes();
         finishPanel.hidden = false;
       }
@@ -2833,6 +2931,29 @@
           question.textContent = `${mistake.problem} = ${mistake.answer}`;
           item.append(question);
           mistakeList.append(item);
+        });
+      }
+
+      function renderPlayRecords(records) {
+        recordTableBody.replaceChildren();
+        const hasCurrentRecord = currentPlayRecord && currentPlayRecordRank;
+        recordSummary.hidden = !hasCurrentRecord || records.length === 0;
+        if (recordSummary.hidden) return;
+
+        recordRank.textContent = `\u4eca\u56de\u306e\u8a18\u9332: \u53f2\u4e0a${currentPlayRecordRank}\u4f4d`;
+        records.forEach((record, index) => {
+          const row = document.createElement("tr");
+          if (record.id === currentPlayRecord.id) row.className = "currentRecord";
+
+          const rankCell = document.createElement("td");
+          rankCell.textContent = `${index + 1}\u4f4d`;
+          const dateCell = document.createElement("td");
+          dateCell.textContent = formatRecordDate(record.playedAt);
+          const timeCell = document.createElement("td");
+          timeCell.textContent = formatTime(record.time);
+
+          row.append(rankCell, dateCell, timeCell);
+          recordTableBody.append(row);
         });
       }
 
