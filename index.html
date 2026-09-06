@@ -1045,30 +1045,34 @@
       .finishPanel {
         display: grid;
         width: 100%;
-        min-height: 440px;
-        align-content: center;
+        height: 100%;
+        min-height: 0;
+        align-content: start;
         justify-items: center;
-        gap: 14px;
+        gap: clamp(8px, 1.35vmin, 14px);
         box-sizing: border-box;
+        overflow: hidden;
+        padding-block: clamp(10px, 1.8vmin, 18px);
         padding-inline: clamp(2px, 0.8vmin, 8px);
         text-align: center;
       }
 
       .finishPanel[hidden], #gameArea[hidden] { display: none; }
       .finishPanel h1 { margin: 0; color: var(--coral); font-size: clamp(2.2rem, 8vw, 5rem); }
-      .finishApp { margin: 0; color: var(--ink); font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; }
+      .finishApp { margin: 0; color: var(--ink); font-size: clamp(1.8rem, 5.1vw, 3.55rem); font-weight: 900; line-height: 1.05; }
       .hanamaru { color: var(--coral); font-family: "Yu Mincho", serif; font-size: clamp(7rem, 28vw, 14rem); font-weight: 900; line-height: 0.8; }
       .clearMessage { margin: 0; color: var(--green); font-size: clamp(4.2rem, 16vw, 10rem); font-weight: 900; line-height: 1; animation: none; white-space: nowrap; }
       .rewardMessage { margin: 0; color: var(--coral); font-size: clamp(2.4rem, 9vw, 5.5rem); font-weight: 900; }
-      .finishTime { margin: 0; font-size: clamp(3.5rem, 13vw, 8rem); font-weight: 900; font-variant-numeric: tabular-nums; }
-      .clearDate { margin: 0; color: var(--muted); font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 900; }
+      .finishTime { margin: 0; font-size: clamp(2.9rem, 10vw, 6.4rem); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
+      .clearDate { margin: 0; color: var(--muted); font-size: clamp(0.98rem, 2.5vw, 1.35rem); font-weight: 900; line-height: 1.1; }
       .bestTime { margin: 0; color: var(--green); font-size: clamp(1rem, 2.9vw, 1.75rem); font-weight: 900; white-space: nowrap; }
-      .recordSummary { width: min(100%, 1080px); justify-self: stretch; margin: 0 auto; text-align: left; }
+      .recordSummary { width: min(100%, 1080px); min-height: 0; justify-self: stretch; margin: 0 auto; text-align: left; }
       .recordSummary h2 { margin: 0 0 8px; color: var(--ink); font-size: clamp(1.25rem, 3.8vw, 2rem); }
-      .recordTableWrap { width: 100%; max-height: min(36dvh, 360px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+      .recordTableWrap { width: 100%; max-height: min(48dvh, 470px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
       .recordTable { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
       .recordTable th,
-      .recordTable td { border-bottom: 1px solid var(--line); padding: 12px 10px; font-size: clamp(1.25rem, 4vw, 1.9rem); font-weight: 850; }
+      .recordTable td { border-bottom: 1px solid var(--line); padding: 8px 10px; font-size: clamp(1.12rem, 3.45vw, 1.72rem); font-weight: 850; line-height: 1.14; }
+      .recordTable th { border-bottom: 1px solid var(--line); padding: 7px 10px; font-size: clamp(1rem, 3vw, 1.4rem); font-weight: 850; line-height: 1.14; }
       .recordTable th { color: var(--muted); text-align: left; }
       .recordTable th:nth-child(1),
       .recordTable td:nth-child(1) { width: 18%; }
@@ -1080,10 +1084,10 @@
       .recordTable th:last-child { text-align: right; }
       .recordTable .currentRecord td { background: #fff1a8; }
       .mistakeSummary { width: min(100%, 580px); margin: 0 auto; text-align: left; }
-      .mistakeSummary h2 { margin: 0 0 8px; font-size: clamp(1.05rem, 3vw, 1.5rem); }
-      .mistakeList { display: grid; max-height: min(24dvh, 190px); gap: 6px; overflow-y: auto; overscroll-behavior: contain; padding: 2px 4px 2px 0; touch-action: pan-y; }
-      .mistakeItem { border-bottom: 1px solid var(--line); padding: 5px 2px; font-size: clamp(1rem, 3vw, 1.35rem); font-weight: 900; }
-      .restartButton { min-width: 180px; margin: 8px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
+      .mistakeSummary h2 { margin: 0 0 4px; font-size: clamp(0.95rem, 2.5vw, 1.25rem); }
+      .mistakeList { display: grid; max-height: min(13dvh, 120px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding: 1px 4px 1px 0; touch-action: pan-y; }
+      .mistakeItem { border-bottom: 1px solid var(--line); padding: 3px 2px; font-size: clamp(0.92rem, 2.55vw, 1.18rem); font-weight: 900; }
+      .restartButton { min-width: 180px; min-height: 44px; margin: 2px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
 
       @media (max-width: 720px) {
         .practiceCard { padding: clamp(7px, 1.7vmin, 12px); }
@@ -1749,6 +1753,7 @@
       const modeSwitch = document.querySelector("#modeSwitch");
       const cover = document.querySelector("#cover");
       const challengeView = document.querySelector("#challengeView");
+      const topBar = document.querySelector(".topBar");
       const startButton = document.querySelector("#startButton");
       const improperFractionStartButton = document.querySelector("#improperFractionStartButton");
       const multiplicationStartButton = document.querySelector("#multiplicationStartButton");
@@ -2782,6 +2787,7 @@
         clearDate.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        topBar.hidden = false;
         startedAt = Date.now();
         isFinished = false;
         updateProgress();
@@ -3007,6 +3013,7 @@
         finishPanel.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        topBar.hidden = false;
         bestTime.hidden = true;
         clearDate.hidden = true;
         fractionGoal.hidden = true;
@@ -3186,6 +3193,7 @@
         hideReaction();
         gameArea.hidden = true;
         fractionGoal.hidden = true;
+        topBar.hidden = true;
         finishApp.textContent = currentAppLabel();
         finishTime.textContent = formatTime(finalTime);
         const playRecords = recordCurrentPlay();
