@@ -1138,6 +1138,14 @@
         padding-top: 8px;
       }
       .recordsMiniTable .latestRecord td:first-child { color: var(--blue); }
+      .recordsMiniTable .latestBadge {
+        display: block;
+        margin-top: 2px;
+        color: var(--blue);
+        font-size: 0.82em;
+        font-weight: 900;
+        line-height: 1;
+      }
       .recordsEmpty { color: var(--muted); }
 
       .big-circle {
@@ -3514,7 +3522,10 @@
           const savedRecords = readPlayRecords(app);
           const topRecords = recordsWithLegacyBest(savedRecords, app).slice(0, 3);
           const latestRecord = latestPlayRecord(savedRecords);
-          const rows = [...topRecords];
+          const rows = topRecords.map((record) => ({
+            ...record,
+            latestInTop: Boolean(latestRecord && record.id === latestRecord.id),
+          }));
           if (latestRecord && !topRecords.some((record) => record.id === latestRecord.id)) {
             rows.push({ ...latestRecord, latestOnly: true });
           }
@@ -3534,7 +3545,17 @@
             const row = document.createElement("tr");
             if (record.latestOnly) row.className = "latestRecord";
             const rankCell = document.createElement("td");
-            rankCell.textContent = record.latestOnly ? "\u6700\u65b0" : `${index + 1}\u4f4d`;
+            if (record.latestOnly) {
+              rankCell.textContent = "\u6700\u65b0";
+            } else {
+              rankCell.textContent = `${index + 1}\u4f4d`;
+              if (record.latestInTop) {
+                const latestBadge = document.createElement("span");
+                latestBadge.className = "latestBadge";
+                latestBadge.textContent = "\u6700\u65b0";
+                rankCell.append(latestBadge);
+              }
+            }
             const dateCell = document.createElement("td");
             dateCell.textContent = formatRecordDate(record.playedAt);
             const timeCell = document.createElement("td");
