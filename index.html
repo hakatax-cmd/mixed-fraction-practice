@@ -1133,6 +1133,11 @@
       .recordsMiniTable td:first-child { width: 16%; color: var(--coral); }
       .recordsMiniTable td:nth-child(2) { width: 56%; }
       .recordsMiniTable td:last-child { width: 28%; text-align: right; }
+      .recordsMiniTable .latestRecord td {
+        border-top: 2px solid rgba(227, 58, 47, 0.2);
+        padding-top: 8px;
+      }
+      .recordsMiniTable .latestRecord td:first-child { color: var(--blue); }
       .recordsEmpty { color: var(--muted); }
 
       .big-circle {
@@ -2877,6 +2882,17 @@
         });
       }
 
+      function latestPlayRecord(records) {
+        return records.reduce((latest, record) => {
+          if (!latest) return record;
+          const latestTime = Date.parse(latest.playedAt);
+          const recordTime = Date.parse(record.playedAt);
+          const safeLatestTime = Number.isNaN(latestTime) ? -Infinity : latestTime;
+          const safeRecordTime = Number.isNaN(recordTime) ? -Infinity : recordTime;
+          return safeRecordTime > safeLatestTime ? record : latest;
+        }, null);
+      }
+
       function recordsWithLegacyBest(records, app = selectedApp) {
         const legacyBest = readBest(bestKeyForApp(app));
         if (!legacyBest || records.some((record) => record.time === legacyBest)) return records;
@@ -3495,8 +3511,14 @@
           title.textContent = appLabel(app);
           block.append(title);
 
-          const records = recordsWithLegacyBest(readPlayRecords(app), app).slice(0, 3);
-          if (records.length === 0) {
+          const savedRecords = readPlayRecords(app);
+          const topRecords = recordsWithLegacyBest(savedRecords, app).slice(0, 3);
+          const latestRecord = latestPlayRecord(savedRecords);
+          const rows = [...topRecords];
+          if (latestRecord && !topRecords.some((record) => record.id === latestRecord.id)) {
+            rows.push({ ...latestRecord, latestOnly: true });
+          }
+          if (rows.length === 0) {
             const empty = document.createElement("p");
             empty.className = "recordsEmpty";
             empty.textContent = "\u8a18\u9332\u306a\u3057";
@@ -3508,10 +3530,11 @@
           const table = document.createElement("table");
           table.className = "recordsMiniTable";
           const body = document.createElement("tbody");
-          records.forEach((record, index) => {
+          rows.forEach((record, index) => {
             const row = document.createElement("tr");
+            if (record.latestOnly) row.className = "latestRecord";
             const rankCell = document.createElement("td");
-            rankCell.textContent = `${index + 1}\u4f4d`;
+            rankCell.textContent = record.latestOnly ? "\u6700\u65b0" : `${index + 1}\u4f4d`;
             const dateCell = document.createElement("td");
             dateCell.textContent = formatRecordDate(record.playedAt);
             const timeCell = document.createElement("td");
