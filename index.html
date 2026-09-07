@@ -1117,7 +1117,8 @@
 
       .recordsMiniTable {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 5px;
         table-layout: fixed;
         font-variant-numeric: tabular-nums;
       }
@@ -1133,15 +1134,22 @@
       .recordsMiniTable td:first-child { width: 16%; color: var(--coral); }
       .recordsMiniTable td:nth-child(2) { width: 56%; }
       .recordsMiniTable td:last-child { width: 28%; text-align: right; }
+      .recordsMiniTable .latestInTopRecord td {
+        background: #fff1a8;
+      }
       .recordsMiniTable .latestRecord td {
-        border-top: 2px solid rgba(227, 58, 47, 0.2);
+        background: #dff4ff;
+        border-top: 2px solid rgba(37, 99, 235, 0.18);
         padding-top: 8px;
       }
-      .recordsMiniTable .latestRecord td:first-child { color: var(--blue); }
+      .recordsMiniTable .latestInTopRecord td:first-child,
+      .recordsMiniTable .latestRecord td:first-child { border-radius: 8px 0 0 8px; }
+      .recordsMiniTable .latestInTopRecord td:last-child,
+      .recordsMiniTable .latestRecord td:last-child { border-radius: 0 8px 8px 0; }
       .recordsMiniTable .latestBadge {
         display: block;
         margin-top: 2px;
-        color: var(--blue);
+        color: var(--coral);
         font-size: 0.82em;
         font-weight: 900;
         line-height: 1;
@@ -3544,6 +3552,7 @@
           rows.forEach((record, index) => {
             const row = document.createElement("tr");
             if (record.latestOnly) row.className = "latestRecord";
+            if (record.latestInTop) row.className = "latestInTopRecord";
             const rankCell = document.createElement("td");
             if (record.latestOnly) {
               rankCell.textContent = "\u6700\u65b0";
