@@ -326,17 +326,16 @@
       .basicDivisionEquals { grid-column: 4; }
       .basicDivisionDividend { grid-column: 5; }
 
-      .basicDivisionRow.blankFirst .answerBox { grid-column: 1; }
-      .basicDivisionRow.blankFirst .basicDivisionKnownFactor { grid-column: 3; }
+      .basicDivisionRow.divisionFormula .basicDivisionDividend { grid-column: 1; justify-self: end; }
+      .basicDivisionRow.divisionFormula .basicDivisionOperator { grid-column: 2; }
+      .basicDivisionRow.divisionFormula .basicDivisionKnownFactor { grid-column: 3; }
+      .basicDivisionRow.divisionFormula .basicDivisionEquals { grid-column: 4; }
+      .basicDivisionRow.divisionFormula .answerBox { grid-column: 5; }
 
       .basicDivisionEquals,
       .basicDivisionOperator {
         color: var(--muted);
         text-align: center;
-      }
-
-      .basicDivisionDividend {
-        justify-self: start;
       }
 
       .basicDivisionFractionRow {
@@ -347,8 +346,15 @@
       }
 
       .basicDivisionFractionBlank {
-        grid-column: 3;
+        display: inline-grid;
+        place-items: center;
+        grid-column: 5;
         grid-row: 2;
+        width: 1.05em;
+        height: 1.05em;
+        border: 0.09em solid var(--ink);
+        border-radius: 0.12em;
+        color: transparent;
       }
 
       .basicDivisionFractionEquals {
@@ -359,9 +365,9 @@
       }
 
       #basicDivisionFraction {
-        grid-column: 5;
+        grid-column: 1 / 4;
         grid-row: 2;
-        justify-self: start;
+        justify-self: center;
       }
 
       .basicDivisionFractionRow .fraction {
@@ -1553,17 +1559,17 @@
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
-              <div class="basicDivisionRow" id="basicDivisionRow">
-                <span class="basicDivisionKnownFactor" id="basicDivisionDivisorTop"></span>
-                <span class="basicDivisionOperator">&times;</span>
-                <button id="basicDivisionAnswerInput" class="answerBox active" aria-label="&#21106;&#12426;&#31639;&#12398;&#31572;&#12360;" data-value="" type="button"></button>
-                <span class="basicDivisionEquals">=</span>
+              <div class="basicDivisionRow divisionFormula" id="basicDivisionRow">
                 <span class="basicDivisionDividend" id="basicDivisionDividendTop"></span>
+                <span class="basicDivisionOperator">&divide;</span>
+                <span class="basicDivisionKnownFactor" id="basicDivisionDivisorTop"></span>
+                <span class="basicDivisionEquals">=</span>
+                <button id="basicDivisionAnswerInput" class="answerBox active" aria-label="&#21106;&#12426;&#31639;&#12398;&#31572;&#12360;" data-value="" type="button"></button>
               </div>
               <div class="basicDivisionFractionRow" id="basicDivisionFractionRow" aria-label="&#21106;&#12426;&#31639;&#12434;&#20998;&#25968;&#12391;&#34920;&#12375;&#12383;&#24335;">
-                <span class="basicDivisionFractionBlank">&#9633;</span>
-                <span class="basicDivisionFractionEquals">=</span>
                 <span id="basicDivisionFraction"></span>
+                <span class="basicDivisionFractionEquals">=</span>
+                <span class="basicDivisionFractionBlank">&#9633;</span>
               </div>
             </div>
           </div>
@@ -2147,11 +2153,6 @@
           }
         }
 
-        const addBlankPositionPattern = (items) => {
-          const offset = Math.random() < 0.5 ? 0 : 1;
-          return items.map((item, index) => ({ ...item, blankFirst: index % 2 === offset }));
-        };
-
         const arrangeWithoutSameDivisor = (items) => {
           const remaining = [...items];
           const arranged = [];
@@ -2175,9 +2176,9 @@
 
         for (let attempt = 0; attempt < 240; attempt += 1) {
           const arranged = arrangeWithoutSameDivisor(shuffle(deck));
-          if (arranged) return addBlankPositionPattern(arranged);
+          if (arranged) return arranged;
         }
-        return addBlankPositionPattern(shuffle(deck));
+        return shuffle(deck);
       }
 
       function chooseLongMultiplier() {
@@ -2406,9 +2407,7 @@
 
       function basicDivisionProblemText(item = basicDivisionProblem) {
         if (!item) return "";
-        return item.blankFirst
-          ? `\u25a1\u00d7${item.divisor}=${item.dividend}`
-          : `${item.divisor}\u00d7\u25a1=${item.dividend}`;
+        return `${item.dividend}\u00f7${item.divisor}`;
       }
 
       function longMultiplicationAnswer() {
@@ -4061,7 +4060,6 @@
           basicDivisionDividendTop.textContent = basicDivisionProblem.dividend;
           basicDivisionDivisorTop.textContent = basicDivisionProblem.divisor;
           basicDivisionFraction.innerHTML = fraction(basicDivisionProblem.dividend, basicDivisionProblem.divisor);
-          basicDivisionRow.classList.toggle("blankFirst", Boolean(basicDivisionProblem.blankFirst));
         } else if (selectedApp === "improperFraction") {
           improperMixedQuestion.innerHTML = `<span>${improperFractionProblem.whole}</span>${fraction(improperFractionProblem.rest, improperFractionProblem.denominator)}`;
           improperAnswerDenominator.textContent = improperFractionProblem.denominator;
