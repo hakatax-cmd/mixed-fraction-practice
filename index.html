@@ -1309,13 +1309,13 @@
           height: min(100dvh, calc(100vw * 16 / 9));
         }
 
-        #challengeView { padding-top: clamp(18px, 4.2vw, 28px); }
+        #challengeView { padding-top: clamp(54px, 14vw, 74px); }
         #gameArea {
           grid-template-rows: minmax(0, 1fr) clamp(14px, 3.4vw, 22px) minmax(180px, 240px);
           gap: clamp(3px, 1.4vw, 7px);
         }
 
-        .doubleProblemLine { padding-top: clamp(0px, 1vw, 8px); }
+        .doubleProblemLine { padding-top: clamp(16px, 4.8vw, 30px); }
         .doubleVerticalProblem {
           --double-cell: clamp(40px, 11.8vw, 62px);
           row-gap: clamp(1px, 1vw, 5px);
@@ -1328,6 +1328,10 @@
         .divisionWork {
           --division-cell: clamp(50px, 10.2vw, 64px);
           --division-gap: clamp(0px, 0.2vw, 2px);
+        }
+
+        #challengeView.divisionMode .divisionProblemLine {
+          padding-top: clamp(16px, 4.8vw, 30px);
         }
       }
 
@@ -1451,7 +1455,7 @@
         <section class="cover" id="divisionCover" hidden>
           <h1>&#22235;&#12369;&#12383;&divide;&#20108;&#12369;&#12383;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
-          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <p class="coverGoal">5&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="divisionStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -3310,31 +3314,6 @@
         const correct = correctDigits && correctDecimal;
 
         if (!correct) {
-          if (selectedApp === "fractionCalculation") {
-            pendingWrongSignature = "";
-            setLocked(true);
-            mistakeCount += 1;
-            recordMistake();
-            updateProgress();
-            correctAnswer.hidden = true;
-            correctAnswer.textContent = "";
-            showAnswerCorrections();
-            showReaction(false);
-            if (isLastTimedProblem()) {
-              finalTime = elapsedTime();
-              clearedAt = new Date();
-              isFinished = true;
-              updateProgress();
-              showManualNext(finishRound);
-              return;
-            }
-            showManualNext(() => {
-              hideReaction();
-              nextProblem(true);
-            });
-            return;
-          }
-
           const signature = answerSignature();
           if (pendingWrongSignature !== signature) {
             showWrongConfirmation(signature);
