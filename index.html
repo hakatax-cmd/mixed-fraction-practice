@@ -1148,10 +1148,26 @@
         border-top: 2px solid rgba(37, 99, 235, 0.18);
         padding-top: 8px;
       }
+      .recordsMiniTable .todayRecord td {
+        background: #dff4ff;
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        border-left-width: 0;
+        border-right-width: 0;
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
       .recordsMiniTable .latestInTopRecord td:first-child,
-      .recordsMiniTable .latestRecord td:first-child { border-radius: 8px 0 0 8px; }
+      .recordsMiniTable .latestRecord td:first-child,
+      .recordsMiniTable .todayRecord td:first-child {
+        border-left-width: 2px;
+        border-radius: 8px 0 0 8px;
+      }
       .recordsMiniTable .latestInTopRecord td:last-child,
-      .recordsMiniTable .latestRecord td:last-child { border-radius: 0 8px 8px 0; }
+      .recordsMiniTable .latestRecord td:last-child,
+      .recordsMiniTable .todayRecord td:last-child {
+        border-right-width: 2px;
+        border-radius: 0 8px 8px 0;
+      }
       .recordsMiniTable .latestBadge {
         display: block;
         margin-top: 2px;
@@ -2912,6 +2928,16 @@
         }, null);
       }
 
+      function isTodayRecord(record) {
+        if (!record?.playedAt) return false;
+        const playedAt = new Date(record.playedAt);
+        if (Number.isNaN(playedAt.getTime())) return false;
+        const today = new Date();
+        return playedAt.getFullYear() === today.getFullYear()
+          && playedAt.getMonth() === today.getMonth()
+          && playedAt.getDate() === today.getDate();
+      }
+
       function recordsWithLegacyBest(records, app = selectedApp) {
         const legacyBest = readBest(bestKeyForApp(app));
         if (!legacyBest || records.some((record) => record.time === legacyBest)) return records;
@@ -3511,9 +3537,10 @@
           const rows = topRecords.map((record) => ({
             ...record,
             latestInTop: Boolean(latestRecord && record.id === latestRecord.id),
+            todayRecord: isTodayRecord(record),
           }));
           if (latestRecord && !topRecords.some((record) => record.id === latestRecord.id)) {
-            rows.push({ ...latestRecord, latestOnly: true });
+            rows.push({ ...latestRecord, latestOnly: true, todayRecord: isTodayRecord(latestRecord) });
           }
           if (rows.length === 0) {
             const empty = document.createElement("p");
@@ -3529,8 +3556,9 @@
           const body = document.createElement("tbody");
           rows.forEach((record, index) => {
             const row = document.createElement("tr");
-            if (record.latestOnly) row.className = "latestRecord";
-            if (record.latestInTop) row.className = "latestInTopRecord";
+            if (record.latestOnly) row.classList.add("latestRecord");
+            if (record.latestInTop) row.classList.add("latestInTopRecord");
+            if (record.todayRecord) row.classList.add("todayRecord");
             const rankCell = document.createElement("td");
             if (record.latestOnly) {
               rankCell.textContent = "\u6700\u65b0";
