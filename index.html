@@ -1148,7 +1148,8 @@
         border-top: 2px solid rgba(222, 161, 36, 0.22);
         padding-top: 8px;
       }
-      .recordsMiniTable .todayRecord td {
+      .recordsMiniTable .todayRecord td,
+      .recordsMiniTable tr[data-today-record="true"] td {
         background: #dff4ff;
         border: 2px solid rgba(37, 99, 235, 0.2);
         border-left-width: 0;
@@ -1158,13 +1159,15 @@
       }
       .recordsMiniTable .latestInTopRecord td:first-child,
       .recordsMiniTable .latestRecord td:first-child,
-      .recordsMiniTable .todayRecord td:first-child {
+      .recordsMiniTable .todayRecord td:first-child,
+      .recordsMiniTable tr[data-today-record="true"] td:first-child {
         border-left-width: 2px;
         border-radius: 8px 0 0 8px;
       }
       .recordsMiniTable .latestInTopRecord td:last-child,
       .recordsMiniTable .latestRecord td:last-child,
-      .recordsMiniTable .todayRecord td:last-child {
+      .recordsMiniTable .todayRecord td:last-child,
+      .recordsMiniTable tr[data-today-record="true"] td:last-child {
         border-right-width: 2px;
         border-radius: 0 8px 8px 0;
       }
@@ -2928,14 +2931,19 @@
         }, null);
       }
 
+      function localDateKey(date) {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
       function isTodayRecord(record) {
         if (!record?.playedAt) return false;
         const playedAt = new Date(record.playedAt);
         if (Number.isNaN(playedAt.getTime())) return false;
-        const today = new Date();
-        return playedAt.getFullYear() === today.getFullYear()
-          && playedAt.getMonth() === today.getMonth()
-          && playedAt.getDate() === today.getDate();
+        return localDateKey(playedAt) === localDateKey(new Date());
       }
 
       function recordsWithLegacyBest(records, app = selectedApp) {
@@ -3556,9 +3564,13 @@
           const body = document.createElement("tbody");
           rows.forEach((record, index) => {
             const row = document.createElement("tr");
+            const todayRecord = isTodayRecord(record);
             if (record.latestOnly) row.classList.add("latestRecord");
             if (record.latestInTop) row.classList.add("latestInTopRecord");
-            if (record.todayRecord) row.classList.add("todayRecord");
+            if (todayRecord) {
+              row.classList.add("todayRecord");
+              row.dataset.todayRecord = "true";
+            }
             const rankCell = document.createElement("td");
             if (record.latestOnly) {
               rankCell.textContent = "\u6700\u65b0";
