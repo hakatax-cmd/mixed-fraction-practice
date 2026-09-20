@@ -1765,6 +1765,8 @@
       const MAX_MISTAKES = 1;
       const AUTO_ADVANCE_MS = 300;
       const WRONG_ADVANCE_MS = 2500;
+      const WRONG_CONFIRM_MS = 1500;
+      const DIVISION_WRONG_IDLE_MS = 40000;
       const FRACTION_SLOTS = ["whole", "rest"];
       const IMPROPER_FRACTION_TARGET = 12;
       const IMPROPER_FRACTION_SLOTS = ["improperNumeratorTens", "improperNumeratorOnes"];
@@ -1875,6 +1877,7 @@
       let isFinished = false;
       let transitionTimer = null;
       let confirmationTimer = null;
+      let divisionWrongTimer = null;
       let bestConfettiTimer = null;
       let clearAnswerConfirmTimer = null;
       let clearAnswerPressedAt = 0;
@@ -1882,6 +1885,7 @@
       let pinValue = "";
       let manualNextAction = null;
       let pendingWrongSignature = "";
+      let pendingDivisionWrongSlot = "";
       let swipeStart = null;
       let mistakes = [];
       let selectedDoubleDecimalPosition = null;
@@ -3102,6 +3106,15 @@
         });
       }
 
+      function clearsAllOnWrongApp() {
+        return selectedApp === "multiplication"
+          || selectedApp === "basicDivision"
+          || selectedApp === "fraction"
+          || selectedApp === "improperFraction"
+          || selectedApp === "longMultiplication"
+          || selectedApp === "fractionCalculation";
+      }
+
       function showAnswerCorrections() {
         activeSlotOrder().forEach((slot) => {
           if (getAnswerValue(slot) === expected(slot)) return;
@@ -3124,6 +3137,38 @@
         const values = activeSlotOrder().map((slot) => getAnswerValue(slot)).join("|");
         const decimal = selectedApp === "doubleMultiplication" ? selectedDoubleDecimalPosition ?? "" : "";
         return `${selectedApp}:${values}:${decimal}`;
+      }
+
+      function clearDivisionWrongTimer() {
+        if (!divisionWrongTimer) return;
+        clearTimeout(divisionWrongTimer);
+        divisionWrongTimer = null;
+        pendingDivisionWrongSlot = "";
+      }
+
+      function clearSlotAnswer(slot) {
+        if (!slot || !inputs[slot]) return;
+        inputs[slot].classList.remove("correction");
+        setAnswerValue(slot, "");
+        setActive(slot);
+        if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
+      }
+
+      function clearActiveAnswers() {
+        activeSlotOrder().forEach((slot) => {
+          inputs[slot].classList.remove("correction");
+          setAnswerValue(slot, "");
+        });
+        if (selectedApp === "doubleMultiplication") resetDoubleDecimalChoice();
+        setActive(activeSlotOrder()[0]);
+        updateDoubleDecimalChoices();
+      }
+
+      function wrongAnswerSlots() {
+        return activeSlotOrder().filter((slot) => {
+          const value = getAnswerValue(slot);
+          return value.length > 0 && value !== expected(slot);
+        });
       }
 
       function removeLastAnswerStep() {
@@ -3160,18 +3205,47 @@
         nextMistakeButton.hidden = false;
       }
 
-      function showWrongConfirmation(signature) {
+      function showWrongConfirmation(signature, cleanup = removeLastAnswerStep) {
         pendingWrongSignature = signature;
         if (confirmationTimer) clearTimeout(confirmationTimer);
+        clearDivisionWrongTimer();
         setLocked(true);
         feedback.textContent = "\u672c\u5f53\u306b\u305d\u308c\u3067\u3044\u3044\uff1f";
         feedback.classList.add("confirming");
         confirmationTimer = window.setTimeout(() => {
           confirmationTimer = null;
+          pendingWrongSignature = "";
           setLocked(false);
           clearConfirmationMessage();
-          removeLastAnswerStep();
-        }, 1500);
+          cleanup();
+          watchDivisionWrongAnswer();
+        }, WRONG_CONFIRM_MS);
+      }
+
+      function watchDivisionWrongAnswer() {
+        if (selectedApp !== "division" || isAnswerLocked || isFinished) {
+          clearDivisionWrongTimer();
+          return;
+        }
+
+        const wrongSlot = wrongAnswerSlots()[0] || "";
+        if (!wrongSlot) {
+          clearDivisionWrongTimer();
+          return;
+        }
+
+        if (divisionWrongTimer && pendingDivisionWrongSlot === wrongSlot) return;
+        clearDivisionWrongTimer();
+        pendingDivisionWrongSlot = wrongSlot;
+        divisionWrongTimer = window.setTimeout(() => {
+          divisionWrongTimer = null;
+          const stillWrongSlot = wrongAnswerSlots()[0] || "";
+          if (!stillWrongSlot || selectedApp !== "division" || isFinished) {
+            pendingDivisionWrongSlot = "";
+            return;
+          }
+          showWrongConfirmation(answerSignature(), () => clearSlotAnswer(stillWrongSlot));
+        }, DIVISION_WRONG_IDLE_MS);
       }
 
       function setSlotValue(slot, rawValue) {
@@ -3179,18 +3253,25 @@
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
+        if (selectedApp === "doubleMultiplication" && value.length >= expected(slot).length && value !== expected(slot)) {
+          showWrongConfirmation(answerSignature(), () => clearSlotAnswer(slot));
+          return;
+        }
         if (value.length >= expected(slot).length) nextSlot(slot);
         if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
+        if (selectedApp === "division") watchDivisionWrongAnswer();
         checkState();
       }
 
       function resetInputs(resetModeLock = false) {
         resetClearAnswerConfirm();
+        clearDivisionWrongTimer();
         if (confirmationTimer) {
           clearTimeout(confirmationTimer);
           confirmationTimer = null;
         }
         pendingWrongSignature = "";
+        pendingDivisionWrongSlot = "";
         clearConfirmationMessage();
         Object.keys(inputs).forEach((slot) => {
           inputs[slot].classList.remove("correction");
@@ -3347,37 +3428,29 @@
         const correct = correctDigits && correctDecimal;
 
         if (!correct) {
-          const signature = answerSignature();
-          if (pendingWrongSignature !== signature) {
-            showWrongConfirmation(signature);
+          if (selectedApp === "division") {
+            watchDivisionWrongAnswer();
             return;
           }
 
-          pendingWrongSignature = "";
-          setLocked(true);
-          mistakeCount += 1;
-          recordMistake();
-          updateProgress();
-          correctAnswer.hidden = true;
-          correctAnswer.textContent = "";
-          showAnswerCorrections();
-          showReaction(false);
-          if (isTimedProblemApp() && isLastTimedProblem()) {
-            finalTime = elapsedTime();
-            clearedAt = new Date();
-            isFinished = true;
-            updateProgress();
-            schedule(finishRound, WRONG_ADVANCE_MS);
+          if (clearsAllOnWrongApp()) {
+            showWrongConfirmation(answerSignature(), clearActiveAnswers);
             return;
           }
-          schedule(() => {
-            hideReaction();
-            nextProblem(true);
-          }, WRONG_ADVANCE_MS);
+
+          const wrongSlot = wrongAnswerSlots()[0];
+          showWrongConfirmation(answerSignature(), () => {
+            if (wrongSlot) {
+              clearSlotAnswer(wrongSlot);
+              return;
+            }
+            removeLastAnswerStep();
+          });
           return;
         }
 
         pendingWrongSignature = "";
+        clearDivisionWrongTimer();
         setLocked(true);
         showReaction(true);
         correctCount += 1;
@@ -4049,8 +4122,7 @@
       }
 
       function startSwipe(event) {
-        if (!hasStarted || isAnswerLocked || isFinished || event.pointerType !== "touch" || isInteractiveTarget(event.target)) return;
-        swipeStart = { x: event.clientX, y: event.clientY };
+        swipeStart = null;
       }
 
       function finishSwipe(event) {
@@ -4065,9 +4137,7 @@
       }
 
       function startTouchSwipe(event) {
-        if (!hasStarted || isAnswerLocked || isFinished || isInteractiveTarget(event.target) || event.touches.length !== 1) return;
-        const touch = event.touches[0];
-        swipeStart = { x: touch.clientX, y: touch.clientY };
+        swipeStart = null;
       }
 
       function finishTouchSwipe(event) {
@@ -4196,12 +4266,14 @@
         if (current.length > 0) {
           setAnswerValue(activeSlot, current.slice(0, -1));
           updateDoubleDecimalChoices();
+          watchDivisionWrongAnswer();
           return;
         }
         const slots = activeSlotOrder();
         const index = slots.indexOf(activeSlot);
         if (index > 0) setActive(slots[index - 1]);
         updateDoubleDecimalChoices();
+        watchDivisionWrongAnswer();
       }
 
       function clearAnswer() {
