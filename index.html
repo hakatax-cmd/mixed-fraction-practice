@@ -191,6 +191,8 @@
         line-height: 1.1;
         box-shadow: 0 6px 0 rgba(22, 32, 42, 0.08);
       }
+      #chooseLongMultiplication { font-size: clamp(0.88rem, 2.5vmin, 1.6rem); }
+      #longMultiplicationCover h1 { font-size: clamp(2.2rem, 7.4vmin, 4.6rem); }
       .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
 
       .progress {
@@ -271,6 +273,7 @@
         --fraction-box-width: clamp(58px, 9.5vmin, 100px);
         --fraction-box-height: clamp(48px, 7.2vmin, 76px);
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         place-items: center;
         padding-top: clamp(0px, 0.6vmin, 8px);
         font-size: clamp(2.05rem, 6.2vmin, 4.5rem);
@@ -278,11 +281,14 @@
 
       .fractionAddSubtractStack {
         display: grid;
+        grid-column: 1;
         grid-template-columns: minmax(0, auto) auto minmax(0, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(8px, 1.4vmin, 16px);
         align-items: center;
         justify-items: center;
+        width: max-content;
+        max-width: 100%;
         font-variant-numeric: tabular-nums;
       }
 
@@ -1438,6 +1444,7 @@
         #challengeView.divisionMode .divisionProblemLine {
           padding-top: clamp(16px, 4.8vw, 30px);
         }
+
       }
 
       @media (orientation: landscape) and (max-height: 600px) {
@@ -1514,7 +1521,7 @@
             <button class="menuButton" id="chooseBasicDivision" type="button">&#21106;&#12426;&#31639;</button>
             <button class="menuButton" id="chooseFraction" type="button">&#24111;&#20998;&#25968;&#12395;&#12377;&#12427;</button>
             <button class="menuButton" id="chooseImproperFraction" type="button">&#20206;&#20998;&#25968;&#12395;&#12377;&#12427;</button>
-            <button class="menuButton" id="chooseLongMultiplication" type="button">&#19977;&#12369;&#12383;&#12398;<br />&#25499;&#12369;&#31639;</button>
+            <button class="menuButton" id="chooseLongMultiplication" type="button">3&#26689;&times;1&#26689;&#12398;<br />&#25499;&#12369;&#31639;</button>
             <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionAddSubtract" type="button">&#20998;&#25968;&#12398;<br />&#36275;&#12375;&#31639;&#12539;&#24341;&#12365;&#31639;</button>
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
@@ -1543,7 +1550,7 @@
         </section>
 
         <section class="cover" id="longMultiplicationCover" hidden>
-          <h1>&#19977;&#12369;&#12383;&#12398;&#25499;&#12369;&#31639;</h1>
+          <h1>3&#26689;&times;1&#26689;&#12398;&#25499;&#12369;&#31639;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="longMultiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
@@ -1949,7 +1956,7 @@
         improperFraction: "\u4eee\u5206\u6570\u306b\u3059\u308b",
         multiplication: "\u4e5d\u4e5d",
         basicDivision: "\u5272\u308a\u7b97",
-        longMultiplication: "\u4e09\u3051\u305f\u306e\u639b\u3051\u7b97",
+        longMultiplication: "3\u6841\u00d71\u6841\u306e\u639b\u3051\u7b97",
         doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
