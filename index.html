@@ -1805,11 +1805,13 @@
               <span class="groupingEquals">=</span>
               <span class="groupingIntermediate">
                 <span id="groupingFactor"></span>
+                <span id="groupingMiddleOpen" hidden>(</span>
                 <span class="groupingMinus" id="groupingMiddleMinus" hidden>-</span>
                 <span class="answerDigits">
                   <button id="groupingMiddleTensInput" class="answerBox" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
                   <button id="groupingMiddleOnesInput" class="answerBox active" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
+                <span id="groupingMiddleClose" hidden>)</span>
               </span>
               <span class="groupingSpacer"></span>
               <span class="groupingEquals groupingFinalEquals">=</span>
@@ -2235,7 +2237,9 @@
       const groupingVisual = document.querySelector("#groupingVisual");
       const groupingQuestion = document.querySelector("#groupingQuestion");
       const groupingFactor = document.querySelector("#groupingFactor");
+      const groupingMiddleOpen = document.querySelector("#groupingMiddleOpen");
       const groupingMiddleMinus = document.querySelector("#groupingMiddleMinus");
+      const groupingMiddleClose = document.querySelector("#groupingMiddleClose");
       const groupingFinalMinus = document.querySelector("#groupingFinalMinus");
       const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
       const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
@@ -2988,7 +2992,8 @@
       function groupingAnswerText(item = groupingProblem) {
         if (!item) return "";
         const sign = item.operator === "subtract" ? "-" : "";
-        return String(item.factor) + "\u00d7" + sign + item.middle + "=" + sign + item.answer;
+        const middle = item.operator === "subtract" ? "(" + sign + item.middle + ")" : item.middle;
+        return String(item.factor) + "\u00d7" + middle + "=" + sign + item.answer;
       }
 
       function groupingExpected(slot) {
@@ -3127,7 +3132,9 @@
           inputs[slot].hidden = false;
         });
         const subtracting = groupingProblem.operator === "subtract";
+        groupingMiddleOpen.hidden = !subtracting;
         groupingMiddleMinus.hidden = !subtracting;
+        groupingMiddleClose.hidden = !subtracting;
         groupingFinalMinus.hidden = !subtracting;
         renderGroupingDiagram();
       }
@@ -3918,7 +3925,7 @@
         const value = rawValue.replace(/\D/g, "").slice(0, expected(slot).length);
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
-        if (selectedApp === "doubleMultiplication" && value.length >= expected(slot).length && value !== expected(slot)) {
+        if ((selectedApp === "doubleMultiplication" || selectedApp === "grouping") && value.length >= expected(slot).length && value !== expected(slot)) {
           showWrongConfirmation(answerSignature(), () => clearSlotAnswer(slot));
           return;
         }
