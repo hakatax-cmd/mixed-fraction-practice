@@ -3063,14 +3063,21 @@
             parts.push(groupingHorizontalDimension(x, y + height, firstWidth, item.first));
             parts.push(groupingHorizontalDimension(x + firstWidth, y + height, secondWidth, item.second));
           } else {
-            parts.push('<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '" rx="6" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>');
-            parts.push(groupingVerticalDimension(x, y, height, item.factor));
-            parts.push(groupingHorizontalDimension(x, y + height, width, item.middle));
+            const originalWidth = item.second * unit;
+            const originalX = (560 - originalWidth) / 2;
+            const firstWidth = item.first * unit;
+            const differenceWidth = item.middle * unit;
+            parts.push('<rect x="' + originalX + '" y="' + y + '" width="' + originalWidth + '" height="' + height + '" rx="6" fill="#dff2e8" stroke="#16202a" stroke-width="3"></rect>');
+            parts.push('<rect x="' + originalX + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>');
+            parts.push('<rect x="' + (originalX + firstWidth) + '" y="' + y + '" width="' + differenceWidth + '" height="' + height + '" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>');
+            parts.push(groupingVerticalDimension(originalX, y, height, item.factor));
+            parts.push(groupingHorizontalDimension(originalX, y, firstWidth, item.first, true));
+            parts.push(groupingHorizontalDimension(originalX, y + height, originalWidth, item.second));
           }
           groupingVisual.innerHTML = parts.join("");
           groupingVisual.setAttribute("aria-label", item.operator === "add"
             ? item.factor + "\u00d7" + item.middle + "\u306e\u9577\u65b9\u5f62"
-            : "\u7dda\u3067\u306a\u306a\u3081\u306b\u5857\u3063\u305f\u3001\u2212" + item.middle + "\u00d7" + item.factor + "\u306e\u9577\u65b9\u5f62");
+            : "\u9752\u3068\u7dd1\u306e\u5143\u306e\u9577\u65b9\u5f62\u3068\u3001\u305d\u306e\u5dee\u306e\u8d64\u3044\u659c\u7dda");
           return;
         }
 
