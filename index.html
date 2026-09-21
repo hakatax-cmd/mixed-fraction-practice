@@ -1610,7 +1610,7 @@
             <button class="menuButton" id="chooseFractionAddSubtract" type="button">&#20998;&#25968;&#12398;<br />&#36275;&#12375;&#31639;&#12539;&#24341;&#12365;&#31639;</button>
             <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#25499;&#12369;&#31639;&#12539;&#21106;&#12426;&#31639;</button>
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
-            <button class="menuButton" id="chooseGrouping" type="button">&#12414;&#12392;&#12417;&#31639;</button>
+            <button class="menuButton" id="chooseGrouping" type="button">&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
@@ -1675,7 +1675,7 @@
         </section>
 
         <section class="cover" id="groupingCover" hidden>
-          <h1>&#12414;&#12392;&#12417;&#31639;</h1>
+          <h1>&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</h1>
           <p class="coverPrompt">&#20849;&#36890;&#12398;&#25968;&#12391;&#12414;&#12392;&#12417;&#12424;&#12358;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="groupingStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
@@ -2085,7 +2085,7 @@
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
-        grouping: "\u307e\u3068\u3081\u7b97",
+        grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
       };
       const APP_ORDER = [
         "multiplication",
@@ -2490,7 +2490,7 @@
           }
 
           const answer = factor * middle;
-          if (factor === first || factor === second || factor === middle) continue;
+          if (factor === first || factor === second || factor === middle || first === second) continue;
           if (answer < 10 || answer > 99) continue;
           const item = { operator, factor, first, second, middle, answer };
           const key = groupingProblemText(item);
@@ -2986,7 +2986,7 @@
       function groupingProblemText(item = groupingProblem) {
         if (!item) return "";
         const sign = item.operator === "add" ? "+" : "-";
-        return String(item.first) + "\u00d7" + item.factor + sign + item.factor + "\u00d7" + item.second;
+        return String(item.factor) + "\u00d7" + item.first + sign + item.second + "\u00d7" + item.factor;
       }
 
       function groupingAnswerText(item = groupingProblem) {
@@ -3104,7 +3104,7 @@
             groupingVerticalDimension(x + firstWidth + gap + secondWidth, sourceY, secondHeight, item.second, true) +
             groupingHorizontalDimension(x + firstWidth + gap, sourceY + secondHeight, secondWidth, item.factor) +
             groupingLabel(x + firstWidth + gap / 2, sourceY + Math.max(firstHeight, secondHeight) / 2 + 8, "+", "#667085");
-          groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u3068" + item.factor + "\u00d7" + item.second + "\u306e\u4e8c\u3064\u306e\u9577\u65b9\u5f62");
+          groupingVisual.setAttribute("aria-label", item.factor + "\u00d7" + item.first + "\u3068" + item.second + "\u00d7" + item.factor + "\u306e\u4e8c\u3064\u306e\u9577\u65b9\u5f62");
           return;
         }
 
@@ -3119,7 +3119,7 @@
           groupingVerticalDimension(x + firstWidth + gap + secondWidth, sourceY, secondHeight, item.second, true) +
           groupingHorizontalDimension(x + firstWidth + gap, sourceY + secondHeight, secondWidth, item.factor) +
           groupingLabel(x + firstWidth + gap / 2, sourceY + Math.max(firstHeight, secondHeight) / 2 + 8, "\u2212", "#c94735");
-        groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u306e\u9752\u3044\u9577\u65b9\u5f62\u304b\u3089\u3001" + item.factor + "\u00d7" + item.second + "\u306e\u7dd1\u306e\u9577\u65b9\u5f62\u3092\u5f15\u304f\u56f3");
+        groupingVisual.setAttribute("aria-label", item.factor + "\u00d7" + item.first + "\u306e\u9752\u3044\u9577\u65b9\u5f62\u304b\u3089\u3001" + item.second + "\u00d7" + item.factor + "\u306e\u7dd1\u306e\u9577\u65b9\u5f62\u3092\u5f15\u304f\u56f3");
       }
 
       function updateGroupingSlots() {
@@ -4991,7 +4991,7 @@
           updateFractionAddSubtractSlots();
         } else if (selectedApp === "grouping") {
           const sign = groupingProblem.operator === "add" ? "+" : "-";
-          groupingQuestion.textContent = groupingProblem.first + "\u00d7" + groupingProblem.factor + sign + groupingProblem.factor + "\u00d7" + groupingProblem.second;
+          groupingQuestion.textContent = groupingProblem.factor + "\u00d7" + groupingProblem.first + sign + groupingProblem.second + "\u00d7" + groupingProblem.factor;
           groupingFactor.textContent = groupingProblem.factor + "\u00d7";
           updateGroupingSlots();
         } else {
