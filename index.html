@@ -194,6 +194,7 @@
       }
       #chooseLongMultiplication { font-size: clamp(0.88rem, 2.5vmin, 1.6rem); }
       #longMultiplicationCover h1 { font-size: clamp(2.2rem, 7.4vmin, 4.6rem); }
+      #chooseGrouping { grid-column: 3; }
       .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
 
       .progress {
@@ -1417,6 +1418,7 @@
         .modeSwitch { width: 100%; }
         .appChoices { grid-template-columns: 1fr; }
         #appMenu .appChoices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        #chooseGrouping { grid-column: 2; }
         .progress {
           min-height: clamp(50px, 8.4vmin, 70px);
           padding-right: clamp(126px, 27vmin, 176px);
@@ -1590,9 +1592,9 @@
             <button class="menuButton" id="chooseLongMultiplication" type="button">3&#26689;&times;1&#26689;&#12398;<br />&#25499;&#12369;&#31639;</button>
             <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionAddSubtract" type="button">&#20998;&#25968;&#12398;<br />&#36275;&#12375;&#31639;&#12539;&#24341;&#12365;&#31639;</button>
-            <button class="menuButton" id="chooseGrouping" type="button">&#12414;&#12392;&#12417;&#31639;</button>
-            <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#25499;&#12369;&#31639;&#12539;&#21106;&#12426;&#31639;</button>
+            <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
+            <button class="menuButton" id="chooseGrouping" type="button">&#12414;&#12392;&#12417;&#31639;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
