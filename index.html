@@ -347,11 +347,22 @@
         font-size: clamp(2.4rem, 6.4vmin, 4.5rem);
       }
 
+      #fractionAddSubtractReducedAnswer.integerResult .answerFraction {
+        display: inline-flex;
+        align-items: center;
+      }
+
+      #fractionAddSubtractReducedAnswer.integerResult .answerFraction i,
+      #fractionAddSubtractReducedAnswer.integerResult #fractionAddSubtractReducedDenominatorInput {
+        display: none;
+      }
+
       #groupingProblemLine {
         --grouping-box-width: clamp(58px, 9.5vmin, 100px);
         --grouping-box-height: clamp(48px, 7.2vmin, 76px);
         display: grid;
-        grid-template-rows: minmax(108px, 0.72fr) auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(120px, 1fr);
         place-items: center;
         align-content: center;
         gap: clamp(4px, 1vmin, 12px);
@@ -361,13 +372,18 @@
       }
 
       .groupingVisual {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
         display: block;
-        width: min(100%, 500px);
-        height: min(100%, 180px);
+        width: min(100%, 520px);
+        height: clamp(138px, 27vmin, 220px);
         overflow: visible;
       }
 
       .groupingStack {
+        grid-column: 1;
+        grid-row: 1;
         display: grid;
         grid-template-columns: minmax(0, auto) auto minmax(0, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
@@ -2470,6 +2486,7 @@
           }
 
           const answer = factor * middle;
+          if (factor === first || factor === second || factor === middle) continue;
           if (answer < 10 || answer > 99) continue;
           const item = { operator, factor, first, second, middle, answer };
           const key = groupingProblemText(item);
@@ -2956,7 +2973,10 @@
           ? `-${answer.numerator}/${answer.denominator}`
           : `${answer.numerator}/${answer.denominator}`;
         if (!item.reduced) return raw;
-        return `${raw}=-${item.reduced.numerator}/${item.reduced.denominator}`;
+        const reduced = item.reduced.denominator === 1
+          ? `-${item.reduced.numerator}`
+          : `-${item.reduced.numerator}/${item.reduced.denominator}`;
+        return `${raw}=${reduced}`;
       }
 
       function groupingProblemText(item = groupingProblem) {
@@ -3150,7 +3170,9 @@
         }
         if (fractionAddSubtractProblem.reduced) {
           values.set("fractionAddSubtractReducedNumerator", String(fractionAddSubtractProblem.reduced.numerator));
-          values.set("fractionAddSubtractReducedDenominator", String(fractionAddSubtractProblem.reduced.denominator));
+          if (fractionAddSubtractProblem.reduced.denominator !== 1) {
+            values.set("fractionAddSubtractReducedDenominator", String(fractionAddSubtractProblem.reduced.denominator));
+          }
         }
         return values.get(slot) || "";
       }
@@ -3171,9 +3193,12 @@
         fractionAddSubtractPrimaryDenominator.hidden = addition;
         fractionAddSubtractPrimaryDenominator.textContent = addition ? "" : answer.denominator;
         const showReduced = Boolean(fractionAddSubtractProblem.reduced);
+        const reducedIsInteger = showReduced && fractionAddSubtractProblem.reduced.denominator === 1;
         fractionAddSubtractReducedSpacer.hidden = !showReduced;
         fractionAddSubtractReducedEquals.hidden = !showReduced;
         fractionAddSubtractReducedAnswer.hidden = !showReduced;
+        fractionAddSubtractReducedAnswer.classList.toggle("integerResult", reducedIsInteger);
+        inputs.fractionAddSubtractReducedDenominator.hidden = reducedIsInteger;
       }
 
       function isTimedProblemApp() {
@@ -3250,7 +3275,12 @@
             ];
           }
           const slots = ["fractionAddSubtractPrimaryNumeratorOnes"];
-          if (fractionAddSubtractProblem.reduced) slots.push(...FRACTION_ADD_SUBTRACT_REDUCED_SLOTS);
+          if (fractionAddSubtractProblem.reduced) {
+            if (fractionAddSubtractProblem.reduced.denominator !== 1) {
+              slots.push("fractionAddSubtractReducedDenominator");
+            }
+            slots.push("fractionAddSubtractReducedNumerator");
+          }
           return slots;
         }
         if (selectedApp === "grouping") {
