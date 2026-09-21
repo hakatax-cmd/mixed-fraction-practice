@@ -141,7 +141,8 @@
       .menuButton:first-child { border-color: rgba(20, 150, 111, 0.48); }
       .menuButton:nth-child(2) { border-color: rgba(37, 99, 235, 0.45); }
       #chooseFractionCalculation,
-      #chooseFractionAddSubtract { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.15rem, 4.2vw, 2.35rem); }
+      #chooseFractionAddSubtract,
+      #chooseGrouping { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.15rem, 4.2vw, 2.35rem); }
       .recordActions {
         display: flex;
         order: -1;
@@ -342,6 +343,71 @@
 
       #fractionAddSubtractProblemLine .fixedDenominator {
         min-height: var(--fraction-box-height);
+        font-size: clamp(2.4rem, 6.4vmin, 4.5rem);
+      }
+
+      #groupingProblemLine {
+        --grouping-box-width: clamp(58px, 9.5vmin, 100px);
+        --grouping-box-height: clamp(48px, 7.2vmin, 76px);
+        display: grid;
+        grid-template-rows: minmax(108px, 0.72fr) auto;
+        place-items: center;
+        align-content: center;
+        gap: clamp(4px, 1vmin, 12px);
+        padding-top: 0;
+        font-size: clamp(2rem, 6.1vmin, 4.35rem);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .groupingVisual {
+        display: block;
+        width: min(100%, 500px);
+        height: min(100%, 180px);
+        overflow: visible;
+      }
+
+      .groupingStack {
+        display: grid;
+        grid-template-columns: minmax(0, auto) auto minmax(0, auto);
+        column-gap: clamp(8px, 1.8vw, 20px);
+        row-gap: clamp(6px, 1.2vmin, 14px);
+        align-items: center;
+        justify-items: center;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .groupingQuestion {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: end;
+        white-space: nowrap;
+      }
+
+      .groupingEquals {
+        grid-column: 2;
+        color: var(--muted);
+        line-height: 1;
+      }
+
+      .groupingIntermediate,
+      .groupingFinal {
+        grid-column: 3;
+        display: inline-flex;
+        align-items: center;
+        justify-self: start;
+        white-space: nowrap;
+      }
+
+      .groupingIntermediate { grid-row: 1; }
+      .groupingSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
+      .groupingFinalEquals { grid-row: 2; }
+      .groupingFinal { grid-row: 2; }
+      .groupingMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
+
+      #groupingProblemLine .answerBox {
+        width: var(--grouping-box-width);
+        height: var(--grouping-box-height);
         font-size: clamp(2.4rem, 6.4vmin, 4.5rem);
       }
 
@@ -1524,6 +1590,7 @@
             <button class="menuButton" id="chooseLongMultiplication" type="button">3&#26689;&times;1&#26689;&#12398;<br />&#25499;&#12369;&#31639;</button>
             <button class="menuButton" id="chooseDoubleMultiplication" type="button">&#20108;&#12369;&#12383;&times;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionAddSubtract" type="button">&#20998;&#25968;&#12398;<br />&#36275;&#12375;&#31639;&#12539;&#24341;&#12365;&#31639;</button>
+            <button class="menuButton" id="chooseGrouping" type="button">&#12414;&#12392;&#12417;&#31639;</button>
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseFractionCalculation" type="button">&#20998;&#25968;&#12398;<br />&#25499;&#12369;&#31639;&#12539;&#21106;&#12426;&#31639;</button>
           </div>
@@ -1586,6 +1653,14 @@
           <p class="coverPrompt">&#36275;&#12375;&#31639;&#12392;&#24341;&#12365;&#31639;&#12434;&#20132;&#20114;&#12395;</p>
           <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="fractionAddSubtractStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="groupingCover" hidden>
+          <h1>&#12414;&#12392;&#12417;&#31639;</h1>
+          <p class="coverPrompt">&#20849;&#36890;&#12398;&#25968;&#12391;&#12414;&#12392;&#12417;&#12424;&#12358;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="groupingStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -1701,6 +1776,30 @@
                   <button id="fractionAddSubtractReducedNumeratorInput" class="answerBox" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#23376;" data-value="" type="button"></button>
                   <i></i>
                   <button id="fractionAddSubtractReducedDenominatorInput" class="answerBox" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#27597;" data-value="" type="button"></button>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="problemLine" id="groupingProblemLine" hidden>
+            <svg class="groupingVisual" id="groupingVisual" viewBox="0 0 500 180" role="img"></svg>
+            <div class="groupingStack">
+              <span class="groupingQuestion" id="groupingQuestion"></span>
+              <span class="groupingEquals">=</span>
+              <span class="groupingIntermediate">
+                <span id="groupingFactor"></span>
+                <span class="groupingMinus" id="groupingMiddleMinus" hidden>-</span>
+                <span class="answerDigits">
+                  <button id="groupingMiddleTensInput" class="answerBox" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                  <button id="groupingMiddleOnesInput" class="answerBox active" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                </span>
+              </span>
+              <span class="groupingSpacer"></span>
+              <span class="groupingEquals groupingFinalEquals">=</span>
+              <span class="groupingFinal">
+                <span class="groupingMinus" id="groupingFinalMinus" hidden>-</span>
+                <span class="answerDigits">
+                  <button id="groupingFinalTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                  <button id="groupingFinalOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
               </span>
             </div>
@@ -1918,6 +2017,9 @@
       const FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS = ["fractionAddSubtractPrimaryNumeratorTens", "fractionAddSubtractPrimaryNumeratorOnes"];
       const FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS = ["fractionAddSubtractPrimaryDenominatorTens", "fractionAddSubtractPrimaryDenominatorOnes"];
       const FRACTION_ADD_SUBTRACT_REDUCED_SLOTS = ["fractionAddSubtractReducedDenominator", "fractionAddSubtractReducedNumerator"];
+      const GROUPING_TARGET = 10;
+      const GROUPING_MIDDLE_SLOTS = ["groupingMiddleTens", "groupingMiddleOnes"];
+      const GROUPING_FINAL_SLOTS = ["groupingFinalTens", "groupingFinalOnes"];
       const DIVISION_SLOTS = [
         "divisionQTens",
         "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
@@ -1934,6 +2036,7 @@
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
       const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
       const FRACTION_ADD_SUBTRACT_BEST_KEY = "fractionAddSubtractBestTimeMs";
+      const GROUPING_BEST_KEY = "groupingBestTimeMs";
       const FRACTION_BEST_KEY = "mixedFractionBestTimeMs";
       const BEST_KEYS = [
         MULTIPLICATION_BEST_KEY,
@@ -1944,6 +2047,7 @@
         DIVISION_BEST_KEY,
         FRACTION_CALCULATION_BEST_KEY,
         FRACTION_ADD_SUBTRACT_BEST_KEY,
+        GROUPING_BEST_KEY,
         FRACTION_BEST_KEY,
         "longMultiplicationBestTimeMs",
         "longMultiplicationBestTimeMsV2",
@@ -1961,6 +2065,7 @@
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
+        grouping: "\u307e\u3068\u3081\u7b97",
       };
       const APP_ORDER = [
         "multiplication",
@@ -1972,6 +2077,7 @@
         "division",
         "fractionCalculation",
         "fractionAddSubtract",
+        "grouping",
       ];
 
       let selectedApp = "menu";
@@ -2003,6 +2109,9 @@
       let fractionAddSubtractDeck = [];
       let fractionAddSubtractIndex = 0;
       let fractionAddSubtractProblem = null;
+      let groupingDeck = [];
+      let groupingIndex = 0;
+      let groupingProblem = null;
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -2066,6 +2175,10 @@
         fractionAddSubtractPrimaryDenominatorOnes: document.querySelector("#fractionAddSubtractPrimaryDenominatorOnesInput"),
         fractionAddSubtractReducedNumerator: document.querySelector("#fractionAddSubtractReducedNumeratorInput"),
         fractionAddSubtractReducedDenominator: document.querySelector("#fractionAddSubtractReducedDenominatorInput"),
+        groupingMiddleTens: document.querySelector("#groupingMiddleTensInput"),
+        groupingMiddleOnes: document.querySelector("#groupingMiddleOnesInput"),
+        groupingFinalTens: document.querySelector("#groupingFinalTensInput"),
+        groupingFinalOnes: document.querySelector("#groupingFinalOnesInput"),
         divisionQTens: document.querySelector("#divisionQTensInput"),
         divisionQOnes: document.querySelector("#divisionQOnesInput"),
         divisionP1Hundreds: document.querySelector("#divisionP1HundredsInput"),
@@ -2101,6 +2214,11 @@
       const fractionAddSubtractReducedSpacer = document.querySelector("#fractionAddSubtractReducedSpacer");
       const fractionAddSubtractReducedEquals = document.querySelector("#fractionAddSubtractReducedEquals");
       const fractionAddSubtractReducedAnswer = document.querySelector("#fractionAddSubtractReducedAnswer");
+      const groupingVisual = document.querySelector("#groupingVisual");
+      const groupingQuestion = document.querySelector("#groupingQuestion");
+      const groupingFactor = document.querySelector("#groupingFactor");
+      const groupingMiddleMinus = document.querySelector("#groupingMiddleMinus");
+      const groupingFinalMinus = document.querySelector("#groupingFinalMinus");
       const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
       const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
       const divisionDividendDigits = [
@@ -2120,6 +2238,7 @@
       const divisionCover = document.querySelector("#divisionCover");
       const fractionCalculationCover = document.querySelector("#fractionCalculationCover");
       const fractionAddSubtractCover = document.querySelector("#fractionAddSubtractCover");
+      const groupingCover = document.querySelector("#groupingCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -2129,6 +2248,7 @@
       const chooseDivision = document.querySelector("#chooseDivision");
       const chooseFractionCalculation = document.querySelector("#chooseFractionCalculation");
       const chooseFractionAddSubtract = document.querySelector("#chooseFractionAddSubtract");
+      const chooseGrouping = document.querySelector("#chooseGrouping");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const easyButton = document.querySelector("#easyButton");
@@ -2146,6 +2266,7 @@
       const divisionStartButton = document.querySelector("#divisionStartButton");
       const fractionCalculationStartButton = document.querySelector("#fractionCalculationStartButton");
       const fractionAddSubtractStartButton = document.querySelector("#fractionAddSubtractStartButton");
+      const groupingStartButton = document.querySelector("#groupingStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -2155,6 +2276,7 @@
       const divisionProblemLine = document.querySelector("#divisionProblemLine");
       const fractionCalculationProblemLine = document.querySelector("#fractionCalculationProblemLine");
       const fractionAddSubtractProblemLine = document.querySelector("#fractionAddSubtractProblemLine");
+      const groupingProblemLine = document.querySelector("#groupingProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const skipRecordButton = document.querySelector("#skipRecordButton");
       const timer = document.querySelector("#timer");
@@ -2274,9 +2396,10 @@
           let item;
           if (operator === "subtract") {
             const denominator = randomInt(3, 9);
-            const leftNumerator = randomInt(1, denominator - 2);
-            const rightNumerator = randomInt(leftNumerator + 1, denominator - 1);
-            const rawNumerator = rightNumerator - leftNumerator;
+            const leftNumerator = randomInt(1, 9);
+            const minimumDifference = Math.max(1, 10 - leftNumerator);
+            const rawNumerator = randomInt(minimumDifference, 9);
+            const rightNumerator = leftNumerator + rawNumerator;
             const divisor = gcd(rawNumerator, denominator);
             item = {
               operator,
@@ -2312,7 +2435,7 @@
         }
 
         return operator === "subtract"
-          ? { operator, first: { numerator: 1, denominator: 6 }, second: { numerator: 5, denominator: 6 }, answer: { numerator: 4, denominator: 6 }, reduced: { numerator: 2, denominator: 3 } }
+          ? { operator, first: { numerator: 5, denominator: 6 }, second: { numerator: 12, denominator: 6 }, answer: { numerator: 7, denominator: 6 }, reduced: null }
           : { operator, first: { numerator: 1, denominator: 2 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 }, reduced: null };
       }
 
@@ -2323,6 +2446,48 @@
         for (let index = 0; index < FRACTION_ADD_SUBTRACT_TARGET; index += 1) {
           const operator = (index % 2 === 0) === startWithAddition ? "add" : "subtract";
           deck.push(createFractionAddSubtractProblem(operator, used));
+        }
+        return deck;
+      }
+
+      function createGroupingProblem(operator, used) {
+        for (let attempt = 0; attempt < 1200; attempt += 1) {
+          const factor = randomInt(2, 9);
+          let first;
+          let second;
+          let middle;
+
+          if (operator === "add") {
+            first = randomInt(2, 9);
+            second = randomInt(2, 9);
+            middle = first + second;
+          } else {
+            first = randomInt(1, 8);
+            second = randomInt(first + 1, 9);
+            middle = second - first;
+          }
+
+          const answer = factor * middle;
+          if (answer < 10 || answer > 99) continue;
+          const item = { operator, factor, first, second, middle, answer };
+          const key = groupingProblemText(item);
+          if (used.has(key)) continue;
+          used.add(key);
+          return item;
+        }
+
+        return operator === "add"
+          ? { operator, factor: 7, first: 5, second: 8, middle: 13, answer: 91 }
+          : { operator, factor: 7, first: 5, second: 8, middle: 3, answer: 21 };
+      }
+
+      function createGroupingDeck() {
+        const used = new Set();
+        const deck = [];
+        const startWithAddition = Math.random() < 0.5;
+        for (let index = 0; index < GROUPING_TARGET; index += 1) {
+          const operator = (index % 2 === 0) === startWithAddition ? "add" : "subtract";
+          deck.push(createGroupingProblem(operator, used));
         }
         return deck;
       }
@@ -2792,6 +2957,128 @@
         return `${raw}=-${item.reduced.numerator}/${item.reduced.denominator}`;
       }
 
+      function groupingProblemText(item = groupingProblem) {
+        if (!item) return "";
+        const sign = item.operator === "add" ? "+" : "-";
+        return String(item.first) + "\u00d7" + item.factor + sign + item.factor + "\u00d7" + item.second;
+      }
+
+      function groupingAnswerText(item = groupingProblem) {
+        if (!item) return "";
+        const sign = item.operator === "subtract" ? "-" : "";
+        return String(item.factor) + "\u00d7" + sign + item.middle + "=" + sign + item.answer;
+      }
+
+      function groupingExpected(slot) {
+        if (!groupingProblem) return "";
+        const values = new Map();
+        const addDigits = (slots, value) => {
+          const digits = String(value);
+          visibleDigitSlots(slots, value).forEach((digitSlot, index) => {
+            values.set(digitSlot, digits[index]);
+          });
+        };
+        addDigits(GROUPING_MIDDLE_SLOTS, groupingProblem.middle);
+        addDigits(GROUPING_FINAL_SLOTS, groupingProblem.answer);
+        return values.get(slot) || "";
+      }
+
+      function groupingIsCombined() {
+        if (!groupingProblem) return false;
+        return visibleDigitSlots(GROUPING_MIDDLE_SLOTS, groupingProblem.middle)
+          .every((slot) => getAnswerValue(slot) === groupingExpected(slot));
+      }
+
+      function groupingLabel(x, y, text, color = "#16202a") {
+        return '<text x="' + x + '" y="' + y + '" fill="' + color + '" font-size="19" font-weight="900" text-anchor="middle">' + text + "</text>";
+      }
+
+      function groupingHatchPattern() {
+        return '<defs><pattern id="groupingHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="10" height="10" fill="#ffe7df"></rect><line x1="0" y1="0" x2="0" y2="10" stroke="#e35b43" stroke-width="4"></line></pattern></defs>';
+      }
+
+      function renderGroupingDiagram() {
+        if (!groupingVisual || !groupingProblem) return;
+        const item = groupingProblem;
+        const combined = groupingIsCombined();
+        const height = Math.min(92, 13 * item.factor);
+        const y = (150 - height) / 2 + 10;
+
+        if (combined) {
+          const unit = Math.min(15, 350 / item.middle, 92 / item.factor);
+          const width = item.middle * unit;
+          const x = (500 - width) / 2;
+          const fill = item.operator === "subtract" ? "url(#groupingHatch)" : "#dff2e8";
+          const parts = [
+            groupingHatchPattern(),
+            '<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '" rx="6" fill="' + fill + '" stroke="#16202a" stroke-width="3"></rect>',
+          ];
+          if (item.operator === "add") {
+            const split = x + item.first * unit;
+            parts.push('<line x1="' + split + '" y1="' + y + '" x2="' + split + '" y2="' + (y + height) + '" stroke="#30745d" stroke-width="3"></line>');
+          }
+          const label = item.operator === "subtract"
+            ? "\u2212" + item.middle + "\u00d7" + item.factor
+            : item.factor + "\u00d7" + item.middle;
+          parts.push(groupingLabel(250, y - 12, label));
+          parts.push(groupingLabel(x - 20, y + height / 2 + 6, item.factor, "#667085"));
+          if (item.operator === "add") {
+            parts.push(groupingLabel(x + item.first * unit / 2, y + height / 2 + 7, item.first));
+            parts.push(groupingLabel(x + item.first * unit + item.second * unit / 2, y + height / 2 + 7, item.second));
+          } else {
+            parts.push(groupingLabel(250, y + height / 2 + 7, "\u2212" + item.middle));
+          }
+          groupingVisual.innerHTML = parts.join("");
+          groupingVisual.setAttribute("aria-label", item.operator === "add"
+            ? item.factor + "\u00d7" + item.middle + "\u306e\u9577\u65b9\u5f62"
+            : "\u7dda\u3067\u306a\u306a\u3081\u306b\u5857\u3063\u305f\u3001\u2212" + item.middle + "\u00d7" + item.factor + "\u306e\u9577\u65b9\u5f62");
+          return;
+        }
+
+        const total = item.operator === "add" ? item.first + item.second : item.second;
+        const unit = Math.min(15, 360 / (total + (item.operator === "add" ? 1 : 0)), 92 / item.factor);
+        const firstWidth = item.first * unit;
+        const secondWidth = item.second * unit;
+
+        if (item.operator === "add") {
+          const gap = 22;
+          const width = firstWidth + secondWidth + gap;
+          const x = (500 - width) / 2;
+          groupingVisual.innerHTML = '<rect x="' + x + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>' +
+            '<rect x="' + (x + firstWidth + gap) + '" y="' + y + '" width="' + secondWidth + '" height="' + height + '" rx="6" fill="#dff2e8" stroke="#16202a" stroke-width="3"></rect>' +
+            groupingLabel(x + firstWidth / 2, y + height / 2 + 7, item.first + "\u00d7" + item.factor) +
+            groupingLabel(x + firstWidth + gap + secondWidth / 2, y + height / 2 + 7, item.factor + "\u00d7" + item.second) +
+            groupingLabel(x - 20, y + height / 2 + 7, item.factor, "#667085") +
+            groupingLabel(x + firstWidth + gap / 2, y + height / 2 + 7, "+", "#667085");
+          groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u3068" + item.factor + "\u00d7" + item.second + "\u306e\u4e8c\u3064\u306e\u9577\u65b9\u5f62");
+          return;
+        }
+
+        const x = (500 - secondWidth) / 2;
+        groupingVisual.innerHTML = groupingHatchPattern() +
+          '<rect x="' + x + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>' +
+          '<rect x="' + x + '" y="' + y + '" width="' + secondWidth + '" height="' + height + '" rx="6" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>' +
+          groupingLabel(x + firstWidth / 2, y + height / 2 + 7, item.first + "\u00d7" + item.factor, "#24507a") +
+          groupingLabel(x + secondWidth / 2, y - 12, "\u2212" + item.factor + "\u00d7" + item.second, "#c94735") +
+          groupingLabel(x - 20, y + height / 2 + 7, item.factor, "#667085");
+        groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u306e\u9577\u65b9\u5f62\u306b\u3001\u3072\u304f" + item.factor + "\u00d7" + item.second + "\u306e\u9577\u65b9\u5f62\u3092\u91cd\u306d\u305f\u56f3");
+      }
+
+      function updateGroupingSlots() {
+        if (!groupingProblem) return;
+        const middleVisible = new Set(visibleDigitSlots(GROUPING_MIDDLE_SLOTS, groupingProblem.middle));
+        GROUPING_MIDDLE_SLOTS.forEach((slot) => {
+          inputs[slot].hidden = !middleVisible.has(slot);
+        });
+        GROUPING_FINAL_SLOTS.forEach((slot) => {
+          inputs[slot].hidden = false;
+        });
+        const subtracting = groupingProblem.operator === "subtract";
+        groupingMiddleMinus.hidden = !subtracting;
+        groupingFinalMinus.hidden = !subtracting;
+        renderGroupingDiagram();
+      }
+
       function visibleDigitSlots(slots, value) {
         return slots.slice(slots.length - String(value).length);
       }
@@ -2888,7 +3175,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping";
       }
 
       function currentTimedIndex() {
@@ -2897,6 +3184,7 @@
         if (selectedApp === "division") return divisionIndex;
         if (selectedApp === "fractionCalculation") return fractionCalculationIndex;
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractIndex;
+        if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -2907,6 +3195,7 @@
         if (selectedApp === "division") return divisionDeck.length;
         if (selectedApp === "fractionCalculation") return fractionCalculationDeck.length || FRACTION_CALCULATION_TARGET;
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractDeck.length || FRACTION_ADD_SUBTRACT_TARGET;
+        if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -2921,6 +3210,7 @@
         if (selectedApp === "division") return divisionProblem ? divisionProblem.quotient : 0;
         if (selectedApp === "fractionCalculation") return fractionCalculationAnswer().numerator;
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractAnswer().numerator;
+        if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
@@ -2931,6 +3221,7 @@
         if (selectedApp === "division") return divisionAnswerText();
         if (selectedApp === "fractionCalculation") return fractionCalculationAnswerText();
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractAnswerText();
+        if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -2953,12 +3244,18 @@
           if (fractionAddSubtractProblem.operator === "add") {
             return [
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
-              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator).reverse(),
+              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
             ];
           }
           const slots = ["fractionAddSubtractPrimaryNumeratorOnes"];
           if (fractionAddSubtractProblem.reduced) slots.push(...FRACTION_ADD_SUBTRACT_REDUCED_SLOTS);
           return slots;
+        }
+        if (selectedApp === "grouping") {
+          return [
+            ...visibleDigitSlots(GROUPING_MIDDLE_SLOTS, groupingProblem.middle),
+            ...visibleDigitSlots(GROUPING_FINAL_SLOTS, groupingProblem.answer),
+          ];
         }
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
@@ -2988,6 +3285,7 @@
         }
         if (selectedApp === "fractionCalculation") return fractionCalculationExpected(slot);
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractExpected(slot);
+        if (selectedApp === "grouping") return groupingExpected(slot);
         if (selectedApp === "longMultiplication") {
           const answer = String(longMultiplicationAnswer()).padStart(4, "0");
           return {
@@ -3085,6 +3383,7 @@
         if (app === "division") return DIVISION_BEST_KEY;
         if (app === "fractionCalculation") return FRACTION_CALCULATION_BEST_KEY;
         if (app === "fractionAddSubtract") return FRACTION_ADD_SUBTRACT_BEST_KEY;
+        if (app === "grouping") return GROUPING_BEST_KEY;
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
@@ -3377,6 +3676,7 @@
       function setAnswerValue(slot, value) {
         inputs[slot].dataset.value = value;
         inputs[slot].textContent = value;
+        if (selectedApp === "grouping") renderGroupingDiagram();
       }
 
       function isDoubleTotalComplete() {
@@ -3413,7 +3713,8 @@
           || selectedApp === "improperFraction"
           || selectedApp === "longMultiplication"
           || selectedApp === "fractionCalculation"
-          || selectedApp === "fractionAddSubtract";
+          || selectedApp === "fractionAddSubtract"
+          || selectedApp === "grouping";
       }
 
       function showAnswerCorrections() {
@@ -3630,6 +3931,7 @@
         divisionCover.hidden = true;
         fractionCalculationCover.hidden = true;
         fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -4063,6 +4365,16 @@
             return;
           }
           fractionAddSubtractProblem = fractionAddSubtractDeck[fractionAddSubtractIndex];
+        } else if (selectedApp === "grouping") {
+          if (keepChallenge) groupingIndex += 1;
+          if (groupingIndex >= groupingDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          groupingProblem = groupingDeck[groupingIndex];
         } else {
           problem = createNextFractionProblem();
         }
@@ -4090,6 +4402,8 @@
           fractionCalculationCover.hidden = false;
         } else if (selectedApp === "fractionAddSubtract") {
           fractionAddSubtractCover.hidden = false;
+        } else if (selectedApp === "grouping") {
+          groupingCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -4311,6 +4625,32 @@
         resetInputs(true);
       }
 
+      function startGroupingChallenge() {
+        selectedApp = "grouping";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        groupingDeck = createGroupingDeck();
+        groupingIndex = 0;
+        groupingProblem = groupingDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
         challengeView.classList.remove("divisionMode");
@@ -4476,6 +4816,27 @@
         resetInputs(true);
       }
 
+      function showGroupingCover() {
+        selectedApp = "grouping";
+        challengeView.classList.remove("divisionMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function isInteractiveTarget(target) {
         return target instanceof Element && Boolean(target.closest("button"));
       }
@@ -4521,6 +4882,7 @@
         divisionProblemLine.hidden = selectedApp !== "division";
         fractionCalculationProblemLine.hidden = selectedApp !== "fractionCalculation";
         fractionAddSubtractProblemLine.hidden = selectedApp !== "fractionAddSubtract";
+        groupingProblemLine.hidden = selectedApp !== "grouping";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -4557,6 +4919,11 @@
           const sign = fractionAddSubtractProblem.operator === "add" ? "+" : "-";
           fractionAddSubtractQuestion.innerHTML = `${fraction(fractionAddSubtractProblem.first.numerator, fractionAddSubtractProblem.first.denominator)}<span class="fractionAddSubtractOperator">${sign}</span>${fraction(fractionAddSubtractProblem.second.numerator, fractionAddSubtractProblem.second.denominator)}`;
           updateFractionAddSubtractSlots();
+        } else if (selectedApp === "grouping") {
+          const sign = groupingProblem.operator === "add" ? "+" : "-";
+          groupingQuestion.textContent = groupingProblem.first + "\u00d7" + groupingProblem.factor + sign + groupingProblem.factor + "\u00d7" + groupingProblem.second;
+          groupingFactor.textContent = groupingProblem.factor + "\u00d7";
+          updateGroupingSlots();
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
           fractionAnswerDenominator.textContent = problem.denominator;
@@ -4690,6 +5057,7 @@
       chooseDivision.addEventListener("click", showDivisionCover);
       chooseFractionCalculation.addEventListener("click", showFractionCalculationCover);
       chooseFractionAddSubtract.addEventListener("click", showFractionAddSubtractCover);
+      chooseGrouping.addEventListener("click", showGroupingCover);
       viewRecordsButton.addEventListener("click", showAllRecords);
       recordsCloseButton.addEventListener("click", hideAllRecords);
       clearRecordsButton.addEventListener("click", showDeletePin);
@@ -4722,6 +5090,7 @@
       divisionStartButton.addEventListener("click", startDivisionChallenge);
       fractionCalculationStartButton.addEventListener("click", startFractionCalculationChallenge);
       fractionAddSubtractStartButton.addEventListener("click", startFractionAddSubtractChallenge);
+      groupingStartButton.addEventListener("click", startGroupingChallenge);
       nextMistakeButton.addEventListener("click", () => {
         if (!manualNextAction) return;
         const action = manualNextAction;
