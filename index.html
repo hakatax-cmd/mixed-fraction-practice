@@ -358,26 +358,26 @@
       }
 
       #groupingProblemLine {
-        --grouping-box-width: clamp(58px, 9.5vmin, 100px);
-        --grouping-box-height: clamp(48px, 7.2vmin, 76px);
+        --grouping-box-width: clamp(48px, 8.2vmin, 84px);
+        --grouping-box-height: clamp(64px, 10.9vmin, 112px);
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto minmax(120px, 1fr);
+        grid-template-rows: auto auto;
         place-items: center;
-        align-content: center;
-        gap: clamp(4px, 1vmin, 12px);
-        padding-top: 0;
-        font-size: clamp(2rem, 6.1vmin, 4.35rem);
+        align-content: end;
+        gap: clamp(8px, 1.5vmin, 16px);
+        padding-top: clamp(18px, 3.6vmin, 42px);
+        font-size: clamp(2.3rem, 6.9vmin, 4.85rem);
         font-variant-numeric: tabular-nums;
       }
 
       .groupingVisual {
         grid-column: 1;
         grid-row: 2;
-        align-self: start;
+        align-self: end;
         display: block;
-        width: min(100%, 520px);
-        height: clamp(138px, 27vmin, 220px);
+        width: min(100%, 560px);
+        height: clamp(156px, 30vmin, 260px);
         overflow: visible;
       }
 
@@ -425,7 +425,7 @@
       #groupingProblemLine .answerBox {
         width: var(--grouping-box-width);
         height: var(--grouping-box-height);
-        font-size: clamp(2.4rem, 6.4vmin, 4.5rem);
+        font-size: clamp(2.8rem, 7.7vmin, 5.35rem);
       }
 
       .fractionCalcQuestion {
@@ -1799,7 +1799,7 @@
             </div>
           </div>
           <div class="problemLine" id="groupingProblemLine" hidden>
-            <svg class="groupingVisual" id="groupingVisual" viewBox="0 0 500 180" role="img"></svg>
+            <svg class="groupingVisual" id="groupingVisual" viewBox="0 0 560 260" role="img"></svg>
             <div class="groupingStack">
               <span class="groupingQuestion" id="groupingQuestion"></span>
               <span class="groupingEquals">=</span>
@@ -3012,24 +3012,45 @@
       }
 
       function groupingLabel(x, y, text, color = "#16202a") {
-        return '<text x="' + x + '" y="' + y + '" fill="' + color + '" font-size="19" font-weight="900" text-anchor="middle">' + text + "</text>";
+        return '<text x="' + x + '" y="' + y + '" fill="' + color + '" font-size="24" font-weight="900" text-anchor="middle">' + text + "</text>";
       }
 
       function groupingHatchPattern() {
         return '<defs><pattern id="groupingHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="10" height="10" fill="#ffe7df"></rect><line x1="0" y1="0" x2="0" y2="10" stroke="#e35b43" stroke-width="4"></line></pattern></defs>';
       }
 
+      function groupingHorizontalDimension(x, y, width, label, above = false) {
+        const dimensionY = y + (above ? -20 : 20);
+        const textY = dimensionY + (above ? -9 : 31);
+        return '<line x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + dimensionY + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + (x + width) + '" y1="' + y + '" x2="' + (x + width) + '" y2="' + dimensionY + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + x + '" y1="' + dimensionY + '" x2="' + (x + width) + '" y2="' + dimensionY + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + x + '" y1="' + (dimensionY - 5) + '" x2="' + x + '" y2="' + (dimensionY + 5) + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + (x + width) + '" y1="' + (dimensionY - 5) + '" x2="' + (x + width) + '" y2="' + (dimensionY + 5) + '" stroke="#667085" stroke-width="2"></line>' +
+          groupingLabel(x + width / 2, textY, label, "#667085");
+      }
+
+      function groupingVerticalDimension(x, y, height, label) {
+        const dimensionX = x - 20;
+        return '<line x1="' + x + '" y1="' + y + '" x2="' + dimensionX + '" y2="' + y + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + x + '" y1="' + (y + height) + '" x2="' + dimensionX + '" y2="' + (y + height) + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + dimensionX + '" y1="' + y + '" x2="' + dimensionX + '" y2="' + (y + height) + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + (dimensionX - 5) + '" y1="' + y + '" x2="' + (dimensionX + 5) + '" y2="' + y + '" stroke="#667085" stroke-width="2"></line>' +
+          '<line x1="' + (dimensionX - 5) + '" y1="' + (y + height) + '" x2="' + (dimensionX + 5) + '" y2="' + (y + height) + '" stroke="#667085" stroke-width="2"></line>' +
+          groupingLabel(dimensionX - 18, y + height / 2 + 8, label, "#667085");
+      }
+
       function renderGroupingDiagram() {
         if (!groupingVisual || !groupingProblem) return;
         const item = groupingProblem;
         const combined = groupingIsCombined();
-        const height = Math.min(92, 13 * item.factor);
-        const y = (150 - height) / 2 + 10;
+        const height = Math.min(138, 20 * item.factor);
+        const y = (220 - height) / 2 + 10;
 
         if (combined) {
-          const unit = Math.min(15, 350 / item.middle, 92 / item.factor);
+          const unit = Math.min(21, 430 / item.middle, 138 / item.factor);
           const width = item.middle * unit;
-          const x = (500 - width) / 2;
+          const x = (560 - width) / 2;
           const fill = item.operator === "subtract" ? "url(#groupingHatch)" : "#dff2e8";
           const parts = [
             groupingHatchPattern(),
@@ -3039,17 +3060,8 @@
             const split = x + item.first * unit;
             parts.push('<line x1="' + split + '" y1="' + y + '" x2="' + split + '" y2="' + (y + height) + '" stroke="#30745d" stroke-width="3"></line>');
           }
-          const label = item.operator === "subtract"
-            ? "\u2212" + item.middle + "\u00d7" + item.factor
-            : item.factor + "\u00d7" + item.middle;
-          parts.push(groupingLabel(250, y - 12, label));
-          parts.push(groupingLabel(x - 20, y + height / 2 + 6, item.factor, "#667085"));
-          if (item.operator === "add") {
-            parts.push(groupingLabel(x + item.first * unit / 2, y + height / 2 + 7, item.first));
-            parts.push(groupingLabel(x + item.first * unit + item.second * unit / 2, y + height / 2 + 7, item.second));
-          } else {
-            parts.push(groupingLabel(250, y + height / 2 + 7, "\u2212" + item.middle));
-          }
+          parts.push(groupingVerticalDimension(x, y, height, item.factor));
+          parts.push(groupingHorizontalDimension(x, y + height, width, item.middle));
           groupingVisual.innerHTML = parts.join("");
           groupingVisual.setAttribute("aria-label", item.operator === "add"
             ? item.factor + "\u00d7" + item.middle + "\u306e\u9577\u65b9\u5f62"
@@ -3058,31 +3070,31 @@
         }
 
         const total = item.operator === "add" ? item.first + item.second : item.second;
-        const unit = Math.min(15, 360 / (total + (item.operator === "add" ? 1 : 0)), 92 / item.factor);
+        const unit = Math.min(21, 460 / (total + (item.operator === "add" ? 1 : 0)), 138 / item.factor);
         const firstWidth = item.first * unit;
         const secondWidth = item.second * unit;
 
         if (item.operator === "add") {
-          const gap = 22;
+          const gap = 28;
           const width = firstWidth + secondWidth + gap;
-          const x = (500 - width) / 2;
+          const x = (560 - width) / 2;
           groupingVisual.innerHTML = '<rect x="' + x + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>' +
             '<rect x="' + (x + firstWidth + gap) + '" y="' + y + '" width="' + secondWidth + '" height="' + height + '" rx="6" fill="#dff2e8" stroke="#16202a" stroke-width="3"></rect>' +
-            groupingLabel(x + firstWidth / 2, y + height / 2 + 7, item.first + "\u00d7" + item.factor) +
-            groupingLabel(x + firstWidth + gap + secondWidth / 2, y + height / 2 + 7, item.factor + "\u00d7" + item.second) +
-            groupingLabel(x - 20, y + height / 2 + 7, item.factor, "#667085") +
-            groupingLabel(x + firstWidth + gap / 2, y + height / 2 + 7, "+", "#667085");
+            groupingVerticalDimension(x, y, height, item.factor) +
+            groupingHorizontalDimension(x, y + height, firstWidth, item.first) +
+            groupingHorizontalDimension(x + firstWidth + gap, y + height, secondWidth, item.second) +
+            groupingLabel(x + firstWidth + gap / 2, y + height / 2 + 8, "+", "#667085");
           groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u3068" + item.factor + "\u00d7" + item.second + "\u306e\u4e8c\u3064\u306e\u9577\u65b9\u5f62");
           return;
         }
 
-        const x = (500 - secondWidth) / 2;
+        const x = (560 - secondWidth) / 2;
         groupingVisual.innerHTML = groupingHatchPattern() +
           '<rect x="' + x + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>' +
           '<rect x="' + x + '" y="' + y + '" width="' + secondWidth + '" height="' + height + '" rx="6" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>' +
-          groupingLabel(x + firstWidth / 2, y + height / 2 + 7, item.first + "\u00d7" + item.factor, "#24507a") +
-          groupingLabel(x + secondWidth / 2, y - 12, "\u2212" + item.factor + "\u00d7" + item.second, "#c94735") +
-          groupingLabel(x - 20, y + height / 2 + 7, item.factor, "#667085");
+          groupingVerticalDimension(x, y, height, item.factor) +
+          groupingHorizontalDimension(x, y, firstWidth, item.first, true) +
+          groupingHorizontalDimension(x, y + height, secondWidth, item.second);
         groupingVisual.setAttribute("aria-label", item.first + "\u00d7" + item.factor + "\u306e\u9577\u65b9\u5f62\u306b\u3001\u3072\u304f" + item.factor + "\u00d7" + item.second + "\u306e\u9577\u65b9\u5f62\u3092\u91cd\u306d\u305f\u56f3");
       }
 
