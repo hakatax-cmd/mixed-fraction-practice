@@ -375,21 +375,32 @@
       .ratioQuestion { margin: 0; font-size: clamp(1.15rem, 3.8vmin, 2.2rem); text-align: center; }
       .ratioEquation { display: inline-flex; align-items: center; justify-content: center; gap: clamp(7px, 1.5vmin, 14px); min-width: 0; font-variant-numeric: tabular-nums; }
       .ratioKnownValue, .ratioEquals, .ratioUnit { white-space: nowrap; }
+      .ratioKnownValue {
+        display: inline-grid;
+        place-items: center;
+        min-width: clamp(54px, 11vmin, 96px);
+        height: clamp(42px, 7.4vmin, 66px);
+        padding: 0 8px;
+        border: 3px solid var(--line);
+        border-radius: 6px;
+        background: #f8fafc;
+      }
       .ratioEquals { align-self: center; color: var(--muted); }
 
       .ratioOperatorInput {
         display: grid;
         place-items: center;
-        width: clamp(42px, 7.4vmin, 66px);
-        height: clamp(42px, 7.4vmin, 66px);
+        width: clamp(54px, 9vmin, 78px);
+        height: clamp(54px, 9vmin, 78px);
         padding: 0;
-        border: 3px solid var(--line);
+        border: 0;
         border-radius: 50%;
-        background: #fffdf8;
-        color: var(--muted);
+        background: transparent;
+        color: var(--ink);
         font: inherit;
-        font-size: clamp(1.5rem, 5vmin, 3rem);
+        font-size: clamp(2.2rem, 7.2vmin, 4.1rem);
         font-weight: 900;
+        line-height: 1;
       }
 
       .ratioFreeInput {
@@ -408,7 +419,8 @@
         font-variant-numeric: tabular-nums;
       }
 
-      .ratioFreeInput.active, .ratioOperatorInput.active, .ratioAnswerBox.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .ratioFreeInput.active, .ratioAnswerBox.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .ratioOperatorInput.active { color: var(--ink); box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.28); }
       .ratioFraction { display: grid; grid-template-rows: clamp(40px, 7.1vmin, 62px) 4px clamp(40px, 7.1vmin, 62px); align-items: center; min-width: clamp(64px, 12vmin, 108px); }
       .ratioFraction .ratioFreeInput { width: 100%; height: 100%; min-width: 0; border-width: 0 0 3px; border-radius: 0; box-shadow: none; }
       .ratioFraction .ratioFreeInput.active { border-color: var(--blue); box-shadow: inset 0 0 0 4px rgba(37, 99, 235, 0.15); }
@@ -431,6 +443,8 @@
         font-weight: 900;
       }
 
+      .ratioDecimal { display: inline-flex; align-items: center; gap: clamp(4px, 0.8vmin, 8px); white-space: nowrap; }
+      .ratioDecimalPrefix { color: var(--muted); }
       .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin-top: clamp(4px, 0.8vmin, 8px); font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
       .ratioVisual { width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
 
@@ -491,6 +505,16 @@
         align-items: center;
         justify-self: start;
         white-space: nowrap;
+      }
+
+      /* Keep each place-value box on one fixed vertical center line. */
+      #groupingProblemLine .answerDigits {
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(4px, 0.8vmin, 8px);
+        height: var(--grouping-box-height);
+        line-height: 1;
+        vertical-align: middle;
       }
 
       .groupingIntermediate { grid-row: 1; }
@@ -1940,7 +1964,14 @@
               </span>
               <span class="ratioKnownValue" id="ratioSecondKnownValue" hidden></span>
               <span class="ratioEquals">=</span>
-              <button class="ratioFreeInput" id="ratioDecimalInput" data-ratio-field="decimal" type="button" aria-label="&#36884;&#20013;&#12398;&#31572;&#12360;" hidden></button>
+              <span class="ratioDecimal" id="ratioDecimalInput" hidden>
+                <span class="ratioDecimalPrefix">0.</span>
+                <span class="ratioAnswerDigits" id="ratioDecimalDigits">
+                  <button class="ratioAnswerBox" id="ratioDecimalTenthsInput" data-ratio-field="decimalTenths" type="button" aria-label="&#23567;&#25968;&#31532;&#19968;&#20301;" hidden></button>
+                  <button class="ratioAnswerBox" id="ratioDecimalHundredthsInput" data-ratio-field="decimalHundredths" type="button" aria-label="&#23567;&#25968;&#31532;&#20108;&#20301;" hidden></button>
+                  <button class="ratioAnswerBox" id="ratioDecimalThousandthsInput" data-ratio-field="decimalThousandths" type="button" aria-label="&#23567;&#25968;&#31532;&#19977;&#20301;" hidden></button>
+                </span>
+              </span>
               <span class="ratioAnswer" id="ratioFormulaAnswer">
                 <span class="ratioAnswerDigits" id="ratioFormulaDigits">
                   <button class="ratioAnswerBox" id="ratioAnswerHundredsInput" data-ratio-field="answerHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
@@ -2506,7 +2537,9 @@
         operator: ratioOperatorInput,
         fractionNumerator: ratioFractionNumeratorInput,
         fractionDenominator: ratioFractionDenominatorInput,
-        decimal: ratioDecimalInput,
+        decimalTenths: document.querySelector("#ratioDecimalTenthsInput"),
+        decimalHundredths: document.querySelector("#ratioDecimalHundredthsInput"),
+        decimalThousandths: document.querySelector("#ratioDecimalThousandthsInput"),
         answerHundreds: document.querySelector("#ratioAnswerHundredsInput"),
         answerTens: document.querySelector("#ratioAnswerTensInput"),
         answerOnes: document.querySelector("#ratioAnswerOnesInput"),
@@ -3399,11 +3432,18 @@
         return slots.slice(slots.length - String(value).length);
       }
 
+      function ratioDecimalFields(item = ratioProblem) {
+        if (!item || item.type !== "rate") return [];
+        const decimalDigits = item.decimal.replace(/^0\./, "");
+        const slots = ["decimalTenths", "decimalHundredths", "decimalThousandths"];
+        return slots.slice(0, decimalDigits.length);
+      }
+
       function ratioFieldOrder() {
         if (!ratioProblem) return [];
         const answerPrefix = ratioProblem.type === "rate" ? "final" : "answer";
         const expressionFields = ratioProblem.type === "rate"
-          ? ["operator", "decimal"]
+          ? ["operator", ...ratioDecimalFields()]
           : ["operator", "fractionNumerator", "fractionDenominator"];
         return [...expressionFields, ...ratioAnswerFields(answerPrefix, ratioProblem.answer)];
       }
@@ -3413,7 +3453,11 @@
         if (field === "operator") return ratioProblem.operator;
         if (field === "fractionNumerator") return String(ratioProblem.rate.numerator);
         if (field === "fractionDenominator") return String(ratioProblem.rate.denominator);
-        if (field === "decimal") return ratioProblem.decimal;
+        if (field.startsWith("decimal")) {
+          const fields = ratioDecimalFields();
+          const index = fields.indexOf(field);
+          return index < 0 ? "" : ratioProblem.decimal.replace(/^0\./, "")[index];
+        }
         const answerPrefix = ratioProblem.type === "rate" ? "final" : "answer";
         const fields = ratioAnswerFields(answerPrefix, ratioProblem.answer);
         const index = fields.indexOf(field);
@@ -3453,6 +3497,8 @@
         ratioFinalUnit.textContent = rateQuestion ? "\u5272" : "";
         ["answerHundreds", "answerTens", "answerOnes"].forEach((field) => { ratioFields[field].hidden = true; });
         ["finalHundreds", "finalTens", "finalOnes"].forEach((field) => { ratioFields[field].hidden = true; });
+        ["decimalTenths", "decimalHundredths", "decimalThousandths"].forEach((field) => { ratioFields[field].hidden = true; });
+        ratioDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
         const prefix = rateQuestion ? "final" : "answer";
         ratioAnswerFields(prefix, ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
       }
@@ -3477,12 +3523,17 @@
         const partWidth = width * ratioProblem.rate.percent / 100;
         const wholeLabel = ratioProblem.type === "original" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.base}${ratioProblem.unit}`;
         const partLabel = ratioProblem.type === "compare" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.part}${ratioProblem.unit}`;
+        const finalRateFields = ratioAnswerFields("final", ratioProblem.answer);
+        const rateSolved = ratioProblem.type === "rate" && finalRateFields.every((field) => (ratioValues[field] || "") === ratioExpected(field));
+        const solvedRateLabel = rateSolved
+          ? groupingLabel(x + partWidth / 2, 22, `${ratioProblem.answer}\u5272`, "#2563eb")
+          : "";
         ratioVisual.innerHTML = '<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '" rx="8" fill="#f5f7fa" stroke="#16202a" stroke-width="3"></rect>' +
           '<rect x="' + x + '" y="' + y + '" width="' + partWidth + '" height="' + height + '" rx="8" fill="#dcecff" stroke="#2563eb" stroke-width="3"></rect>' +
           '<line x1="' + (x + partWidth) + '" y1="' + y + '" x2="' + (x + partWidth) + '" y2="' + (y + height) + '" stroke="#2563eb" stroke-width="3"></line>' +
           ratioDimension(x, partWidth, y, partLabel, true) +
           ratioDimension(x, width, y + height, wholeLabel) +
-          groupingLabel(x + partWidth / 2, 38, `${ratioProblem.rate.percent}%`, "#2563eb");
+          solvedRateLabel;
         ratioVisual.setAttribute("aria-label", `${wholeLabel}\u306e\u3046\u3061${partLabel}\u306e\u5272\u5408\u3092\u793a\u3059\u56f3`);
       }
 
@@ -4134,6 +4185,7 @@
       function ratioSetValue(field, value) {
         ratioValues[field] = value;
         renderRatioEntry();
+        renderRatioDiagram();
       }
 
       function ratioAdvance(field) {
@@ -5779,3 +5831,4 @@
     </script>
   </body>
 </html>
+
