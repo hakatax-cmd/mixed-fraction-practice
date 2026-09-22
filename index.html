@@ -1962,6 +1962,7 @@
                 <i></i>
                 <button class="ratioFreeInput" id="ratioFractionDenominatorInput" data-ratio-field="fractionDenominator" type="button" aria-label="&#20998;&#27597;"></button>
               </span>
+              <button class="ratioFreeInput" id="ratioFactorDecimalInput" data-ratio-field="factorDecimal" type="button" aria-label="&#21106;&#21512;&#12398;&#23567;&#25968;" hidden></button>
               <span class="ratioKnownValue" id="ratioSecondKnownValue" hidden></span>
               <span class="ratioEquals">=</span>
               <span class="ratioDecimal" id="ratioDecimalInput" hidden>
@@ -2429,6 +2430,7 @@
       const ratioFractionInput = document.querySelector("#ratioFractionInput");
       const ratioFractionNumeratorInput = document.querySelector("#ratioFractionNumeratorInput");
       const ratioFractionDenominatorInput = document.querySelector("#ratioFractionDenominatorInput");
+      const ratioFactorDecimalInput = document.querySelector("#ratioFactorDecimalInput");
       const ratioDecimalInput = document.querySelector("#ratioDecimalInput");
       const ratioFormulaAnswer = document.querySelector("#ratioFormulaAnswer");
       const ratioFormulaUnit = document.querySelector("#ratioFormulaUnit");
@@ -2537,6 +2539,7 @@
         operator: ratioOperatorInput,
         fractionNumerator: ratioFractionNumeratorInput,
         fractionDenominator: ratioFractionDenominatorInput,
+        factorDecimal: ratioFactorDecimalInput,
         decimalTenths: document.querySelector("#ratioDecimalTenthsInput"),
         decimalHundredths: document.querySelector("#ratioDecimalHundredthsInput"),
         decimalThousandths: document.querySelector("#ratioDecimalThousandthsInput"),
@@ -2729,11 +2732,17 @@
 
       function createRatioProblem(type, used) {
         const fractionRates = [
-          { percent: 50, numerator: 1, denominator: 2 },
-          { percent: 25, numerator: 1, denominator: 4 },
-          { percent: 20, numerator: 1, denominator: 5 },
-          { percent: 12.5, numerator: 1, denominator: 8 },
-          { percent: 10, numerator: 1, denominator: 10 },
+          { percent: 10, numerator: 1, denominator: 10, inputStyle: "decimal", decimal: "0.1" },
+          { percent: 20, numerator: 2, denominator: 10, inputStyle: "decimal", decimal: "0.2" },
+          { percent: 30, numerator: 3, denominator: 10, inputStyle: "decimal", decimal: "0.3" },
+          { percent: 40, numerator: 4, denominator: 10, inputStyle: "decimal", decimal: "0.4" },
+          { percent: 50, numerator: 5, denominator: 10, inputStyle: "decimal", decimal: "0.5" },
+          { percent: 60, numerator: 6, denominator: 10, inputStyle: "decimal", decimal: "0.6" },
+          { percent: 70, numerator: 7, denominator: 10, inputStyle: "decimal", decimal: "0.7" },
+          { percent: 80, numerator: 8, denominator: 10, inputStyle: "decimal", decimal: "0.8" },
+          { percent: 90, numerator: 9, denominator: 10, inputStyle: "decimal", decimal: "0.9" },
+          { percent: 25, numerator: 1, denominator: 4, inputStyle: "fraction" },
+          { percent: 12.5, numerator: 1, denominator: 8, inputStyle: "fraction" },
         ];
 
         for (let attempt = 0; attempt < 300; attempt += 1) {
@@ -3444,7 +3453,9 @@
         const answerPrefix = ratioProblem.type === "rate" ? "final" : "answer";
         const expressionFields = ratioProblem.type === "rate"
           ? ["operator", ...ratioDecimalFields()]
-          : ["operator", "fractionNumerator", "fractionDenominator"];
+          : ratioProblem.rate.inputStyle === "decimal"
+            ? ["operator", "factorDecimal"]
+            : ["operator", "fractionNumerator", "fractionDenominator"];
         return [...expressionFields, ...ratioAnswerFields(answerPrefix, ratioProblem.answer)];
       }
 
@@ -3453,6 +3464,7 @@
         if (field === "operator") return ratioProblem.operator;
         if (field === "fractionNumerator") return String(ratioProblem.rate.numerator);
         if (field === "fractionDenominator") return String(ratioProblem.rate.denominator);
+        if (field === "factorDecimal") return ratioProblem.rate.decimal;
         if (field.startsWith("decimal")) {
           const fields = ratioDecimalFields();
           const index = fields.indexOf(field);
@@ -3487,7 +3499,9 @@
       function renderRatioSlots() {
         if (!ratioProblem) return;
         const rateQuestion = ratioProblem.type === "rate";
-        ratioFractionInput.hidden = rateQuestion;
+        const decimalFactor = !rateQuestion && ratioProblem.rate.inputStyle === "decimal";
+        ratioFractionInput.hidden = rateQuestion || decimalFactor;
+        ratioFactorDecimalInput.hidden = !decimalFactor;
         ratioSecondKnownValue.hidden = !rateQuestion;
         ratioSecondKnownValue.textContent = rateQuestion ? `${ratioProblem.base}` : "";
         ratioDecimalInput.hidden = !rateQuestion;
@@ -5831,4 +5845,3 @@
     </script>
   </body>
 </html>
-
