@@ -362,18 +362,21 @@
 
       #ratioProblemLine {
         display: grid;
-        grid-template-rows: auto auto minmax(130px, 1fr);
+        grid-template-rows: auto auto auto minmax(130px, 1fr);
         place-items: center;
         align-content: start;
-        gap: clamp(18px, 3.2vmin, 34px);
+        gap: clamp(10px, 1.8vmin, 18px);
         padding: clamp(30px, 5.5vmin, 58px) 0 clamp(20px, 3.8vmin, 42px);
         font-size: clamp(1.55rem, 4.9vmin, 3.25rem);
         font-weight: 900;
         line-height: 1;
       }
 
-      .ratioQuestion { margin: 0; font-size: clamp(1.15rem, 3.8vmin, 2.2rem); text-align: center; }
+      .ratioQuestion { grid-row: 1; margin: 0 0 clamp(14px, 2.5vmin, 26px); font-size: clamp(1.35rem, 4.4vmin, 2.55rem); text-align: center; }
       .ratioEquation { display: inline-flex; align-items: center; justify-content: center; gap: clamp(4px, 1.2vmin, 12px); min-width: 0; font-variant-numeric: tabular-nums; }
+      #ratioProblemLine > .ratioEquation:not(.ratioFractionStep) { grid-row: 2; }
+      .ratioFractionStep, .ratioFinalRow { grid-row: 3; }
+      .ratioFractionStep { margin: 0; }
       .ratioKnownValue, .ratioEquals, .ratioUnit { white-space: nowrap; }
       .ratioKnownValue {
         display: inline-grid;
@@ -445,8 +448,8 @@
 
       .ratioDecimal { display: inline-flex; align-items: center; gap: clamp(4px, 0.8vmin, 8px); white-space: nowrap; }
       .ratioDecimalPrefix { color: var(--muted); }
-      .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin-top: clamp(4px, 0.8vmin, 8px); font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
-      .ratioVisual { align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
+      .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin: 0; font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
+      .ratioVisual { grid-row: 4; align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
 
       #groupingProblemLine {
         --grouping-box-width: clamp(48px, 8.2vmin, 84px);
@@ -1964,7 +1967,7 @@
               </span>
               <button class="ratioFreeInput" id="ratioFactorDecimalInput" data-ratio-field="factorDecimal" type="button" aria-label="&#21106;&#21512;&#12398;&#23567;&#25968;" hidden></button>
               <button class="ratioKnownValue ratioFreeInput" id="ratioSecondKnownValue" data-ratio-field="knownSecondValue" type="button" aria-label="&#24335;&#12398;&#20108;&#12388;&#30446;&#12398;&#25968;" hidden></button>
-              <span class="ratioEquals">=</span>
+              <span class="ratioEquals" id="ratioPrimaryEquals">=</span>
               <span class="ratioDecimal" id="ratioDecimalInput" hidden>
                 <span class="ratioDecimalPrefix">0.</span>
                 <span class="ratioAnswerDigits" id="ratioDecimalDigits">
@@ -1980,6 +1983,24 @@
                   <button class="ratioAnswerBox" id="ratioAnswerOnesInput" data-ratio-field="answerOnes" type="button" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;"></button>
                 </span>
                 <span class="ratioUnit" id="ratioFormulaUnit"></span>
+              </span>
+            </div>
+            <div class="ratioEquation ratioFractionStep" id="ratioFractionStep" hidden>
+              <span class="ratioKnownValue" id="ratioFractionStepKnownValue"></span>
+              <span class="ratioEquals" id="ratioFractionStepOperator"></span>
+              <span class="ratioFraction">
+                <button class="ratioFreeInput" id="ratioStepFractionNumeratorInput" data-ratio-field="stepFractionNumerator" type="button" aria-label="&#20998;&#23376;"></button>
+                <i></i>
+                <button class="ratioFreeInput" id="ratioStepFractionDenominatorInput" data-ratio-field="stepFractionDenominator" type="button" aria-label="&#20998;&#27597;"></button>
+              </span>
+              <span class="ratioEquals">=</span>
+              <span class="ratioAnswer">
+                <span class="ratioAnswerDigits">
+                  <button class="ratioAnswerBox" id="ratioStepAnswerHundredsInput" data-ratio-field="stepAnswerHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
+                  <button class="ratioAnswerBox" id="ratioStepAnswerTensInput" data-ratio-field="stepAnswerTens" type="button" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" hidden></button>
+                  <button class="ratioAnswerBox" id="ratioStepAnswerOnesInput" data-ratio-field="stepAnswerOnes" type="button" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;"></button>
+                </span>
+                <span class="ratioUnit" id="ratioStepAnswerUnit"></span>
               </span>
             </div>
             <div class="ratioFinalRow" id="ratioFinalRow" hidden>
@@ -2314,6 +2335,7 @@
       let ratioProblem = null;
       let ratioActiveField = "";
       let ratioValues = {};
+      let ratioPhase = "decimal";
       let activeSlot = "whole";
       let correctCount = 0;
       let mistakeCount = 0;
@@ -2426,6 +2448,7 @@
       const ratioQuestion = document.querySelector("#ratioQuestion");
       const ratioKnownValue = document.querySelector("#ratioKnownValue");
       const ratioSecondKnownValue = document.querySelector("#ratioSecondKnownValue");
+      const ratioPrimaryEquals = document.querySelector("#ratioPrimaryEquals");
       const ratioOperatorInput = document.querySelector("#ratioOperatorInput");
       const ratioFractionInput = document.querySelector("#ratioFractionInput");
       const ratioFractionNumeratorInput = document.querySelector("#ratioFractionNumeratorInput");
@@ -2434,6 +2457,10 @@
       const ratioDecimalInput = document.querySelector("#ratioDecimalInput");
       const ratioFormulaAnswer = document.querySelector("#ratioFormulaAnswer");
       const ratioFormulaUnit = document.querySelector("#ratioFormulaUnit");
+      const ratioFractionStep = document.querySelector("#ratioFractionStep");
+      const ratioFractionStepKnownValue = document.querySelector("#ratioFractionStepKnownValue");
+      const ratioFractionStepOperator = document.querySelector("#ratioFractionStepOperator");
+      const ratioStepAnswerUnit = document.querySelector("#ratioStepAnswerUnit");
       const ratioFinalRow = document.querySelector("#ratioFinalRow");
       const ratioFinalUnit = document.querySelector("#ratioFinalUnit");
       const ratioVisual = document.querySelector("#ratioVisual");
@@ -2551,6 +2578,11 @@
         finalHundreds: document.querySelector("#ratioFinalHundredsInput"),
         finalTens: document.querySelector("#ratioFinalTensInput"),
         finalOnes: document.querySelector("#ratioFinalOnesInput"),
+        stepFractionNumerator: document.querySelector("#ratioStepFractionNumeratorInput"),
+        stepFractionDenominator: document.querySelector("#ratioStepFractionDenominatorInput"),
+        stepAnswerHundreds: document.querySelector("#ratioStepAnswerHundredsInput"),
+        stepAnswerTens: document.querySelector("#ratioStepAnswerTensInput"),
+        stepAnswerOnes: document.querySelector("#ratioStepAnswerOnesInput"),
       };
 
       function randomInt(min, max) {
@@ -2743,8 +2775,12 @@
           { percent: 70, numerator: 7, denominator: 10, inputStyle: "decimal", decimal: "0.7" },
           { percent: 80, numerator: 8, denominator: 10, inputStyle: "decimal", decimal: "0.8" },
           { percent: 90, numerator: 9, denominator: 10, inputStyle: "decimal", decimal: "0.9" },
-          { percent: 25, numerator: 1, denominator: 4, inputStyle: "fraction" },
-          { percent: 12.5, numerator: 1, denominator: 8, inputStyle: "fraction" },
+          { percent: 25, numerator: 1, denominator: 4, inputStyle: "decimalThenFraction", decimal: "0.25" },
+          { percent: 75, numerator: 3, denominator: 4, inputStyle: "decimalThenFraction", decimal: "0.75" },
+          { percent: 12.5, numerator: 1, denominator: 8, inputStyle: "decimalThenFraction", decimal: "0.125" },
+          { percent: 37.5, numerator: 3, denominator: 8, inputStyle: "decimalThenFraction", decimal: "0.375" },
+          { percent: 62.5, numerator: 5, denominator: 8, inputStyle: "decimalThenFraction", decimal: "0.625" },
+          { percent: 87.5, numerator: 7, denominator: 8, inputStyle: "decimalThenFraction", decimal: "0.875" },
         ];
 
         for (let attempt = 0; attempt < 300; attempt += 1) {
@@ -3443,6 +3479,10 @@
         return slots.slice(slots.length - String(value).length);
       }
 
+      function ratioNeedsFractionStep(item = ratioProblem) {
+        return Boolean(item && item.type !== "rate" && item.rate.inputStyle === "decimalThenFraction");
+      }
+
       function ratioDecimalFields(item = ratioProblem) {
         if (!item || item.type !== "rate") return [];
         const decimalDigits = item.decimal.replace(/^0\./, "");
@@ -3452,6 +3492,16 @@
 
       function ratioFieldOrder() {
         if (!ratioProblem) return [];
+        if (ratioNeedsFractionStep()) {
+          if (ratioPhase === "fraction") {
+            return [
+              "stepFractionDenominator",
+              "stepFractionNumerator",
+              ...ratioAnswerFields("stepAnswer", ratioProblem.answer),
+            ];
+          }
+          return ["knownValue", "operator", "factorDecimal"];
+        }
         const answerPrefix = ratioProblem.type === "rate" ? "final" : "answer";
         const expressionFields = ratioProblem.type === "rate"
           ? ["knownValue", "operator", "knownSecondValue", ...ratioDecimalFields()]
@@ -3470,13 +3520,17 @@
         if (field === "knownSecondValue") return String(ratioProblem.base);
         if (field === "fractionNumerator") return String(ratioProblem.rate.numerator);
         if (field === "fractionDenominator") return String(ratioProblem.rate.denominator);
+        if (field === "stepFractionNumerator") return String(ratioProblem.rate.numerator);
+        if (field === "stepFractionDenominator") return String(ratioProblem.rate.denominator);
         if (field === "factorDecimal") return ratioProblem.rate.decimal;
         if (field.startsWith("decimal")) {
           const fields = ratioDecimalFields();
           const index = fields.indexOf(field);
           return index < 0 ? "" : ratioProblem.decimal.replace(/^0\./, "")[index];
         }
-        const answerPrefix = ratioProblem.type === "rate" ? "final" : "answer";
+        const answerPrefix = ratioNeedsFractionStep()
+          ? "stepAnswer"
+          : ratioProblem.type === "rate" ? "final" : "answer";
         const fields = ratioAnswerFields(answerPrefix, ratioProblem.answer);
         const index = fields.indexOf(field);
         return index < 0 ? "" : String(ratioProblem.answer)[index];
@@ -3484,6 +3538,7 @@
 
       function setRatioActive(field) {
         if (isAnswerLocked || isFinished) return;
+        if (!ratioFieldOrder().includes(field)) return;
         ratioActiveField = field;
         Object.entries(ratioFields).forEach(([key, input]) => input.classList.toggle("active", key === field));
       }
@@ -3498,6 +3553,8 @@
 
       function resetRatioEntry() {
         ratioValues = {};
+        ratioPhase = "decimal";
+        renderRatioSlots();
         ratioActiveField = ratioFieldOrder()[0] || "";
         renderRatioEntry();
       }
@@ -3505,21 +3562,34 @@
       function renderRatioSlots() {
         if (!ratioProblem) return;
         const rateQuestion = ratioProblem.type === "rate";
-        const decimalFactor = !rateQuestion && ratioProblem.rate.inputStyle === "decimal";
+        const fractionStep = ratioNeedsFractionStep();
+        const decimalFactor = !rateQuestion && (ratioProblem.rate.inputStyle === "decimal" || fractionStep);
         ratioFractionInput.hidden = rateQuestion || decimalFactor;
         ratioFactorDecimalInput.hidden = !decimalFactor;
         ratioSecondKnownValue.hidden = !rateQuestion;
         ratioDecimalInput.hidden = !rateQuestion;
-        ratioFormulaAnswer.hidden = rateQuestion;
+        ratioPrimaryEquals.hidden = fractionStep;
+        ratioFormulaAnswer.hidden = rateQuestion || fractionStep;
         ratioFinalRow.hidden = !rateQuestion;
+        ratioFractionStep.hidden = !fractionStep || ratioPhase !== "fraction";
+        ratioFractionStepKnownValue.textContent = fractionStep ? ratioExpected("knownValue") : "";
+        ratioFractionStepOperator.textContent = fractionStep ? ratioProblem.operator : "";
         ratioFormulaUnit.textContent = rateQuestion ? "" : ratioProblem.unit;
+        ratioStepAnswerUnit.textContent = fractionStep ? ratioProblem.unit : "";
         ratioFinalUnit.textContent = rateQuestion ? "\u5272" : "";
         ["answerHundreds", "answerTens", "answerOnes"].forEach((field) => { ratioFields[field].hidden = true; });
         ["finalHundreds", "finalTens", "finalOnes"].forEach((field) => { ratioFields[field].hidden = true; });
+        ["stepFractionNumerator", "stepFractionDenominator", "stepAnswerHundreds", "stepAnswerTens", "stepAnswerOnes"].forEach((field) => { ratioFields[field].hidden = true; });
         ["decimalTenths", "decimalHundredths", "decimalThousandths"].forEach((field) => { ratioFields[field].hidden = true; });
         ratioDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
-        const prefix = rateQuestion ? "final" : "answer";
-        ratioAnswerFields(prefix, ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
+        if (fractionStep && ratioPhase === "fraction") {
+          ratioFields.stepFractionNumerator.hidden = false;
+          ratioFields.stepFractionDenominator.hidden = false;
+          ratioAnswerFields("stepAnswer", ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
+        } else if (!fractionStep) {
+          const prefix = rateQuestion ? "final" : "answer";
+          ratioAnswerFields(prefix, ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
+        }
       }
 
       function ratioDimension(x, width, y, label, above = false) {
@@ -4205,6 +4275,13 @@
       }
 
       function ratioAdvance(field) {
+        if (ratioNeedsFractionStep() && ratioPhase === "decimal" && field === "factorDecimal") {
+          ratioPhase = "fraction";
+          renderRatioSlots();
+          renderRatioEntry();
+          setRatioActive("stepFractionDenominator");
+          return;
+        }
         const fields = ratioFieldOrder();
         const index = fields.indexOf(field);
         if (index >= 0 && index < fields.length - 1) {
