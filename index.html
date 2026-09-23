@@ -145,7 +145,7 @@
       #chooseGrouping,
       #chooseRatio { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.15rem, 4.2vw, 2.35rem); }
       #chooseRatio { border-color: rgba(20, 150, 111, 0.48); }
-      #chooseSpeed { border-color: rgba(96, 112, 128, 0.28); color: var(--muted); box-shadow: none; }
+      #chooseSpeed { border-color: rgba(37, 99, 235, 0.45); }
       .recordActions {
         display: flex;
         order: -1;
@@ -483,6 +483,26 @@
       .ratioDecimalPrefix { color: var(--muted); }
       .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin: 0; font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
       .ratioVisual { grid-row: 4; align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
+
+      #speedProblemLine {
+        display: grid;
+        grid-template-rows: auto auto minmax(128px, 1fr);
+        place-items: center;
+        align-content: start;
+        gap: clamp(16px, 3vmin, 28px);
+        padding: clamp(42px, 7vmin, 72px) 0 clamp(18px, 3vmin, 34px);
+        font-size: clamp(1.75rem, 5.5vmin, 3.6rem);
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .speedQuestion { margin: 0; font-size: clamp(1.4rem, 4.4vmin, 2.55rem); text-align: center; }
+      .speedFormula { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(6px, 1.1vmin, 10px); font-variant-numeric: tabular-nums; }
+      .speedFormula .equals { color: var(--muted); }
+      .speedAnswer { display: inline-flex; align-items: center; gap: clamp(5px, 1vmin, 10px); }
+      .speedAnswerDigits { display: inline-flex; gap: clamp(4px, 0.9vmin, 8px); }
+      .speedAnswer .answerBox { width: clamp(46px, 8vmin, 74px); height: clamp(46px, 8vmin, 74px); font-size: clamp(1.8rem, 5.8vmin, 3.5rem); }
+      .speedVisual { width: min(100%, 560px); height: clamp(126px, 22vmin, 200px); align-self: end; overflow: visible; }
 
       #groupingProblemLine {
         --grouping-box-width: clamp(48px, 8.2vmin, 84px);
@@ -1766,7 +1786,7 @@
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseGrouping" type="button">&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</button>
             <button class="menuButton" id="chooseRatio" type="button">&#21106;&#21512;</button>
-            <button class="menuButton" id="chooseSpeed" type="button" disabled>&#26089;&#12373;<br />&#24037;&#20107;&#20013;</button>
+            <button class="menuButton" id="chooseSpeed" type="button">&#26089;&#12373;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
@@ -1843,6 +1863,14 @@
           <p class="coverPrompt">&#24335;&#12392;&#22259;&#12391;&#12392;&#12367;&#12424;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="ratioStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="speedCover" hidden>
+          <h1>&#26089;&#12373;</h1>
+          <p class="coverPrompt">&#31186;&#36895;&#12391;&#12392;&#12367;&#12424;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="speedStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -2046,6 +2074,24 @@
               <span class="ratioUnit" id="ratioFinalUnit"></span>
             </div>
             <svg class="ratioVisual" id="ratioVisual" viewBox="0 0 560 220" role="img"></svg>
+          </div>
+          <div id="speedProblemLine" hidden>
+            <p class="speedQuestion" id="speedQuestion"></p>
+            <div class="speedFormula">
+              <span id="speedFormulaLeft"></span>
+              <span id="speedFormulaOperator"></span>
+              <span id="speedFormulaRight"></span>
+              <span class="equals">=</span>
+              <span class="speedAnswer">
+                <span class="speedAnswerDigits">
+                  <button id="speedAnswerHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                  <button id="speedAnswerTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
+                  <button id="speedAnswerOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                </span>
+                <span id="speedAnswerUnit"></span>
+              </span>
+            </div>
+            <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 180" role="img"></svg>
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
@@ -2268,6 +2314,9 @@
       const GROUPING_FINAL_SLOTS = ["groupingFinalTens", "groupingFinalOnes"];
       const RATIO_TARGET = 10;
       const RATIO_BEST_KEY = "ratioBestTimeMs";
+      const SPEED_TARGET = 10;
+      const SPEED_SLOTS = ["speedAnswerHundreds", "speedAnswerTens", "speedAnswerOnes"];
+      const SPEED_BEST_KEY = "speedBestTimeMs";
       const DIVISION_SLOTS = [
         "divisionQTens",
         "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
@@ -2297,6 +2346,7 @@
         FRACTION_ADD_SUBTRACT_BEST_KEY,
         GROUPING_BEST_KEY,
         RATIO_BEST_KEY,
+        SPEED_BEST_KEY,
         FRACTION_BEST_KEY,
         "longMultiplicationBestTimeMs",
         "longMultiplicationBestTimeMsV2",
@@ -2316,6 +2366,7 @@
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
         ratio: "\u5272\u5408",
+        speed: "\u65e9\u3055",
       };
       const APP_ORDER = [
         "multiplication",
@@ -2329,6 +2380,7 @@
         "fractionAddSubtract",
         "grouping",
         "ratio",
+        "speed",
       ];
 
       let selectedApp = "menu";
@@ -2366,6 +2418,9 @@
       let ratioDeck = [];
       let ratioIndex = 0;
       let ratioProblem = null;
+      let speedDeck = [];
+      let speedIndex = 0;
+      let speedProblem = null;
       let ratioActiveField = "";
       let ratioValues = {};
       let ratioPhase = "decimal";
@@ -2449,6 +2504,9 @@
         divisionP2Ones: document.querySelector("#divisionP2OnesInput"),
         divisionRemainderTens: document.querySelector("#divisionRemainderTensInput"),
         divisionRemainderOnes: document.querySelector("#divisionRemainderOnesInput"),
+        speedAnswerHundreds: document.querySelector("#speedAnswerHundredsInput"),
+        speedAnswerTens: document.querySelector("#speedAnswerTensInput"),
+        speedAnswerOnes: document.querySelector("#speedAnswerOnesInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
       const improperMixedQuestion = document.querySelector("#improperMixedQuestion");
@@ -2497,6 +2555,12 @@
       const ratioFinalRow = document.querySelector("#ratioFinalRow");
       const ratioFinalUnit = document.querySelector("#ratioFinalUnit");
       const ratioVisual = document.querySelector("#ratioVisual");
+      const speedQuestion = document.querySelector("#speedQuestion");
+      const speedFormulaLeft = document.querySelector("#speedFormulaLeft");
+      const speedFormulaOperator = document.querySelector("#speedFormulaOperator");
+      const speedFormulaRight = document.querySelector("#speedFormulaRight");
+      const speedAnswerUnit = document.querySelector("#speedAnswerUnit");
+      const speedVisual = document.querySelector("#speedVisual");
       const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
       const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
       const divisionDividendDigits = [
@@ -2518,6 +2582,7 @@
       const fractionAddSubtractCover = document.querySelector("#fractionAddSubtractCover");
       const groupingCover = document.querySelector("#groupingCover");
       const ratioCover = document.querySelector("#ratioCover");
+      const speedCover = document.querySelector("#speedCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -2529,6 +2594,7 @@
       const chooseFractionAddSubtract = document.querySelector("#chooseFractionAddSubtract");
       const chooseGrouping = document.querySelector("#chooseGrouping");
       const chooseRatio = document.querySelector("#chooseRatio");
+      const chooseSpeed = document.querySelector("#chooseSpeed");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const easyButton = document.querySelector("#easyButton");
@@ -2548,6 +2614,7 @@
       const fractionAddSubtractStartButton = document.querySelector("#fractionAddSubtractStartButton");
       const groupingStartButton = document.querySelector("#groupingStartButton");
       const ratioStartButton = document.querySelector("#ratioStartButton");
+      const speedStartButton = document.querySelector("#speedStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -2559,6 +2626,7 @@
       const fractionAddSubtractProblemLine = document.querySelector("#fractionAddSubtractProblemLine");
       const groupingProblemLine = document.querySelector("#groupingProblemLine");
       const ratioProblemLine = document.querySelector("#ratioProblemLine");
+      const speedProblemLine = document.querySelector("#speedProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const skipRecordButton = document.querySelector("#skipRecordButton");
       const timer = document.querySelector("#timer");
@@ -2874,6 +2942,92 @@
           previousType = type;
         }
         return deck;
+      }
+
+      function createSpeedProblem(type, used) {
+        for (let attempt = 0; attempt < 200; attempt += 1) {
+          const speed = [10, 20, 30][randomInt(0, 2)];
+          const seconds = randomInt(2, 9);
+          const distance = speed * seconds;
+          const item = { type, speed, seconds, distance };
+          const key = `${type}:${speed}:${seconds}`;
+          if (used.has(key)) continue;
+          used.add(key);
+          return item;
+        }
+        return { type, speed: 20, seconds: 4, distance: 80 };
+      }
+
+      function createSpeedDeck() {
+        const used = new Set();
+        const deck = [];
+        const remaining = { distance: 4, speed: 3, time: 3 };
+        let previousType = "";
+        while (deck.length < SPEED_TARGET) {
+          const choices = Object.keys(remaining).filter((type) => remaining[type] > 0 && type !== previousType);
+          const type = choices[randomInt(0, choices.length - 1)];
+          deck.push(createSpeedProblem(type, used));
+          remaining[type] -= 1;
+          previousType = type;
+        }
+        return deck;
+      }
+
+      function speedAnswer(item = speedProblem) {
+        if (!item) return 0;
+        if (item.type === "distance") return item.distance;
+        if (item.type === "speed") return item.speed;
+        return item.seconds;
+      }
+
+      function speedUnit(item = speedProblem) {
+        return item && item.type === "speed" ? "m/\u79d2" : item && item.type === "distance" ? "m" : "\u79d2";
+      }
+
+      function speedProblemText(item = speedProblem) {
+        if (!item) return "";
+        if (item.type === "distance") return `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3080\u3068\u3001\u4f55m\uff1f`;
+        if (item.type === "speed") return `${item.distance}m\u3092${item.seconds}\u79d2\u3067\u9032\u3080\u3068\u3001\u6bce\u79d2\u4f55m\uff1f`;
+        return `\u6bce\u79d2${item.speed}m\u3067${item.distance}m\u9032\u3080\u3068\u3001\u4f55\u79d2\uff1f`;
+      }
+
+      function speedAnswerText(item = speedProblem) {
+        return `${speedAnswer(item)}${speedUnit(item)}`;
+      }
+
+      function renderSpeedProblem() {
+        if (!speedProblem) return;
+        const item = speedProblem;
+        speedQuestion.textContent = speedProblemText(item);
+        if (item.type === "distance") {
+          speedFormulaLeft.textContent = `\u6bce\u79d2${item.speed}m`;
+          speedFormulaOperator.textContent = "\u00d7";
+          speedFormulaRight.textContent = `${item.seconds}\u79d2`;
+        } else if (item.type === "speed") {
+          speedFormulaLeft.textContent = `${item.distance}m`;
+          speedFormulaOperator.textContent = "\u00f7";
+          speedFormulaRight.textContent = `${item.seconds}\u79d2`;
+        } else {
+          speedFormulaLeft.textContent = `${item.distance}m`;
+          speedFormulaOperator.textContent = "\u00f7";
+          speedFormulaRight.textContent = `\u6bce\u79d2${item.speed}m`;
+        }
+        speedAnswerUnit.textContent = speedUnit(item);
+        const visible = new Set(visibleDigitSlots(SPEED_SLOTS, speedAnswer(item)));
+        SPEED_SLOTS.forEach((slot) => { inputs[slot].hidden = !visible.has(slot); });
+
+        const fraction = item.distance / 270;
+        const fullWidth = 430;
+        const filledWidth = Math.max(86, Math.round(fullWidth * fraction));
+        const x = 65;
+        speedVisual.innerHTML =
+          '<defs><marker id="speedArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"></path></marker></defs>' +
+          '<line x1="' + x + '" y1="94" x2="' + (x + fullWidth) + '" y2="94" stroke="#d7dce5" stroke-width="22" stroke-linecap="round"></line>' +
+          '<line x1="' + x + '" y1="94" x2="' + (x + filledWidth) + '" y2="94" stroke="#a9cdfb" stroke-width="22" stroke-linecap="round"></line>' +
+          '<line x1="' + x + '" y1="94" x2="' + (x + filledWidth) + '" y2="94" stroke="#2563eb" stroke-width="4" marker-end="url(#speedArrow)"></line>' +
+          '<text x="' + (x + fullWidth / 2) + '" y="52" fill="#667085" font-size="28" font-weight="900" text-anchor="middle">' + item.distance + 'm</text>' +
+          '<text x="' + (x + fullWidth / 2) + '" y="145" fill="#16202a" font-size="28" font-weight="900" text-anchor="middle">\u6bce\u79d2' + item.speed + 'm \u00d7 ' + item.seconds + '\u79d2</text>';
+        speedVisual.setAttribute("aria-label", `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3080${item.distance}m\u306e\u9053\u306e\u308a`);
       }
 
       function ratioProblemText(item = ratioProblem) {
@@ -3779,7 +3933,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed";
       }
 
       function currentTimedIndex() {
@@ -3790,6 +3944,7 @@
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractIndex;
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
+        if (selectedApp === "speed") return speedIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -3802,6 +3957,7 @@
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractDeck.length || FRACTION_ADD_SUBTRACT_TARGET;
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
+        if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -3818,6 +3974,7 @@
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractAnswer().numerator;
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
+        if (selectedApp === "speed") return speedAnswer();
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
@@ -3830,6 +3987,7 @@
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractAnswerText();
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
+        if (selectedApp === "speed") return speedAnswerText();
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -3871,6 +4029,7 @@
           ];
         }
         if (selectedApp === "ratio") return [];
+        if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
@@ -3901,6 +4060,11 @@
         if (selectedApp === "fractionAddSubtract") return fractionAddSubtractExpected(slot);
         if (selectedApp === "grouping") return groupingExpected(slot);
         if (selectedApp === "ratio") return "";
+        if (selectedApp === "speed") {
+          const digits = String(speedAnswer());
+          const slots = visibleDigitSlots(SPEED_SLOTS, speedAnswer());
+          return digits[slots.indexOf(slot)] || "";
+        }
         if (selectedApp === "longMultiplication") {
           const answer = String(longMultiplicationAnswer()).padStart(4, "0");
           return {
@@ -4000,6 +4164,7 @@
         if (app === "fractionAddSubtract") return FRACTION_ADD_SUBTRACT_BEST_KEY;
         if (app === "grouping") return GROUPING_BEST_KEY;
         if (app === "ratio") return RATIO_BEST_KEY;
+        if (app === "speed") return SPEED_BEST_KEY;
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
@@ -4415,7 +4580,8 @@
           || selectedApp === "longMultiplication"
           || selectedApp === "fractionCalculation"
           || selectedApp === "fractionAddSubtract"
-          || selectedApp === "grouping";
+          || selectedApp === "grouping"
+          || selectedApp === "speed";
       }
 
       function showAnswerCorrections() {
@@ -4639,6 +4805,7 @@
         fractionAddSubtractCover.hidden = true;
         groupingCover.hidden = true;
         ratioCover.hidden = true;
+        speedCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -5092,6 +5259,16 @@
             return;
           }
           ratioProblem = ratioDeck[ratioIndex];
+        } else if (selectedApp === "speed") {
+          if (keepChallenge) speedIndex += 1;
+          if (speedIndex >= speedDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          speedProblem = speedDeck[speedIndex];
         } else {
           problem = createNextFractionProblem();
         }
@@ -5123,6 +5300,8 @@
           groupingCover.hidden = false;
         } else if (selectedApp === "ratio") {
           ratioCover.hidden = false;
+        } else if (selectedApp === "speed") {
+          speedCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -5398,6 +5577,34 @@
         resetInputs(true);
       }
 
+      function startSpeedChallenge() {
+        selectedApp = "speed";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode", "ratioMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        speedDeck = createSpeedDeck();
+        speedIndex = 0;
+        speedProblem = speedDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
         challengeView.classList.remove("divisionMode");
@@ -5607,6 +5814,29 @@
         resetInputs(true);
       }
 
+      function showSpeedCover() {
+        selectedApp = "speed";
+        challengeView.classList.remove("divisionMode", "ratioMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function isInteractiveTarget(target) {
         return target instanceof Element && Boolean(target.closest("button"));
       }
@@ -5654,6 +5884,7 @@
         fractionAddSubtractProblemLine.hidden = selectedApp !== "fractionAddSubtract";
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
+        speedProblemLine.hidden = selectedApp !== "speed";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         fractionGoal.hidden = false;
@@ -5698,6 +5929,8 @@
           updateGroupingSlots();
         } else if (selectedApp === "ratio") {
           renderRatioProblem();
+        } else if (selectedApp === "speed") {
+          renderSpeedProblem();
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
           fractionAnswerDenominator.textContent = problem.denominator;
@@ -5876,6 +6109,7 @@
       chooseFractionAddSubtract.addEventListener("click", showFractionAddSubtractCover);
       chooseGrouping.addEventListener("click", showGroupingCover);
       chooseRatio.addEventListener("click", showRatioCover);
+      chooseSpeed.addEventListener("click", showSpeedCover);
       viewRecordsButton.addEventListener("click", showAllRecords);
       recordsCloseButton.addEventListener("click", hideAllRecords);
       clearRecordsButton.addEventListener("click", showDeletePin);
@@ -5910,6 +6144,7 @@
       fractionAddSubtractStartButton.addEventListener("click", startFractionAddSubtractChallenge);
       groupingStartButton.addEventListener("click", startGroupingChallenge);
       ratioStartButton.addEventListener("click", startRatioChallenge);
+      speedStartButton.addEventListener("click", startSpeedChallenge);
       nextMistakeButton.addEventListener("click", () => {
         if (!manualNextAction) return;
         const action = manualNextAction;
