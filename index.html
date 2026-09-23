@@ -366,7 +366,7 @@
         place-items: center;
         align-content: start;
         gap: clamp(10px, 1.8vmin, 18px);
-        padding: clamp(30px, 5.5vmin, 58px) 0 clamp(20px, 3.8vmin, 42px);
+        padding: clamp(42px, 7vmin, 72px) 0 clamp(20px, 3.8vmin, 42px);
         font-size: clamp(1.55rem, 4.9vmin, 3.25rem);
         font-weight: 900;
         line-height: 1;
@@ -425,9 +425,42 @@
       .ratioFreeInput.active, .ratioAnswerBox.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
       .ratioOperatorInput.active { color: var(--ink); box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.28); }
       .ratioFraction { display: grid; grid-template-rows: clamp(40px, 7.1vmin, 62px) 4px clamp(40px, 7.1vmin, 62px); align-items: center; min-width: clamp(64px, 12vmin, 108px); }
-      .ratioFraction .ratioFreeInput { width: 100%; height: 100%; min-width: 0; border-width: 0 0 3px; border-radius: 0; box-shadow: none; }
+      .ratioFraction .ratioFreeInput { width: 100%; height: 100%; min-width: 0; border: 3px solid var(--line); border-radius: 6px; box-shadow: none; }
       .ratioFraction .ratioFreeInput.active { border-color: var(--blue); box-shadow: inset 0 0 0 4px rgba(37, 99, 235, 0.15); }
       .ratioFraction i { display: block; height: 4px; background: var(--ink); }
+
+      #ratioProblemLine.fractionStepMode {
+        --ratio-step-known-width: clamp(48px, 11vmin, 72px);
+        --ratio-step-operator-width: clamp(44px, 9vmin, 66px);
+        --ratio-step-factor-width: clamp(94px, 18vmin, 122px);
+      }
+
+      #ratioProblemLine.fractionStepMode .ratioEquation {
+        display: grid;
+        grid-template-columns: var(--ratio-step-known-width) var(--ratio-step-operator-width) var(--ratio-step-factor-width) auto auto;
+        column-gap: clamp(4px, 1vmin, 8px);
+        justify-content: start;
+        justify-self: center;
+        width: min(100%, 360px);
+      }
+
+      #ratioProblemLine.fractionStepMode .ratioKnownValue { grid-column: 1; width: var(--ratio-step-known-width); min-width: 0; }
+      #ratioProblemLine.fractionStepMode .ratioOperatorInput,
+      #ratioProblemLine.fractionStepMode .ratioFractionStepOperator {
+        grid-column: 2;
+        width: var(--ratio-step-operator-width);
+        justify-self: center;
+        text-align: center;
+      }
+      #ratioProblemLine.fractionStepMode #ratioFactorDecimalInput,
+      #ratioProblemLine.fractionStepMode .ratioFractionStep .ratioFraction {
+        grid-column: 3;
+        width: var(--ratio-step-factor-width);
+        min-width: 0;
+      }
+      #ratioProblemLine.fractionStepMode #ratioPrimaryEquals,
+      #ratioProblemLine.fractionStepMode .ratioFractionStep > .ratioEquals:not(.ratioFractionStepOperator) { grid-column: 4; justify-self: start; }
+      #ratioProblemLine.fractionStepMode .ratioFractionStep .ratioAnswer { grid-column: 5; justify-self: start; }
       .ratioAnswer { display: inline-flex; align-items: center; gap: clamp(5px, 1vmin, 9px); }
       .ratioAnswerDigits { display: inline-flex; gap: clamp(4px, 0.9vmin, 8px); }
 
@@ -1987,7 +2020,7 @@
             </div>
             <div class="ratioEquation ratioFractionStep" id="ratioFractionStep" hidden>
               <span class="ratioKnownValue" id="ratioFractionStepKnownValue"></span>
-              <span class="ratioEquals" id="ratioFractionStepOperator"></span>
+              <span class="ratioEquals ratioFractionStepOperator" id="ratioFractionStepOperator"></span>
               <span class="ratioFraction">
                 <button class="ratioFreeInput" id="ratioStepFractionNumeratorInput" data-ratio-field="stepFractionNumerator" type="button" aria-label="&#20998;&#23376;"></button>
                 <i></i>
@@ -3564,11 +3597,12 @@
         const rateQuestion = ratioProblem.type === "rate";
         const fractionStep = ratioNeedsFractionStep();
         const decimalFactor = !rateQuestion && (ratioProblem.rate.inputStyle === "decimal" || fractionStep);
+        ratioProblemLine.classList.toggle("fractionStepMode", fractionStep);
         ratioFractionInput.hidden = rateQuestion || decimalFactor;
         ratioFactorDecimalInput.hidden = !decimalFactor;
         ratioSecondKnownValue.hidden = !rateQuestion;
         ratioDecimalInput.hidden = !rateQuestion;
-        ratioPrimaryEquals.hidden = fractionStep;
+        ratioPrimaryEquals.hidden = false;
         ratioFormulaAnswer.hidden = rateQuestion || fractionStep;
         ratioFinalRow.hidden = !rateQuestion;
         ratioFractionStep.hidden = !fractionStep || ratioPhase !== "fraction";
