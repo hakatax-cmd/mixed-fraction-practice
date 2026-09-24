@@ -464,7 +464,7 @@
       }
       #ratioProblemLine.fractionStepMode #ratioPrimaryEquals,
       #ratioProblemLine.fractionStepMode .ratioFractionStep > .ratioEquals:not(.ratioFractionStepOperator),
-      #ratioProblemLine.fractionStepMode .ratioMultiplyStep > .ratioEquals { grid-column: 4; justify-self: start; }
+      #ratioProblemLine.fractionStepMode .ratioMultiplyStep > .ratioEquals:not(.ratioMultiplyOperator) { grid-column: 4; justify-self: start; }
       #ratioProblemLine.fractionStepMode .ratioMultiplyStep .ratioAnswer { grid-column: 5; justify-self: start; }
       .ratioAnswer { display: inline-flex; align-items: center; gap: clamp(5px, 1vmin, 9px); }
       .ratioAnswerDigits { display: inline-flex; gap: clamp(4px, 0.9vmin, 8px); }
