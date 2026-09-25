@@ -373,12 +373,32 @@
       }
 
       .ratioQuestion { grid-row: 1; margin: 0 0 clamp(14px, 2.5vmin, 26px); font-size: clamp(1.35rem, 4.4vmin, 2.55rem); text-align: center; }
+      .ratioGuideFormula {
+        grid-row: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(7px, 1.4vmin, 13px);
+        min-height: clamp(48px, 8vmin, 70px);
+        padding: 8px clamp(16px, 3vmin, 28px);
+        border: 3px solid #e7bd42;
+        border-radius: 8px;
+        background: #fff4bd;
+        color: var(--ink);
+        font-size: clamp(1.25rem, 4.1vmin, 2.35rem);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
       .ratioEquation { display: inline-flex; align-items: center; justify-content: center; gap: clamp(4px, 1.2vmin, 12px); min-width: 0; font-variant-numeric: tabular-nums; }
       .ratioSpecialStack { display: contents; }
       #ratioProblemLine > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 2; }
       .ratioFractionStep, .ratioFinalRow { grid-row: 3; }
       .ratioMultiplyStep { grid-row: 4; }
       .ratioResultStep { grid-row: 5; }
+      #ratioProblemLine.hasRatioGuide { grid-template-rows: auto auto auto auto minmax(130px, 1fr); }
+      #ratioProblemLine.hasRatioGuide > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 3; }
+      #ratioProblemLine.hasRatioGuide .ratioFinalRow { grid-row: 4; }
+      #ratioProblemLine.hasRatioGuide .ratioVisual { grid-row: 5; }
       .ratioFractionStep { margin: 0; }
       .ratioKnownValue, .ratioEquals, .ratioUnit { white-space: nowrap; }
       .ratioKnownValue {
@@ -425,7 +445,8 @@
         font-variant-numeric: tabular-nums;
       }
 
-      .ratioFreeInput.active, .ratioAnswerBox.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .ratioFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .ratioAnswerBox.active { border-color: #ec8ead; box-shadow: 0 0 0 6px rgba(236, 142, 173, 0.2); }
       .ratioOperatorInput.active { color: var(--ink); box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.28); }
       .ratioFraction { display: grid; grid-template-rows: clamp(40px, 7.1vmin, 62px) 4px clamp(40px, 7.1vmin, 62px); align-items: center; min-width: clamp(64px, 12vmin, 108px); }
       .ratioFraction .ratioFreeInput { width: 100%; height: 100%; min-width: 0; border: 3px solid var(--line); border-radius: 6px; box-shadow: none; }
@@ -507,6 +528,9 @@
       .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin: 0; font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
       .ratioVisual { grid-row: 4; align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
       #ratioProblemLine.fractionStepMode .ratioVisual { grid-row: 3; }
+      #ratioProblemLine.fractionStepMode.hasRatioGuide { grid-template-rows: auto auto auto minmax(130px, 1fr); }
+      #ratioProblemLine.fractionStepMode.hasRatioGuide .ratioSpecialStack { grid-row: 3; }
+      #ratioProblemLine.fractionStepMode.hasRatioGuide .ratioVisual { grid-row: 4; }
 
       #speedProblemLine {
         display: grid;
@@ -1258,7 +1282,7 @@
       #challengeView.ratioMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
       #challengeView.ratioMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
       #challengeView.ratioMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
-      #challengeView.ratioMode #ratioTimesKey { grid-column: 2; grid-row: 1; }
+      #challengeView.ratioMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
       #challengeView.ratioMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
       #challengeView.ratioMode #ratioDotKey { grid-column: 4; grid-row: 1; }
       #challengeView.ratioMode .keypad.operatorChoice [data-digit],
@@ -2049,6 +2073,13 @@
           </div>
           <div id="ratioProblemLine" hidden>
             <p class="ratioQuestion" id="ratioQuestion"></p>
+            <div class="ratioGuideFormula" id="ratioGuideFormula" hidden>
+              <span id="ratioGuideLeft"></span>
+              <span>&times;</span>
+              <span id="ratioGuideFactor"></span>
+              <span>=</span>
+              <span id="ratioGuideRight"></span>
+            </div>
             <div class="ratioSpecialStack">
             <div class="ratioEquation">
               <button class="ratioKnownValue ratioFreeInput" id="ratioKnownValue" data-ratio-field="knownValue" type="button" aria-label="&#24335;&#12398;&#26368;&#21021;&#12398;&#25968;"></button>
@@ -2583,6 +2614,10 @@
       const groupingMiddleClose = document.querySelector("#groupingMiddleClose");
       const groupingFinalMinus = document.querySelector("#groupingFinalMinus");
       const ratioQuestion = document.querySelector("#ratioQuestion");
+      const ratioGuideFormula = document.querySelector("#ratioGuideFormula");
+      const ratioGuideLeft = document.querySelector("#ratioGuideLeft");
+      const ratioGuideFactor = document.querySelector("#ratioGuideFactor");
+      const ratioGuideRight = document.querySelector("#ratioGuideRight");
       const ratioKnownValue = document.querySelector("#ratioKnownValue");
       const ratioSecondKnownValue = document.querySelector("#ratioSecondKnownValue");
       const ratioPrimaryEquals = document.querySelector("#ratioPrimaryEquals");
@@ -3821,6 +3856,23 @@
         const fractionStep = ratioNeedsFractionStep();
         const decimalFactor = !rateQuestion && (ratioProblem.rate.inputStyle === "decimal" || fractionStep);
         ratioProblemLine.classList.toggle("fractionStepMode", fractionStep);
+        const showRatioGuide = ratioProblem.type !== "compare";
+        ratioProblemLine.classList.toggle("hasRatioGuide", showRatioGuide);
+        ratioGuideFormula.hidden = !showRatioGuide;
+        const guideRate = ratioProblem.rate.decimal;
+        if (ratioProblem.type === "rate") {
+          ratioGuideLeft.textContent = `${ratioProblem.base}${ratioProblem.unit}`;
+          ratioGuideFactor.textContent = "X\u500d";
+          ratioGuideRight.textContent = `${ratioProblem.part}${ratioProblem.unit}`;
+        } else if (ratioProblem.type === "original") {
+          ratioGuideLeft.textContent = `X${ratioProblem.unit}`;
+          ratioGuideFactor.textContent = `${guideRate}\u500d`;
+          ratioGuideRight.textContent = `${ratioProblem.part}${ratioProblem.unit}`;
+        } else {
+          ratioGuideLeft.textContent = `${ratioProblem.base}${ratioProblem.unit}`;
+          ratioGuideFactor.textContent = `${guideRate}\u500d`;
+          ratioGuideRight.textContent = `X${ratioProblem.unit}`;
+        }
         ratioFractionInput.hidden = rateQuestion || decimalFactor;
         ratioFactorDecimalInput.hidden = !decimalFactor;
         ratioSecondKnownValue.hidden = !rateQuestion;
