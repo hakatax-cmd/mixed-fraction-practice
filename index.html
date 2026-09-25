@@ -3829,13 +3829,19 @@
         ratioFormulaAnswer.hidden = rateQuestion || fractionStep;
         ratioFinalRow.hidden = !rateQuestion;
         ratioFractionStep.hidden = !fractionStep || ratioPhase === "decimal";
-        ratioMultiplyStep.hidden = !fractionStep || ratioPhase !== "multiply";
+        const needsInverseMultiplyStep = fractionStep && ratioProblem.operator === "\u00f7";
+        ratioMultiplyStep.hidden = !needsInverseMultiplyStep || ratioPhase !== "multiply";
         ratioResultStep.hidden = !fractionStep || ratioPhase !== "multiply";
         ratioFractionStepKnownValue.textContent = fractionStep ? ratioExpected("knownValue") : "";
         ratioFractionStepOperator.textContent = fractionStep ? ratioProblem.operator : "";
         ratioMultiplyKnownValue.textContent = fractionStep ? ratioExpected("knownValue") : "";
-        ratioMultiplyFractionNumerator.textContent = fractionStep ? ratioExpected("stepFractionDenominator") : "";
-        ratioMultiplyFractionDenominator.textContent = fractionStep ? ratioExpected("stepFractionNumerator") : "";
+        const invertFractionForDivision = fractionStep && ratioProblem.operator === "\u00f7";
+        ratioMultiplyFractionNumerator.textContent = fractionStep
+          ? ratioExpected(invertFractionForDivision ? "stepFractionDenominator" : "stepFractionNumerator")
+          : "";
+        ratioMultiplyFractionDenominator.textContent = fractionStep
+          ? ratioExpected(invertFractionForDivision ? "stepFractionNumerator" : "stepFractionDenominator")
+          : "";
         ratioFormulaUnit.textContent = rateQuestion ? "" : ratioProblem.unit;
         ratioStepAnswerUnit.textContent = fractionStep ? ratioProblem.unit : "";
         ratioFinalUnit.textContent = rateQuestion ? "\u5272" : "";
