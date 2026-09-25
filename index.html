@@ -4555,6 +4555,15 @@
           });
           return;
         }
+        if (ratioProblem.type === "rate" && field === "decimalTenths" && next.length === wanted.length) {
+          const decimalFields = ratioDecimalFields();
+          const hundredths = decimalFields[1];
+          if (hundredths && ratioExpected(hundredths) === "0") {
+            ratioSetValue(hundredths, "0");
+            ratioAdvance(hundredths);
+            return;
+          }
+        }
         if (next.length === wanted.length) ratioAdvance(field);
       }
 
