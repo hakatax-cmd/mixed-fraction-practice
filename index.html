@@ -362,7 +362,7 @@
 
       #ratioProblemLine {
         display: grid;
-        grid-template-rows: auto auto auto auto minmax(130px, 1fr);
+        grid-template-rows: auto auto auto minmax(130px, 1fr);
         place-items: center;
         align-content: start;
         gap: clamp(10px, 1.8vmin, 18px);
@@ -374,7 +374,8 @@
 
       .ratioQuestion { grid-row: 1; margin: 0 0 clamp(14px, 2.5vmin, 26px); font-size: clamp(1.35rem, 4.4vmin, 2.55rem); text-align: center; }
       .ratioEquation { display: inline-flex; align-items: center; justify-content: center; gap: clamp(4px, 1.2vmin, 12px); min-width: 0; font-variant-numeric: tabular-nums; }
-      #ratioProblemLine > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 2; }
+      .ratioSpecialStack { display: contents; }
+      #ratioProblemLine > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 2; }
       .ratioFractionStep, .ratioFinalRow { grid-row: 3; }
       .ratioMultiplyStep { grid-row: 4; }
       .ratioFractionStep { margin: 0; }
@@ -435,16 +436,29 @@
         --ratio-step-known-width: clamp(48px, 11vmin, 72px);
         --ratio-step-operator-width: clamp(44px, 9vmin, 66px);
         --ratio-step-factor-width: clamp(94px, 18vmin, 122px);
+        --ratio-step-fraction-width: clamp(58px, 10.5vmin, 74px);
+        --ratio-step-equals-width: clamp(24px, 5vmin, 34px);
+        grid-template-rows: auto auto minmax(130px, 1fr);
       }
 
-      #ratioProblemLine.fractionStepMode .ratioEquation {
+      #ratioProblemLine.fractionStepMode .ratioSpecialStack {
         display: grid;
-        grid-template-columns: var(--ratio-step-known-width) var(--ratio-step-operator-width) var(--ratio-step-factor-width) auto auto;
+        grid-template-columns: var(--ratio-step-known-width) var(--ratio-step-operator-width) var(--ratio-step-factor-width) var(--ratio-step-equals-width) minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        row-gap: clamp(10px, 1.8vmin, 18px);
         column-gap: clamp(4px, 1vmin, 8px);
         justify-content: start;
         justify-self: center;
         width: min(100%, 360px);
+        grid-row: 2;
       }
+
+      #ratioProblemLine.fractionStepMode .ratioSpecialStack > .ratioEquation { display: contents; }
+      #ratioProblemLine.fractionStepMode .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) > * { grid-row: 1; }
+      #ratioProblemLine.fractionStepMode .ratioSpecialStack > .ratioFractionStep > * { grid-row: 2; }
+      #ratioProblemLine.fractionStepMode .ratioSpecialStack > .ratioMultiplyStep > * { grid-row: 3; }
+      #ratioProblemLine.fractionStepMode .ratioFractionStep { grid-row: auto; }
+      #ratioProblemLine.fractionStepMode .ratioMultiplyStep { grid-row: auto; }
 
       #ratioProblemLine.fractionStepMode .ratioKnownValue { grid-column: 1; width: var(--ratio-step-known-width); min-width: 0; }
       #ratioProblemLine.fractionStepMode .ratioOperatorInput,
@@ -459,9 +473,11 @@
       #ratioProblemLine.fractionStepMode .ratioFractionStep .ratioFraction,
       #ratioProblemLine.fractionStepMode .ratioMultiplyStep .ratioFraction {
         grid-column: 3;
-        width: var(--ratio-step-factor-width);
         min-width: 0;
       }
+      #ratioProblemLine.fractionStepMode #ratioFactorDecimalInput { width: var(--ratio-step-factor-width); }
+      #ratioProblemLine.fractionStepMode .ratioFractionStep .ratioFraction,
+      #ratioProblemLine.fractionStepMode .ratioMultiplyStep .ratioFraction { width: var(--ratio-step-fraction-width); }
       #ratioProblemLine.fractionStepMode #ratioPrimaryEquals,
       #ratioProblemLine.fractionStepMode .ratioFractionStep > .ratioEquals:not(.ratioFractionStepOperator),
       #ratioProblemLine.fractionStepMode .ratioMultiplyStep > .ratioEquals:not(.ratioMultiplyOperator) { grid-column: 4; justify-self: start; }
@@ -487,7 +503,8 @@
       .ratioDecimal { display: inline-flex; align-items: center; gap: clamp(4px, 0.8vmin, 8px); white-space: nowrap; }
       .ratioDecimalPrefix { color: var(--muted); }
       .ratioFinalRow { display: inline-flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vmin, 14px); margin: 0; font-size: clamp(1.35rem, 4.1vmin, 2.6rem); }
-      .ratioVisual { grid-row: 5; align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
+      .ratioVisual { grid-row: 4; align-self: end; width: min(100%, 560px); height: clamp(138px, 24vmin, 220px); overflow: visible; }
+      #ratioProblemLine.fractionStepMode .ratioVisual { grid-row: 3; }
 
       #speedProblemLine {
         display: grid;
@@ -2023,6 +2040,7 @@
           </div>
           <div id="ratioProblemLine" hidden>
             <p class="ratioQuestion" id="ratioQuestion"></p>
+            <div class="ratioSpecialStack">
             <div class="ratioEquation">
               <button class="ratioKnownValue ratioFreeInput" id="ratioKnownValue" data-ratio-field="knownValue" type="button" aria-label="&#24335;&#12398;&#26368;&#21021;&#12398;&#25968;"></button>
               <button class="ratioOperatorInput" id="ratioOperatorInput" data-ratio-field="operator" type="button" aria-label="&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
@@ -2078,6 +2096,7 @@
                 </span>
                 <span class="ratioUnit" id="ratioStepAnswerUnit"></span>
               </span>
+            </div>
             </div>
             <div class="ratioFinalRow" id="ratioFinalRow" hidden>
               <span>&#31572;&#12360;</span>
@@ -3793,10 +3812,11 @@
         ["stepFractionNumerator", "stepFractionDenominator", "stepAnswerHundreds", "stepAnswerTens", "stepAnswerOnes"].forEach((field) => { ratioFields[field].hidden = true; });
         ["decimalTenths", "decimalHundredths", "decimalThousandths"].forEach((field) => { ratioFields[field].hidden = true; });
         ratioDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
-        if (fractionStep && ratioPhase === "fraction") {
+        if (fractionStep && (ratioPhase === "fraction" || ratioPhase === "multiply")) {
           ratioFields.stepFractionNumerator.hidden = false;
           ratioFields.stepFractionDenominator.hidden = false;
-        } else if (fractionStep && ratioPhase === "multiply") {
+        }
+        if (fractionStep && ratioPhase === "multiply") {
           ratioAnswerFields("stepAnswer", ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
         } else if (!fractionStep) {
           const prefix = rateQuestion ? "final" : "answer";
