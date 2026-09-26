@@ -1682,6 +1682,8 @@
       .mistakeList { display: grid; max-height: min(13dvh, 120px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding: 1px 4px 1px 0; touch-action: pan-y; }
       .mistakeItem { border-bottom: 1px solid var(--line); padding: 3px 2px; font-size: clamp(0.92rem, 2.55vw, 1.18rem); font-weight: 900; }
       .restartButton { min-width: 180px; min-height: 44px; align-self: end; margin: 2px auto 0; padding: 0 24px; background: var(--blue); color: #fff; }
+      .preschoolReviewPrompt { margin: 2px 0 0; color: var(--ink); font-size: clamp(1.1rem, 3.3vw, 1.6rem); font-weight: 900; }
+      .preschoolReviewButton { background: var(--green); }
 
       @media (max-width: 720px) {
         .practiceCard { padding: clamp(7px, 1.7vmin, 12px); }
@@ -2351,6 +2353,8 @@
             <h2>&#12414;&#12385;&#12364;&#12360;&#12383;&#21839;&#38988;</h2>
             <div class="mistakeList" id="mistakeList"></div>
           </section>
+          <p class="preschoolReviewPrompt" id="preschoolReviewPrompt" hidden>&#24489;&#32722;&#12398;7&#21839;&#12364;&#12354;&#12426;&#12414;&#12377;&#12290;</p>
+          <button class="restartButton preschoolReviewButton" id="preschoolReviewButton" type="button" hidden>&#24489;&#32722;&#12377;&#12427;</button>
           <button class="restartButton" id="restartButton" type="button">&#12514;&#12540;&#12489;&#36984;&#25246;</button>
         </section>
         </div>
@@ -2551,6 +2555,12 @@
       let preschoolDeck = [];
       let preschoolIndex = 0;
       let preschoolProblem = null;
+      let preschoolProblemStartedAt = 0;
+      let preschoolProblemDurations = [];
+      let preschoolReviewDeck = [];
+      let preschoolReviewIndex = 0;
+      let preschoolReviewActive = false;
+      let preschoolReviewCountdownTimer = null;
       let ratioActiveField = "";
       let ratioValues = {};
       let ratioPhase = "decimal";
@@ -2809,6 +2819,8 @@
       const recordSummary = document.querySelector("#recordSummary");
       const recordRank = document.querySelector("#recordRank");
       const recordTableBody = document.querySelector("#recordTableBody");
+      const preschoolReviewPrompt = document.querySelector("#preschoolReviewPrompt");
+      const preschoolReviewButton = document.querySelector("#preschoolReviewButton");
       const doubleTotalRow = document.querySelector(".doubleTotal");
       const doubleDecimalChoices = [...document.querySelectorAll(".decimalPointChoice")];
       const ratioFields = {
@@ -3159,6 +3171,51 @@
         preschoolOperator.textContent = preschoolProblem.type === "add" ? "+" : "-";
         preschoolSecond.textContent = preschoolProblem.second;
         inputs.preschoolAnswerTens.hidden = preschoolProblem.answer < 10;
+      }
+
+      function beginPreschoolProblemTimer() {
+        preschoolProblemStartedAt = Date.now();
+      }
+
+      function recordPreschoolProblemDuration() {
+        if (selectedApp !== "preschool" || preschoolReviewActive || !preschoolProblem || !preschoolProblemStartedAt) return;
+        preschoolProblemDurations.push({
+          problem: { ...preschoolProblem },
+          elapsedMs: Math.max(0, Date.now() - preschoolProblemStartedAt),
+        });
+      }
+
+      function preparePreschoolReview() {
+        preschoolReviewDeck = preschoolProblemDurations
+          .slice()
+          .sort((left, right) => right.elapsedMs - left.elapsedMs)
+          .slice(0, 7)
+          .map(({ problem: item }) => ({ ...item }));
+      }
+
+      function clearPreschoolReviewCountdown() {
+        if (!preschoolReviewCountdownTimer) return;
+        clearInterval(preschoolReviewCountdownTimer);
+        preschoolReviewCountdownTimer = null;
+      }
+
+      function startPreschoolReviewCountdown() {
+        clearPreschoolReviewCountdown();
+        let secondsRemaining = 5;
+        const renderCountdown = () => {
+          preschoolReviewPrompt.textContent = `5秒後に復習の7問が始まります。 ${secondsRemaining}`;
+          preschoolReviewPrompt.hidden = false;
+        };
+        renderCountdown();
+        preschoolReviewCountdownTimer = setInterval(() => {
+          secondsRemaining -= 1;
+          if (secondsRemaining > 0) {
+            renderCountdown();
+            return;
+          }
+          clearPreschoolReviewCountdown();
+          startPreschoolReview();
+        }, 1000);
       }
 
       function speedAnswer(item = speedProblem) {
@@ -4181,7 +4238,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
-        if (selectedApp === "preschool") return preschoolIndex;
+        if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -4195,7 +4252,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
-        if (selectedApp === "preschool") return preschoolDeck.length;
+        if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -4634,6 +4691,7 @@
 
       function resetChallenge() {
         stopBestConfetti();
+        clearPreschoolReviewCountdown();
         correctCount = 0;
         mistakeCount = 0;
         mistakes = [];
@@ -4657,6 +4715,8 @@
         clearDate.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        preschoolReviewPrompt.hidden = true;
+        preschoolReviewButton.hidden = true;
         topBar.hidden = false;
         startedAt = Date.now();
         isFinished = false;
@@ -5064,6 +5124,7 @@
 
       function showCoverScreen() {
         stopBestConfetti();
+        clearPreschoolReviewCountdown();
         if (transitionTimer) {
           clearTimeout(transitionTimer);
           transitionTimer = null;
@@ -5084,6 +5145,11 @@
         currentPlayRecord = null;
         currentPlayRecordRank = null;
         shouldSaveCurrentPlay = true;
+        preschoolProblemStartedAt = 0;
+        preschoolProblemDurations = [];
+        preschoolReviewDeck = [];
+        preschoolReviewIndex = 0;
+        preschoolReviewActive = false;
         updateSkipRecordButton();
         isFinished = false;
         correctCount = 0;
@@ -5108,6 +5174,8 @@
         finishPanel.hidden = true;
         recordSummary.hidden = true;
         recordTableBody.replaceChildren();
+        preschoolReviewPrompt.hidden = true;
+        preschoolReviewButton.hidden = true;
         topBar.hidden = false;
         bestTime.hidden = true;
         clearDate.hidden = true;
@@ -5227,6 +5295,7 @@
         clearDivisionWrongTimer();
         setLocked(true);
         showReaction(true);
+        recordPreschoolProblemDuration();
         correctCount += 1;
         updateProgress();
         if (selectedApp === "fraction" && correctCount === TARGET_CORRECT) {
@@ -5243,6 +5312,11 @@
           clearedAt = new Date();
           isFinished = true;
           updateProgress();
+          if (selectedApp === "preschool" && preschoolReviewActive) {
+            schedule(finishPreschoolReview);
+            return;
+          }
+          if (selectedApp === "preschool") preparePreschoolReview();
           schedule(finishRound);
           return;
         }
@@ -5278,8 +5352,36 @@
         clearDate.hidden = !clearedAt;
         renderPlayRecords(playRecords);
         renderMistakes();
+        const hasPreschoolReview = selectedApp === "preschool" && !preschoolReviewActive && preschoolReviewDeck.length === 7;
         finishPanel.hidden = false;
+        preschoolReviewButton.hidden = true;
+        if (hasPreschoolReview) {
+          startPreschoolReviewCountdown();
+        } else {
+          preschoolReviewPrompt.hidden = true;
+        }
         if (multiplicationBestUpdated) startBestConfetti();
+      }
+
+      function finishPreschoolReview() {
+        hideReaction();
+        gameArea.hidden = true;
+        fractionGoal.hidden = true;
+        topBar.hidden = true;
+        clearMessage.hidden = true;
+        rewardMessage.hidden = true;
+        hanamaru.hidden = true;
+        finishTitle.hidden = false;
+        finishTitle.textContent = "復習終了";
+        finishApp.textContent = currentAppLabel();
+        finishTime.textContent = formatTime(finalTime);
+        bestTime.hidden = true;
+        clearDate.hidden = true;
+        recordSummary.hidden = true;
+        mistakeSummary.hidden = true;
+        preschoolReviewPrompt.hidden = true;
+        preschoolReviewButton.hidden = true;
+        finishPanel.hidden = false;
       }
 
       function recordMistake() {
@@ -5566,20 +5668,33 @@
           }
           speedProblem = speedDeck[speedIndex];
         } else if (selectedApp === "preschool") {
-          if (keepChallenge) preschoolIndex += 1;
-          if (preschoolIndex >= preschoolDeck.length) {
-            finalTime = elapsedTime();
-            clearedAt = new Date();
-            isFinished = true;
-            finishRound();
-            return;
+          if (preschoolReviewActive) {
+            if (keepChallenge) preschoolReviewIndex += 1;
+            if (preschoolReviewIndex >= preschoolReviewDeck.length) {
+              finalTime = elapsedTime();
+              clearedAt = new Date();
+              isFinished = true;
+              finishPreschoolReview();
+              return;
+            }
+            preschoolProblem = preschoolReviewDeck[preschoolReviewIndex];
+          } else {
+            if (keepChallenge) preschoolIndex += 1;
+            if (preschoolIndex >= preschoolDeck.length) {
+              finalTime = elapsedTime();
+              clearedAt = new Date();
+              isFinished = true;
+              finishRound();
+              return;
+            }
+            preschoolProblem = preschoolDeck[preschoolIndex];
           }
-          preschoolProblem = preschoolDeck[preschoolIndex];
         } else {
           problem = createNextFractionProblem();
         }
         renderProblem();
         resetInputs(true);
+        if (selectedApp === "preschool") beginPreschoolProblemTimer();
       }
 
       function restartRound() {
@@ -5934,12 +6049,32 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
+        preschoolReviewActive = false;
+        preschoolReviewDeck = [];
+        preschoolReviewIndex = 0;
+        preschoolProblemDurations = [];
         preschoolDeck = createPreschoolDeck();
         preschoolIndex = 0;
         preschoolProblem = preschoolDeck[0];
         resetChallenge();
         renderProblem();
         resetInputs(true);
+        beginPreschoolProblemTimer();
+      }
+
+      function startPreschoolReview() {
+        if (selectedApp !== "preschool" || preschoolReviewDeck.length !== 7) return;
+        preschoolReviewActive = true;
+        preschoolReviewIndex = 0;
+        preschoolProblem = preschoolReviewDeck[0];
+        hasStarted = true;
+        finishPanel.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+        beginPreschoolProblemTimer();
       }
 
       function showFractionCover() {
@@ -6498,6 +6633,7 @@
         updateSkipRecordButton();
       });
       document.querySelector("#restartButton").addEventListener("click", showCoverScreen);
+      preschoolReviewButton.addEventListener("click", startPreschoolReview);
       startButton.addEventListener("click", startChallenge);
       improperFractionStartButton.addEventListener("click", startImproperFractionChallenge);
       multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
