@@ -146,6 +146,8 @@
       #chooseRatio { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.15rem, 4.2vw, 2.35rem); }
       #chooseRatio { border-color: rgba(20, 150, 111, 0.48); }
       #chooseSpeed { border-color: rgba(37, 99, 235, 0.45); }
+      #choosePreschool { border-color: rgba(227, 58, 47, 0.45); font-size: clamp(1.05rem, 3.8vw, 2rem); }
+      #preschoolCover h1 { font-size: clamp(1.7rem, 6.2vw, 3.6rem); }
       .recordActions {
         display: flex;
         order: -1;
@@ -543,6 +545,23 @@
         font-weight: 900;
         line-height: 1;
       }
+      #preschoolProblemLine {
+        display: grid;
+        min-height: 100%;
+        place-items: center;
+        padding-bottom: clamp(100px, 18vmin, 180px);
+      }
+      .preschoolFormula {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(12px, 2.5vmin, 24px);
+        font-size: clamp(3.3rem, 12vmin, 7.5rem);
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+      .preschoolFormula .answerBox { width: clamp(68px, 13vmin, 110px); height: clamp(68px, 13vmin, 110px); }
 
       .speedQuestion { margin: 0; font-size: clamp(1.4rem, 4.4vmin, 2.55rem); text-align: center; }
       .speedFormula { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(6px, 1.1vmin, 10px); font-variant-numeric: tabular-nums; }
@@ -1847,6 +1866,7 @@
             <button class="menuButton" id="chooseGrouping" type="button">&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</button>
             <button class="menuButton" id="chooseRatio" type="button">&#21106;&#21512;</button>
             <button class="menuButton" id="chooseSpeed" type="button">&#26089;&#12373;</button>
+            <button class="menuButton" id="choosePreschool" type="button">&#12362;&#21069;&#12399;<br />&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
@@ -1931,6 +1951,14 @@
           <p class="coverPrompt">&#31186;&#36895;&#12391;&#12392;&#12367;&#12424;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="speedStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="preschoolCover" hidden>
+          <h1>&#12362;&#21069;&#12399;&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</h1>
+          <p class="coverPrompt">&#12356;&#12387;&#12369;&#12383;&#12398;&#12383;&#12375;&#31639;&#12539;&#12402;&#12365;&#31639;</p>
+          <p class="coverGoal">56&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="preschoolStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -2175,6 +2203,18 @@
             </div>
             <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 180" role="img"></svg>
           </div>
+          <div id="preschoolProblemLine" hidden>
+            <div class="preschoolFormula">
+              <span id="preschoolFirst"></span>
+              <span id="preschoolOperator"></span>
+              <span id="preschoolSecond"></span>
+              <span class="equals">=</span>
+              <span class="answerDigits">
+                <button id="preschoolAnswerTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="preschoolAnswerOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+              </span>
+            </div>
+          </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
               <div class="basicDivisionRow divisionFormula" id="basicDivisionRow">
@@ -2399,6 +2439,8 @@
       const SPEED_TARGET = 10;
       const SPEED_SLOTS = ["speedAnswerHundreds", "speedAnswerTens", "speedAnswerOnes"];
       const SPEED_BEST_KEY = "speedBestTimeMs";
+      const PRESCHOOL_SLOTS = ["preschoolAnswerTens", "preschoolAnswerOnes"];
+      const PRESCHOOL_BEST_KEY = "preschoolBestTimeMs";
       const DIVISION_SLOTS = [
         "divisionQTens",
         "divisionP1Ones", "divisionP1Hundreds", "divisionP1Tens",
@@ -2429,6 +2471,7 @@
         GROUPING_BEST_KEY,
         RATIO_BEST_KEY,
         SPEED_BEST_KEY,
+        PRESCHOOL_BEST_KEY,
         FRACTION_BEST_KEY,
         "longMultiplicationBestTimeMs",
         "longMultiplicationBestTimeMsV2",
@@ -2449,6 +2492,7 @@
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
         ratio: "\u5272\u5408",
         speed: "\u65e9\u3055",
+        preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
       };
       const APP_ORDER = [
         "multiplication",
@@ -2463,6 +2507,7 @@
         "grouping",
         "ratio",
         "speed",
+        "preschool",
       ];
 
       let selectedApp = "menu";
@@ -2503,6 +2548,9 @@
       let speedDeck = [];
       let speedIndex = 0;
       let speedProblem = null;
+      let preschoolDeck = [];
+      let preschoolIndex = 0;
+      let preschoolProblem = null;
       let ratioActiveField = "";
       let ratioValues = {};
       let ratioPhase = "decimal";
@@ -2589,6 +2637,8 @@
         speedAnswerHundreds: document.querySelector("#speedAnswerHundredsInput"),
         speedAnswerTens: document.querySelector("#speedAnswerTensInput"),
         speedAnswerOnes: document.querySelector("#speedAnswerOnesInput"),
+        preschoolAnswerTens: document.querySelector("#preschoolAnswerTensInput"),
+        preschoolAnswerOnes: document.querySelector("#preschoolAnswerOnesInput"),
       };
       const problemFraction = document.querySelector("#problemFraction");
       const improperMixedQuestion = document.querySelector("#improperMixedQuestion");
@@ -2652,6 +2702,9 @@
       const speedFormulaRight = document.querySelector("#speedFormulaRight");
       const speedAnswerUnit = document.querySelector("#speedAnswerUnit");
       const speedVisual = document.querySelector("#speedVisual");
+      const preschoolFirst = document.querySelector("#preschoolFirst");
+      const preschoolOperator = document.querySelector("#preschoolOperator");
+      const preschoolSecond = document.querySelector("#preschoolSecond");
       const divisionDivisorTens = document.querySelector("#divisionDivisorTens");
       const divisionDivisorOnes = document.querySelector("#divisionDivisorOnes");
       const divisionDividendDigits = [
@@ -2674,6 +2727,7 @@
       const groupingCover = document.querySelector("#groupingCover");
       const ratioCover = document.querySelector("#ratioCover");
       const speedCover = document.querySelector("#speedCover");
+      const preschoolCover = document.querySelector("#preschoolCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -2686,6 +2740,7 @@
       const chooseGrouping = document.querySelector("#chooseGrouping");
       const chooseRatio = document.querySelector("#chooseRatio");
       const chooseSpeed = document.querySelector("#chooseSpeed");
+      const choosePreschool = document.querySelector("#choosePreschool");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const easyButton = document.querySelector("#easyButton");
@@ -2706,6 +2761,7 @@
       const groupingStartButton = document.querySelector("#groupingStartButton");
       const ratioStartButton = document.querySelector("#ratioStartButton");
       const speedStartButton = document.querySelector("#speedStartButton");
+      const preschoolStartButton = document.querySelector("#preschoolStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -2718,6 +2774,7 @@
       const groupingProblemLine = document.querySelector("#groupingProblemLine");
       const ratioProblemLine = document.querySelector("#ratioProblemLine");
       const speedProblemLine = document.querySelector("#speedProblemLine");
+      const preschoolProblemLine = document.querySelector("#preschoolProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
       const skipRecordButton = document.querySelector("#skipRecordButton");
       const timer = document.querySelector("#timer");
@@ -3062,6 +3119,33 @@
           previousType = type;
         }
         return deck;
+      }
+
+      function createPreschoolDeck() {
+        const deck = [];
+        for (let answer = 11; answer <= 18; answer += 1) {
+          for (let first = 1; first <= 9; first += 1) {
+            const second = answer - first;
+            if (second < first || second > 9) continue;
+            deck.push({ type: "add", first, second, answer });
+          }
+        }
+        for (let first = 11; first <= 18; first += 1) {
+          for (let second = 1; second <= 9; second += 1) {
+            const answer = first - second;
+            if (answer < 0 || answer > 9) continue;
+            deck.push({ type: "subtract", first, second, answer });
+          }
+        }
+        return shuffle(deck);
+      }
+
+      function renderPreschoolProblem() {
+        if (!preschoolProblem) return;
+        preschoolFirst.textContent = preschoolProblem.first;
+        preschoolOperator.textContent = preschoolProblem.type === "add" ? "+" : "-";
+        preschoolSecond.textContent = preschoolProblem.second;
+        inputs.preschoolAnswerTens.hidden = preschoolProblem.answer < 10;
       }
 
       function speedAnswer(item = speedProblem) {
@@ -4072,7 +4156,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool";
       }
 
       function currentTimedIndex() {
@@ -4084,6 +4168,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
+        if (selectedApp === "preschool") return preschoolIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -4097,6 +4182,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
+        if (selectedApp === "preschool") return preschoolDeck.length;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -4114,6 +4200,7 @@
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
         if (selectedApp === "speed") return speedAnswer();
+        if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
@@ -4127,6 +4214,7 @@
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
+        if (selectedApp === "preschool") return String(currentTimedAnswer());
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -4169,6 +4257,7 @@
         }
         if (selectedApp === "ratio") return [];
         if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
+        if (selectedApp === "preschool") return visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
@@ -4202,6 +4291,11 @@
         if (selectedApp === "speed") {
           const digits = String(speedAnswer());
           const slots = visibleDigitSlots(SPEED_SLOTS, speedAnswer());
+          return digits[slots.indexOf(slot)] || "";
+        }
+        if (selectedApp === "preschool") {
+          const digits = String(preschoolProblem.answer);
+          const slots = visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
           return digits[slots.indexOf(slot)] || "";
         }
         if (selectedApp === "longMultiplication") {
@@ -4304,6 +4398,7 @@
         if (app === "grouping") return GROUPING_BEST_KEY;
         if (app === "ratio") return RATIO_BEST_KEY;
         if (app === "speed") return SPEED_BEST_KEY;
+        if (app === "preschool") return PRESCHOOL_BEST_KEY;
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
@@ -4767,7 +4862,8 @@
           || selectedApp === "fractionCalculation"
           || selectedApp === "fractionAddSubtract"
           || selectedApp === "grouping"
-          || selectedApp === "speed";
+          || selectedApp === "speed"
+          || selectedApp === "preschool";
       }
 
       function showAnswerCorrections() {
@@ -4992,6 +5088,7 @@
         groupingCover.hidden = true;
         ratioCover.hidden = true;
         speedCover.hidden = true;
+        preschoolCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -5455,6 +5552,16 @@
             return;
           }
           speedProblem = speedDeck[speedIndex];
+        } else if (selectedApp === "preschool") {
+          if (keepChallenge) preschoolIndex += 1;
+          if (preschoolIndex >= preschoolDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          preschoolProblem = preschoolDeck[preschoolIndex];
         } else {
           problem = createNextFractionProblem();
         }
@@ -5488,6 +5595,8 @@
           ratioCover.hidden = false;
         } else if (selectedApp === "speed") {
           speedCover.hidden = false;
+        } else if (selectedApp === "preschool") {
+          preschoolCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -5791,6 +5900,35 @@
         resetInputs(true);
       }
 
+      function startPreschoolChallenge() {
+        selectedApp = "preschool";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode", "ratioMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        preschoolDeck = createPreschoolDeck();
+        preschoolIndex = 0;
+        preschoolProblem = preschoolDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function showFractionCover() {
         selectedApp = "fraction";
         challengeView.classList.remove("divisionMode");
@@ -6023,6 +6161,30 @@
         resetInputs(true);
       }
 
+      function showPreschoolCover() {
+        selectedApp = "preschool";
+        challengeView.classList.remove("divisionMode", "ratioMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function isInteractiveTarget(target) {
         return target instanceof Element && Boolean(target.closest("button"));
       }
@@ -6071,6 +6233,7 @@
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
         speedProblemLine.hidden = selectedApp !== "speed";
+        preschoolProblemLine.hidden = selectedApp !== "preschool";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         fractionGoal.hidden = false;
@@ -6117,6 +6280,8 @@
           renderRatioProblem();
         } else if (selectedApp === "speed") {
           renderSpeedProblem();
+        } else if (selectedApp === "preschool") {
+          renderPreschoolProblem();
         } else {
           problemFraction.innerHTML = fraction(problem.numerator, problem.denominator);
           fractionAnswerDenominator.textContent = problem.denominator;
@@ -6296,6 +6461,7 @@
       chooseGrouping.addEventListener("click", showGroupingCover);
       chooseRatio.addEventListener("click", showRatioCover);
       chooseSpeed.addEventListener("click", showSpeedCover);
+      choosePreschool.addEventListener("click", showPreschoolCover);
       viewRecordsButton.addEventListener("click", showAllRecords);
       recordsCloseButton.addEventListener("click", hideAllRecords);
       clearRecordsButton.addEventListener("click", showDeletePin);
@@ -6331,6 +6497,7 @@
       groupingStartButton.addEventListener("click", startGroupingChallenge);
       ratioStartButton.addEventListener("click", startRatioChallenge);
       speedStartButton.addEventListener("click", startSpeedChallenge);
+      preschoolStartButton.addEventListener("click", startPreschoolChallenge);
       nextMistakeButton.addEventListener("click", () => {
         if (!manualNextAction) return;
         const action = manualNextAction;
