@@ -3122,22 +3122,35 @@
       }
 
       function createPreschoolDeck() {
-        const deck = [];
+        const additions = [];
+        const subtractions = [];
         for (let answer = 11; answer <= 18; answer += 1) {
           for (let first = 1; first <= 9; first += 1) {
             const second = answer - first;
             if (second < first || second > 9) continue;
-            deck.push({ type: "add", first, second, answer });
+            additions.push({ type: "add", first, second, answer });
           }
         }
         for (let first = 11; first <= 18; first += 1) {
           for (let second = 1; second <= 9; second += 1) {
             const answer = first - second;
             if (answer < 0 || answer > 9) continue;
-            deck.push({ type: "subtract", first, second, answer });
+            subtractions.push({ type: "subtract", first, second, answer });
           }
         }
-        return shuffle(deck);
+        const shuffledAdditions = shuffle(additions);
+        const shuffledSubtractions = shuffle(subtractions);
+        const gaps = Array.from({ length: shuffledAdditions.length + 1 }, () => []);
+        gaps.forEach((gap, index) => gap.push(shuffledSubtractions[index]));
+        shuffledSubtractions.slice(gaps.length).forEach((item) => {
+          const choices = gaps.filter((gap) => gap.length < 2);
+          choices[randomInt(0, choices.length - 1)].push(item);
+        });
+        const deck = [...gaps[0]];
+        shuffledAdditions.forEach((item, index) => {
+          deck.push(item, ...gaps[index + 1]);
+        });
+        return Math.random() < 0.5 ? deck : deck.reverse();
       }
 
       function renderPreschoolProblem() {
