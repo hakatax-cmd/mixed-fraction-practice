@@ -582,9 +582,11 @@
       #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-weight: 900; font-variant-numeric: tabular-nums; }
       .equationBase { margin: 0; font-size: clamp(2.4rem, 8.2vmin, 5rem); line-height: 1; }
       .equationLine { display: inline-flex; align-items: center; justify-content: start; gap: clamp(8px, 1.6vmin, 15px); font-size: clamp(2.4rem, 8.2vmin, 5rem); line-height: 1; }
-      .equationFreeInput { display: grid; place-items: center; min-width: clamp(58px, 10vmin, 82px); height: clamp(58px, 11vmin, 92px); padding: 0 8px; border: 3px solid var(--line); border-radius: 6px; background: repeating-linear-gradient(to right, transparent 0 calc((100% / var(--equation-slots, 1)) - 2px), var(--line) calc((100% / var(--equation-slots, 1)) - 2px) calc(100% / var(--equation-slots, 1))), #fff; color: var(--ink); font: inherit; font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; }
-      .equationFreeInput[data-slots="2"] { min-width: clamp(116px, 20vmin, 164px); }
-      .equationFreeInput[data-slots="3"] { min-width: clamp(174px, 30vmin, 246px); }
+      .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); min-width: clamp(46px, 8vmin, 62px); height: clamp(69px, 12vmin, 93px); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; overflow: hidden; }
+      .equationFreeInput[data-slots="2"] { min-width: clamp(92px, 16vmin, 124px); }
+      .equationFreeInput[data-slots="3"] { min-width: clamp(138px, 24vmin, 186px); }
+      .equationFreeInput .equationDigit { display: grid; place-items: center; min-width: 0; height: 100%; }
+      .equationFreeInput .equationDigit + .equationDigit { border-left: 2px solid var(--line); }
       .equationFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
       .equationFraction { display: grid; grid-template-rows: clamp(52px, 9vmin, 76px) 4px clamp(52px, 9vmin, 76px); align-items: center; min-width: clamp(68px, 13vmin, 102px); }
       .equationFraction .equationFreeInput { width: 100%; min-width: 0; height: 100%; padding: 0 4px; }
@@ -3611,8 +3613,9 @@
         equationFinalInput.hidden = isFraction;
         equationFractionInput.hidden = true;
         Object.entries(equationFields).forEach(([field, input]) => {
-          input.textContent = equationValues[field] || "";
           const slots = Math.min(3, Math.max(1, equationExpected(field).length));
+          const value = Array.from(equationValues[field] || "");
+          input.innerHTML = Array.from({ length: slots }, (_, index) => `<span class="equationDigit">${value[index] || ""}</span>`).join("");
           input.dataset.slots = String(slots);
           input.style.setProperty("--equation-slots", String(slots));
           input.classList.toggle("active", field === equationActiveField);
