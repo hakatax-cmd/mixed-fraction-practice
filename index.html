@@ -1676,7 +1676,7 @@
       .recordTable td:nth-child(3) { width: 28%; }
       .recordTable td:last-child,
       .recordTable th:last-child { text-align: right; }
-      .recordTable .currentRecord td { background: #fff1a8; }
+      .recordTable .currentRecord td { background: #ffe0b2; }
       .mistakeSummary { width: min(100%, 580px); margin: 0 auto; text-align: left; }
       .mistakeSummary h2 { margin: 0 0 4px; font-size: clamp(0.95rem, 2.5vw, 1.25rem); }
       .mistakeList { display: grid; max-height: min(13dvh, 120px); gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding: 1px 4px 1px 0; touch-action: pan-y; }
@@ -4809,7 +4809,7 @@
         const fields = ratioFieldOrder();
         if (expressionFields.includes(field) && field === expressionFields.at(-1)) {
           if (!ratioExpressionIsCorrect()) {
-            showWrongConfirmation(ratioSignature(), clearRatioEntry);
+            showWrongConfirmation(ratioSignature(), () => clearRatioFields(expressionFields));
             return;
           }
           ratioAdvance(field);
@@ -4817,7 +4817,7 @@
         }
         if (answerFields.includes(field) && field === answerFields.at(-1)) {
           if (!answerFields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
-            showWrongConfirmation(ratioSignature(), clearRatioEntry);
+            showWrongConfirmation(ratioSignature(), () => clearRatioFields(answerFields));
             return;
           }
           completeRatioProblem();
@@ -4876,6 +4876,16 @@
       function clearRatioEntry() {
         if (selectedApp !== "ratio" || isAnswerLocked || isFinished) return;
         resetRatioEntry();
+      }
+
+      function clearRatioFields(fields) {
+        if (selectedApp !== "ratio" || isAnswerLocked || isFinished) return;
+        fields.forEach((field) => {
+          delete ratioValues[field];
+        });
+        renderRatioEntry();
+        renderRatioDiagram();
+        setRatioActive(fields[0] || ratioFieldOrder()[0] || "");
       }
 
       function completeRatioProblem() {
