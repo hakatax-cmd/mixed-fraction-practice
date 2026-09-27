@@ -3308,7 +3308,7 @@
           }
           const constant = kind === "basic" ? randomInt(1, 9) : randomInt(1, 15);
           const total = middle + constant;
-          if (constant < 1 || (kind !== "basic" && total < 1)) continue;
+          if (constant < 1 || constant === coefficient || (kind !== "basic" && total < 1)) continue;
           const item = { kind, coefficient, constant, total, middle, answer };
           const key = `${coefficient}:${constant}:${total}`;
           if (used.has(key)) continue;
