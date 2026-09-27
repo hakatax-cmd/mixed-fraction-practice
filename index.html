@@ -536,11 +536,11 @@
 
       #speedProblemLine {
         display: grid;
-        grid-template-rows: auto auto minmax(128px, 1fr);
+        grid-template-rows: auto minmax(142px, 1fr) auto;
         place-items: center;
         align-content: start;
-        gap: clamp(16px, 3vmin, 28px);
-        padding: clamp(42px, 7vmin, 72px) 0 clamp(18px, 3vmin, 34px);
+        gap: clamp(10px, 2vmin, 18px);
+        padding: clamp(34px, 5.6vmin, 58px) 0 clamp(4px, 1vmin, 10px);
         font-size: clamp(1.75rem, 5.5vmin, 3.6rem);
         font-weight: 900;
         line-height: 1;
@@ -561,15 +561,22 @@
         font-variant-numeric: tabular-nums;
         line-height: 1;
       }
+      .preschoolFormula .answerDigits { display: inline-flex; align-items: center; gap: clamp(4px, 0.8vmin, 8px); line-height: 0; }
       .preschoolFormula .answerBox { width: clamp(68px, 13vmin, 110px); height: clamp(68px, 13vmin, 110px); }
+      #preschoolAnswerTensInput[hidden] { display: inline-block !important; visibility: hidden; pointer-events: none; }
 
       .speedQuestion { margin: 0; font-size: clamp(1.4rem, 4.4vmin, 2.55rem); text-align: center; }
-      .speedFormula { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(6px, 1.1vmin, 10px); font-variant-numeric: tabular-nums; }
+      .speedFormula { display: inline-flex; align-items: center; justify-content: center; gap: clamp(5px, 1vmin, 10px); font-size: clamp(1.4rem, 4.3vmin, 2.65rem); font-variant-numeric: tabular-nums; white-space: nowrap; }
       .speedFormula .equals { color: var(--muted); }
+      .speedTerm { display: inline-flex; align-items: center; gap: clamp(3px, 0.7vmin, 7px); }
+      .speedFreeInput { display: grid; place-items: center; min-width: clamp(58px, 11vmin, 96px); height: clamp(48px, 8.6vmin, 76px); padding: 0 8px; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: clamp(1.65rem, 5.3vmin, 3.2rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .speedFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .speedOperatorInput { display: grid; place-items: center; width: clamp(54px, 10vmin, 82px); height: clamp(54px, 10vmin, 82px); padding: 0; border: 3px solid var(--ink); border-radius: 50%; background: #fff; color: var(--ink); font: inherit; font-size: clamp(2.2rem, 7vmin, 4rem); font-weight: 900; line-height: 1; }
+      .speedOperatorInput.active { box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.28); }
       .speedAnswer { display: inline-flex; align-items: center; gap: clamp(5px, 1vmin, 10px); }
       .speedAnswerDigits { display: inline-flex; gap: clamp(4px, 0.9vmin, 8px); }
       .speedAnswer .answerBox { width: clamp(46px, 8vmin, 74px); height: clamp(46px, 8vmin, 74px); font-size: clamp(1.8rem, 5.8vmin, 3.5rem); }
-      .speedVisual { width: min(100%, 560px); height: clamp(126px, 22vmin, 200px); align-self: end; overflow: visible; }
+      .speedVisual { width: min(100%, 560px); height: clamp(148px, 25vmin, 220px); align-self: end; overflow: visible; }
 
       #groupingProblemLine {
         --grouping-box-width: clamp(48px, 8.2vmin, 84px);
@@ -1289,26 +1296,28 @@
       .keypad #clearButton { grid-column: 4; grid-row: 2; }
       .keypad [data-key="0"] { grid-column: 4; grid-row: 3; }
       .ratioKey { display: none; }
-      #challengeView.ratioMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
-      #challengeView.ratioMode .ratioKey { display: block; }
+      #challengeView.ratioMode .keypad,
+      #challengeView.speedMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
+      #challengeView.ratioMode .ratioKey,
+      #challengeView.speedMode .ratioKey { display: block; }
       #challengeView.ratioMode .keypad:not(.operatorChoice) #ratioTimesKey,
       #challengeView.ratioMode .keypad:not(.operatorChoice) #ratioDivideKey {
         visibility: hidden;
         pointer-events: none;
       }
-      #challengeView.ratioMode .keypad [data-key="1"] { grid-column: 1; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="2"] { grid-column: 2; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="3"] { grid-column: 3; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="4"] { grid-column: 1; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="5"] { grid-column: 2; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="6"] { grid-column: 3; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="7"] { grid-column: 1; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
-      #challengeView.ratioMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
-      #challengeView.ratioMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
-      #challengeView.ratioMode #ratioDotKey { grid-column: 4; grid-row: 1; }
+      #challengeView.ratioMode .keypad [data-key="1"], #challengeView.speedMode .keypad [data-key="1"] { grid-column: 1; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="2"], #challengeView.speedMode .keypad [data-key="2"] { grid-column: 2; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="3"], #challengeView.speedMode .keypad [data-key="3"] { grid-column: 3; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="4"], #challengeView.speedMode .keypad [data-key="4"] { grid-column: 1; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="5"], #challengeView.speedMode .keypad [data-key="5"] { grid-column: 2; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="6"], #challengeView.speedMode .keypad [data-key="6"] { grid-column: 3; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="7"], #challengeView.speedMode .keypad [data-key="7"] { grid-column: 1; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="8"], #challengeView.speedMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="9"], #challengeView.speedMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="0"], #challengeView.speedMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
+      #challengeView.ratioMode #ratioTimesKey, #challengeView.speedMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
+      #challengeView.ratioMode #ratioDivideKey, #challengeView.speedMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
+      #challengeView.ratioMode #ratioDotKey, #challengeView.speedMode #ratioDotKey { grid-column: 4; grid-row: 1; }
       #challengeView.ratioMode .keypad.operatorChoice [data-digit],
       #challengeView.ratioMode .keypad.operatorChoice #ratioDotKey {
         border-color: #cbd2dc;
@@ -1316,8 +1325,17 @@
         color: transparent;
         pointer-events: none;
       }
-      #challengeView.ratioMode #backButton { grid-column: 4; grid-row: 2; }
-      #challengeView.ratioMode #clearButton { grid-column: 4; grid-row: 3; }
+      #challengeView.speedMode .keypad:not(.operatorChoice) #ratioTimesKey,
+      #challengeView.speedMode .keypad:not(.operatorChoice) #ratioDivideKey,
+      #challengeView.speedMode #ratioDotKey,
+      #challengeView.speedMode .keypad.operatorChoice [data-digit] {
+        border-color: #cbd2dc;
+        background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px);
+        color: transparent;
+        pointer-events: none;
+      }
+      #challengeView.ratioMode #backButton, #challengeView.speedMode #backButton { grid-column: 4; grid-row: 2; }
+      #challengeView.ratioMode #clearButton, #challengeView.speedMode #clearButton { grid-column: 4; grid-row: 3; }
       button:disabled { cursor: default; opacity: 0.52; transform: none; }
       .goal {
         display: block;
@@ -1867,7 +1885,7 @@
             <button class="menuButton" id="chooseDivision" type="button">&#22235;&#12369;&#12383;&divide;<br />&#20108;&#12369;&#12383;</button>
             <button class="menuButton" id="chooseGrouping" type="button">&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</button>
             <button class="menuButton" id="chooseRatio" type="button">&#21106;&#21512;</button>
-            <button class="menuButton" id="chooseSpeed" type="button">&#26089;&#12373;</button>
+            <button class="menuButton" id="chooseSpeed" type="button">&#36895;&#12373;</button>
             <button class="menuButton" id="choosePreschool" type="button">&#12362;&#21069;&#12399;<br />&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</button>
           </div>
           <div class="recordActions">
@@ -1949,7 +1967,7 @@
         </section>
 
         <section class="cover" id="speedCover" hidden>
-          <h1>&#26089;&#12373;</h1>
+          <h1>&#36895;&#12373;</h1>
           <p class="coverPrompt">&#31186;&#36895;&#12391;&#12392;&#12367;&#12424;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="speedStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
@@ -2189,10 +2207,11 @@
           </div>
           <div id="speedProblemLine" hidden>
             <p class="speedQuestion" id="speedQuestion"></p>
+            <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 240" role="img"></svg>
             <div class="speedFormula">
-              <span id="speedFormulaLeft"></span>
-              <span id="speedFormulaOperator"></span>
-              <span id="speedFormulaRight"></span>
+              <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaLeft" data-speed-field="left" type="button" aria-label="&#24335;&#12398;&#24038;&#12398;&#25968;"></button><span id="speedFormulaLeftUnit"></span></span>
+              <button class="speedOperatorInput" id="speedFormulaOperator" data-speed-field="operator" type="button" aria-label="&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
+              <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaRight" data-speed-field="right" type="button" aria-label="&#24335;&#12398;&#21491;&#12398;&#25968;"></button><span id="speedFormulaRightUnit"></span></span>
               <span class="equals">=</span>
               <span class="speedAnswer">
                 <span class="speedAnswerDigits">
@@ -2203,7 +2222,6 @@
                 <span id="speedAnswerUnit"></span>
               </span>
             </div>
-            <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 180" role="img"></svg>
           </div>
           <div id="preschoolProblemLine" hidden>
             <div class="preschoolFormula">
@@ -2495,7 +2513,7 @@
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
         ratio: "\u5272\u5408",
-        speed: "\u65e9\u3055",
+        speed: "\u901f\u3055",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
       };
       const APP_ORDER = [
@@ -2552,6 +2570,8 @@
       let speedDeck = [];
       let speedIndex = 0;
       let speedProblem = null;
+      let speedValues = {};
+      let speedActiveField = "";
       let preschoolDeck = [];
       let preschoolIndex = 0;
       let preschoolProblem = null;
@@ -2710,8 +2730,15 @@
       const speedFormulaLeft = document.querySelector("#speedFormulaLeft");
       const speedFormulaOperator = document.querySelector("#speedFormulaOperator");
       const speedFormulaRight = document.querySelector("#speedFormulaRight");
+      const speedFormulaLeftUnit = document.querySelector("#speedFormulaLeftUnit");
+      const speedFormulaRightUnit = document.querySelector("#speedFormulaRightUnit");
       const speedAnswerUnit = document.querySelector("#speedAnswerUnit");
       const speedVisual = document.querySelector("#speedVisual");
+      const speedFields = {
+        left: speedFormulaLeft,
+        operator: speedFormulaOperator,
+        right: speedFormulaRight,
+      };
       const preschoolFirst = document.querySelector("#preschoolFirst");
       const preschoolOperator = document.querySelector("#preschoolOperator");
       const preschoolSecond = document.querySelector("#preschoolSecond");
@@ -3240,39 +3267,146 @@
         return `${speedAnswer(item)}${speedUnit(item)}`;
       }
 
+      function speedExpected(field, item = speedProblem) {
+        if (!item) return "";
+        if (field === "operator") return item.type === "distance" ? "\u00d7" : "\u00f7";
+        if (field === "left") return String(item.type === "distance" ? item.speed : item.distance);
+        if (field === "right") return String(item.type === "time" ? item.speed : item.seconds);
+        return "";
+      }
+
+      function speedExpressionFields() {
+        return ["left", "operator", "right"];
+      }
+
+      function speedExpressionIsCorrect() {
+        return speedExpressionFields().every((field) => (speedValues[field] || "") === speedExpected(field));
+      }
+
+      function speedSignature() {
+        return `speed:${speedExpressionFields().map((field) => speedValues[field] || "").join("|")}`;
+      }
+
+      function renderSpeedEntry() {
+        Object.entries(speedFields).forEach(([field, input]) => {
+          const value = speedValues[field] || "";
+          input.textContent = value || (field === "operator" ? "\u25cb" : "");
+          input.classList.toggle("active", field === speedActiveField);
+        });
+        SPEED_SLOTS.forEach((slot) => {
+          inputs[slot].classList.toggle("active", slot === speedActiveField);
+        });
+        keypad.classList.toggle("operatorChoice", speedActiveField === "operator");
+      }
+
+      function setSpeedActive(field) {
+        if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
+        const answerSlots = activeSlotOrder();
+        if (!speedExpressionFields().includes(field) && !answerSlots.includes(field)) return;
+        if (answerSlots.includes(field) && !speedExpressionIsCorrect()) return;
+        speedActiveField = field;
+        if (answerSlots.includes(field)) activeSlot = field;
+        renderSpeedEntry();
+      }
+
+      function resetSpeedEntry() {
+        speedValues = {};
+        speedActiveField = "left";
+        renderSpeedEntry();
+      }
+
+      function clearSpeedExpression() {
+        if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
+        speedValues = {};
+        speedActiveField = "left";
+        renderSpeedEntry();
+      }
+
+      function speedSetValue(field, value) {
+        speedValues[field] = value;
+        renderSpeedEntry();
+      }
+
+      function speedFinishField(field) {
+        const fields = speedExpressionFields();
+        if (field !== fields.at(-1)) {
+          setSpeedActive(fields[fields.indexOf(field) + 1]);
+          return;
+        }
+        if (!speedExpressionIsCorrect()) {
+          showWrongConfirmation(speedSignature(), clearSpeedExpression);
+          return;
+        }
+        setSpeedActive(activeSlotOrder()[0]);
+      }
+
+      function speedReceive(value) {
+        if (selectedApp !== "speed" || isAnswerLocked || isFinished || !speedActiveField) return;
+        if (activeSlotOrder().includes(speedActiveField)) {
+          if (/^\d$/.test(value)) {
+            setSlotValue(speedActiveField, getAnswerValue(speedActiveField) + value);
+          }
+          return;
+        }
+        const operator = speedActiveField === "operator";
+        const allowed = operator ? value === "\u00d7" || value === "\u00f7" : /^\d$/.test(value);
+        if (!allowed) return;
+        const expectedValue = speedExpected(speedActiveField);
+        const current = speedValues[speedActiveField] || "";
+        const next = operator ? value : current + value;
+        if (next.length > expectedValue.length) return;
+        speedSetValue(speedActiveField, next);
+        if (next.length === expectedValue.length) speedFinishField(speedActiveField);
+      }
+
+      function speedBackspace() {
+        if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
+        const current = speedValues[speedActiveField] || "";
+        if (current) {
+          speedSetValue(speedActiveField, current.slice(0, -1));
+          return;
+        }
+        const fields = speedExpressionFields();
+        const index = fields.indexOf(speedActiveField);
+        if (index > 0) setSpeedActive(fields[index - 1]);
+      }
+
       function renderSpeedProblem() {
         if (!speedProblem) return;
         const item = speedProblem;
         speedQuestion.textContent = speedProblemText(item);
         if (item.type === "distance") {
-          speedFormulaLeft.textContent = `\u6bce\u79d2${item.speed}m`;
-          speedFormulaOperator.textContent = "\u00d7";
-          speedFormulaRight.textContent = `${item.seconds}\u79d2`;
+          speedFormulaLeftUnit.textContent = "m/\u79d2";
+          speedFormulaRightUnit.textContent = "\u79d2";
         } else if (item.type === "speed") {
-          speedFormulaLeft.textContent = `${item.distance}m`;
-          speedFormulaOperator.textContent = "\u00f7";
-          speedFormulaRight.textContent = `${item.seconds}\u79d2`;
+          speedFormulaLeftUnit.textContent = "m";
+          speedFormulaRightUnit.textContent = "\u79d2";
         } else {
-          speedFormulaLeft.textContent = `${item.distance}m`;
-          speedFormulaOperator.textContent = "\u00f7";
-          speedFormulaRight.textContent = `\u6bce\u79d2${item.speed}m`;
+          speedFormulaLeftUnit.textContent = "m";
+          speedFormulaRightUnit.textContent = "m/\u79d2";
         }
         speedAnswerUnit.textContent = speedUnit(item);
         const visible = new Set(visibleDigitSlots(SPEED_SLOTS, speedAnswer(item)));
         SPEED_SLOTS.forEach((slot) => { inputs[slot].hidden = !visible.has(slot); });
-
-        const fraction = item.distance / 270;
-        const fullWidth = 430;
-        const filledWidth = Math.max(86, Math.round(fullWidth * fraction));
-        const x = 65;
+        const distanceLabel = item.type === "distance" ? "x m" : `${item.distance}m`;
+        const speedLabel = item.type === "speed" ? "\u6bce\u79d2 x m" : `\u6bce\u79d2${item.speed}m`;
+        const timeLabel = item.type === "time" ? "x \u79d2" : `${item.seconds}\u79d2`;
+        const x = 142;
+        const y = 38;
+        const width = 346;
+        const height = 138;
         speedVisual.innerHTML =
-          '<defs><marker id="speedArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"></path></marker></defs>' +
-          '<line x1="' + x + '" y1="94" x2="' + (x + fullWidth) + '" y2="94" stroke="#d7dce5" stroke-width="22" stroke-linecap="round"></line>' +
-          '<line x1="' + x + '" y1="94" x2="' + (x + filledWidth) + '" y2="94" stroke="#a9cdfb" stroke-width="22" stroke-linecap="round"></line>' +
-          '<line x1="' + x + '" y1="94" x2="' + (x + filledWidth) + '" y2="94" stroke="#2563eb" stroke-width="4" marker-end="url(#speedArrow)"></line>' +
-          '<text x="' + (x + fullWidth / 2) + '" y="52" fill="#667085" font-size="28" font-weight="900" text-anchor="middle">' + item.distance + 'm</text>' +
-          '<text x="' + (x + fullWidth / 2) + '" y="145" fill="#16202a" font-size="28" font-weight="900" text-anchor="middle">\u6bce\u79d2' + item.speed + 'm \u00d7 ' + item.seconds + '\u79d2</text>';
-        speedVisual.setAttribute("aria-label", `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3080${item.distance}m\u306e\u9053\u306e\u308a`);
+          '<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '" rx="8" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>' +
+          '<line x1="' + (x - 42) + '" y1="' + y + '" x2="' + (x - 42) + '" y2="' + (y + height) + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<line x1="' + (x - 42) + '" y1="' + y + '" x2="' + x + '" y2="' + y + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<line x1="' + (x - 42) + '" y1="' + (y + height) + '" x2="' + x + '" y2="' + (y + height) + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<text x="' + (x - 68) + '" y="' + (y + height / 2) + '" fill="#667085" font-size="25" font-weight="900" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 ' + (x - 68) + ' ' + (y + height / 2) + ')">' + timeLabel + '</text>' +
+          '<text x="' + (x + width / 2) + '" y="' + (y + height / 2 + 10) + '" fill="#16202a" font-size="34" font-weight="900" text-anchor="middle">' + distanceLabel + '</text>' +
+          '<line x1="' + x + '" y1="' + (y + height + 36) + '" x2="' + (x + width) + '" y2="' + (y + height + 36) + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<line x1="' + x + '" y1="' + (y + height) + '" x2="' + x + '" y2="' + (y + height + 36) + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<line x1="' + (x + width) + '" y1="' + (y + height) + '" x2="' + (x + width) + '" y2="' + (y + height + 36) + '" stroke="#667085" stroke-width="2" stroke-dasharray="5 5"></line>' +
+          '<text x="' + (x + width / 2) + '" y="' + (y + height + 72) + '" fill="#667085" font-size="25" font-weight="900" text-anchor="middle">' + speedLabel + '</text>';
+        speedVisual.setAttribute("aria-label", `\u6a2a\u304c${speedLabel}\u3001\u7e26\u304c${timeLabel}\u3001\u4e2d\u304c${distanceLabel}\u306e\u9577\u65b9\u5f62`);
       }
 
       function ratioProblemText(item = ratioProblem) {
@@ -4737,6 +4871,9 @@
         Object.values(ratioFields).forEach((input) => {
           input.disabled = locked;
         });
+        Object.values(speedFields).forEach((input) => {
+          input.disabled = locked;
+        });
       }
 
       function setModeLocked(locked) {
@@ -4748,10 +4885,12 @@
       function setActive(slot) {
         if (isAnswerLocked || isFinished) return;
         activeSlot = slot;
+        if (selectedApp === "speed") speedActiveField = slot;
         Object.entries(inputs).forEach(([key, input]) => {
           input.classList.toggle("active", key === slot);
           input.blur();
         });
+        if (selectedApp === "speed") renderSpeedEntry();
       }
 
       function nextSlot(slot) {
@@ -5119,6 +5258,11 @@
           resetRatioEntry();
           return;
         }
+        if (selectedApp === "speed") {
+          setLocked(false);
+          resetSpeedEntry();
+          return;
+        }
         if (resetModeLock && selectedApp === "fraction") setModeLocked(false);
         setLocked(false);
         setActive(activeSlotOrder()[0]);
@@ -5165,7 +5309,7 @@
         correctCount = 0;
         mistakeCount = 0;
         appMenu.hidden = false;
-        challengeView.classList.remove("divisionMode", "ratioMode");
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         multiplicationCover.hidden = true;
         basicDivisionCover.hidden = true;
         improperFractionCover.hidden = true;
@@ -6394,6 +6538,7 @@
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
+        challengeView.classList.toggle("speedMode", selectedApp === "speed");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
         if (selectedApp === "multiplication") {
@@ -6449,9 +6594,19 @@
       Object.entries(inputs).forEach(([slot, input]) => {
         input.addEventListener("pointerdown", (event) => {
           event.preventDefault();
+          if (selectedApp === "speed") {
+            setSpeedActive(slot);
+            return;
+          }
           setActive(slot);
         });
-        input.addEventListener("click", () => setActive(slot));
+        input.addEventListener("click", () => {
+          if (selectedApp === "speed") {
+            setSpeedActive(slot);
+            return;
+          }
+          setActive(slot);
+        });
       });
 
       function bindFastPress(button, action) {
@@ -6509,6 +6664,10 @@
           ratioBackspace();
           return;
         }
+        if (selectedApp === "speed" && !activeSlotOrder().includes(speedActiveField)) {
+          speedBackspace();
+          return;
+        }
         resetClearAnswerConfirm();
         pendingWrongSignature = "";
         clearConfirmationMessage();
@@ -6535,6 +6694,10 @@
             clearRatioEntry();
             return;
           }
+          if (selectedApp === "speed") {
+            resetInputs();
+            return;
+          }
           resetInputs();
         }
       }
@@ -6558,6 +6721,23 @@
             return;
           }
         }
+        if (selectedApp === "speed") {
+          if (/^\d$/.test(event.key)) {
+            event.preventDefault();
+            speedReceive(event.key);
+            return;
+          }
+          if (event.key === "*" || event.key === "x" || event.key === "X") {
+            event.preventDefault();
+            speedReceive("\u00d7");
+            return;
+          }
+          if (event.key === "/") {
+            event.preventDefault();
+            speedReceive("\u00f7");
+            return;
+          }
+        }
         if (/^\d$/.test(event.key)) {
           event.preventDefault();
           resetClearAnswerConfirm();
@@ -6577,6 +6757,10 @@
             ratioReceive(button.dataset.digit);
             return;
           }
+          if (selectedApp === "speed") {
+            speedReceive(button.dataset.digit);
+            return;
+          }
           setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit);
         });
       });
@@ -6591,8 +6775,24 @@
         });
       });
 
-      bindFastPress(document.querySelector("#ratioTimesKey"), () => ratioReceive("\u00d7"));
-      bindFastPress(document.querySelector("#ratioDivideKey"), () => ratioReceive("\u00f7"));
+      document.querySelectorAll("[data-speed-field]").forEach((input) => {
+        input.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          if (selectedApp === "speed") setSpeedActive(input.dataset.speedField);
+        });
+        input.addEventListener("click", () => {
+          if (selectedApp === "speed") setSpeedActive(input.dataset.speedField);
+        });
+      });
+
+      bindFastPress(document.querySelector("#ratioTimesKey"), () => {
+        if (selectedApp === "ratio") ratioReceive("\u00d7");
+        if (selectedApp === "speed") speedReceive("\u00d7");
+      });
+      bindFastPress(document.querySelector("#ratioDivideKey"), () => {
+        if (selectedApp === "ratio") ratioReceive("\u00f7");
+        if (selectedApp === "speed") speedReceive("\u00f7");
+      });
       bindFastPress(document.querySelector("#ratioDotKey"), () => ratioReceive("."));
 
       doubleDecimalChoices.forEach((button) => {
