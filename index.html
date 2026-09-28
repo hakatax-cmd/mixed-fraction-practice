@@ -3334,7 +3334,7 @@
         return deck;
       }
 
-      function createEquationProblem(kind, used, allowNegative = false) {
+      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+") {
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -3346,42 +3346,59 @@
             [coefficient, answer] = divisionPairs[randomInt(0, divisionPairs.length - 1)];
             middle = coefficient * answer;
           } else if (kind === "fraction") {
-            const choices = [
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator: "+", workOperator: "-", commonDenominator: 6, workFirst: 5, workSecond: 2 },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 5, denominator: 4 }, answer: { numerator: 9, denominator: 8 }, sourceOperator: "+", workOperator: "-", commonDenominator: 4, workFirst: 5, workSecond: 2 },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 1, denominator: 6 }, answer: { numerator: 8, denominator: 9 }, sourceOperator: "-", workOperator: "+", commonDenominator: 6, workFirst: 1, workSecond: 3 },
-            ];
-            const item = choices.find((choice) => !used.has(`fraction:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
+            const choices = shuffle([
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 2, denominator: 3 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 8, denominator: 9 } },
+            ]);
+            const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
             if (!item) continue;
-            const key = `fraction:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}`;
+            const commonDenominator = item.middle.denominator * item.constant.denominator;
+            const middleNumerator = item.middle.numerator * item.constant.denominator;
+            const constantNumerator = item.constant.numerator * item.middle.denominator;
+            const totalNumerator = sourceOperator === "+"
+              ? middleNumerator + constantNumerator
+              : middleNumerator - constantNumerator;
+            if (totalNumerator < 1) continue;
+            const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}`;
             used.add(key);
-            return { kind, ...item };
+            return {
+              kind,
+              ...item,
+              total: { numerator: totalNumerator, denominator: commonDenominator },
+              sourceOperator,
+              workOperator: sourceOperator === "+" ? "-" : "+",
+              commonDenominator,
+              workFirst: totalNumerator,
+              workSecond: constantNumerator,
+            };
           } else {
             coefficient = randomInt(2, 9);
             answer = allowNegative ? -randomInt(1, 9) : randomInt(1, 9);
             middle = coefficient * answer;
           }
           const constant = kind === "basic" ? randomInt(1, 9) : randomInt(1, 15);
-          const total = middle + constant;
-          if (constant < 1 || constant === coefficient || (kind !== "basic" && total < 1)) continue;
-          const item = { kind, coefficient, constant, total, middle, answer };
-          const key = `${coefficient}:${constant}:${total}`;
+          const total = sourceOperator === "+" ? middle + constant : middle - constant;
+          if (constant < 1 || constant === coefficient || total < 1 && !allowNegative) continue;
+          const item = { kind, coefficient, constant, total, middle, answer, sourceOperator };
+          const key = `${sourceOperator}:${coefficient}:${constant}:${total}`;
           if (used.has(key)) continue;
           used.add(key);
           return item;
         }
         return kind === "fraction"
-          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator: "+", workOperator: "-", commonDenominator: 6, workFirst: 5, workSecond: 2 }
-          : { kind, coefficient: 6, constant: 4, total: 100, middle: 96, answer: 16 };
+          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: 5, workSecond: 2 }
+          : { kind, coefficient: 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: 16, sourceOperator };
       }
 
       function createEquationDeck() {
         const used = new Set();
-        const negative = Array.from({ length: 3 }, () => createEquationProblem("basic", used, true));
-        const positive = Array.from({ length: 3 }, () => createEquationProblem("basic", used, false));
-        const division = Array.from({ length: 3 }, () => createEquationProblem("division", used));
-        const fractions = Array.from({ length: 3 }, () => createEquationProblem("fraction", used));
-        return [...shuffle(negative), ...shuffle(positive), ...shuffle(division), ...shuffle(fractions)];
+        const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
+        const negative = signs.slice(0, 3).map((sign) => createEquationProblem("basic", used, true, sign));
+        const positive = signs.slice(3, 6).map((sign) => createEquationProblem("basic", used, false, sign));
+        const division = signs.slice(6, 9).map((sign) => createEquationProblem("division", used, false, sign));
+        const fractions = signs.slice(9).concat(["+", "-"]).map((sign) => createEquationProblem("fraction", used, false, sign));
+        return [...negative, ...positive, ...division, ...fractions];
       }
 
       function createPreschoolDeck() {
@@ -3819,7 +3836,7 @@
           equationCommonDenominator.textContent = equationProblem.commonDenominator;
           equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
         } else {
-          equationBase.textContent = `${equationProblem.coefficient}x + ${equationProblem.constant} = ${equationProblem.total}`;
+          equationBase.textContent = `${equationProblem.coefficient}x ${equationProblem.sourceOperator} ${equationProblem.constant} = ${equationProblem.total}`;
           equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
         }
         resetEquationEntry();
