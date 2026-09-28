@@ -321,6 +321,19 @@
         align-items: center;
         justify-self: start;
       }
+      .fractionAddSubtractWorkSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
+      .fractionAddSubtractWorkEquals { grid-column: 2; grid-row: 2; }
+      .fractionAddSubtractWork {
+        grid-column: 3;
+        grid-row: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-self: start;
+        gap: clamp(7px, 1.2vmin, 12px);
+      }
+      .fractionAddSubtractWork .answerDigits { display: inline-flex; gap: clamp(4px, 0.8vmin, 8px); }
+      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryEquals,
+      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryAnswer { grid-row: 3; }
       .fractionAddSubtractDenominatorCell {
         display: grid;
         min-height: var(--fraction-box-height);
@@ -598,6 +611,34 @@
       .equationOperatorInput.active { filter: drop-shadow(0 0 7px rgba(37, 99, 235, 0.45)); }
       .equationStaticFraction { display: inline-grid; grid-template-rows: 1fr 4px 1fr; min-width: clamp(54px, 10vmin, 78px); text-align: center; align-items: center; vertical-align: middle; }
       .equationStaticFraction i { display: block; height: 4px; background: var(--ink); }
+      #equationProblemLine.fractionEquation { width: 100%; min-width: 0; padding-inline: clamp(10px, 3.5vmin, 34px); }
+      #equationProblemLine.fractionEquation .equationBase { max-width: 100%; flex-wrap: wrap; row-gap: clamp(8px, 1.4vmin, 12px); }
+      #equationProblemLine.fractionEquation .equationLine:not(.fractionMiddleLine) { display: flex; flex-wrap: wrap; max-width: 100%; }
+      #equationProblemLine.fractionEquation .fractionMiddleLine {
+        display: grid;
+        grid-template-columns: auto auto minmax(0, max-content);
+        grid-template-areas:
+          "left equals work"
+          "result-equals result result";
+        justify-items: start;
+        align-items: center;
+        max-width: 100%;
+      }
+      #equationProblemLine.fractionEquation #equationMiddleLeft { grid-area: left; }
+      #equationProblemLine.fractionEquation #equationMiddleLine > .equals:not(#equationMiddleResultEquals) { grid-area: equals; }
+      #equationProblemLine.fractionEquation #equationMiddleFractionInput { grid-area: work; }
+      #equationProblemLine.fractionEquation #equationMiddleResultEquals { grid-area: result-equals; }
+      #equationProblemLine.fractionEquation #equationMiddleResultFraction { grid-area: result; }
+      @media (max-width: 430px) {
+        #equationProblemLine.fractionEquation { gap: clamp(10px, 2.4vmin, 16px); padding-inline: 8px; }
+        #equationProblemLine.fractionEquation .equationBase,
+        #equationProblemLine.fractionEquation .equationLine { gap: 6px; font-size: clamp(2rem, 8.7vw, 2.5rem); }
+        #equationProblemLine.fractionEquation .equationStaticFraction { min-width: 44px; }
+        #equationProblemLine.fractionEquation .equationWorkFraction { min-width: 140px; grid-template-rows: 48px 3px 48px; }
+        #equationProblemLine.fractionEquation .equationResultFraction { min-width: 48px; grid-template-rows: 48px 3px 48px; }
+        #equationProblemLine.fractionEquation .equationFreeInput { min-width: 42px; height: 54px; font-size: 2.1rem; }
+        #equationProblemLine.fractionEquation .equationOperatorInput { width: 40px; height: 40px; font-size: 2.5rem; }
+      }
 
       #groupingProblemLine {
         --grouping-box-width: clamp(48px, 8.2vmin, 84px);
@@ -2123,7 +2164,20 @@
           <div class="problemLine" id="fractionAddSubtractProblemLine" hidden>
             <div class="fractionAddSubtractStack">
               <span class="fractionAddSubtractQuestion" id="fractionAddSubtractQuestion"></span>
-              <span class="fractionAddSubtractEquals">=</span>
+              <span class="fractionAddSubtractEquals" id="fractionAddSubtractPrimaryEquals">=</span>
+              <span class="fractionAddSubtractWorkSpacer" id="fractionAddSubtractWorkSpacer" hidden></span>
+              <span class="fractionAddSubtractEquals fractionAddSubtractWorkEquals" id="fractionAddSubtractWorkEquals" hidden>=</span>
+              <span class="fractionAddSubtractWork" id="fractionAddSubtractWork" hidden>
+                <span class="answerDigits">
+                  <button id="fractionAddSubtractWorkFirstTensInput" class="answerBox" aria-label="分子の足し算、左の十の位" data-value="" type="button"></button>
+                  <button id="fractionAddSubtractWorkFirstOnesInput" class="answerBox" aria-label="分子の足し算、左の一の位" data-value="" type="button"></button>
+                </span>
+                <span class="fractionAddSubtractOperator">+</span>
+                <span class="answerDigits">
+                  <button id="fractionAddSubtractWorkSecondTensInput" class="answerBox" aria-label="分子の足し算、右の十の位" data-value="" type="button"></button>
+                  <button id="fractionAddSubtractWorkSecondOnesInput" class="answerBox" aria-label="分子の足し算、右の一の位" data-value="" type="button"></button>
+                </span>
+              </span>
               <span class="fractionAddSubtractAnswer" id="fractionAddSubtractPrimaryAnswer">
                 <span class="fractionAddSubtractMinus" id="fractionAddSubtractPrimaryMinus" hidden>-</span>
                 <span class="answerFraction">
@@ -2294,7 +2348,7 @@
           </div>
           <div id="equationProblemLine" hidden>
             <p class="equationBase" id="equationBase"></p>
-            <div class="equationLine">
+            <div class="equationLine fractionMiddleLine" id="equationMiddleLine">
               <span id="equationMiddleLeft"></span>
               <span class="equals">=</span>
               <button class="equationFreeInput active" id="equationMiddleInput" data-equation-field="middle" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#21491;&#36794;"></button>
@@ -2567,6 +2621,8 @@
       const FRACTION_ADD_SUBTRACT_TARGET = 12;
       const FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS = ["fractionAddSubtractPrimaryNumeratorTens", "fractionAddSubtractPrimaryNumeratorOnes"];
       const FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS = ["fractionAddSubtractPrimaryDenominatorTens", "fractionAddSubtractPrimaryDenominatorOnes"];
+      const FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS = ["fractionAddSubtractWorkFirstTens", "fractionAddSubtractWorkFirstOnes"];
+      const FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS = ["fractionAddSubtractWorkSecondTens", "fractionAddSubtractWorkSecondOnes"];
       const FRACTION_ADD_SUBTRACT_REDUCED_SLOTS = ["fractionAddSubtractReducedDenominator", "fractionAddSubtractReducedNumerator"];
       const GROUPING_TARGET = 10;
       const GROUPING_MIDDLE_SLOTS = ["groupingMiddleHundreds", "groupingMiddleTens", "groupingMiddleOnes"];
@@ -2681,6 +2737,7 @@
       let fractionAddSubtractDeck = [];
       let fractionAddSubtractIndex = 0;
       let fractionAddSubtractProblem = null;
+      let fractionAddSubtractAdditionStage = "answer";
       let groupingDeck = [];
       let groupingIndex = 0;
       let groupingProblem = null;
@@ -2771,6 +2828,10 @@
         fractionAddSubtractPrimaryNumeratorOnes: document.querySelector("#fractionAddSubtractPrimaryNumeratorOnesInput"),
         fractionAddSubtractPrimaryDenominatorTens: document.querySelector("#fractionAddSubtractPrimaryDenominatorTensInput"),
         fractionAddSubtractPrimaryDenominatorOnes: document.querySelector("#fractionAddSubtractPrimaryDenominatorOnesInput"),
+        fractionAddSubtractWorkFirstTens: document.querySelector("#fractionAddSubtractWorkFirstTensInput"),
+        fractionAddSubtractWorkFirstOnes: document.querySelector("#fractionAddSubtractWorkFirstOnesInput"),
+        fractionAddSubtractWorkSecondTens: document.querySelector("#fractionAddSubtractWorkSecondTensInput"),
+        fractionAddSubtractWorkSecondOnes: document.querySelector("#fractionAddSubtractWorkSecondOnesInput"),
         fractionAddSubtractReducedNumerator: document.querySelector("#fractionAddSubtractReducedNumeratorInput"),
         fractionAddSubtractReducedDenominator: document.querySelector("#fractionAddSubtractReducedDenominatorInput"),
         groupingMiddleHundreds: document.querySelector("#groupingMiddleHundredsInput"),
@@ -2816,6 +2877,10 @@
       const fractionAddSubtractPrimaryMinus = document.querySelector("#fractionAddSubtractPrimaryMinus");
       const fractionAddSubtractPrimaryDenominator = document.querySelector("#fractionAddSubtractPrimaryDenominator");
       const fractionAddSubtractPrimaryDenominatorInputs = document.querySelector("#fractionAddSubtractPrimaryDenominatorInputs");
+      const fractionAddSubtractStack = document.querySelector(".fractionAddSubtractStack");
+      const fractionAddSubtractWorkSpacer = document.querySelector("#fractionAddSubtractWorkSpacer");
+      const fractionAddSubtractWorkEquals = document.querySelector("#fractionAddSubtractWorkEquals");
+      const fractionAddSubtractWork = document.querySelector("#fractionAddSubtractWork");
       const fractionAddSubtractReducedSpacer = document.querySelector("#fractionAddSubtractReducedSpacer");
       const fractionAddSubtractReducedEquals = document.querySelector("#fractionAddSubtractReducedEquals");
       const fractionAddSubtractReducedAnswer = document.querySelector("#fractionAddSubtractReducedAnswer");
@@ -3393,12 +3458,11 @@
 
       function createEquationDeck() {
         const used = new Set();
-        const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const negative = signs.slice(0, 3).map((sign) => createEquationProblem("basic", used, true, sign));
-        const positive = signs.slice(3, 6).map((sign) => createEquationProblem("basic", used, false, sign));
-        const division = signs.slice(6, 9).map((sign) => createEquationProblem("division", used, false, sign));
-        const fractions = signs.slice(9).concat(["+", "-"]).map((sign) => createEquationProblem("fraction", used, false, sign));
-        return [...negative, ...positive, ...division, ...fractions];
+        const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
+        const negative = signs.slice(0, 4).map((sign) => createEquationProblem("basic", used, true, sign));
+        const positive = signs.slice(4, 7).map((sign) => createEquationProblem("basic", used, false, sign));
+        const fractions = signs.slice(7, 12).map((sign) => createEquationProblem("fraction", used, false, sign));
+        return [...negative, ...positive, ...fractions];
       }
 
       function createPreschoolDeck() {
@@ -3829,6 +3893,7 @@
 
       function renderEquationProblem() {
         if (!equationProblem) return;
+        equationProblemLine.classList.toggle("fractionEquation", equationProblem.kind === "fraction");
         if (equationProblem.kind === "fraction") {
           const fractionHtml = (value) => `<span>${value.numerator}</span><i></i><span>${value.denominator}</span>`;
           equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
@@ -4298,6 +4363,19 @@
         return item ? item.answer : { numerator: 0, denominator: 1 };
       }
 
+      function fractionAddSubtractWorkTerms(item = fractionAddSubtractProblem) {
+        if (!item || item.operator !== "add") return { first: 0, second: 0 };
+        return {
+          first: item.first.numerator * item.second.denominator,
+          second: item.second.numerator * item.first.denominator,
+        };
+      }
+
+      function fractionAddSubtractNeedsWork(item = fractionAddSubtractProblem) {
+        const terms = fractionAddSubtractWorkTerms(item);
+        return item?.operator === "add" && terms.first >= 10 && terms.second >= 10;
+      }
+
       function fractionAddSubtractProblemText(item = fractionAddSubtractProblem) {
         if (!item) return "";
         const sign = item.operator === "add" ? "+" : "-";
@@ -4759,6 +4837,11 @@
         if (fractionAddSubtractProblem.operator === "add") {
           addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
         }
+        if (fractionAddSubtractNeedsWork()) {
+          const terms = fractionAddSubtractWorkTerms();
+          addDigits(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first);
+          addDigits(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second);
+        }
         if (fractionAddSubtractProblem.reduced) {
           values.set("fractionAddSubtractReducedNumerator", String(fractionAddSubtractProblem.reduced.numerator));
           if (fractionAddSubtractProblem.reduced.denominator !== 1) {
@@ -4772,6 +4855,8 @@
         if (!fractionAddSubtractProblem) return;
         const answer = fractionAddSubtractAnswer();
         const addition = fractionAddSubtractProblem.operator === "add";
+        const needsWork = fractionAddSubtractNeedsWork();
+        const terms = fractionAddSubtractWorkTerms();
         const visible = new Set([
           ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
           ...(addition ? visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator) : []),
@@ -4779,6 +4864,17 @@
         [...FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, ...FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS].forEach((slot) => {
           inputs[slot].hidden = !visible.has(slot);
         });
+        const workVisible = new Set([
+          ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first),
+          ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second),
+        ]);
+        [...FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, ...FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS].forEach((slot) => {
+          inputs[slot].hidden = !needsWork || !workVisible.has(slot);
+        });
+        fractionAddSubtractStack.classList.toggle("hasAdditionWork", needsWork);
+        fractionAddSubtractWorkSpacer.hidden = !needsWork;
+        fractionAddSubtractWorkEquals.hidden = !needsWork;
+        fractionAddSubtractWork.hidden = !needsWork;
         fractionAddSubtractPrimaryMinus.hidden = addition;
         fractionAddSubtractPrimaryDenominatorInputs.hidden = !addition;
         fractionAddSubtractPrimaryDenominator.hidden = addition;
@@ -4878,6 +4974,19 @@
         if (selectedApp === "fractionAddSubtract") {
           const answer = fractionAddSubtractAnswer();
           if (fractionAddSubtractProblem.operator === "add") {
+            if (fractionAddSubtractNeedsWork()) {
+              if (fractionAddSubtractAdditionStage === "denominator") {
+                return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
+              }
+              if (fractionAddSubtractAdditionStage === "work") {
+                const terms = fractionAddSubtractWorkTerms();
+                return [
+                  ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first),
+                  ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second),
+                ];
+              }
+              return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
+            }
             return [
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
@@ -5872,6 +5981,17 @@
         const correctDigits = slots.every((slot) => getAnswerValue(slot) === expected(slot));
         const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
         const correct = correctDigits && correctDecimal;
+
+        if (selectedApp === "fractionAddSubtract" && fractionAddSubtractNeedsWork() && fractionAddSubtractAdditionStage !== "answer") {
+          if (!correct) {
+            showWrongConfirmation(answerSignature(), clearActiveAnswers);
+            return;
+          }
+          fractionAddSubtractAdditionStage = fractionAddSubtractAdditionStage === "denominator" ? "work" : "answer";
+          updateFractionAddSubtractSlots();
+          setActive(activeSlotOrder()[0]);
+          return;
+        }
 
         if (!correct) {
           if (selectedApp === "division") {
@@ -7095,6 +7215,7 @@
         } else if (selectedApp === "fractionAddSubtract") {
           const sign = fractionAddSubtractProblem.operator === "add" ? "+" : "-";
           fractionAddSubtractQuestion.innerHTML = `${fraction(fractionAddSubtractProblem.first.numerator, fractionAddSubtractProblem.first.denominator)}<span class="fractionAddSubtractOperator">${sign}</span>${fraction(fractionAddSubtractProblem.second.numerator, fractionAddSubtractProblem.second.denominator)}`;
+          fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "denominator" : "answer";
           updateFractionAddSubtractSlots();
         } else if (selectedApp === "grouping") {
           const sign = groupingProblem.operator === "add" ? "+" : "-";
