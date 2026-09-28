@@ -579,8 +579,8 @@
       .speedAnswer .answerBox { width: clamp(46px, 8vmin, 74px); height: clamp(46px, 8vmin, 74px); font-size: clamp(1.8rem, 5.8vmin, 3.5rem); }
       .speedVisual { width: min(100%, 560px); height: clamp(148px, 25vmin, 220px); align-self: center; overflow: visible; }
 
-      #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-weight: 900; font-variant-numeric: tabular-nums; }
-      .equationBase { margin: 0; font-size: clamp(2.4rem, 8.2vmin, 5rem); line-height: 1; }
+      #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .equationBase { display: flex; align-items: center; gap: clamp(7px, 1.2vmin, 12px); margin: 0; font-size: clamp(2.4rem, 8.2vmin, 5rem); line-height: 1; }
       .equationLine { display: inline-flex; align-items: center; justify-content: start; gap: clamp(8px, 1.6vmin, 15px); font-size: clamp(2.4rem, 8.2vmin, 5rem); line-height: 1; }
       .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); min-width: clamp(46px, 8vmin, 62px); height: clamp(69px, 12vmin, 93px); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; overflow: hidden; }
       .equationFreeInput[data-slots="2"] { min-width: clamp(92px, 16vmin, 124px); }
@@ -588,9 +588,14 @@
       .equationFreeInput .equationDigit { display: grid; place-items: center; min-width: 0; height: 100%; }
       .equationFreeInput .equationDigit + .equationDigit { border-left: 2px solid var(--line); }
       .equationFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
-      .equationFraction { display: grid; grid-template-rows: clamp(52px, 9vmin, 76px) 4px clamp(52px, 9vmin, 76px); align-items: center; min-width: clamp(68px, 13vmin, 102px); }
-      .equationFraction .equationFreeInput { width: 100%; min-width: 0; height: 100%; padding: 0 4px; }
-      .equationFraction i { display: block; height: 4px; background: var(--ink); }
+      .equationWorkFraction, .equationResultFraction { display: inline-grid; grid-template-rows: clamp(52px, 9vmin, 76px) 4px clamp(52px, 9vmin, 76px); align-items: center; min-width: clamp(56px, 10vmin, 76px); vertical-align: middle; }
+      .equationWorkFraction { min-width: clamp(176px, 31vmin, 240px); }
+      .equationWorkNumerator { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: clamp(5px, 1vmin, 9px); height: 100%; }
+      .equationWorkFraction .equationFreeInput, .equationResultFraction .equationFreeInput { width: 100%; min-width: 0; height: 100%; padding: 0 4px; }
+      .equationWorkFraction i, .equationResultFraction i { display: block; height: 4px; background: var(--ink); }
+      .equationKnownDenominator { display: grid; place-items: center; height: 100%; }
+      .equationOperatorInput { display: grid; place-items: center; width: clamp(48px, 8vmin, 64px); height: clamp(48px, 8vmin, 64px); padding: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: clamp(2.2rem, 7vmin, 4.2rem); font-weight: 900; line-height: 1; }
+      .equationOperatorInput.active { filter: drop-shadow(0 0 7px rgba(37, 99, 235, 0.45)); }
       .equationStaticFraction { display: inline-grid; grid-template-rows: 1fr 4px 1fr; min-width: clamp(54px, 10vmin, 78px); text-align: center; align-items: center; vertical-align: middle; }
       .equationStaticFraction i { display: block; height: 4px; background: var(--ink); }
 
@@ -1352,9 +1357,11 @@
       }
       #challengeView.equationMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
       #challengeView.equationMode .ratioKey { display: block; }
-      #challengeView.equationMode #ratioTimesKey,
-      #challengeView.equationMode #ratioDivideKey { visibility: hidden; pointer-events: none; }
+      #challengeView.equationMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
+      #challengeView.equationMode #ratioDivideKey { grid-column: 2; grid-row: 1; }
+      #challengeView.equationMode #ratioPlusKey { grid-column: 3; grid-row: 1; font-size: 2.1rem; }
       #challengeView.equationMode #ratioDotKey { grid-column: 4; grid-row: 1; font-size: 2.1rem; }
+      #challengeView.ratioMode #ratioPlusKey, #challengeView.speedMode #ratioPlusKey { visibility: hidden; pointer-events: none; }
       #challengeView.equationMode [data-key="1"] { grid-column: 1; grid-row: 2; }
       #challengeView.equationMode [data-key="2"] { grid-column: 2; grid-row: 2; }
       #challengeView.equationMode [data-key="3"] { grid-column: 3; grid-row: 2; }
@@ -2283,10 +2290,20 @@
               <span id="equationMiddleLeft"></span>
               <span class="equals">=</span>
               <button class="equationFreeInput active" id="equationMiddleInput" data-equation-field="middle" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#21491;&#36794;"></button>
-              <span class="equationFraction" id="equationMiddleFractionInput" hidden>
+              <span class="equationWorkFraction" id="equationMiddleFractionInput" hidden>
+                <span class="equationWorkNumerator">
+                  <button class="equationFreeInput" id="equationMiddleFirstInput" data-equation-field="middleFirst" type="button" aria-label="&#36890;&#20998;&#24460;&#12398;&#19968;&#12388;&#30446;&#12398;&#25968;"></button>
+                  <button class="equationOperatorInput" id="equationMiddleOperatorInput" data-equation-field="middleOperator" type="button" aria-label="&#36890;&#20998;&#24460;&#12398;&#31526;&#21495;">&#9675;</button>
+                  <button class="equationFreeInput" id="equationMiddleSecondInput" data-equation-field="middleSecond" type="button" aria-label="&#36890;&#20998;&#24460;&#12398;&#20108;&#12388;&#30446;&#12398;&#25968;"></button>
+                </span>
+                <i></i>
+                <span class="equationKnownDenominator" id="equationCommonDenominator"></span>
+              </span>
+              <span class="equals" id="equationMiddleResultEquals" hidden>=</span>
+              <span class="equationResultFraction" id="equationMiddleResultFraction" hidden>
                 <button class="equationFreeInput" id="equationMiddleNumeratorInput" data-equation-field="middleNumerator" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#20998;&#23376;"></button>
                 <i></i>
-                <button class="equationFreeInput" id="equationMiddleDenominatorInput" data-equation-field="middleDenominator" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#20998;&#27597;"></button>
+                <span class="equationKnownDenominator" id="equationMiddleResultDenominator"></span>
               </span>
             </div>
             <div class="equationLine" id="equationFinalLine" hidden>
@@ -2302,11 +2319,22 @@
             <div class="equationLine" id="equationFractionFinalLine" hidden>
               <span>x</span>
               <span class="equals">=</span>
-              <span class="equationStaticFraction" id="equationFinalMiddleFraction"></span>
-              <span>&divide;</span>
-              <span class="equationStaticFraction" id="equationFinalCoefficientFraction"></span>
+              <span class="equationResultFraction">
+                <button class="equationFreeInput" id="equationFractionLeftNumeratorInput" data-equation-field="fractionLeftNumerator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#24038;&#12398;&#20998;&#23376;"></button>
+                <i></i>
+                <button class="equationFreeInput" id="equationFractionLeftDenominatorInput" data-equation-field="fractionLeftDenominator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#24038;&#12398;&#20998;&#27597;"></button>
+              </span>
+              <button class="equationOperatorInput" id="equationFractionOperatorInput" data-equation-field="fractionOperator" type="button" aria-label="&#20998;&#25968;&#12398;&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
+              <span class="equationResultFraction">
+                <button class="equationFreeInput" id="equationFractionRightNumeratorInput" data-equation-field="fractionRightNumerator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#21491;&#12398;&#20998;&#23376;"></button>
+                <i></i>
+                <button class="equationFreeInput" id="equationFractionRightDenominatorInput" data-equation-field="fractionRightDenominator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#21491;&#12398;&#20998;&#27597;"></button>
+              </span>
+            </div>
+            <div class="equationLine" id="equationFractionAnswerLine" hidden>
+              <span>x</span>
               <span class="equals">=</span>
-              <span class="equationFraction">
+              <span class="equationResultFraction" id="equationFinalResultFraction">
                 <button class="equationFreeInput" id="equationFractionFinalNumeratorInput" data-equation-field="fractionFinalNumerator" type="button" aria-label="x&#12398;&#20516;&#12398;&#20998;&#23376;"></button>
                 <i></i>
                 <button class="equationFreeInput" id="equationFractionFinalDenominatorInput" data-equation-field="fractionFinalDenominator" type="button" aria-label="x&#12398;&#20516;&#12398;&#20998;&#27597;"></button>
@@ -2405,6 +2433,7 @@
           <div class="keypad" id="keypad" aria-label="&#25968;&#23383;&#12398;&#12479;&#12483;&#12481;&#20837;&#21147;">
             <button class="ratioKey" id="ratioTimesKey" type="button" aria-label="&#12363;&#12369;&#12427;">&times;</button>
             <button class="ratioKey" id="ratioDivideKey" type="button" aria-label="&#12431;&#12427;">&divide;</button>
+            <button class="ratioKey" id="ratioPlusKey" type="button" aria-label="&#12383;&#12377;">+</button>
             <button class="ratioKey" id="ratioDotKey" type="button" aria-label="&#23567;&#25968;&#28857;">.</button>
             <button type="button" data-digit="1" data-key="1">1</button>
             <button type="button" data-digit="2" data-key="2">2</button>
@@ -2832,25 +2861,43 @@
       const equationMiddleLeft = document.querySelector("#equationMiddleLeft");
       const equationMiddleInput = document.querySelector("#equationMiddleInput");
       const equationMiddleFractionInput = document.querySelector("#equationMiddleFractionInput");
+      const equationMiddleFirstInput = document.querySelector("#equationMiddleFirstInput");
+      const equationMiddleSecondInput = document.querySelector("#equationMiddleSecondInput");
+      const equationMiddleOperatorInput = document.querySelector("#equationMiddleOperatorInput");
+      const equationCommonDenominator = document.querySelector("#equationCommonDenominator");
+      const equationMiddleResultEquals = document.querySelector("#equationMiddleResultEquals");
+      const equationMiddleResultFraction = document.querySelector("#equationMiddleResultFraction");
       const equationMiddleNumeratorInput = document.querySelector("#equationMiddleNumeratorInput");
-      const equationMiddleDenominatorInput = document.querySelector("#equationMiddleDenominatorInput");
+      const equationMiddleResultDenominator = document.querySelector("#equationMiddleResultDenominator");
       const equationFinalLine = document.querySelector("#equationFinalLine");
       const equationFinalInput = document.querySelector("#equationFinalInput");
       const equationFractionInput = document.querySelector("#equationFractionInput");
       const equationFractionNumeratorInput = document.querySelector("#equationFractionNumeratorInput");
       const equationFractionDenominatorInput = document.querySelector("#equationFractionDenominatorInput");
       const equationFractionFinalLine = document.querySelector("#equationFractionFinalLine");
-      const equationFinalMiddleFraction = document.querySelector("#equationFinalMiddleFraction");
-      const equationFinalCoefficientFraction = document.querySelector("#equationFinalCoefficientFraction");
+      const equationFractionLeftNumeratorInput = document.querySelector("#equationFractionLeftNumeratorInput");
+      const equationFractionLeftDenominatorInput = document.querySelector("#equationFractionLeftDenominatorInput");
+      const equationFractionOperatorInput = document.querySelector("#equationFractionOperatorInput");
+      const equationFractionRightNumeratorInput = document.querySelector("#equationFractionRightNumeratorInput");
+      const equationFractionRightDenominatorInput = document.querySelector("#equationFractionRightDenominatorInput");
+      const equationFractionAnswerLine = document.querySelector("#equationFractionAnswerLine");
+      const equationFinalResultFraction = document.querySelector("#equationFinalResultFraction");
       const equationFractionFinalNumeratorInput = document.querySelector("#equationFractionFinalNumeratorInput");
       const equationFractionFinalDenominatorInput = document.querySelector("#equationFractionFinalDenominatorInput");
       const equationFields = {
         middle: equationMiddleInput,
+        middleFirst: equationMiddleFirstInput,
+        middleOperator: equationMiddleOperatorInput,
+        middleSecond: equationMiddleSecondInput,
         middleNumerator: equationMiddleNumeratorInput,
-        middleDenominator: equationMiddleDenominatorInput,
         final: equationFinalInput,
         numerator: equationFractionNumeratorInput,
         denominator: equationFractionDenominatorInput,
+        fractionLeftNumerator: equationFractionLeftNumeratorInput,
+        fractionLeftDenominator: equationFractionLeftDenominatorInput,
+        fractionOperator: equationFractionOperatorInput,
+        fractionRightNumerator: equationFractionRightNumeratorInput,
+        fractionRightDenominator: equationFractionRightDenominatorInput,
         fractionFinalNumerator: equationFractionFinalNumeratorInput,
         fractionFinalDenominator: equationFractionFinalDenominatorInput,
       };
@@ -3292,9 +3339,9 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = [
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 5, denominator: 4 }, answer: { numerator: 9, denominator: 8 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 7, denominator: 6 }, answer: { numerator: 8, denominator: 9 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator: "+", workOperator: "-", commonDenominator: 6, workFirst: 5, workSecond: 2 },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 5, denominator: 4 }, answer: { numerator: 9, denominator: 8 }, sourceOperator: "+", workOperator: "-", commonDenominator: 4, workFirst: 5, workSecond: 2 },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, total: { numerator: 1, denominator: 6 }, answer: { numerator: 8, denominator: 9 }, sourceOperator: "-", workOperator: "+", commonDenominator: 6, workFirst: 1, workSecond: 3 },
             ];
             const item = choices.find((choice) => !used.has(`fraction:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
             if (!item) continue;
@@ -3316,7 +3363,7 @@
           return item;
         }
         return kind === "fraction"
-          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 } }
+          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator: "+", workOperator: "-", commonDenominator: 6, workFirst: 5, workSecond: 2 }
           : { kind, coefficient: 6, constant: 4, total: 100, middle: 96, answer: 16 };
       }
 
@@ -3579,24 +3626,35 @@
       }
 
       function equationFinalFields() {
-        return equationProblem?.kind === "fraction" ? ["fractionFinalDenominator", "fractionFinalNumerator"] : ["final"];
+        return ["final"];
       }
 
       function equationExpected(field) {
         if (!equationProblem) return "";
         if (field === "middle") return String(equationProblem.middle);
-        if (field === "middleDenominator") return String(equationProblem.middle.denominator);
+        if (field === "middleFirst") return String(equationProblem.workFirst);
+        if (field === "middleOperator") return equationProblem.workOperator;
+        if (field === "middleSecond") return String(equationProblem.workSecond);
         if (field === "middleNumerator") return String(equationProblem.middle.numerator);
         if (field === "final") return String(equationProblem.answer);
+        if (field === "fractionLeftDenominator") return String(equationProblem.middle.denominator);
+        if (field === "fractionLeftNumerator") return String(equationProblem.middle.numerator);
+        if (field === "fractionOperator") return "\u00f7";
+        if (field === "fractionRightDenominator") return String(equationProblem.coefficient.denominator);
+        if (field === "fractionRightNumerator") return String(equationProblem.coefficient.numerator);
         if (field === "fractionFinalDenominator") return String(equationProblem.answer.denominator);
         if (field === "fractionFinalNumerator") return String(equationProblem.answer.numerator);
         return "";
       }
 
       function equationCurrentFields() {
-        if (equationPhase === "middle") {
-          return equationProblem?.kind === "fraction" ? ["middleDenominator", "middleNumerator"] : ["middle"];
+        if (equationProblem?.kind === "fraction") {
+          if (equationPhase === "work") return ["middleFirst", "middleOperator", "middleSecond"];
+          if (equationPhase === "result") return ["middleNumerator"];
+          if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionOperator", "fractionRightDenominator", "fractionRightNumerator"];
+          if (equationPhase === "answer") return ["fractionFinalDenominator", "fractionFinalNumerator"];
         }
+        if (equationPhase === "middle") return ["middle"];
         return equationFinalFields();
       }
 
@@ -3608,11 +3666,20 @@
         const isFraction = equationProblem?.kind === "fraction";
         equationMiddleInput.hidden = isFraction;
         equationMiddleFractionInput.hidden = !isFraction;
+        equationMiddleResultEquals.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
+        equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
         equationFinalLine.hidden = equationPhase !== "final" || isFraction;
-        equationFractionFinalLine.hidden = equationPhase !== "final" || !isFraction;
+        equationFractionFinalLine.hidden = !isFraction || !["expression", "answer"].includes(equationPhase);
+        equationFractionAnswerLine.hidden = !isFraction || equationPhase !== "answer";
         equationFinalInput.hidden = isFraction;
         equationFractionInput.hidden = true;
         Object.entries(equationFields).forEach(([field, input]) => {
+          const isOperator = field === "middleOperator" || field === "fractionOperator";
+          if (isOperator) {
+            input.textContent = equationValues[field] || "\u25cb";
+            input.classList.toggle("active", field === equationActiveField);
+            return;
+          }
           const slots = Math.min(3, Math.max(1, equationExpected(field).length));
           const value = Array.from(equationValues[field] || "");
           input.innerHTML = Array.from({ length: slots }, (_, index) => `<span class="equationDigit">${value[index] || ""}</span>`).join("");
@@ -3630,8 +3697,8 @@
 
       function resetEquationEntry() {
         equationValues = {};
-        equationPhase = "middle";
-        equationActiveField = equationProblem?.kind === "fraction" ? "middleDenominator" : "middle";
+        equationPhase = equationProblem?.kind === "fraction" ? "work" : "middle";
+        equationActiveField = equationProblem?.kind === "fraction" ? "middleFirst" : "middle";
         renderEquationEntry();
       }
 
@@ -3670,7 +3737,7 @@
         const fieldIndex = fields.indexOf(equationActiveField);
         if (fieldIndex >= 0 && fieldIndex < fields.length - 1) {
           if ((equationValues[equationActiveField] || "") !== equationExpected(equationActiveField)) {
-            showWrongConfirmation(equationSignature([equationActiveField]), () => clearEquationFields([equationActiveField]));
+            showWrongConfirmation(equationSignature(fields), () => clearEquationFields(fields));
             return;
           }
           equationActiveField = fields[fieldIndex + 1];
@@ -3680,6 +3747,15 @@
         if (!equationIsCorrect(fields)) {
           showWrongConfirmation(equationSignature(fields), () => clearEquationFields(fields));
           return;
+        }
+        if (equationProblem?.kind === "fraction") {
+          const nextPhase = { work: "result", result: "expression", expression: "answer" }[equationPhase];
+          if (nextPhase) {
+            equationPhase = nextPhase;
+            equationActiveField = equationCurrentFields()[0];
+            renderEquationEntry();
+            return;
+          }
         }
         if (equationPhase === "middle") {
           equationPhase = "final";
@@ -3696,6 +3772,14 @@
         const expected = equationExpected(field);
         const current = equationValues[field] || "";
         const nextValue = value === "\u2212" ? "-" : value;
+        const expectsOperator = ["+", "-", "\u00d7", "\u00f7"].includes(expected);
+        if (expectsOperator) {
+          if (nextValue !== expected) return;
+          equationValues[field] = nextValue;
+          renderEquationEntry();
+          equationFinishField();
+          return;
+        }
         if (nextValue === "-" && (current || !expected.startsWith("-"))) return;
         if (!/^\d$/.test(nextValue) && nextValue !== "-") return;
         const next = current + nextValue;
@@ -3722,10 +3806,10 @@
         if (!equationProblem) return;
         if (equationProblem.kind === "fraction") {
           const fractionHtml = (value) => `<span>${value.numerator}</span><i></i><span>${value.denominator}</span>`;
-          equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x + <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
+          equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
           equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
-          equationFinalMiddleFraction.innerHTML = fractionHtml(equationProblem.middle);
-          equationFinalCoefficientFraction.innerHTML = fractionHtml(equationProblem.coefficient);
+          equationCommonDenominator.textContent = equationProblem.commonDenominator;
+          equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
         } else {
           equationBase.textContent = `${equationProblem.coefficient}x + ${equationProblem.constant} = ${equationProblem.total}`;
           equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
@@ -7172,6 +7256,21 @@
             equationReceive("\u2212");
             return;
           }
+          if (event.key === "+") {
+            event.preventDefault();
+            equationReceive("+");
+            return;
+          }
+          if (event.key === "*" || event.key === "x" || event.key === "X") {
+            event.preventDefault();
+            equationReceive("\u00d7");
+            return;
+          }
+          if (event.key === "/") {
+            event.preventDefault();
+            equationReceive("\u00f7");
+            return;
+          }
         }
         if (/^\d$/.test(event.key)) {
           event.preventDefault();
@@ -7237,10 +7336,15 @@
       bindFastPress(document.querySelector("#ratioTimesKey"), () => {
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
+        if (selectedApp === "equation") equationReceive("\u00d7");
       });
       bindFastPress(document.querySelector("#ratioDivideKey"), () => {
         if (selectedApp === "ratio") ratioReceive("\u00f7");
         if (selectedApp === "speed") speedReceive("\u00f7");
+        if (selectedApp === "equation") equationReceive("\u00f7");
+      });
+      bindFastPress(document.querySelector("#ratioPlusKey"), () => {
+        if (selectedApp === "equation") equationReceive("+");
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
