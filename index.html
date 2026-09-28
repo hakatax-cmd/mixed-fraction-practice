@@ -1319,6 +1319,10 @@
       .ratioKey { display: none; }
       #challengeView.ratioMode .keypad,
       #challengeView.speedMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
+      #challengeView.speedMode .keypad {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: 100%;
+      }
       #challengeView.ratioMode .ratioKey,
       #challengeView.speedMode .ratioKey { display: block; }
       #challengeView.ratioMode .keypad:not(.operatorChoice) #ratioTimesKey,
@@ -1355,6 +1359,8 @@
         color: transparent;
         pointer-events: none;
       }
+      #challengeView.speedMode #ratioPlusKey { display: none; }
+      #challengeView.speedMode .keypad .toolButton { width: min(100%, clamp(58px, 14vmin, 76px)); }
       #challengeView.equationMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
       #challengeView.equationMode .ratioKey { display: block; }
       #challengeView.equationMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
@@ -2157,6 +2163,7 @@
                 <span id="groupingMiddleOpen" hidden>(</span>
                 <span class="groupingMinus" id="groupingMiddleMinus" hidden>-</span>
                 <span class="answerDigits">
+                  <button id="groupingMiddleHundredsInput" class="answerBox" aria-label="まとめた数の百の位" data-value="" type="button" hidden></button>
                   <button id="groupingMiddleTensInput" class="answerBox" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
                   <button id="groupingMiddleOnesInput" class="answerBox active" aria-label="&#12414;&#12392;&#12417;&#12383;&#25968;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
@@ -2167,6 +2174,7 @@
               <span class="groupingFinal">
                 <span class="groupingMinus" id="groupingFinalMinus" hidden>-</span>
                 <span class="answerDigits">
+                  <button id="groupingFinalHundredsInput" class="answerBox" aria-label="答えの百の位" data-value="" type="button" hidden></button>
                   <button id="groupingFinalTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
                   <button id="groupingFinalOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
@@ -2561,8 +2569,8 @@
       const FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS = ["fractionAddSubtractPrimaryDenominatorTens", "fractionAddSubtractPrimaryDenominatorOnes"];
       const FRACTION_ADD_SUBTRACT_REDUCED_SLOTS = ["fractionAddSubtractReducedDenominator", "fractionAddSubtractReducedNumerator"];
       const GROUPING_TARGET = 10;
-      const GROUPING_MIDDLE_SLOTS = ["groupingMiddleTens", "groupingMiddleOnes"];
-      const GROUPING_FINAL_SLOTS = ["groupingFinalTens", "groupingFinalOnes"];
+      const GROUPING_MIDDLE_SLOTS = ["groupingMiddleHundreds", "groupingMiddleTens", "groupingMiddleOnes"];
+      const GROUPING_FINAL_SLOTS = ["groupingFinalHundreds", "groupingFinalTens", "groupingFinalOnes"];
       const RATIO_TARGET = 10;
       const RATIO_BEST_KEY = "ratioBestTimeMs";
       const SPEED_TARGET = 10;
@@ -2765,8 +2773,10 @@
         fractionAddSubtractPrimaryDenominatorOnes: document.querySelector("#fractionAddSubtractPrimaryDenominatorOnesInput"),
         fractionAddSubtractReducedNumerator: document.querySelector("#fractionAddSubtractReducedNumeratorInput"),
         fractionAddSubtractReducedDenominator: document.querySelector("#fractionAddSubtractReducedDenominatorInput"),
+        groupingMiddleHundreds: document.querySelector("#groupingMiddleHundredsInput"),
         groupingMiddleTens: document.querySelector("#groupingMiddleTensInput"),
         groupingMiddleOnes: document.querySelector("#groupingMiddleOnesInput"),
+        groupingFinalHundreds: document.querySelector("#groupingFinalHundredsInput"),
         groupingFinalTens: document.querySelector("#groupingFinalTensInput"),
         groupingFinalOnes: document.querySelector("#groupingFinalOnesInput"),
         divisionQTens: document.querySelector("#divisionQTensInput"),
@@ -3178,23 +3188,21 @@
       function createGroupingProblem(operator, used) {
         for (let attempt = 0; attempt < 1200; attempt += 1) {
           const factor = randomInt(2, 9);
+          const middle = [10, 20, 50, 100][randomInt(0, 3)];
           let first;
           let second;
-          let middle;
 
           if (operator === "add") {
-            first = randomInt(2, 9);
-            second = randomInt(2, 9);
-            middle = first + second;
+            first = randomInt(1, middle - 1);
+            second = middle - first;
           } else {
-            first = randomInt(1, 8);
-            second = randomInt(first + 1, 9);
-            middle = second - first;
+            second = randomInt(1, Math.min(20, middle - 1));
+            first = middle + second;
           }
 
           const answer = factor * middle;
-          if (factor === first || factor === second || factor === middle || first === second) continue;
-          if (answer < 10 || answer > 99) continue;
+          if (factor === first || factor === second || first === second) continue;
+          if (answer < 10 || answer > 999) continue;
           const item = { operator, factor, first, second, middle, answer };
           const key = groupingProblemText(item);
           if (used.has(key)) continue;
@@ -3203,8 +3211,8 @@
         }
 
         return operator === "add"
-          ? { operator, factor: 7, first: 5, second: 8, middle: 13, answer: 91 }
-          : { operator, factor: 7, first: 5, second: 8, middle: 3, answer: 21 };
+          ? { operator, factor: 6, first: 3, second: 97, middle: 100, answer: 600 }
+          : { operator, factor: 6, first: 104, second: 4, middle: 100, answer: 600 };
       }
 
       function createGroupingDeck() {
@@ -4300,9 +4308,8 @@
 
       function groupingAnswerText(item = groupingProblem) {
         if (!item) return "";
-        const sign = item.operator === "subtract" ? "-" : "";
-        const middle = item.operator === "subtract" ? "(" + sign + item.middle + ")" : item.middle;
-        return String(item.factor) + "\u00d7" + middle + "=" + sign + item.answer;
+        const middle = item.operator === "subtract" ? "(" + item.middle + ")" : item.middle;
+        return String(item.factor) + "\u00d7" + middle + "=" + item.answer;
       }
 
       function groupingExpected(slot) {
@@ -4377,16 +4384,16 @@
             parts.push(groupingHorizontalDimension(x, y + height, firstWidth, item.first));
             parts.push(groupingHorizontalDimension(x + firstWidth, y + height, secondWidth, item.second));
           } else {
-            const originalWidth = item.second * unit;
+            const originalWidth = item.first * unit;
             const originalX = (560 - originalWidth) / 2;
-            const firstWidth = item.first * unit;
+            const removedWidth = item.second * unit;
             const differenceWidth = item.middle * unit;
             parts.push('<rect x="' + originalX + '" y="' + y + '" width="' + originalWidth + '" height="' + height + '" rx="6" fill="#dff2e8" stroke="#16202a" stroke-width="3"></rect>');
-            parts.push('<rect x="' + originalX + '" y="' + y + '" width="' + firstWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>');
-            parts.push('<rect x="' + (originalX + firstWidth) + '" y="' + y + '" width="' + differenceWidth + '" height="' + height + '" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>');
+            parts.push('<rect x="' + originalX + '" y="' + y + '" width="' + removedWidth + '" height="' + height + '" rx="6" fill="#dcecff" stroke="#16202a" stroke-width="3"></rect>');
+            parts.push('<rect x="' + (originalX + removedWidth) + '" y="' + y + '" width="' + differenceWidth + '" height="' + height + '" fill="url(#groupingHatch)" stroke="#c94735" stroke-width="3"></rect>');
             parts.push(groupingVerticalDimension(originalX, y, height, item.factor));
-            parts.push(groupingHorizontalDimension(originalX, y, firstWidth, item.first, true));
-            parts.push(groupingHorizontalDimension(originalX, y + height, originalWidth, item.second));
+            parts.push(groupingHorizontalDimension(originalX, y, removedWidth, item.second, true));
+            parts.push(groupingHorizontalDimension(originalX, y + height, originalWidth, item.first));
           }
           groupingVisual.innerHTML = parts.join("");
           groupingVisual.setAttribute("aria-label", item.operator === "add"
@@ -4437,14 +4444,15 @@
         GROUPING_MIDDLE_SLOTS.forEach((slot) => {
           inputs[slot].hidden = !middleVisible.has(slot);
         });
+        const finalVisible = new Set(visibleDigitSlots(GROUPING_FINAL_SLOTS, groupingProblem.answer));
         GROUPING_FINAL_SLOTS.forEach((slot) => {
-          inputs[slot].hidden = false;
+          inputs[slot].hidden = !finalVisible.has(slot);
         });
         const subtracting = groupingProblem.operator === "subtract";
         groupingMiddleOpen.hidden = !subtracting;
-        groupingMiddleMinus.hidden = !subtracting;
+        groupingMiddleMinus.hidden = true;
         groupingMiddleClose.hidden = !subtracting;
-        groupingFinalMinus.hidden = !subtracting;
+        groupingFinalMinus.hidden = true;
         renderGroupingDiagram();
       }
 
