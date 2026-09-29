@@ -614,30 +614,40 @@
       #equationProblemLine.fractionEquation { width: 100%; min-width: 0; padding-inline: clamp(10px, 3.5vmin, 34px); }
       #equationProblemLine.fractionEquation .equationBase { max-width: 100%; flex-wrap: wrap; row-gap: clamp(8px, 1.4vmin, 12px); }
       #equationProblemLine.fractionEquation .equationLine:not(.fractionMiddleLine) { display: flex; flex-wrap: wrap; max-width: 100%; }
+      #equationProblemLine.fractionEquation #equationFractionAnswerLine { flex-wrap: nowrap; }
       #equationProblemLine.fractionEquation .fractionMiddleLine {
-        display: grid;
-        grid-template-columns: auto auto minmax(0, max-content);
-        grid-template-areas:
-          "left equals work"
-          "result-equals result result";
-        justify-items: start;
-        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
         max-width: 100%;
       }
-      #equationProblemLine.fractionEquation #equationMiddleLeft { grid-area: left; }
-      #equationProblemLine.fractionEquation #equationMiddleLine > .equals:not(#equationMiddleResultEquals) { grid-area: equals; }
-      #equationProblemLine.fractionEquation #equationMiddleFractionInput { grid-area: work; }
-      #equationProblemLine.fractionEquation #equationMiddleResultEquals { grid-area: result-equals; }
-      #equationProblemLine.fractionEquation #equationMiddleResultFraction { grid-area: result; }
+      #equationProblemLine.fractionEquation {
+        gap: clamp(7px, 1.4vmin, 12px);
+        padding-top: clamp(16px, 2.8vmin, 28px);
+        padding-bottom: clamp(10px, 2vmin, 20px);
+      }
+      #equationProblemLine.fractionEquation .equationBase,
+      #equationProblemLine.fractionEquation .equationLine { font-size: clamp(1.8rem, 5vmin, 2.6rem); }
+      #equationProblemLine.fractionEquation .equationStaticFraction { min-width: clamp(42px, 7.8vmin, 60px); }
+      #equationProblemLine.fractionEquation .equationWorkFraction {
+        min-width: clamp(120px, 21vmin, 156px);
+        grid-template-rows: clamp(38px, 6vmin, 52px) 3px clamp(38px, 6vmin, 52px);
+      }
+      #equationProblemLine.fractionEquation .equationResultFraction {
+        min-width: clamp(42px, 7.8vmin, 60px);
+        grid-template-rows: clamp(38px, 6vmin, 52px) 3px clamp(38px, 6vmin, 52px);
+      }
+      #equationProblemLine.fractionEquation .equationFreeInput { font-size: clamp(1.7rem, 4.6vmin, 2.35rem); }
+      #equationProblemLine.fractionEquation .equationOperatorInput { width: clamp(36px, 6vmin, 48px); height: clamp(36px, 6vmin, 48px); font-size: clamp(2rem, 5vmin, 2.6rem); }
       @media (max-width: 430px) {
-        #equationProblemLine.fractionEquation { gap: clamp(10px, 2.4vmin, 16px); padding-inline: 8px; }
+        #equationProblemLine.fractionEquation { gap: 7px; padding-inline: 8px; }
         #equationProblemLine.fractionEquation .equationBase,
-        #equationProblemLine.fractionEquation .equationLine { gap: 6px; font-size: clamp(2rem, 8.7vw, 2.5rem); }
-        #equationProblemLine.fractionEquation .equationStaticFraction { min-width: 44px; }
-        #equationProblemLine.fractionEquation .equationWorkFraction { min-width: 140px; grid-template-rows: 48px 3px 48px; }
-        #equationProblemLine.fractionEquation .equationResultFraction { min-width: 48px; grid-template-rows: 48px 3px 48px; }
-        #equationProblemLine.fractionEquation .equationFreeInput { min-width: 42px; height: 54px; font-size: 2.1rem; }
-        #equationProblemLine.fractionEquation .equationOperatorInput { width: 40px; height: 40px; font-size: 2.5rem; }
+        #equationProblemLine.fractionEquation .equationLine { gap: 6px; font-size: clamp(1.7rem, 7.6vw, 2.1rem); }
+        #equationProblemLine.fractionEquation .equationStaticFraction { min-width: 40px; }
+        #equationProblemLine.fractionEquation .equationWorkFraction { min-width: 126px; grid-template-rows: 40px 3px 40px; }
+        #equationProblemLine.fractionEquation .equationResultFraction { min-width: 42px; grid-template-rows: 40px 3px 40px; }
+        #equationProblemLine.fractionEquation .equationFreeInput { min-width: 38px; height: 100%; font-size: 1.8rem; }
+        #equationProblemLine.fractionEquation .equationOperatorInput { width: 36px; height: 36px; font-size: 2.1rem; }
       }
 
       #groupingProblemLine {
@@ -3412,15 +3422,18 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 2, denominator: 3 } },
               { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 8, denominator: 9 } },
+              { coefficient: { numerator: 4, denominator: 5 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 } },
+              { coefficient: { numerator: 5, denominator: 6 }, middle: { numerator: 5, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 4 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 8, denominator: 9 } },
+              { coefficient: { numerator: 3, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 5, denominator: 6 } },
             ]);
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
             if (!item) continue;
-            const commonDenominator = item.middle.denominator * item.constant.denominator;
-            const middleNumerator = item.middle.numerator * item.constant.denominator;
-            const constantNumerator = item.constant.numerator * item.middle.denominator;
+            const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
+            const middleNumerator = item.middle.numerator * (commonDenominator / item.middle.denominator);
+            const constantNumerator = item.constant.numerator * (commonDenominator / item.constant.denominator);
+            if (gcd(middleNumerator, commonDenominator) !== 1) continue;
             const totalNumerator = sourceOperator === "+"
               ? middleNumerator + constantNumerator
               : middleNumerator - constantNumerator;
