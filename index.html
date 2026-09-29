@@ -3409,7 +3409,7 @@
         return deck;
       }
 
-      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+") {
+      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false) {
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -3425,8 +3425,7 @@
               { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 } },
               { coefficient: { numerator: 4, denominator: 5 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 } },
               { coefficient: { numerator: 5, denominator: 6 }, middle: { numerator: 5, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 4 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 8, denominator: 9 } },
-              { coefficient: { numerator: 3, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 5, denominator: 6 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 3, denominator: 5 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 5 } },
             ]);
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
             if (!item) continue;
@@ -3437,7 +3436,7 @@
             const totalNumerator = sourceOperator === "+"
               ? middleNumerator + constantNumerator
               : middleNumerator - constantNumerator;
-            if (totalNumerator < 1) continue;
+            if (totalNumerator < 1 || gcd(totalNumerator, commonDenominator) !== 1) continue;
             const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}`;
             used.add(key);
             return {
@@ -3452,7 +3451,7 @@
               workResultNumerator: middleNumerator,
             };
           } else {
-            coefficient = randomInt(2, 9);
+            coefficient = randomInt(2, 9) * (negativeCoefficient ? -1 : 1);
             answer = allowNegative ? -randomInt(1, 9) : randomInt(1, 9);
             middle = coefficient * answer;
           }
@@ -3467,21 +3466,17 @@
         }
         return kind === "fraction"
           ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: sourceOperator === "+" ? { numerator: 5, denominator: 6 } : { numerator: 1, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: sourceOperator === "+" ? 5 : 1, workSecond: 2, workResultNumerator: 3 }
-          : { kind, coefficient: 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: 16, sourceOperator };
+          : { kind, coefficient: negativeCoefficient ? -6 : 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: negativeCoefficient ? -16 : 16, sourceOperator };
       }
 
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const kinds = [
-          "positive", "negative", "fraction",
-          "positive", "negative", "fraction",
-          "positive", "negative", "fraction",
-          "negative", "fraction",
-        ];
+        const kinds = Array.from({ length: 4 }, () => ["positive", "negative", "fraction"]).flat();
         return kinds.map((kind, index) => {
           if (kind === "fraction") return createEquationProblem("fraction", used, false, signs[index]);
-          return createEquationProblem("basic", used, kind === "negative", signs[index]);
+          const negativeCoefficient = kind === "negative" && (index === 4 || index === 10);
+          return createEquationProblem("basic", used, kind === "negative", signs[index], negativeCoefficient);
         });
       }
 
