@@ -3436,6 +3436,7 @@
               commonDenominator,
               workFirst: totalNumerator,
               workSecond: constantNumerator,
+              workResultNumerator: middleNumerator,
             };
           } else {
             coefficient = randomInt(2, 9);
@@ -3452,17 +3453,23 @@
           return item;
         }
         return kind === "fraction"
-          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: { numerator: 5, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: 5, workSecond: 2 }
+          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: sourceOperator === "+" ? { numerator: 5, denominator: 6 } : { numerator: 1, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: sourceOperator === "+" ? 5 : 1, workSecond: 2, workResultNumerator: 3 }
           : { kind, coefficient: 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: 16, sourceOperator };
       }
 
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const negative = signs.slice(0, 4).map((sign) => createEquationProblem("basic", used, true, sign));
-        const positive = signs.slice(4, 7).map((sign) => createEquationProblem("basic", used, false, sign));
-        const fractions = signs.slice(7, 12).map((sign) => createEquationProblem("fraction", used, false, sign));
-        return [...negative, ...positive, ...fractions];
+        const kinds = [
+          "positive", "negative", "fraction",
+          "positive", "negative", "fraction",
+          "positive", "negative", "fraction",
+          "negative", "fraction",
+        ];
+        return kinds.map((kind, index) => {
+          if (kind === "fraction") return createEquationProblem("fraction", used, false, signs[index]);
+          return createEquationProblem("basic", used, kind === "negative", signs[index]);
+        });
       }
 
       function createPreschoolDeck() {
@@ -3724,7 +3731,7 @@
         if (field === "middleFirst") return String(equationProblem.workFirst);
         if (field === "middleOperator") return equationProblem.workOperator;
         if (field === "middleSecond") return String(equationProblem.workSecond);
-        if (field === "middleNumerator") return String(equationProblem.middle.numerator);
+        if (field === "middleNumerator") return String(equationProblem.workResultNumerator);
         if (field === "final") return String(equationProblem.answer);
         if (field === "fractionLeftDenominator") return String(equationProblem.middle.denominator);
         if (field === "fractionLeftNumerator") return String(equationProblem.middle.numerator);
