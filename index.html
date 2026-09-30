@@ -636,7 +636,7 @@
       }
       .preschoolFormula .answerBox { width: var(--digit-frame-width); height: var(--digit-frame-height); }
 
-      .speedQuestion { margin: 0; font-size: inherit; text-align: center; }
+      .speedQuestion { margin: 0; font-size: inherit; text-align: center; line-height: 1.35; white-space: pre-line; }
       .speedFormula { display: inline-flex; align-items: center; justify-content: center; gap: clamp(5px, 1vmin, 10px); font-size: inherit; font-variant-numeric: tabular-nums; white-space: nowrap; }
       .speedFormula .equals { color: var(--muted); }
       .speedTerm { display: inline-flex; align-items: center; gap: clamp(3px, 0.7vmin, 7px); }
@@ -3602,9 +3602,9 @@
 
       function speedProblemText(item = speedProblem) {
         if (!item) return "";
-        if (item.type === "distance") return `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3080\u3068\u3001\u4f55m\uff1f`;
-        if (item.type === "speed") return `${item.distance}m\u3092${item.seconds}\u79d2\u3067\u9032\u3080\u3068\u3001\u6bce\u79d2\u4f55m\uff1f`;
-        return `\u6bce\u79d2${item.speed}m\u3067${item.distance}m\u9032\u3080\u3068\u3001\u4f55\u79d2\uff1f`;
+        if (item.type === "distance") return `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3093\u3060\u5834\u5408\u3001\n\u4f55m\u9032\u3080\uff1f`;
+        if (item.type === "speed") return `${item.distance}m\u3092${item.seconds}\u79d2\u3067\u9032\u3093\u3060\u5834\u5408\u3001\n\u6bce\u79d2\u4f55m\u9032\u3080\uff1f`;
+        return `\u6bce\u79d2${item.speed}m\u3067\u9032\u3093\u3060\u5834\u5408\u3001\n${item.distance}m\u9032\u3080\u306e\u306b\u4f55\u79d2\u304b\u304b\u308b\uff1f`;
       }
 
       function speedAnswerText(item = speedProblem) {
