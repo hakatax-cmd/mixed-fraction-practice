@@ -284,31 +284,34 @@
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr);
         place-items: center;
+        align-content: start;
         min-width: 0;
-        padding-top: clamp(0px, 0.6vmin, 8px);
+        padding-top: clamp(16px, 3vmin, 34px);
         font-size: clamp(2.05rem, 6.2vmin, 4.5rem);
       }
 
       .fractionAddSubtractStack {
         display: grid;
         grid-column: 1;
-        grid-template-columns: minmax(0, auto) auto minmax(0, auto);
+        grid-template-columns: auto minmax(0, max-content);
+        grid-template-rows: repeat(4, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(8px, 1.4vmin, 16px);
         align-items: center;
         justify-items: center;
-        width: max-content;
+        justify-self: center;
+        width: fit-content;
         max-width: 100%;
         min-width: 0;
         font-variant-numeric: tabular-nums;
       }
 
       .fractionAddSubtractQuestion {
-        grid-column: 1;
+        grid-column: 1 / -1;
         grid-row: 1;
         display: inline-flex;
         align-items: center;
-        justify-self: end;
+        justify-self: center;
         gap: clamp(8px, 1.8vw, 18px);
       }
 
@@ -318,19 +321,20 @@
         line-height: 1;
       }
 
-      .fractionAddSubtractEquals { grid-column: 2; }
-      #fractionAddSubtractPrimaryEquals { grid-row: 1; }
+      .fractionAddSubtractEquals { grid-column: 1; justify-self: end; }
+      #fractionAddSubtractPrimaryEquals { grid-row: 2; }
       .fractionAddSubtractAnswer {
-        grid-column: 3;
-        grid-row: 1;
+        grid-column: 2;
+        grid-row: 2;
         display: inline-flex;
         align-items: center;
         justify-self: start;
       }
-      .fractionAddSubtractWorkSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
-      .fractionAddSubtractWorkEquals { grid-column: 2; grid-row: 2; }
+      .fractionAddSubtractWorkSpacer,
+      .fractionAddSubtractReducedSpacer { display: none !important; }
+      .fractionAddSubtractWorkEquals { grid-column: 1; grid-row: 2; }
       .fractionAddSubtractWork {
-        grid-column: 3;
+        grid-column: 2;
         grid-row: 2;
         display: inline-flex;
         align-items: center;
@@ -345,12 +349,10 @@
         min-height: var(--fraction-box-height);
         place-items: center;
       }
-      .fractionAddSubtractReducedSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
-      #fractionAddSubtractReducedEquals { grid-row: 2; }
-      #fractionAddSubtractReducedAnswer { grid-row: 2; }
+      #fractionAddSubtractReducedEquals { grid-column: 1; grid-row: 3; }
+      #fractionAddSubtractReducedAnswer { grid-column: 2; grid-row: 3; }
       .fractionAddSubtractMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
 
-      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedSpacer,
       .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedEquals,
       .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedAnswer { grid-row: 4; }
 
@@ -669,10 +671,10 @@
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto minmax(0, 1fr);
         place-items: center;
-        align-content: end;
+        align-content: start;
         gap: clamp(8px, 1.5vmin, 16px);
         min-width: 0;
-        padding-top: 0;
+        padding-top: clamp(16px, 3vmin, 34px);
         font-size: clamp(2.3rem, 6.9vmin, 4.85rem);
         font-variant-numeric: tabular-nums;
       }
@@ -691,33 +693,36 @@
         grid-column: 1;
         grid-row: 1;
         display: grid;
-        grid-template-columns: minmax(0, auto) auto minmax(0, auto);
-        grid-template-rows: auto auto;
+        grid-template-columns: auto minmax(0, max-content);
+        grid-template-rows: repeat(3, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(6px, 1.2vmin, 14px);
         align-items: center;
         justify-items: center;
-        width: max-content;
+        justify-self: center;
+        width: fit-content;
         max-width: 100%;
         min-width: 0;
       }
 
       .groupingQuestion {
-        grid-column: 1;
+        grid-column: 1 / -1;
         grid-row: 1;
-        justify-self: end;
+        justify-self: center;
         white-space: nowrap;
       }
 
       .groupingEquals {
-        grid-column: 2;
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: end;
         color: var(--muted);
         line-height: 1;
       }
 
       .groupingIntermediate,
       .groupingFinal {
-        grid-column: 3;
+        grid-column: 2;
         display: inline-flex;
         align-items: center;
         justify-self: start;
@@ -734,10 +739,10 @@
         vertical-align: middle;
       }
 
-      .groupingIntermediate { grid-row: 1; }
-      .groupingSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
-      .groupingFinalEquals { grid-row: 2; }
-      .groupingFinal { grid-row: 2; }
+      .groupingIntermediate { grid-row: 2; }
+      .groupingSpacer { display: none; }
+      .groupingFinalEquals { grid-column: 1; grid-row: 3; }
+      .groupingFinal { grid-row: 3; }
       .groupingMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
 
       #groupingProblemLine .answerBox {
