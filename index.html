@@ -3466,12 +3466,27 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 } },
-              { coefficient: { numerator: 4, denominator: 5 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 } },
-              { coefficient: { numerator: 5, denominator: 6 }, middle: { numerator: 5, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 4 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 3, denominator: 5 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 5 } },
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 2, denominator: 3 } },
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 4, denominator: 3 } },
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 5 } },
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 6, denominator: 7 } },
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 2 } },
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 1, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 3, denominator: 4 } },
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 9, denominator: 4 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 4 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 1, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 3, denominator: 8 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 9 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 9 }, answer: { numerator: 8, denominator: 9 } },
+              { coefficient: { numerator: 1, denominator: 4 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 3 } },
+              { coefficient: { numerator: 2, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 4 } },
+              { coefficient: { numerator: 3, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 5, denominator: 6 } },
+              { coefficient: { numerator: 1, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 7, denominator: 2 } },
+              { coefficient: { numerator: 2, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 7, denominator: 4 } },
+              { coefficient: { numerator: 3, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 6 } },
+              { coefficient: { numerator: 1, denominator: 8 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 8, denominator: 3 } },
+              { coefficient: { numerator: 3, denominator: 8 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 8, denominator: 9 } },
             ]);
-            const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}`));
+            const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
             const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
             const middleNumerator = item.middle.numerator * (commonDenominator / item.middle.denominator);
@@ -3481,7 +3496,7 @@
               ? middleNumerator + constantNumerator
               : middleNumerator - constantNumerator;
             if (totalNumerator < 1 || gcd(totalNumerator, commonDenominator) !== 1) continue;
-            const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}`;
+            const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}:${item.constant.numerator}/${item.constant.denominator}`;
             used.add(key);
             return {
               kind,
@@ -3494,6 +3509,30 @@
               workSecond: constantNumerator,
               workResultNumerator: middleNumerator,
             };
+          } else if (kind === "bothSides") {
+            const differenceMagnitude = Math.random() < 0.7 ? 1 : 2;
+            const coefficientDifference = differenceMagnitude * (Math.random() < 0.5 ? -1 : 1);
+            const leftCoefficient = randomInt(2, 9);
+            const rightCoefficient = leftCoefficient - coefficientDifference;
+            if (rightCoefficient < 2 || rightCoefficient > 9) continue;
+            answer = (allowNegative ? -1 : 1) * randomInt(1, Math.floor(8 / differenceMagnitude));
+            middle = coefficientDifference * answer;
+            const leftConstant = randomInt(Math.max(1, 1 - middle), Math.min(9, 9 - middle));
+            const rightConstant = leftConstant + middle;
+            const item = {
+              kind,
+              coefficient: coefficientDifference,
+              middle,
+              answer,
+              leftCoefficient,
+              rightCoefficient,
+              leftConstant,
+              rightConstant,
+            };
+            const key = `both:${leftCoefficient}:${leftConstant}:${rightCoefficient}:${rightConstant}`;
+            if (used.has(key)) continue;
+            used.add(key);
+            return item;
           } else {
             coefficient = randomInt(2, 9) * (negativeCoefficient ? -1 : 1);
             answer = allowNegative ? -randomInt(1, 9) : randomInt(1, 9);
@@ -3510,17 +3549,35 @@
         }
         return kind === "fraction"
           ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: sourceOperator === "+" ? { numerator: 5, denominator: 6 } : { numerator: 1, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: sourceOperator === "+" ? 5 : 1, workSecond: 2, workResultNumerator: 3 }
+          : kind === "bothSides"
+            ? allowNegative
+              ? { kind, coefficient: 1, middle: -2, answer: -2, leftCoefficient: 3, leftConstant: 6, rightCoefficient: 2, rightConstant: 4 }
+              : { kind, coefficient: -1, middle: -2, answer: 2, leftCoefficient: 2, leftConstant: 6, rightCoefficient: 3, rightConstant: 4 }
           : { kind, coefficient: negativeCoefficient ? -6 : 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: negativeCoefficient ? -16 : 16, sourceOperator };
       }
 
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const kinds = Array.from({ length: 4 }, () => ["positive", "negative", "fraction"]).flat();
-        return kinds.map((kind, index) => {
-          if (kind === "fraction") return createEquationProblem("fraction", used, false, signs[index]);
-          const negativeCoefficient = kind === "negative" && (index === 4 || index === 10);
-          return createEquationProblem("basic", used, kind === "negative", signs[index], negativeCoefficient);
+        const plan = [
+          { kind: "basic", allowNegative: false },
+          { kind: "basic", allowNegative: true },
+          { kind: "fraction" },
+          { kind: "bothSides", allowNegative: false },
+          { kind: "bothSides", allowNegative: true },
+          { kind: "fraction" },
+          { kind: "basic", allowNegative: false },
+          { kind: "basic", allowNegative: true },
+          { kind: "fraction" },
+          { kind: "basic", allowNegative: false },
+          { kind: "basic", allowNegative: true },
+          { kind: "fraction" },
+        ];
+        return plan.map((item, index) => {
+          if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index]);
+          if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
+          const negativeCoefficient = item.allowNegative && (index === 7 || index === 10);
+          return createEquationProblem("basic", used, item.allowNegative, signs[index], negativeCoefficient);
         });
       }
 
@@ -3943,6 +4000,9 @@
           equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
           equationCommonDenominator.textContent = equationProblem.commonDenominator;
           equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
+        } else if (equationProblem.kind === "bothSides") {
+          equationBase.textContent = `${equationProblem.leftCoefficient}x + ${equationProblem.leftConstant} = ${equationProblem.rightCoefficient}x + ${equationProblem.rightConstant}`;
+          equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
         } else {
           equationBase.textContent = `${equationProblem.coefficient}x ${equationProblem.sourceOperator} ${equationProblem.constant} = ${equationProblem.total}`;
           equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
