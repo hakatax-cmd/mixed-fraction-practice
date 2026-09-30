@@ -626,7 +626,14 @@
         font-variant-numeric: tabular-nums;
         line-height: 1;
       }
-      .preschoolFormula .answerDigits { display: inline-flex; align-items: center; gap: clamp(4px, 0.8vmin, 8px); line-height: 0; }
+      .preschoolFormula .answerDigits {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: calc(var(--digit-frame-width) + var(--digit-frame-width) + clamp(4px, 0.8vmin, 8px));
+        gap: clamp(4px, 0.8vmin, 8px);
+        line-height: 0;
+      }
       .preschoolFormula .answerBox { width: var(--digit-frame-width); height: var(--digit-frame-height); }
 
       .speedQuestion { margin: 0; font-size: inherit; text-align: center; }
