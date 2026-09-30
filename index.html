@@ -293,14 +293,14 @@
       .fractionAddSubtractStack {
         display: grid;
         grid-column: 1;
-        grid-template-columns: auto minmax(0, max-content);
+        grid-template-columns: 1.05em minmax(0, 1fr);
         grid-template-rows: repeat(4, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(8px, 1.4vmin, 16px);
         align-items: center;
         justify-items: center;
         justify-self: center;
-        width: fit-content;
+        width: min(100%, 520px);
         max-width: 100%;
         min-width: 0;
         font-variant-numeric: tabular-nums;
@@ -321,7 +321,13 @@
         line-height: 1;
       }
 
-      .fractionAddSubtractEquals { grid-column: 1; justify-self: end; }
+      .fractionAddSubtractEquals {
+        grid-column: 1;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
       #fractionAddSubtractPrimaryEquals { grid-row: 2; }
       .fractionAddSubtractAnswer {
         grid-column: 2;
@@ -336,12 +342,29 @@
       .fractionAddSubtractWork {
         grid-column: 2;
         grid-row: 2;
-        display: inline-flex;
+        display: inline-grid;
         align-items: center;
         justify-self: start;
+      }
+      .fractionAddSubtractWorkFraction {
+        display: inline-grid;
+        grid-template-rows: var(--fraction-box-height) 5px var(--fraction-box-height);
+        min-width: min(100%, clamp(260px, 48vmin, 410px));
+        align-items: center;
+      }
+      .fractionAddSubtractWorkNumerator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         gap: clamp(7px, 1.2vmin, 12px);
       }
       .fractionAddSubtractWork .answerDigits { display: inline-flex; gap: clamp(4px, 0.8vmin, 8px); }
+      .fractionAddSubtractWorkFraction i { display: block; height: 5px; background: var(--ink); }
+      .fractionAddSubtractWorkFraction .fixedDenominator {
+        display: grid;
+        min-height: var(--fraction-box-height);
+        place-items: center;
+      }
       .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryEquals,
       .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryAnswer { grid-row: 3; }
       .fractionAddSubtractDenominatorCell {
@@ -693,7 +716,7 @@
         grid-column: 1;
         grid-row: 1;
         display: grid;
-        grid-template-columns: auto minmax(0, max-content);
+        grid-template-columns: 1.05em minmax(0, max-content);
         grid-template-rows: repeat(3, auto);
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(6px, 1.2vmin, 14px);
@@ -706,16 +729,16 @@
       }
 
       .groupingQuestion {
-        grid-column: 1 / -1;
+        grid-column: 2;
         grid-row: 1;
-        justify-self: center;
+        justify-self: start;
         white-space: nowrap;
       }
 
       .groupingEquals {
         grid-column: 1;
         grid-row: 2;
-        justify-self: end;
+        justify-self: start;
         color: var(--muted);
         line-height: 1;
       }
@@ -741,7 +764,7 @@
 
       .groupingIntermediate { grid-row: 2; }
       .groupingSpacer { display: none; }
-      .groupingFinalEquals { grid-column: 1; grid-row: 3; }
+      .groupingFinalEquals { grid-column: 1; grid-row: 3; justify-self: start; }
       .groupingFinal { grid-row: 3; }
       .groupingMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
 
@@ -2198,14 +2221,20 @@
               <span class="fractionAddSubtractWorkSpacer" id="fractionAddSubtractWorkSpacer" hidden></span>
               <span class="fractionAddSubtractEquals fractionAddSubtractWorkEquals" id="fractionAddSubtractWorkEquals" hidden>=</span>
               <span class="fractionAddSubtractWork" id="fractionAddSubtractWork" hidden>
-                <span class="answerDigits">
-                  <button id="fractionAddSubtractWorkFirstTensInput" class="answerBox" aria-label="分子の足し算、左の十の位" data-value="" type="button"></button>
-                  <button id="fractionAddSubtractWorkFirstOnesInput" class="answerBox" aria-label="分子の足し算、左の一の位" data-value="" type="button"></button>
-                </span>
-                <span class="fractionAddSubtractOperator">+</span>
-                <span class="answerDigits">
-                  <button id="fractionAddSubtractWorkSecondTensInput" class="answerBox" aria-label="分子の足し算、右の十の位" data-value="" type="button"></button>
-                  <button id="fractionAddSubtractWorkSecondOnesInput" class="answerBox" aria-label="分子の足し算、右の一の位" data-value="" type="button"></button>
+                <span class="fractionAddSubtractWorkFraction">
+                  <span class="fractionAddSubtractWorkNumerator">
+                    <span class="answerDigits">
+                      <button id="fractionAddSubtractWorkFirstTensInput" class="answerBox" aria-label="分子の足し算、左の十の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkFirstOnesInput" class="answerBox" aria-label="分子の足し算、左の一の位" data-value="" type="button"></button>
+                    </span>
+                    <span class="fractionAddSubtractOperator">+</span>
+                    <span class="answerDigits">
+                      <button id="fractionAddSubtractWorkSecondTensInput" class="answerBox" aria-label="分子の足し算、右の十の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkSecondOnesInput" class="answerBox" aria-label="分子の足し算、右の一の位" data-value="" type="button"></button>
+                    </span>
+                  </span>
+                  <i></i>
+                  <span class="fixedDenominator" id="fractionAddSubtractWorkDenominator"></span>
                 </span>
               </span>
               <span class="fractionAddSubtractAnswer" id="fractionAddSubtractPrimaryAnswer">
@@ -2911,6 +2940,7 @@
       const fractionAddSubtractWorkSpacer = document.querySelector("#fractionAddSubtractWorkSpacer");
       const fractionAddSubtractWorkEquals = document.querySelector("#fractionAddSubtractWorkEquals");
       const fractionAddSubtractWork = document.querySelector("#fractionAddSubtractWork");
+      const fractionAddSubtractWorkDenominator = document.querySelector("#fractionAddSubtractWorkDenominator");
       const fractionAddSubtractReducedSpacer = document.querySelector("#fractionAddSubtractReducedSpacer");
       const fractionAddSubtractReducedEquals = document.querySelector("#fractionAddSubtractReducedEquals");
       const fractionAddSubtractReducedAnswer = document.querySelector("#fractionAddSubtractReducedAnswer");
@@ -4910,6 +4940,7 @@
         fractionAddSubtractWorkSpacer.hidden = !needsWork;
         fractionAddSubtractWorkEquals.hidden = !needsWork;
         fractionAddSubtractWork.hidden = !needsWork;
+        fractionAddSubtractWorkDenominator.textContent = needsWork ? answer.denominator : "";
         fractionAddSubtractPrimaryMinus.hidden = addition;
         fractionAddSubtractPrimaryDenominatorInputs.hidden = !addition;
         fractionAddSubtractPrimaryDenominator.hidden = addition;
