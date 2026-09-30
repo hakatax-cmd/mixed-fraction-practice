@@ -282,7 +282,9 @@
         --fraction-box-height: clamp(48px, 7.2vmin, 76px);
         display: grid;
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
         place-items: center;
+        min-width: 0;
         padding-top: clamp(0px, 0.6vmin, 8px);
         font-size: clamp(2.05rem, 6.2vmin, 4.5rem);
       }
@@ -297,11 +299,13 @@
         justify-items: center;
         width: max-content;
         max-width: 100%;
+        min-width: 0;
         font-variant-numeric: tabular-nums;
       }
 
       .fractionAddSubtractQuestion {
         grid-column: 1;
+        grid-row: 1;
         display: inline-flex;
         align-items: center;
         justify-self: end;
@@ -315,8 +319,10 @@
       }
 
       .fractionAddSubtractEquals { grid-column: 2; }
+      #fractionAddSubtractPrimaryEquals { grid-row: 1; }
       .fractionAddSubtractAnswer {
         grid-column: 3;
+        grid-row: 1;
         display: inline-flex;
         align-items: center;
         justify-self: start;
@@ -339,8 +345,14 @@
         min-height: var(--fraction-box-height);
         place-items: center;
       }
-      .fractionAddSubtractReducedSpacer { grid-column: 1; min-width: 1px; }
+      .fractionAddSubtractReducedSpacer { grid-column: 1; grid-row: 2; min-width: 1px; }
+      #fractionAddSubtractReducedEquals { grid-row: 2; }
+      #fractionAddSubtractReducedAnswer { grid-row: 2; }
       .fractionAddSubtractMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
+
+      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedSpacer,
+      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedEquals,
+      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedAnswer { grid-row: 4; }
 
       #fractionAddSubtractProblemLine .fraction,
       #fractionAddSubtractProblemLine .answerFraction {
@@ -655,10 +667,11 @@
         --grouping-box-height: clamp(64px, 10.9vmin, 112px);
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto auto;
+        grid-template-rows: auto minmax(0, 1fr);
         place-items: center;
         align-content: end;
         gap: clamp(8px, 1.5vmin, 16px);
+        min-width: 0;
         padding-top: 0;
         font-size: clamp(2.3rem, 6.9vmin, 4.85rem);
         font-variant-numeric: tabular-nums;
@@ -679,12 +692,14 @@
         grid-row: 1;
         display: grid;
         grid-template-columns: minmax(0, auto) auto minmax(0, auto);
+        grid-template-rows: auto auto;
         column-gap: clamp(8px, 1.8vw, 20px);
         row-gap: clamp(6px, 1.2vmin, 14px);
         align-items: center;
         justify-items: center;
         width: max-content;
         max-width: 100%;
+        min-width: 0;
       }
 
       .groupingQuestion {
