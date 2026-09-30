@@ -82,7 +82,7 @@
         grid-template-rows: 1fr;
         position: relative;
         overflow: hidden;
-        padding-top: clamp(22px, 3.6vmin, 38px);
+        padding-top: clamp(60px, 10vmin, 86px);
       }
       .topBar {
         position: absolute;
@@ -208,7 +208,7 @@
       .progress {
         position: relative;
         display: block;
-        min-height: clamp(52px, 7vmin, 76px);
+        min-height: clamp(68px, 9.6vmin, 96px);
         padding-right: clamp(138px, 22vmin, 190px);
         font-size: clamp(1.02rem, 2.45vmin, 1.45rem);
         font-weight: 900;
@@ -216,6 +216,15 @@
         width: 100%;
       }
 
+      .currentDateTime {
+        display: block;
+        margin-bottom: clamp(2px, 0.4vmin, 5px);
+        color: var(--muted);
+        font-size: clamp(0.82rem, 2vmin, 1.18rem);
+        font-weight: 900;
+        line-height: 1.15;
+        font-variant-numeric: tabular-nums;
+      }
       .streak { display: block; color: var(--coral); }
       .skipRecordButton {
         position: absolute;
@@ -266,7 +275,7 @@
       .mixedAnswer, .improperAnswer, .productAnswer { grid-column: 3; justify-self: start; }
       .mixedAnswer, .mixedQuestion { display: inline-flex; align-items: center; gap: clamp(10px, 2.4vw, 26px); }
       .improperAnswer { display: inline-flex; align-items: center; }
-      #multiplicationProblemLine { font-size: clamp(2.2rem, 6.8vmin, 4.8rem); }
+      #multiplicationProblemLine { font-size: clamp(2.8rem, 8.5vmin, 5.8rem); }
       .multiplicationFormula { font-size: inherit; font-weight: 900; }
       .productAnswer { display: inline-flex; gap: clamp(8px, 2vw, 14px); }
       #multiplicationProblemLine .answerBox { font-size: 1.12em; }
@@ -612,7 +621,7 @@
         align-items: center;
         justify-content: center;
         gap: clamp(12px, 2.5vmin, 24px);
-        font-size: clamp(2.2rem, 6.8vmin, 4.8rem);
+        font-size: clamp(2.75rem, 8vmin, 5.5rem);
         font-weight: 900;
         font-variant-numeric: tabular-nums;
         line-height: 1;
@@ -926,7 +935,7 @@
         align-items: end;
         column-gap: clamp(12px, 2.2vmin, 22px);
         color: var(--ink);
-        font-size: clamp(2rem, 5.8vmin, 4.1rem);
+        font-size: clamp(2.55rem, 7vmin, 4.8rem);
         font-weight: 900;
         line-height: 0.95;
         font-variant-numeric: tabular-nums;
@@ -968,12 +977,13 @@
       }
 
       .doubleVerticalProblem {
-        --double-cell: clamp(36px, 6.2vmin, 64px);
+        --double-cell: var(--digit-frame-width);
+        --double-gap: 0.08em;
         display: inline-grid;
         grid-template-columns: auto repeat(4, var(--double-cell));
         align-items: end;
         justify-content: center;
-        column-gap: clamp(6px, 1.2vmin, 10px);
+        column-gap: var(--double-gap);
         row-gap: clamp(3px, 0.8vmin, 8px);
         color: var(--ink);
         font-size: clamp(1.7rem, 4.9vmin, 3.4rem);
@@ -999,7 +1009,6 @@
       }
 
       .doubleInputRow {
-        --double-gap: clamp(6px, 1.2vmin, 10px);
         position: relative;
         display: grid;
         grid-auto-flow: column;
@@ -1013,16 +1022,16 @@
       .doubleTotal[data-selected-decimal="0"]::before {
         content: "0.";
         position: absolute;
-        left: calc(var(--double-cell) * -0.86);
-        bottom: calc(var(--double-cell) * 0.02);
+        left: calc(var(--double-cell) * -0.82);
+        bottom: 0;
         color: var(--ink);
-        font-size: calc(var(--double-cell) * 0.58);
+        font-size: 1em;
         font-weight: 900;
         line-height: 1;
         pointer-events: none;
       }
       .doubleVerticalProblem .answerBox {
-        width: var(--digit-frame-width);
+        width: 100%;
         height: var(--digit-frame-height);
         border-width: 3px;
         font-size: inherit;
@@ -1055,7 +1064,7 @@
         align-items: center;
         justify-items: center;
         color: var(--ink);
-        font-size: clamp(1.05rem, 3.4vmin, 2.2rem);
+        font-size: clamp(1.75rem, 5vmin, 2.65rem);
         font-weight: 900;
         line-height: 1;
         font-variant-numeric: tabular-nums;
@@ -1100,35 +1109,12 @@
       }
 
       .decimalNumber {
-        position: relative;
-        display: inline-grid;
-        grid-template-columns: repeat(2, 0.69em);
+        display: inline-flex;
+        align-items: baseline;
         justify-content: end;
-        width: 1.38em;
+        width: auto;
+        letter-spacing: 0;
         font-variant-numeric: tabular-nums;
-      }
-
-      .decimalNumber::before {
-        content: "0.";
-        position: absolute;
-        right: calc(100% + 0.04em);
-        bottom: 0.02em;
-        display: none;
-        font-size: 0.62em;
-        line-height: 1;
-      }
-
-      .decimalNumber[data-decimals="2"]::before { display: block; }
-
-      .problemDecimalPoint {
-        position: absolute;
-        left: 50%;
-        bottom: 0.02em;
-        width: 0.21em;
-        height: 0.21em;
-        border-radius: 50%;
-        background: currentColor;
-        transform: translateX(-50%);
       }
 
       .decimalPointChoice {
@@ -1234,8 +1220,11 @@
       }
 
       .answerBox {
+        display: grid;
+        place-items: center;
         width: var(--digit-frame-width);
         height: var(--digit-frame-height);
+        padding: 0;
         border: 4px solid var(--line);
         border-radius: 8px;
         background: #fff;
@@ -1340,6 +1329,10 @@
       .feedback.confirming {
         color: var(--coral);
         font-size: clamp(1.05rem, 3vmin, 1.65rem);
+      }
+
+      .feedback.operatorWrong {
+        font-size: clamp(2.2rem, 6.8vmin, 4rem);
       }
 
       .nextMistakeButton {
@@ -1856,7 +1849,7 @@
         #appMenu .appChoices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         #chooseGrouping { grid-column: 2; }
         .progress {
-          min-height: clamp(50px, 8.4vmin, 70px);
+          min-height: clamp(64px, 10vmin, 88px);
           padding-right: clamp(126px, 27vmin, 176px);
           font-size: clamp(0.96rem, 2.6vmin, 1.28rem);
         }
@@ -1872,7 +1865,7 @@
           font-size: clamp(0.68rem, 2.55vw, 0.82rem);
         }
         .progress {
-          min-height: 58px;
+          min-height: 68px;
           padding-right: 128px;
           font-size: clamp(0.86rem, 3.35vw, 1.02rem);
         }
@@ -1932,8 +1925,8 @@
 
         .doubleProblemLine { padding-top: clamp(16px, 4.8vw, 30px); }
         .doubleVerticalProblem {
-          --double-cell: clamp(40px, 11.8vw, 62px);
-          row-gap: clamp(1px, 1vw, 5px);
+          --double-gap: 0.08em;
+          row-gap: 0.08em;
           font-size: clamp(1.9rem, 9.4vw, 3.4rem);
         }
         .doubleVerticalProblem .answerBox {
@@ -2139,11 +2132,6 @@
 
         <section class="cover" id="cover" hidden>
           <h1>&#24111;&#20998;&#25968;&#12428;&#12435;&#12375;&#12421;&#12358;</h1>
-          <p class="coverPrompt">&#12514;&#12540;&#12489;&#12434;&#12360;&#12425;&#12412;&#12358;</p>
-          <div class="modeSwitch" id="modeSwitch" aria-label="&#38627;&#26131;&#24230;&#12524;&#12505;&#12523;">
-            <button id="easyButton" class="active" type="button">&#12405;&#12388;&#12358;</button>
-            <button id="hardButton" type="button">&#12416;&#12378;&#12363;&#12375;&#12356;</button>
-          </div>
           <p class="coverGoal">12&#21839;<br />135&#31186;&#20197;&#20869;<br />&#12511;&#12473;1&#21839;&#20197;&#20869;</p>
           <p class="coverPrompt">&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="startButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
@@ -2161,6 +2149,7 @@
         <div id="challengeView" hidden>
           <div class="topBar">
             <div class="progress" aria-live="polite">
+              <time class="currentDateTime" id="currentDateTime" aria-label="現在の日付と時刻"></time>
               <span class="streak" id="streakLabel">&#27491;&#35299; 0 / 12 &#12539; &#12511;&#12473; 0 / 1</span>
               <button class="skipRecordButton" id="skipRecordButton" type="button" aria-pressed="false">&#35352;&#37682;&#12395;&#21547;&#12417;&#12394;&#12356;</button>
               <time class="timer" id="timer" aria-label="&#32076;&#36942;&#26178;&#38291;">0.0&#31186;</time>
@@ -2476,11 +2465,6 @@
                 <span class="basicDivisionKnownFactor" id="basicDivisionDivisorTop"></span>
                 <span class="basicDivisionEquals">=</span>
                 <button id="basicDivisionAnswerInput" class="answerBox active" aria-label="&#21106;&#12426;&#31639;&#12398;&#31572;&#12360;" data-value="" type="button"></button>
-              </div>
-              <div class="basicDivisionFractionRow" id="basicDivisionFractionRow" aria-label="&#21106;&#12426;&#31639;&#12434;&#20998;&#25968;&#12391;&#34920;&#12375;&#12383;&#24335;">
-                <span id="basicDivisionFraction"></span>
-                <span class="basicDivisionFractionEquals">=</span>
-                <span class="basicDivisionFractionBlank">&#9633;</span>
               </div>
             </div>
           </div>
@@ -2930,7 +2914,6 @@
       const basicDivisionRow = document.querySelector("#basicDivisionRow");
       const basicDivisionDividendTop = document.querySelector("#basicDivisionDividendTop");
       const basicDivisionDivisorTop = document.querySelector("#basicDivisionDivisorTop");
-      const basicDivisionFraction = document.querySelector("#basicDivisionFraction");
       const fractionAnswerDenominator = document.querySelector("#fractionAnswerDenominator");
       const improperAnswerDenominator = document.querySelector("#improperAnswerDenominator");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
@@ -3085,9 +3068,6 @@
       const chooseEquation = document.querySelector("#chooseEquation");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
-      const easyButton = document.querySelector("#easyButton");
-      const hardButton = document.querySelector("#hardButton");
-      const modeSwitch = document.querySelector("#modeSwitch");
       const cover = document.querySelector("#cover");
       const challengeView = document.querySelector("#challengeView");
       const topBar = document.querySelector(".topBar");
@@ -3120,6 +3100,7 @@
       const preschoolProblemLine = document.querySelector("#preschoolProblemLine");
       const equationProblemLine = document.querySelector("#equationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
+      const currentDateTime = document.querySelector("#currentDateTime");
       const skipRecordButton = document.querySelector("#skipRecordButton");
       const timer = document.querySelector("#timer");
       const gameArea = document.querySelector("#gameArea");
@@ -3266,15 +3247,15 @@
             const minimumDifference = Math.max(1, 10 - leftNumerator);
             const rawNumerator = randomInt(minimumDifference, 9);
             const rightNumerator = leftNumerator + rawNumerator;
-            const divisor = gcd(rawNumerator, denominator);
+            if (gcd(leftNumerator, denominator) !== 1) continue;
+            if (gcd(rightNumerator, denominator) !== 1) continue;
+            if (gcd(rawNumerator, denominator) !== 1) continue;
             item = {
               operator,
               first: { numerator: leftNumerator, denominator },
               second: { numerator: rightNumerator, denominator },
               answer: { numerator: rawNumerator, denominator },
-              reduced: divisor > 1
-                ? { numerator: rawNumerator / divisor, denominator: denominator / divisor }
-                : null,
+              reduced: null,
             };
           } else {
             const firstDenominator = randomInt(2, 9);
@@ -3282,9 +3263,12 @@
             if (gcd(firstDenominator, secondDenominator) !== 1) continue;
             const firstNumerator = randomInt(1, firstDenominator - 1);
             const secondNumerator = randomInt(1, secondDenominator - 1);
+            if (gcd(firstNumerator, firstDenominator) !== 1) continue;
+            if (gcd(secondNumerator, secondDenominator) !== 1) continue;
             const numerator = firstNumerator * secondDenominator + secondNumerator * firstDenominator;
             const denominator = firstDenominator * secondDenominator;
             if (numerator >= 100) continue;
+            if (gcd(numerator, denominator) !== 1) continue;
             item = {
               operator,
               first: { numerator: firstNumerator, denominator: firstDenominator },
@@ -3301,7 +3285,7 @@
         }
 
         return operator === "subtract"
-          ? { operator, first: { numerator: 5, denominator: 6 }, second: { numerator: 12, denominator: 6 }, answer: { numerator: 7, denominator: 6 }, reduced: null }
+          ? { operator, first: { numerator: 4, denominator: 7 }, second: { numerator: 10, denominator: 7 }, answer: { numerator: 6, denominator: 7 }, reduced: null }
           : { operator, first: { numerator: 1, denominator: 2 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 }, reduced: null };
       }
 
@@ -3934,9 +3918,13 @@
         const nextValue = value === "\u2212" ? "-" : value;
         const expectsOperator = ["+", "-", "\u00d7", "\u00f7"].includes(expected);
         if (expectsOperator) {
-          if (nextValue !== expected) return;
+          if (!["+", "-", "\u00d7", "\u00f7"].includes(nextValue)) return;
           equationValues[field] = nextValue;
           renderEquationEntry();
+          if (nextValue !== expected) {
+            showEquationOperatorWrong();
+            return;
+          }
           equationFinishField();
           return;
         }
@@ -4336,8 +4324,12 @@
 
       function decimalNumberHtml(value, decimalPlaces) {
         const digits = String(value).padStart(2, "0");
-        const point = decimalPlaces === 1 ? '<span class="problemDecimalPoint" aria-hidden="true"></span>' : "";
-        return `<span class="decimalNumber" data-decimals="${decimalPlaces}"><span>${digits[0]}</span><span>${digits[1]}</span>${point}</span>`;
+        const decimalText = decimalPlaces === 2
+          ? `0.${digits}`
+          : decimalPlaces === 1
+            ? `${digits[0]}.${digits[1]}`
+            : digits;
+        return `<span class="decimalNumber" data-decimals="${decimalPlaces}">${decimalText}</span>`;
       }
 
       function doubleMultiplicationPartials() {
@@ -5047,9 +5039,6 @@
           const answer = fractionAddSubtractAnswer();
           if (fractionAddSubtractProblem.operator === "add") {
             if (fractionAddSubtractNeedsWork()) {
-              if (fractionAddSubtractAdditionStage === "denominator") {
-                return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
-              }
               if (fractionAddSubtractAdditionStage === "work") {
                 const terms = fractionAddSubtractWorkTerms();
                 return [
@@ -5057,11 +5046,14 @@
                   ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second),
                 ];
               }
-              return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
+              return [
+                ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
+                ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
+              ];
             }
             return [
-              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
+              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
             ];
           }
           const slots = ["fractionAddSubtractPrimaryNumeratorOnes"];
@@ -5436,6 +5428,7 @@
       }
 
       function updateProgress() {
+        currentDateTime.textContent = formatDateTime(new Date());
         if (!hasStarted) return;
         if (isTimedProblemApp()) {
           streakLabel.textContent = `\u554f\u984c ${Math.min(currentTimedIndex() + 1, currentTimedLength())} / ${currentTimedLength()} \u30fb \u30df\u30b9 ${mistakeCount}`;
@@ -5503,8 +5496,6 @@
 
       function setModeLocked(locked) {
         modeLocked = locked;
-        easyButton.disabled = locked;
-        hardButton.disabled = locked;
       }
 
       function setActive(slot) {
@@ -5790,7 +5781,7 @@
       }
 
       function clearConfirmationMessage() {
-        feedback.classList.remove("confirming");
+        feedback.classList.remove("confirming", "operatorWrong");
         feedback.textContent = "\u00a0";
         nextMistakeButton.hidden = true;
         manualNextAction = null;
@@ -5817,6 +5808,22 @@
           clearConfirmationMessage();
           cleanup();
           watchDivisionWrongAnswer();
+        }, WRONG_CONFIRM_MS);
+      }
+
+      function showEquationOperatorWrong() {
+        pendingWrongSignature = equationSignature();
+        if (confirmationTimer) clearTimeout(confirmationTimer);
+        clearDivisionWrongTimer();
+        setLocked(true);
+        feedback.textContent = "\u9055\u3046\u3088";
+        feedback.classList.add("confirming", "operatorWrong");
+        confirmationTimer = window.setTimeout(() => {
+          confirmationTimer = null;
+          pendingWrongSignature = "";
+          setLocked(false);
+          clearConfirmationMessage();
+          clearEquationFields();
         }, WRONG_CONFIRM_MS);
       }
 
@@ -6054,12 +6061,12 @@
         const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
         const correct = correctDigits && correctDecimal;
 
-        if (selectedApp === "fractionAddSubtract" && fractionAddSubtractNeedsWork() && fractionAddSubtractAdditionStage !== "answer") {
+        if (selectedApp === "fractionAddSubtract" && fractionAddSubtractNeedsWork() && fractionAddSubtractAdditionStage === "work") {
           if (!correct) {
             showWrongConfirmation(answerSignature(), clearActiveAnswers);
             return;
           }
-          fractionAddSubtractAdditionStage = fractionAddSubtractAdditionStage === "denominator" ? "work" : "answer";
+          fractionAddSubtractAdditionStage = "answer";
           updateFractionAddSubtractSlots();
           setActive(activeSlotOrder()[0]);
           return;
@@ -7260,7 +7267,6 @@
         } else if (selectedApp === "basicDivision") {
           basicDivisionDividendTop.textContent = basicDivisionProblem.dividend;
           basicDivisionDivisorTop.textContent = basicDivisionProblem.divisor;
-          basicDivisionFraction.innerHTML = fraction(basicDivisionProblem.dividend, basicDivisionProblem.divisor);
         } else if (selectedApp === "improperFraction") {
           improperMixedQuestion.innerHTML = `<span>${improperFractionProblem.whole}</span>${fraction(improperFractionProblem.rest, improperFractionProblem.denominator)}`;
           improperAnswerDenominator.textContent = improperFractionProblem.denominator;
@@ -7287,7 +7293,7 @@
         } else if (selectedApp === "fractionAddSubtract") {
           const sign = fractionAddSubtractProblem.operator === "add" ? "+" : "-";
           fractionAddSubtractQuestion.innerHTML = `${fraction(fractionAddSubtractProblem.first.numerator, fractionAddSubtractProblem.first.denominator)}<span class="fractionAddSubtractOperator">${sign}</span>${fraction(fractionAddSubtractProblem.second.numerator, fractionAddSubtractProblem.second.denominator)}`;
-          fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "denominator" : "answer";
+          fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "work" : "answer";
           updateFractionAddSubtractSlots();
         } else if (selectedApp === "grouping") {
           const sign = groupingProblem.operator === "add" ? "+" : "-";
@@ -7658,19 +7664,6 @@
       document.addEventListener("touchmove", (event) => {
         if (event.touches.length > 1) event.preventDefault();
       }, { passive: false });
-      easyButton.addEventListener("click", () => {
-        if (hasStarted || modeLocked || isAnswerLocked) return;
-        mode = "easy";
-        easyButton.classList.add("active");
-        hardButton.classList.remove("active");
-      });
-      hardButton.addEventListener("click", () => {
-        if (hasStarted || modeLocked || isAnswerLocked) return;
-        mode = "hard";
-        hardButton.classList.add("active");
-        easyButton.classList.remove("active");
-      });
-
       window.setInterval(updateProgress, 100);
       showCoverScreen();
       revealApp();
