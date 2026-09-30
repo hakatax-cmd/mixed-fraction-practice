@@ -2807,8 +2807,6 @@
       let preschoolDeck = [];
       let preschoolIndex = 0;
       let preschoolProblem = null;
-      let preschoolProblemStartedAt = 0;
-      let preschoolProblemDurations = [];
       let preschoolReviewDeck = [];
       let preschoolReviewIndex = 0;
       let preschoolReviewActive = false;
@@ -3560,26 +3558,6 @@
         inputs.preschoolAnswerTens.hidden = preschoolProblem.answer < 10;
       }
 
-      function beginPreschoolProblemTimer() {
-        preschoolProblemStartedAt = Date.now();
-      }
-
-      function recordPreschoolProblemDuration() {
-        if (selectedApp !== "preschool" || preschoolReviewActive || !preschoolProblem || !preschoolProblemStartedAt) return;
-        preschoolProblemDurations.push({
-          problem: { ...preschoolProblem },
-          elapsedMs: Math.max(0, Date.now() - preschoolProblemStartedAt),
-        });
-      }
-
-      function preparePreschoolReview() {
-        preschoolReviewDeck = preschoolProblemDurations
-          .slice()
-          .sort((left, right) => right.elapsedMs - left.elapsedMs)
-          .slice(0, 7)
-          .map(({ problem: item }) => ({ ...item }));
-      }
-
       function clearPreschoolReviewCountdown() {
         if (!preschoolReviewCountdownTimer) return;
         clearInterval(preschoolReviewCountdownTimer);
@@ -3590,7 +3568,7 @@
         clearPreschoolReviewCountdown();
         let secondsRemaining = 5;
         const renderCountdown = () => {
-          preschoolReviewPrompt.textContent = `5秒後に復習の7問が始まります。 ${secondsRemaining}`;
+          preschoolReviewPrompt.textContent = `5秒後に復習の${preschoolReviewDeck.length}問が始まります。 ${secondsRemaining}`;
           preschoolReviewPrompt.hidden = false;
         };
         renderCountdown();
@@ -5936,8 +5914,6 @@
         currentPlayRecord = null;
         currentPlayRecordRank = null;
         shouldSaveCurrentPlay = true;
-        preschoolProblemStartedAt = 0;
-        preschoolProblemDurations = [];
         preschoolReviewDeck = [];
         preschoolReviewIndex = 0;
         preschoolReviewActive = false;
@@ -6073,6 +6049,19 @@
         }
 
         if (!correct) {
+          if (selectedApp === "preschool") {
+            if (!preschoolReviewActive) preschoolReviewDeck.push({ ...preschoolProblem });
+            mistakeCount += 1;
+            updateProgress();
+            setLocked(true);
+            showReaction(false);
+            schedule(() => {
+              hideReaction();
+              nextProblem(true);
+            }, 1000);
+            return;
+          }
+
           if (selectedApp === "division") {
             watchDivisionWrongAnswer();
             return;
@@ -6098,7 +6087,6 @@
         clearDivisionWrongTimer();
         setLocked(true);
         showReaction(true);
-        recordPreschoolProblemDuration();
         correctCount += 1;
         updateProgress();
         if (selectedApp === "fraction" && correctCount === TARGET_CORRECT) {
@@ -6119,7 +6107,6 @@
             schedule(finishPreschoolReview);
             return;
           }
-          if (selectedApp === "preschool") preparePreschoolReview();
           schedule(finishRound);
           return;
         }
@@ -6155,7 +6142,7 @@
         clearDate.hidden = !clearedAt;
         renderPlayRecords(playRecords);
         renderMistakes();
-        const hasPreschoolReview = selectedApp === "preschool" && !preschoolReviewActive && preschoolReviewDeck.length === 7;
+        const hasPreschoolReview = selectedApp === "preschool" && !preschoolReviewActive && preschoolReviewDeck.length > 0;
         finishPanel.hidden = false;
         preschoolReviewButton.hidden = true;
         if (hasPreschoolReview) {
@@ -6507,7 +6494,6 @@
         }
         renderProblem();
         resetInputs(true);
-        if (selectedApp === "preschool") beginPreschoolProblemTimer();
       }
 
       function restartRound() {
@@ -6867,14 +6853,12 @@
         preschoolReviewActive = false;
         preschoolReviewDeck = [];
         preschoolReviewIndex = 0;
-        preschoolProblemDurations = [];
         preschoolDeck = createPreschoolDeck();
         preschoolIndex = 0;
         preschoolProblem = preschoolDeck[0];
         resetChallenge();
         renderProblem();
         resetInputs(true);
-        beginPreschoolProblemTimer();
       }
 
       function startEquationChallenge() {
@@ -6908,7 +6892,7 @@
       }
 
       function startPreschoolReview() {
-        if (selectedApp !== "preschool" || preschoolReviewDeck.length !== 7) return;
+        if (selectedApp !== "preschool" || preschoolReviewDeck.length === 0) return;
         preschoolReviewActive = true;
         preschoolReviewIndex = 0;
         preschoolProblem = preschoolReviewDeck[0];
@@ -6919,7 +6903,6 @@
         resetChallenge();
         renderProblem();
         resetInputs(true);
-        beginPreschoolProblemTimer();
       }
 
       function showFractionCover() {
