@@ -1337,6 +1337,21 @@
         font-size: clamp(1.05rem, 3vmin, 1.65rem);
       }
 
+      .feedback.secondChanceWarning {
+        display: grid;
+        place-items: center;
+        min-height: clamp(64px, 12vmin, 104px);
+        padding: 8px 14px;
+        border: 3px solid var(--coral);
+        border-radius: 12px;
+        background: #fff0ee;
+        color: var(--coral);
+        font-size: clamp(1.55rem, 5vmin, 2.75rem);
+        font-weight: 1000;
+        line-height: 1.18;
+        text-shadow: 0 1px 0 #fff;
+      }
+
       .feedback.operatorWrong {
         font-size: clamp(2.2rem, 6.8vmin, 4rem);
       }
@@ -2652,7 +2667,7 @@
       const TARGET_CORRECT = 12;
       const CLEAR_LIMIT_MS = 135000;
       const MAX_MISTAKES = 1;
-      const AUTO_ADVANCE_MS = 300;
+      const AUTO_ADVANCE_MS = 250;
       const WRONG_ADVANCE_MS = 2500;
       const WRONG_CONFIRM_MS = 1500;
       const DIVISION_WRONG_IDLE_MS = 40000;
@@ -5834,7 +5849,7 @@
       }
 
       function clearConfirmationMessage() {
-        feedback.classList.remove("confirming", "operatorWrong");
+        feedback.classList.remove("confirming", "operatorWrong", "secondChanceWarning");
         feedback.textContent = "\u00a0";
         nextMistakeButton.hidden = true;
         manualNextAction = null;
@@ -5870,7 +5885,7 @@
         clearDivisionWrongTimer();
         setLocked(true);
         feedback.textContent = "\u6b21\u3082\u9593\u9055\u3048\u305f\u3089\u3001\u672c\u5f53\u306b\u00d7\u3002";
-        feedback.classList.add("confirming");
+        feedback.classList.add("confirming", "secondChanceWarning");
         confirmationTimer = window.setTimeout(() => {
           confirmationTimer = null;
           pendingWrongSignature = "";
