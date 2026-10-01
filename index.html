@@ -2844,6 +2844,7 @@
       let pinValue = "";
       let manualNextAction = null;
       let pendingWrongSignature = "";
+      let secondChanceUsed = false;
       let pendingDivisionWrongSlot = "";
       let swipeStart = null;
       let mistakes = [];
@@ -5748,6 +5749,14 @@
           || selectedApp === "preschool";
       }
 
+      function hasSecondChanceWrongFlow() {
+        return selectedApp === "multiplication"
+          || selectedApp === "basicDivision"
+          || selectedApp === "fraction"
+          || selectedApp === "improperFraction"
+          || selectedApp === "preschool";
+      }
+
       function showAnswerCorrections() {
         activeSlotOrder().forEach((slot) => {
           if (getAnswerValue(slot) === expected(slot)) return;
@@ -5855,6 +5864,22 @@
         }, WRONG_CONFIRM_MS);
       }
 
+      function showSecondChanceWarning() {
+        pendingWrongSignature = answerSignature();
+        if (confirmationTimer) clearTimeout(confirmationTimer);
+        clearDivisionWrongTimer();
+        setLocked(true);
+        feedback.textContent = "\u6b21\u3082\u9593\u9055\u3048\u305f\u3089\u3001\u672c\u5f53\u306b\u00d7\u3002";
+        feedback.classList.add("confirming");
+        confirmationTimer = window.setTimeout(() => {
+          confirmationTimer = null;
+          pendingWrongSignature = "";
+          setLocked(false);
+          clearConfirmationMessage();
+          clearActiveAnswers();
+        }, WRONG_CONFIRM_MS);
+      }
+
       function showEquationOperatorWrong() {
         pendingWrongSignature = equationSignature();
         if (confirmationTimer) clearTimeout(confirmationTimer);
@@ -5924,6 +5949,7 @@
           confirmationTimer = null;
         }
         pendingWrongSignature = "";
+        secondChanceUsed = false;
         pendingDivisionWrongSlot = "";
         clearConfirmationMessage();
         Object.keys(inputs).forEach((slot) => {
@@ -6119,8 +6145,16 @@
         }
 
         if (!correct) {
-          if (selectedApp === "preschool") {
-            if (!preschoolReviewActive) preschoolReviewDeck.push({ ...preschoolProblem });
+          if (hasSecondChanceWrongFlow()) {
+            if (!secondChanceUsed) {
+              secondChanceUsed = true;
+              showSecondChanceWarning();
+              return;
+            }
+
+            if (selectedApp === "preschool" && !preschoolReviewActive) {
+              preschoolReviewDeck.push({ ...preschoolProblem });
+            }
             mistakeCount += 1;
             updateProgress();
             setLocked(true);
