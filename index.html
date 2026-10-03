@@ -652,6 +652,10 @@
       #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .equationBase { display: flex; align-items: center; gap: clamp(7px, 1.2vmin, 12px); margin: 0; font-size: inherit; line-height: 1; }
       .equationLine { display: inline-flex; align-items: center; justify-content: start; gap: clamp(8px, 1.6vmin, 15px); font-size: inherit; line-height: 1; }
+      #equationMiddleLine.coefficientOnRight #equationMiddleInput { order: 1; }
+      #equationMiddleLine.coefficientOnRight > .equals { order: 2; }
+      #equationMiddleLine.coefficientOnRight #equationMiddleCoefficientInput { order: 3; }
+      #equationMiddleLine.coefficientOnRight #equationMiddleCoefficientX { order: 4; }
       .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); min-width: 0; height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; font-variant-numeric: tabular-nums; overflow: hidden; }
       .equationFreeInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width)); }
       .equationFreeInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width)); }
@@ -1337,7 +1341,8 @@
         font-size: clamp(1.05rem, 3vmin, 1.65rem);
       }
 
-      .feedback.secondChanceWarning {
+      .feedback.secondChanceWarning,
+      .feedback.delayedWrongWarning {
         display: grid;
         place-items: center;
         height: 100%;
@@ -2433,6 +2438,8 @@
               <span id="equationMiddleLeft"></span>
               <span class="equals">=</span>
               <button class="equationFreeInput active" id="equationMiddleInput" data-equation-field="middle" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#21491;&#36794;"></button>
+              <button class="equationFreeInput" id="equationMiddleCoefficientInput" data-equation-field="middleCoefficient" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;x&#12398;&#20418;&#25968;" hidden></button>
+              <span id="equationMiddleCoefficientX" hidden>x</span>
               <span class="equationWorkFraction" id="equationMiddleFractionInput" hidden>
                 <span class="equationWorkNumerator">
                   <button class="equationFreeInput" id="equationMiddleFirstInput" data-equation-field="middleFirst" type="button" aria-label="&#36890;&#20998;&#24460;&#12398;&#19968;&#12388;&#30446;&#12398;&#25968;"></button>
@@ -3013,8 +3020,11 @@
         right: speedFormulaRight,
       };
       const equationBase = document.querySelector("#equationBase");
+      const equationMiddleLine = document.querySelector("#equationMiddleLine");
       const equationMiddleLeft = document.querySelector("#equationMiddleLeft");
       const equationMiddleInput = document.querySelector("#equationMiddleInput");
+      const equationMiddleCoefficientInput = document.querySelector("#equationMiddleCoefficientInput");
+      const equationMiddleCoefficientX = document.querySelector("#equationMiddleCoefficientX");
       const equationMiddleFractionInput = document.querySelector("#equationMiddleFractionInput");
       const equationMiddleFirstInput = document.querySelector("#equationMiddleFirstInput");
       const equationMiddleSecondInput = document.querySelector("#equationMiddleSecondInput");
@@ -3041,6 +3051,7 @@
       const equationFractionFinalDenominatorInput = document.querySelector("#equationFractionFinalDenominatorInput");
       const equationFields = {
         middle: equationMiddleInput,
+        middleCoefficient: equationMiddleCoefficientInput,
         middleFirst: equationMiddleFirstInput,
         middleOperator: equationMiddleOperatorInput,
         middleSecond: equationMiddleSecondInput,
@@ -3491,7 +3502,7 @@
         return deck;
       }
 
-      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "") {
+      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "", coefficientOnRight = false) {
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -3535,15 +3546,30 @@
               workResultNumerator: middleNumerator,
             };
           } else if (kind === "bothSides") {
-            const differenceMagnitude = Math.random() < 0.7 ? 1 : 2;
-            const coefficientDifference = differenceMagnitude * (Math.random() < 0.5 ? -1 : 1);
-            const leftCoefficient = randomInt(2, 9);
-            const rightCoefficient = leftCoefficient - coefficientDifference;
-            if (rightCoefficient < 2 || rightCoefficient > 9) continue;
-            answer = (allowNegative ? -1 : 1) * randomInt(1, Math.floor(8 / differenceMagnitude));
-            middle = coefficientDifference * answer;
-            const leftConstant = randomInt(Math.max(1, 1 - middle), Math.min(9, 9 - middle));
-            const rightConstant = leftConstant + middle;
+            const differenceMagnitude = Math.random() < 0.5 ? 2 : 3;
+            let coefficientDifference;
+            let leftCoefficient;
+            let rightCoefficient;
+            let leftConstant;
+            let rightConstant;
+            if (coefficientOnRight) {
+              leftCoefficient = randomInt(2, 9 - differenceMagnitude);
+              rightCoefficient = leftCoefficient + differenceMagnitude;
+              answer = randomInt(1, Math.floor(8 / differenceMagnitude));
+              middle = differenceMagnitude * answer;
+              rightConstant = randomInt(1, 9 - middle);
+              leftConstant = rightConstant + middle;
+              coefficientDifference = differenceMagnitude;
+            } else {
+              coefficientDifference = differenceMagnitude * (Math.random() < 0.5 ? -1 : 1);
+              leftCoefficient = randomInt(2, 9);
+              rightCoefficient = leftCoefficient - coefficientDifference;
+              if (rightCoefficient < 2 || rightCoefficient > 9) continue;
+              answer = (allowNegative ? -1 : 1) * randomInt(1, Math.floor(8 / differenceMagnitude));
+              middle = coefficientDifference * answer;
+              leftConstant = randomInt(Math.max(1, 1 - middle), Math.min(9, 9 - middle));
+              rightConstant = leftConstant + middle;
+            }
             const item = {
               kind,
               coefficient: coefficientDifference,
@@ -3553,6 +3579,7 @@
               rightCoefficient,
               leftConstant,
               rightConstant,
+              coefficientOnRight,
             };
             const key = `both:${leftCoefficient}:${leftConstant}:${rightCoefficient}:${rightConstant}`;
             if (used.has(key)) continue;
@@ -3589,8 +3616,8 @@
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
           { kind: "fraction" },
-          { kind: "division", allowNegative: false },
-          { kind: "division", allowNegative: false },
+          { kind: "bothSidesRight", allowNegative: false },
+          { kind: "bothSides", allowNegative: true },
           { kind: "fraction" },
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
@@ -3601,7 +3628,8 @@
         ];
         return plan.map((item, index) => {
           if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index], false, fractionCoefficientKeys.shift());
-          if (item.kind === "division") return createEquationProblem("division", used, false, signs[index]);
+          if (item.kind === "bothSidesRight") return createEquationProblem("bothSides", used, false, "+", false, "", true);
+          if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
           const negativeCoefficient = item.allowNegative && (index === 7 || index === 10);
           return createEquationProblem("basic", used, item.allowNegative, signs[index], negativeCoefficient);
         });
@@ -3853,6 +3881,7 @@
       function equationExpected(field) {
         if (!equationProblem) return "";
         if (field === "middle") return String(equationProblem.middle);
+        if (field === "middleCoefficient") return String(equationProblem.coefficient);
         if (field === "middleFirst") return String(equationProblem.workFirst);
         if (field === "middleOperator") return equationProblem.workOperator;
         if (field === "middleSecond") return String(equationProblem.workSecond);
@@ -3875,7 +3904,9 @@
           if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionOperator", "fractionRightDenominator", "fractionRightNumerator"];
           if (equationPhase === "answer") return ["fractionFinalDenominator", "fractionFinalNumerator"];
         }
-        if (equationPhase === "middle") return ["middle"];
+        if (equationPhase === "middle") {
+          return equationProblem?.coefficientOnRight ? ["middle", "middleCoefficient"] : ["middle"];
+        }
         return equationFinalFields();
       }
 
@@ -3885,7 +3916,11 @@
 
       function renderEquationEntry() {
         const isFraction = equationProblem?.kind === "fraction";
+        const coefficientOnRight = Boolean(equationProblem?.coefficientOnRight);
         equationMiddleInput.hidden = isFraction;
+        equationMiddleCoefficientInput.hidden = isFraction || !coefficientOnRight;
+        equationMiddleCoefficientX.hidden = isFraction || !coefficientOnRight;
+        equationMiddleLeft.hidden = coefficientOnRight;
         equationMiddleFractionInput.hidden = !isFraction;
         equationMiddleResultEquals.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
         equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
@@ -4030,6 +4065,7 @@
       function renderEquationProblem() {
         if (!equationProblem) return;
         equationProblemLine.classList.toggle("fractionEquation", equationProblem.kind === "fraction");
+        equationMiddleLine.classList.toggle("coefficientOnRight", Boolean(equationProblem.coefficientOnRight));
         if (equationProblem.kind === "fraction") {
           const fractionHtml = (value) => `<span>${value.numerator}</span><i></i><span>${value.denominator}</span>`;
           equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
@@ -5890,7 +5926,7 @@
 
       function clearConfirmationMessage() {
         gameArea.classList.remove("secondChanceWarningVisible");
-        feedback.classList.remove("confirming", "operatorWrong", "secondChanceWarning");
+        feedback.classList.remove("confirming", "operatorWrong", "secondChanceWarning", "delayedWrongWarning");
         feedback.textContent = "\u00a0";
         nextMistakeButton.hidden = true;
         manualNextAction = null;
@@ -5916,7 +5952,7 @@
           setLocked(false);
           clearConfirmationMessage();
           cleanup();
-          watchDivisionWrongAnswer();
+          watchDelayedWrongAnswer();
         }, WRONG_CONFIRM_MS);
       }
 
@@ -5953,8 +5989,26 @@
         }, WRONG_CONFIRM_MS);
       }
 
-      function watchDivisionWrongAnswer() {
-        if (selectedApp !== "division" || isAnswerLocked || isFinished) {
+      function showDelayedWrongCorrection(wrongSlot) {
+        if (confirmationTimer) clearTimeout(confirmationTimer);
+        clearDivisionWrongTimer();
+        wrongAnswerSlots().forEach((slot) => inputs[slot].classList.add("correction"));
+        setLocked(true);
+        gameArea.classList.add("secondChanceWarningVisible");
+        feedback.textContent = "\u3053\u3053\u304b\u3089\u9593\u9055\u3063\u3066\u3044\u307e\u3059";
+        feedback.classList.add("confirming", "delayedWrongWarning");
+        confirmationTimer = window.setTimeout(() => {
+          confirmationTimer = null;
+          setLocked(false);
+          clearConfirmationMessage();
+          clearDivisionAnswersFrom(wrongSlot);
+          watchDelayedWrongAnswer();
+        }, 1000);
+      }
+
+      function watchDelayedWrongAnswer() {
+        const supportsDelayedCorrection = selectedApp === "division" || selectedApp === "doubleMultiplication";
+        if (!supportsDelayedCorrection || isAnswerLocked || isFinished) {
           clearDivisionWrongTimer();
           return;
         }
@@ -5973,11 +6027,12 @@
         divisionWrongTimer = window.setTimeout(() => {
           divisionWrongTimer = null;
           const stillWrongSlot = wrongAnswerSlots()[0] || "";
-          if (!stillWrongSlot || selectedApp !== "division" || isFinished) {
+          const stillSupportsDelayedCorrection = selectedApp === "division" || selectedApp === "doubleMultiplication";
+          if (!stillWrongSlot || !stillSupportsDelayedCorrection || isFinished) {
             pendingDivisionWrongSlot = "";
             return;
           }
-          showWrongConfirmation(answerSignature(), () => clearDivisionAnswersFrom(stillWrongSlot));
+          showDelayedWrongCorrection(stillWrongSlot);
         }, DIVISION_WRONG_IDLE_MS);
       }
 
@@ -5990,13 +6045,13 @@
           : digits.slice(0, digitLimit);
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
-        if ((selectedApp === "doubleMultiplication" || selectedApp === "grouping") && value.length >= expected(slot).length && value !== expected(slot)) {
+        if (selectedApp === "grouping" && value.length >= expected(slot).length && value !== expected(slot)) {
           showWrongConfirmation(answerSignature(), () => clearSlotAnswer(slot));
           return;
         }
         if (value.length >= expected(slot).length) nextSlot(slot);
         if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
-        if (selectedApp === "division") watchDivisionWrongAnswer();
+        if (selectedApp === "division" || selectedApp === "doubleMultiplication") watchDelayedWrongAnswer();
         checkState();
       }
 
@@ -6237,8 +6292,8 @@
             return;
           }
 
-          if (selectedApp === "division") {
-            watchDivisionWrongAnswer();
+          if (selectedApp === "division" || selectedApp === "doubleMultiplication") {
+            watchDelayedWrongAnswer();
             return;
           }
 
@@ -7561,14 +7616,14 @@
         if (current.length > 0) {
           setAnswerValue(activeSlot, current.slice(0, -1));
           updateDoubleDecimalChoices();
-          watchDivisionWrongAnswer();
+          watchDelayedWrongAnswer();
           return;
         }
         const slots = activeSlotOrder();
         const index = slots.indexOf(activeSlot);
         if (index > 0) setActive(slots[index - 1]);
         updateDoubleDecimalChoices();
-        watchDivisionWrongAnswer();
+        watchDelayedWrongAnswer();
       }
 
       function clearAnswer() {
