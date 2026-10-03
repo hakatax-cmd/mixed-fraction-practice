@@ -1340,7 +1340,8 @@
       .feedback.secondChanceWarning {
         display: grid;
         place-items: center;
-        min-height: clamp(64px, 12vmin, 104px);
+        height: 100%;
+        min-height: 0;
         padding: 8px 14px;
         border: 3px solid var(--coral);
         border-radius: 12px;
@@ -1515,6 +1516,10 @@
         align-content: start;
         height: 100%;
         min-height: 0;
+      }
+
+      #gameArea.secondChanceWarningVisible {
+        grid-template-rows: minmax(0, 1fr) clamp(76px, 13vmin, 110px) minmax(200px, 272px);
       }
 
       .reaction {
@@ -1808,7 +1813,7 @@
       }
 
       .wrongReaction { display: grid; justify-items: center; gap: 12px; }
-      .correctAnswer { display: none !important; margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
+      .correctAnswer { margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
 
       .finishPanel {
         display: grid;
@@ -2670,7 +2675,9 @@
       const AUTO_ADVANCE_MS = 250;
       const WRONG_ADVANCE_MS = 2500;
       const WRONG_CONFIRM_MS = 1500;
-      const DIVISION_WRONG_IDLE_MS = 40000;
+      const OPERATOR_PENALTY_MS = 25000;
+      const OPERATOR_PENALTY_REACTION_MS = 900;
+      const DIVISION_WRONG_IDLE_MS = 30000;
       const FRACTION_SLOTS = ["whole", "rest"];
       const IMPROPER_FRACTION_TARGET = 12;
       const IMPROPER_FRACTION_SLOTS = ["improperNumeratorTens", "improperNumeratorOnes"];
@@ -2841,6 +2848,7 @@
       let startedAt = null;
       let hasStarted = false;
       let finalTime = 0;
+      let timePenaltyMs = 0;
       let clearedAt = null;
       let multiplicationBestUpdated = false;
       let previousMultiplicationBest = null;
@@ -2861,6 +2869,7 @@
       let pendingWrongSignature = "";
       let secondChanceUsed = false;
       let pendingDivisionWrongSlot = "";
+      let pendingDivisionWrongSignature = "";
       let swipeStart = null;
       let mistakes = [];
       let selectedDoubleDecimalPosition = null;
@@ -3469,7 +3478,7 @@
         return deck;
       }
 
-      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false) {
+      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "") {
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -3482,26 +3491,11 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 2, denominator: 3 } },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 4, denominator: 3 } },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 5 } },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 2 } },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 1, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 3, denominator: 4 } },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 9, denominator: 4 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 3, denominator: 4 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 1, denominator: 4 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 3, denominator: 8 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 9 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 3 }, constant: { numerator: 1, denominator: 9 }, answer: { numerator: 8, denominator: 9 } },
-              { coefficient: { numerator: 1, denominator: 4 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 4, denominator: 3 } },
-              { coefficient: { numerator: 2, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 4 } },
-              { coefficient: { numerator: 3, denominator: 5 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 5, denominator: 6 } },
-              { coefficient: { numerator: 1, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 7, denominator: 2 } },
-              { coefficient: { numerator: 2, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 7, denominator: 4 } },
-              { coefficient: { numerator: 3, denominator: 7 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 6 } },
-              { coefficient: { numerator: 1, denominator: 8 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 8, denominator: 3 } },
-              { coefficient: { numerator: 3, denominator: 8 }, middle: { numerator: 1, denominator: 3 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 8, denominator: 9 } },
-            ]);
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 4, denominator: 7 } },
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 6, denominator: 7 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 4, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 6, denominator: 7 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 4, denominator: 7 } },
+            ]).filter((choice) => !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey);
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
             const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
@@ -3512,6 +3506,8 @@
               ? middleNumerator + constantNumerator
               : middleNumerator - constantNumerator;
             if (totalNumerator < 1 || gcd(totalNumerator, commonDenominator) !== 1) continue;
+            const workTerms = [totalNumerator, constantNumerator];
+            if (workTerms.some((term) => term > 99) || workTerms.every((term) => term >= 10)) continue;
             const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}:${item.constant.numerator}/${item.constant.denominator}`;
             used.add(key);
             return {
@@ -3575,6 +3571,7 @@
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
+        const fractionCoefficientKeys = shuffle(["1/2", "1/3", "2/3", "3/4"]);
         const plan = [
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
@@ -3590,7 +3587,7 @@
           { kind: "fraction" },
         ];
         return plan.map((item, index) => {
-          if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index]);
+          if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index], false, fractionCoefficientKeys.shift());
           if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
           const negativeCoefficient = item.allowNegative && (index === 7 || index === 10);
           return createEquationProblem("basic", used, item.allowNegative, signs[index], negativeCoefficient);
@@ -3744,6 +3741,12 @@
         renderSpeedEntry();
       }
 
+      function clearSpeedOperator() {
+        delete speedValues.operator;
+        speedActiveField = "operator";
+        renderSpeedEntry();
+      }
+
       function speedFinishField(field) {
         const fields = speedExpressionFields();
         if (field !== fields.at(-1)) {
@@ -3773,6 +3776,10 @@
         const next = operator ? value : current + value;
         if (next.length > expectedValue.length) return;
         speedSetValue(speedActiveField, next);
+        if (operator && next !== expectedValue) {
+          showOperatorPenalty(clearSpeedOperator);
+          return;
+        }
         if (next.length === expectedValue.length) speedFinishField(speedActiveField);
       }
 
@@ -5066,6 +5073,10 @@
       }
 
       function currentTimedAnswerText() {
+        if (selectedApp === "fraction") {
+          const answer = solve();
+          return `${answer.whole}\u3068${answer.rest}/${problem.denominator}`;
+        }
         if (selectedApp === "basicDivision") return String(basicDivisionAnswer());
         if (selectedApp === "improperFraction") return `${improperFractionAnswer()}/${improperFractionProblem.denominator}`;
         if (selectedApp === "division") return divisionAnswerText();
@@ -5255,7 +5266,7 @@
       }
 
       function elapsedTime() {
-        return startedAt ? Date.now() - startedAt : 0;
+        return startedAt ? Date.now() - startedAt + timePenaltyMs : 0;
       }
 
       function readMultiplicationBest() {
@@ -5505,6 +5516,7 @@
         mistakeCount = 0;
         mistakes = [];
         finalTime = 0;
+        timePenaltyMs = 0;
         clearedAt = null;
         multiplicationBestUpdated = false;
         previousMultiplicationBest = null;
@@ -5657,6 +5669,10 @@
         const next = isOperator ? value : current + value;
         if (next.length > wanted.length) return;
         ratioSetValue(field, next);
+        if (isOperator && next !== wanted) {
+          showOperatorPenalty(() => clearRatioFields(["operator"]));
+          return;
+        }
         if (ratioProblem.type === "rate" && field === "decimalTenths" && next.length === wanted.length) {
           const decimalFields = ratioDecimalFields();
           const hundredths = decimalFields[1];
@@ -5797,10 +5813,10 @@
       }
 
       function clearDivisionWrongTimer() {
-        if (!divisionWrongTimer) return;
-        clearTimeout(divisionWrongTimer);
+        if (divisionWrongTimer) clearTimeout(divisionWrongTimer);
         divisionWrongTimer = null;
         pendingDivisionWrongSlot = "";
+        pendingDivisionWrongSignature = "";
       }
 
       function clearSlotAnswer(slot) {
@@ -5809,6 +5825,16 @@
         setAnswerValue(slot, "");
         setActive(slot);
         if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
+      }
+
+      function clearDivisionAnswersFrom(slot) {
+        const slots = activeSlotOrder();
+        const start = Math.max(0, slots.indexOf(slot));
+        slots.slice(start).forEach((answerSlot) => {
+          inputs[answerSlot].classList.remove("correction");
+          setAnswerValue(answerSlot, "");
+        });
+        setActive(slots[start]);
       }
 
       function clearActiveAnswers() {
@@ -5849,6 +5875,7 @@
       }
 
       function clearConfirmationMessage() {
+        gameArea.classList.remove("secondChanceWarningVisible");
         feedback.classList.remove("confirming", "operatorWrong", "secondChanceWarning");
         feedback.textContent = "\u00a0";
         nextMistakeButton.hidden = true;
@@ -5884,6 +5911,7 @@
         if (confirmationTimer) clearTimeout(confirmationTimer);
         clearDivisionWrongTimer();
         setLocked(true);
+        gameArea.classList.add("secondChanceWarningVisible");
         feedback.textContent = "\u6b21\u3082\u9593\u9055\u3048\u305f\u3089\u3001\u672c\u5f53\u306b\u00d7\u3002";
         feedback.classList.add("confirming", "secondChanceWarning");
         confirmationTimer = window.setTimeout(() => {
@@ -5923,9 +5951,11 @@
           return;
         }
 
-        if (divisionWrongTimer && pendingDivisionWrongSlot === wrongSlot) return;
+        const signature = answerSignature();
+        if (divisionWrongTimer && pendingDivisionWrongSlot === wrongSlot && pendingDivisionWrongSignature === signature) return;
         clearDivisionWrongTimer();
         pendingDivisionWrongSlot = wrongSlot;
+        pendingDivisionWrongSignature = signature;
         divisionWrongTimer = window.setTimeout(() => {
           divisionWrongTimer = null;
           const stillWrongSlot = wrongAnswerSlots()[0] || "";
@@ -5933,7 +5963,7 @@
             pendingDivisionWrongSlot = "";
             return;
           }
-          showWrongConfirmation(answerSignature(), () => clearSlotAnswer(stillWrongSlot));
+          showWrongConfirmation(answerSignature(), () => clearDivisionAnswersFrom(stillWrongSlot));
         }, DIVISION_WRONG_IDLE_MS);
       }
 
@@ -6077,11 +6107,11 @@
         setTimeout(reveal, 50);
       }
 
-      function showReaction(correct) {
+      function showReaction(correct, revealCorrectAnswer = true, wrongLabel = "") {
         correctMark.hidden = !correct;
         wrongReaction.hidden = correct;
-        correctAnswer.hidden = true;
-        correctAnswer.textContent = "";
+        correctAnswer.hidden = correct || (!revealCorrectAnswer && !wrongLabel);
+        correctAnswer.textContent = correct ? "" : wrongLabel || (revealCorrectAnswer ? `\u6b63\u89e3\u3000${currentTimedAnswerText()}` : "");
         reaction.classList.toggle("wrong", !correct);
         reaction.classList.remove("show");
         void reaction.offsetWidth;
@@ -6091,6 +6121,18 @@
       function hideReaction() {
         reaction.classList.remove("show");
         reaction.classList.remove("wrong");
+      }
+
+      function showOperatorPenalty(cleanup) {
+        timePenaltyMs += OPERATOR_PENALTY_MS;
+        updateProgress();
+        setLocked(true);
+        showReaction(false, false, "+25\u79d2");
+        schedule(() => {
+          hideReaction();
+          setLocked(false);
+          cleanup();
+        }, OPERATOR_PENALTY_REACTION_MS);
       }
 
       function stopBestConfetti() {
