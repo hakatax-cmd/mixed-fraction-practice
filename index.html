@@ -3589,8 +3589,8 @@
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
           { kind: "fraction" },
-          { kind: "bothSides", allowNegative: false },
-          { kind: "bothSides", allowNegative: true },
+          { kind: "division", allowNegative: false },
+          { kind: "division", allowNegative: false },
           { kind: "fraction" },
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
@@ -3601,7 +3601,7 @@
         ];
         return plan.map((item, index) => {
           if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index], false, fractionCoefficientKeys.shift());
-          if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
+          if (item.kind === "division") return createEquationProblem("division", used, false, signs[index]);
           const negativeCoefficient = item.allowNegative && (index === 7 || index === 10);
           return createEquationProblem("basic", used, item.allowNegative, signs[index], negativeCoefficient);
         });
