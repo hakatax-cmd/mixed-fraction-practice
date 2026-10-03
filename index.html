@@ -2308,6 +2308,7 @@
               <span class="groupingFinal">
                 <span class="groupingMinus" id="groupingFinalMinus" hidden>-</span>
                 <span class="answerDigits">
+                  <button id="groupingFinalThousandsInput" class="answerBox" aria-label="答えの千の位" data-value="" type="button" hidden></button>
                   <button id="groupingFinalHundredsInput" class="answerBox" aria-label="答えの百の位" data-value="" type="button" hidden></button>
                   <button id="groupingFinalTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
                   <button id="groupingFinalOnesInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
@@ -2675,7 +2676,7 @@
       const AUTO_ADVANCE_MS = 250;
       const WRONG_ADVANCE_MS = 2500;
       const WRONG_CONFIRM_MS = 1500;
-      const OPERATOR_PENALTY_MS = 25000;
+      const OPERATOR_PENALTY_MS = 50000;
       const OPERATOR_PENALTY_REACTION_MS = 900;
       const DIVISION_WRONG_IDLE_MS = 30000;
       const FRACTION_SLOTS = ["whole", "rest"];
@@ -2703,7 +2704,7 @@
       const FRACTION_ADD_SUBTRACT_REDUCED_SLOTS = ["fractionAddSubtractReducedDenominator", "fractionAddSubtractReducedNumerator"];
       const GROUPING_TARGET = 10;
       const GROUPING_MIDDLE_SLOTS = ["groupingMiddleHundreds", "groupingMiddleTens", "groupingMiddleOnes"];
-      const GROUPING_FINAL_SLOTS = ["groupingFinalHundreds", "groupingFinalTens", "groupingFinalOnes"];
+      const GROUPING_FINAL_SLOTS = ["groupingFinalThousands", "groupingFinalHundreds", "groupingFinalTens", "groupingFinalOnes"];
       const RATIO_TARGET = 10;
       const RATIO_BEST_KEY = "ratioBestTimeMs";
       const SPEED_TARGET = 10;
@@ -2915,6 +2916,7 @@
         groupingMiddleHundreds: document.querySelector("#groupingMiddleHundredsInput"),
         groupingMiddleTens: document.querySelector("#groupingMiddleTensInput"),
         groupingMiddleOnes: document.querySelector("#groupingMiddleOnesInput"),
+        groupingFinalThousands: document.querySelector("#groupingFinalThousandsInput"),
         groupingFinalHundreds: document.querySelector("#groupingFinalHundredsInput"),
         groupingFinalTens: document.querySelector("#groupingFinalTensInput"),
         groupingFinalOnes: document.querySelector("#groupingFinalOnesInput"),
@@ -3363,8 +3365,19 @@
         const used = new Set();
         const deck = [];
         const startWithAddition = Math.random() < 0.5;
+        const specialByOperator = {
+          add: { operator: "add", factor: 17, first: 99, second: 1, middle: 100, answer: 1700, compactTerm: true },
+          subtract: { operator: "subtract", factor: 13, first: 101, second: 1, middle: 100, answer: 1300, compactTerm: true },
+        };
         for (let index = 0; index < GROUPING_TARGET; index += 1) {
           const operator = (index % 2 === 0) === startWithAddition ? "add" : "subtract";
+          const special = specialByOperator[operator];
+          if (special) {
+            deck.push(special);
+            used.add(groupingProblemText(special));
+            delete specialByOperator[operator];
+            continue;
+          }
           deck.push(createGroupingProblem(operator, used));
         }
         return deck;
@@ -4528,6 +4541,7 @@
       function groupingProblemText(item = groupingProblem) {
         if (!item) return "";
         const sign = item.operator === "add" ? "+" : "-";
+        if (item.compactTerm) return String(item.first) + "\u00d7" + item.factor + sign + item.factor;
         return String(item.factor) + "\u00d7" + item.first + sign + item.second + "\u00d7" + item.factor;
       }
 
@@ -6127,7 +6141,7 @@
         timePenaltyMs += OPERATOR_PENALTY_MS;
         updateProgress();
         setLocked(true);
-        showReaction(false, false, "+25\u79d2");
+        showReaction(false, false, "+50\u79d2");
         schedule(() => {
           hideReaction();
           setLocked(false);
@@ -7441,7 +7455,7 @@
           updateFractionAddSubtractSlots();
         } else if (selectedApp === "grouping") {
           const sign = groupingProblem.operator === "add" ? "+" : "-";
-          groupingQuestion.textContent = groupingProblem.factor + "\u00d7" + groupingProblem.first + sign + groupingProblem.second + "\u00d7" + groupingProblem.factor;
+          groupingQuestion.textContent = groupingProblemText(groupingProblem);
           groupingFactor.textContent = groupingProblem.factor + "\u00d7";
           updateGroupingSlots();
         } else if (selectedApp === "ratio") {
