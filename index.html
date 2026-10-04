@@ -2542,7 +2542,7 @@
             </div>
             <div class="simultaneousSpacer"></div>
             <div class="simultaneousStep" id="simultaneousMultiplyStep">
-              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span>2x +</span>
+              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span id="simultaneousScaledXText">2x +</span>
               <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
               <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
             </div>
@@ -3139,6 +3139,7 @@
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
+      const simultaneousScaledXText = document.querySelector("#simultaneousScaledXText");
       const simultaneousScaledYInput = document.querySelector("#simultaneousScaledYInput");
       const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
       const simultaneousEliminateStep = document.querySelector("#simultaneousEliminateStep");
@@ -3775,7 +3776,7 @@
       function createSimultaneousDeck() {
         const deck = [];
         const used = new Set();
-        const addProblem = (fractionY) => {
+        const addProblem = (fractionY, useAddition) => {
           for (let attempt = 0; attempt < 200; attempt += 1) {
             const x = randomInt(-5, 8);
             if (x === 0) continue;
@@ -3793,10 +3794,16 @@
               yNumerator = randomInt(1, 6);
               secondY = randomInt(1, 4);
             }
-            const eliminationCoefficient = fractionY ? yDenominator : randomInt(1, 4);
-            const firstY = multiplier * secondY + eliminationCoefficient;
+            const eliminationCoefficient = fractionY
+              ? (useAddition ? yDenominator * 3 : yDenominator)
+              : (useAddition ? randomInt(secondY * 2 + 1, secondY * 2 + 4) : randomInt(1, 4));
+            const firstY = useAddition
+              ? eliminationCoefficient - multiplier * secondY
+              : multiplier * secondY + eliminationCoefficient;
+            if (firstY < 1) continue;
             const yValue = yNumerator / yDenominator;
-            const secondConstant = x + secondY * yValue;
+            const secondX = useAddition ? -1 : 1;
+            const secondConstant = secondX * x + secondY * yValue;
             const firstConstant = multiplier * x + firstY * yValue;
             if (!Number.isInteger(secondConstant) || !Number.isInteger(firstConstant)) continue;
             const substitutionTerm = secondY * yValue;
@@ -3810,23 +3817,25 @@
               yDenominator,
               firstY,
               secondY,
+              secondX,
               firstConstant,
               secondConstant,
               multiplier,
               eliminationCoefficient,
-              eliminationRhs: yNumerator,
+              eliminationRhs: eliminationCoefficient * yNumerator / yDenominator,
               substitutionTerm,
               fractionY,
+              useAddition,
             };
           }
           return null;
         };
         while (deck.length < 3) {
-          const problem = addProblem(false);
+          const problem = addProblem(false, deck.length === 1);
           if (problem) deck.push(problem);
         }
         while (deck.length < SIMULTANEOUS_TARGET) {
-          const problem = addProblem(true);
+          const problem = addProblem(true, deck.length === 4);
           if (problem) deck.push(problem);
         }
         return deck;
@@ -4338,10 +4347,12 @@
         if (!simultaneousProblem) return;
         const item = simultaneousProblem;
         simultaneousFirstEquation.innerHTML = "<span>2x " + systemTerm(item.firstY) + "y = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
-        simultaneousSecondEquation.innerHTML = "<span>x " + systemTerm(item.secondY) + "y = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
-        simultaneousEliminateText.textContent = "①−③ →";
+        const secondXText = item.secondX < 0 ? "−x" : "x";
+        simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemTerm(item.secondY) + "y = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
+        simultaneousScaledXText.textContent = item.secondX < 0 ? "−2x +" : "2x +";
+        simultaneousEliminateText.textContent = item.useAddition ? "①＋③ →" : "①−③ →";
         const substitutionOperator = item.substitutionTerm < 0 ? "−" : "+";
-        simultaneousSubstituteStep.textContent = "x " + substitutionOperator + " " + Math.abs(item.substitutionTerm) + " = " + item.secondConstant;
+        simultaneousSubstituteStep.textContent = secondXText + " " + substitutionOperator + " " + Math.abs(item.substitutionTerm) + " = " + item.secondConstant;
         simultaneousValues = {};
         simultaneousPhase = "multiply";
         simultaneousActiveField = "scaledY";
