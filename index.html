@@ -4238,6 +4238,9 @@
         }
         schedule(() => {
           hideReaction();
+          // The equation answer path locks the keypad for the reaction. Unlock
+          // before replacing the problem so the new first field is immediately usable.
+          setLocked(false);
           nextProblem(true);
         });
       }
@@ -7242,8 +7245,13 @@
         } else {
           problem = createNextFractionProblem();
         }
+        // Equation rendering resets its own field state. Keep the keypad
+        // explicitly enabled across that render, otherwise the prior answer's
+        // reaction lock can carry into the new question on mobile browsers.
+        if (selectedApp === "equation") setLocked(false);
         renderProblem();
         resetInputs(true);
+        if (selectedApp === "equation") setLocked(false);
       }
 
       function startSimultaneousChallenge() {
