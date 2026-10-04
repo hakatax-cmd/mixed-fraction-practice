@@ -12,7 +12,7 @@
         --blue: #2563eb;
         --green: #14966f;
         --coral: #e33a2f;
-        --digit-frame-width: 0.82em;
+        --digit-frame-width: 0.8em;
         --digit-frame-height: 1.2em;
         --yellow: #ffd166;
       }
@@ -723,11 +723,11 @@
       .simultaneousNumber { color: var(--muted); font-size: .72em; }
       .simultaneousSpacer { height: clamp(4px, 1vmin, 12px); }
       .simultaneousCaption { color: var(--muted); font-size: .66em; }
-      .simultaneousInput { display: grid; grid-template-columns: repeat(var(--system-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; overflow: hidden; }
-      .simultaneousInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width)); }
-      .simultaneousInput .systemDigit { display: grid; place-items: center; min-width: 0; height: 100%; }
-      .simultaneousInput .systemDigit + .systemDigit { border-left: 2px solid var(--line); }
-      .simultaneousInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, .15); }
+      .simultaneousInput { --system-gap: clamp(3px, .55vmin, 6px); display: inline-grid; grid-template-columns: repeat(var(--system-slots, 1), var(--digit-frame-width)); gap: var(--system-gap); width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; overflow: visible; }
+      .simultaneousInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--system-gap)); }
+      .simultaneousInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width) + var(--system-gap) + var(--system-gap)); }
+      .simultaneousInput .systemDigit { display: grid; place-items: center; min-width: 0; height: 100%; border: 3px solid var(--line); border-radius: 6px; background: #fff; }
+      .simultaneousInput.active .systemDigit { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, .15); }
       .simultaneousFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); min-width: var(--digit-frame-width); text-align: center; vertical-align: middle; }
       .simultaneousFraction i { display: block; height: 4px; background: var(--ink); }
       .simultaneousFraction .simultaneousInput { width: 100%; height: 100%; }
@@ -4319,6 +4319,15 @@
           equationPhase = "final";
           equationActiveField = "final";
           renderEquationEntry();
+          return;
+        }
+        if (
+          equationProblem?.kind !== "fraction" &&
+          equationPhase === "final" &&
+          field === "final" &&
+          next === expected
+        ) {
+          completeEquationProblem();
           return;
         }
         renderEquationEntry();
