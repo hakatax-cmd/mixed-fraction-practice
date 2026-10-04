@@ -4197,13 +4197,6 @@
           input.style.setProperty("--equation-slots", String(slots));
           input.classList.toggle("active", field === equationActiveField);
         });
-        // iPad can occasionally lose the completion callback when this button is redrawn.
-        // Detect a completed first line during rendering as well, then expose x = immediately.
-        if (!isFraction && equationPhase === "middle" && equationIsCorrect()) {
-          equationPhase = "final";
-          equationActiveField = equationFinalFields()[0];
-          renderEquationEntry();
-        }
       }
 
       function setEquationActive(field) {
@@ -4290,16 +4283,6 @@
         completeEquationProblem();
       }
 
-      function queueEquationFinish(field, phase) {
-        window.setTimeout(() => {
-          if (selectedApp !== "equation" || isAnswerLocked || isFinished) return;
-          if (equationActiveField !== field || equationPhase !== phase) return;
-          const fields = equationCurrentFields();
-          if (!fields.includes(field)) return;
-          equationFinishField();
-        }, 0);
-      }
-
       function equationReceive(value) {
         if (selectedApp !== "equation" || isAnswerLocked || isFinished || !equationActiveField) return;
         const field = equationActiveField;
@@ -4315,7 +4298,7 @@
             showEquationOperatorWrong();
             return;
           }
-          queueEquationFinish(field, equationPhase);
+          equationFinishField();
           return;
         }
         if (nextValue === "-" && (current || !expected.startsWith("-"))) return;
@@ -4324,7 +4307,7 @@
         if (next.length > expected.length) return;
         equationValues[field] = next;
         renderEquationEntry();
-        if (next.length === expected.length) queueEquationFinish(field, equationPhase);
+        if (next.length === expected.length) equationFinishField();
       }
 
       function equationBackspace() {
