@@ -2542,17 +2542,17 @@
             </div>
             <div class="simultaneousSpacer"></div>
             <div class="simultaneousStep" id="simultaneousMultiplyStep">
-              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span id="simultaneousScaledXText">2x +</span>
+              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span id="simultaneousScaledXText">2x</span><span id="simultaneousScaledYSign">+</span>
               <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
               <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
             </div>
             <div class="simultaneousStep" id="simultaneousEliminateStep" hidden>
               <span id="simultaneousEliminateText"></span>
-              <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="y&#12398;&#20418;&#25968;"></button><span>y =</span>
+              <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="&#28040;&#21435;&#24460;&#12398;&#20418;&#25968;"></button><span id="simultaneousEliminateVariable">y =</span>
               <button class="simultaneousInput" id="simultaneousRhsInput" data-system-field="rhs" type="button" aria-label="y&#12398;&#21491;&#36794;"></button>
             </div>
             <div class="simultaneousStep" id="simultaneousYStep">
-              <span>y =</span>
+              <span id="simultaneousSolvedLabel">y =</span>
               <button class="simultaneousInput" id="simultaneousYInput" data-system-field="y" type="button" aria-label="y&#12398;&#20516;"></button>
               <span class="simultaneousFraction" id="simultaneousYFraction" hidden>
                 <button class="simultaneousInput" id="simultaneousYNumeratorInput" data-system-field="yNumerator" type="button" aria-label="y&#12398;&#20998;&#23376;"></button><i></i>
@@ -2560,8 +2560,16 @@
               </span>
             </div>
             <div class="simultaneousStep" id="simultaneousSubstituteCaption" hidden><span class="simultaneousCaption">&#12371;&#12428;&#12434;&#9313;&#12395;&#20195;&#20837;</span></div>
-            <div class="simultaneousStep" id="simultaneousSubstituteStep" hidden></div>
-            <div class="simultaneousStep" id="simultaneousXStep" hidden><span>x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="x&#12398;&#20516;"></button></div>
+            <div class="simultaneousStep" id="simultaneousSubstituteStep" hidden>
+              <span id="simultaneousSubstitutePrefix"></span>
+              <button class="simultaneousInput" id="simultaneousSubstituteInput" data-system-field="substitute" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20516;"></button>
+              <span class="simultaneousFraction" id="simultaneousSubstituteFraction" hidden>
+                <button class="simultaneousInput" id="simultaneousSubstituteNumeratorInput" data-system-field="substituteNumerator" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20998;&#23376;"></button><i></i>
+                <button class="simultaneousInput" id="simultaneousSubstituteDenominatorInput" data-system-field="substituteDenominator" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20998;&#27597;"></button>
+              </span>
+              <span id="simultaneousSubstituteSuffix"></span>
+            </div>
+            <div class="simultaneousStep" id="simultaneousXStep" hidden><span id="simultaneousFinalLabel">x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="&#26368;&#24460;&#12398;&#31572;&#12360;"></button></div>
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
@@ -3140,20 +3148,29 @@
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
       const simultaneousScaledXText = document.querySelector("#simultaneousScaledXText");
+      const simultaneousScaledYSign = document.querySelector("#simultaneousScaledYSign");
       const simultaneousScaledYInput = document.querySelector("#simultaneousScaledYInput");
       const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
       const simultaneousEliminateStep = document.querySelector("#simultaneousEliminateStep");
       const simultaneousEliminateText = document.querySelector("#simultaneousEliminateText");
+      const simultaneousEliminateVariable = document.querySelector("#simultaneousEliminateVariable");
       const simultaneousCoefficientInput = document.querySelector("#simultaneousCoefficientInput");
       const simultaneousRhsInput = document.querySelector("#simultaneousRhsInput");
       const simultaneousYStep = document.querySelector("#simultaneousYStep");
+      const simultaneousSolvedLabel = document.querySelector("#simultaneousSolvedLabel");
       const simultaneousYInput = document.querySelector("#simultaneousYInput");
       const simultaneousYFraction = document.querySelector("#simultaneousYFraction");
       const simultaneousYNumeratorInput = document.querySelector("#simultaneousYNumeratorInput");
       const simultaneousYDenominatorInput = document.querySelector("#simultaneousYDenominatorInput");
       const simultaneousSubstituteCaption = document.querySelector("#simultaneousSubstituteCaption");
       const simultaneousSubstituteStep = document.querySelector("#simultaneousSubstituteStep");
+      const simultaneousSubstitutePrefix = document.querySelector("#simultaneousSubstitutePrefix");
+      const simultaneousSubstituteInput = document.querySelector("#simultaneousSubstituteInput");
+      const simultaneousSubstituteFraction = document.querySelector("#simultaneousSubstituteFraction");
+      const simultaneousSubstituteNumeratorInput = document.querySelector("#simultaneousSubstituteNumeratorInput");
+      const simultaneousSubstituteDenominatorInput = document.querySelector("#simultaneousSubstituteDenominatorInput");
       const simultaneousXStep = document.querySelector("#simultaneousXStep");
+      const simultaneousFinalLabel = document.querySelector("#simultaneousFinalLabel");
       const simultaneousXInput = document.querySelector("#simultaneousXInput");
       const equationFields = {
         middle: equationMiddleInput,
@@ -3183,6 +3200,9 @@
         y: simultaneousYInput,
         yNumerator: simultaneousYNumeratorInput,
         yDenominator: simultaneousYDenominatorInput,
+        substitute: simultaneousSubstituteInput,
+        substituteNumerator: simultaneousSubstituteNumeratorInput,
+        substituteDenominator: simultaneousSubstituteDenominatorInput,
         x: simultaneousXInput,
       };
       const preschoolFirst = document.querySelector("#preschoolFirst");
@@ -3776,7 +3796,7 @@
       function createSimultaneousDeck() {
         const deck = [];
         const used = new Set();
-        const addProblem = (fractionY, useAddition) => {
+        const addProblem = (fractionY, cancelVariable, useAddition = false) => {
           for (let attempt = 0; attempt < 200; attempt += 1) {
             const x = randomInt(-5, 8);
             if (x === 0) continue;
@@ -3794,27 +3814,49 @@
               yNumerator = randomInt(1, 6);
               secondY = randomInt(1, 4);
             }
-            const eliminationCoefficient = fractionY
-              ? (useAddition ? yDenominator * 3 : yDenominator)
-              : (useAddition ? randomInt(secondY * 2 + 1, secondY * 2 + 4) : randomInt(1, 4));
-            const firstY = useAddition
-              ? eliminationCoefficient - multiplier * secondY
-              : multiplier * secondY + eliminationCoefficient;
-            if (firstY < 1) continue;
             const yValue = yNumerator / yDenominator;
-            const secondX = useAddition ? -1 : 1;
+            let firstX;
+            let firstY;
+            let secondX;
+            let operation;
+            let eliminationCoefficient;
+            let firstSolutionVariable;
+            if (cancelVariable === "x") {
+              firstX = 2;
+              secondX = 1;
+              firstY = multiplier * secondY + (fractionY ? yDenominator : randomInt(2, 4));
+              eliminationCoefficient = firstY - multiplier * secondY;
+              operation = "−";
+              firstSolutionVariable = "y";
+            } else {
+              if (fractionY) continue;
+              firstX = 3;
+              secondX = 1;
+              const baseY = secondY;
+              secondY = useAddition ? -baseY : baseY;
+              firstY = multiplier * baseY;
+              eliminationCoefficient = useAddition ? 5 : 1;
+              operation = useAddition ? "＋" : "−";
+              firstSolutionVariable = "x";
+            }
             const secondConstant = secondX * x + secondY * yValue;
-            const firstConstant = multiplier * x + firstY * yValue;
+            const firstConstant = firstX * x + firstY * yValue;
             if (!Number.isInteger(secondConstant) || !Number.isInteger(firstConstant)) continue;
-            const substitutionTerm = secondY * yValue;
-            if (!Number.isInteger(substitutionTerm)) continue;
-            const key = [firstY, secondY, firstConstant, secondConstant, x, yNumerator, yDenominator].join(":");
+            const eliminationRhs = operation === "＋"
+              ? firstConstant + multiplier * secondConstant
+              : firstConstant - multiplier * secondConstant;
+            const expectedRhs = firstSolutionVariable === "y"
+              ? eliminationCoefficient * yValue
+              : eliminationCoefficient * x;
+            if (!Number.isInteger(eliminationRhs) || eliminationRhs !== expectedRhs) continue;
+            const key = [firstX, firstY, secondX, secondY, firstConstant, secondConstant, x, yNumerator, yDenominator].join(":");
             if (used.has(key)) continue;
             used.add(key);
             return {
               x,
               yNumerator,
               yDenominator,
+              firstX,
               firstY,
               secondY,
               secondX,
@@ -3822,20 +3864,21 @@
               secondConstant,
               multiplier,
               eliminationCoefficient,
-              eliminationRhs: eliminationCoefficient * yNumerator / yDenominator,
-              substitutionTerm,
+              eliminationRhs,
               fractionY,
-              useAddition,
+              operation,
+              firstSolutionVariable,
+              finalVariable: firstSolutionVariable === "x" ? "y" : "x",
             };
           }
           return null;
         };
         while (deck.length < 3) {
-          const problem = addProblem(false, deck.length === 1);
+          const problem = addProblem(false, deck.length === 1 ? "y" : "x", deck.length === 1);
           if (problem) deck.push(problem);
         }
         while (deck.length < SIMULTANEOUS_TARGET) {
-          const problem = addProblem(true, deck.length === 4);
+          const problem = addProblem(true, "x");
           if (problem) deck.push(problem);
         }
         return deck;
@@ -4112,6 +4155,7 @@
           if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionRightDenominator", "fractionRightNumerator"];
           if (equationPhase === "raw") return ["fractionFinalDenominator", "fractionFinalNumerator"];
           if (equationPhase === "simplify") return ["simplifiedDenominator", "simplifiedNumerator"];
+          return [];
         }
         if (equationPhase === "middle") {
           return equationProblem?.coefficientOnRight ? ["middle", "middleCoefficient"] : ["middle"];
@@ -4227,6 +4271,8 @@
             renderEquationEntry();
             return;
           }
+          completeEquationProblem();
+          return;
         }
         if (equationPhase === "middle") {
           equationPhase = "final";
@@ -4235,6 +4281,16 @@
           return;
         }
         completeEquationProblem();
+      }
+
+      function queueEquationFinish(field, phase) {
+        window.setTimeout(() => {
+          if (selectedApp !== "equation" || isAnswerLocked || isFinished) return;
+          if (equationActiveField !== field || equationPhase !== phase) return;
+          const fields = equationCurrentFields();
+          if (!fields.includes(field)) return;
+          equationFinishField();
+        }, 0);
       }
 
       function equationReceive(value) {
@@ -4252,7 +4308,7 @@
             showEquationOperatorWrong();
             return;
           }
-          equationFinishField();
+          queueEquationFinish(field, equationPhase);
           return;
         }
         if (nextValue === "-" && (current || !expected.startsWith("-"))) return;
@@ -4261,7 +4317,7 @@
         if (next.length > expected.length) return;
         equationValues[field] = next;
         renderEquationEntry();
-        if (next.length === expected.length) equationFinishField();
+        if (next.length === expected.length) queueEquationFinish(field, equationPhase);
       }
 
       function equationBackspace() {
@@ -4301,37 +4357,66 @@
         return value < 0 ? "− " + Math.abs(value) : "+ " + value;
       }
 
+      function systemVariableTerm(coefficient, variable) {
+        if (coefficient === 1) return "+ " + variable;
+        if (coefficient === -1) return "− " + variable;
+        return systemTerm(coefficient) + variable;
+      }
+
+      function simultaneousFirstSolution() {
+        if (!simultaneousProblem) return { numerator: 0, denominator: 1 };
+        return simultaneousProblem.firstSolutionVariable === "x"
+          ? { numerator: simultaneousProblem.x, denominator: 1 }
+          : { numerator: simultaneousProblem.yNumerator, denominator: simultaneousProblem.yDenominator };
+      }
+
+      function simultaneousFinalValue() {
+        if (!simultaneousProblem) return 0;
+        return simultaneousProblem.finalVariable === "x"
+          ? simultaneousProblem.x
+          : simultaneousProblem.yNumerator;
+      }
+
       function systemExpected(field) {
         if (!simultaneousProblem) return "";
-        if (field === "scaledY") return String(2 * simultaneousProblem.secondY);
+        if (field === "scaledY") return String(Math.abs(2 * simultaneousProblem.secondY));
         if (field === "scaledRhs") return String(2 * simultaneousProblem.secondConstant);
         if (field === "coefficient") return String(simultaneousProblem.eliminationCoefficient);
         if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
-        if (field === "y") return String(simultaneousProblem.yNumerator);
-        if (field === "yNumerator") return String(simultaneousProblem.yNumerator);
-        if (field === "yDenominator") return String(simultaneousProblem.yDenominator);
-        if (field === "x") return String(simultaneousProblem.x);
+        const first = simultaneousFirstSolution();
+        if (field === "y") return String(first.numerator);
+        if (field === "yNumerator") return String(first.numerator);
+        if (field === "yDenominator") return String(first.denominator);
+        if (field === "substitute") return String(first.numerator);
+        if (field === "substituteNumerator") return String(first.numerator);
+        if (field === "substituteDenominator") return String(first.denominator);
+        if (field === "x") return String(simultaneousFinalValue());
         return "";
       }
 
       function systemCurrentFields() {
         if (simultaneousPhase === "multiply") return ["scaledY", "scaledRhs"];
         if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
-        if (simultaneousPhase === "y") {
-          return simultaneousProblem?.fractionY ? ["yDenominator", "yNumerator"] : ["y"];
+        if (simultaneousPhase === "solution") {
+          return simultaneousFirstSolution().denominator > 1 ? ["yDenominator", "yNumerator"] : ["y"];
+        }
+        if (simultaneousPhase === "substitute") {
+          return simultaneousFirstSolution().denominator > 1 ? ["substituteDenominator", "substituteNumerator"] : ["substitute"];
         }
         return ["x"];
       }
 
       function renderSystemEntry() {
-        const showFraction = Boolean(simultaneousProblem?.fractionY);
+        const showFraction = simultaneousFirstSolution().denominator > 1;
         simultaneousEliminateStep.hidden = simultaneousPhase === "multiply";
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
         simultaneousYStep.hidden = simultaneousPhase === "multiply" || simultaneousPhase === "eliminate";
-        simultaneousSubstituteCaption.hidden = simultaneousPhase !== "x";
-        simultaneousSubstituteStep.hidden = simultaneousPhase !== "x";
-        simultaneousXStep.hidden = simultaneousPhase !== "x";
+        simultaneousSubstituteInput.hidden = showFraction;
+        simultaneousSubstituteFraction.hidden = !showFraction;
+        simultaneousSubstituteCaption.hidden = !["substitute", "final"].includes(simultaneousPhase);
+        simultaneousSubstituteStep.hidden = !["substitute", "final"].includes(simultaneousPhase);
+        simultaneousXStep.hidden = simultaneousPhase !== "final";
         Object.entries(simultaneousFields).forEach(([field, input]) => {
           const expected = systemExpected(field);
           const slots = Math.min(3, Math.max(1, expected.length));
@@ -4346,13 +4431,23 @@
       function renderSimultaneousProblem() {
         if (!simultaneousProblem) return;
         const item = simultaneousProblem;
-        simultaneousFirstEquation.innerHTML = "<span>2x " + systemTerm(item.firstY) + "y = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
+        simultaneousFirstEquation.innerHTML = "<span>" + (item.firstX === 1 ? "x" : item.firstX + "x") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
         const secondXText = item.secondX < 0 ? "−x" : "x";
-        simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemTerm(item.secondY) + "y = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
-        simultaneousScaledXText.textContent = item.secondX < 0 ? "−2x +" : "2x +";
-        simultaneousEliminateText.textContent = item.useAddition ? "①＋③ →" : "①−③ →";
-        const substitutionOperator = item.substitutionTerm < 0 ? "−" : "+";
-        simultaneousSubstituteStep.textContent = secondXText + " " + substitutionOperator + " " + Math.abs(item.substitutionTerm) + " = " + item.secondConstant;
+        simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
+        simultaneousScaledXText.textContent = item.secondX < 0 ? "−2x" : "2x";
+        simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
+        simultaneousEliminateText.textContent = "①" + item.operation + "③ →";
+        simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
+        simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
+        simultaneousFinalLabel.textContent = item.finalVariable + " =";
+        if (item.firstSolutionVariable === "y") {
+          const factor = Math.abs(item.secondY);
+          simultaneousSubstitutePrefix.textContent = "x " + (item.secondY < 0 ? "− " : "+ ") + (factor === 1 ? "" : factor + "×");
+          simultaneousSubstituteSuffix.textContent = " = " + item.secondConstant;
+        } else {
+          simultaneousSubstitutePrefix.textContent = "";
+          simultaneousSubstituteSuffix.textContent = " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant;
+        }
         simultaneousValues = {};
         simultaneousPhase = "multiply";
         simultaneousActiveField = "scaledY";
@@ -4414,13 +4509,19 @@
           return;
         }
         if (simultaneousPhase === "eliminate") {
-          simultaneousPhase = "y";
+          simultaneousPhase = "solution";
           simultaneousActiveField = systemCurrentFields()[0];
           renderSystemEntry();
           return;
         }
-        if (simultaneousPhase === "y") {
-          simultaneousPhase = "x";
+        if (simultaneousPhase === "solution") {
+          simultaneousPhase = "substitute";
+          simultaneousActiveField = systemCurrentFields()[0];
+          renderSystemEntry();
+          return;
+        }
+        if (simultaneousPhase === "substitute") {
+          simultaneousPhase = "final";
           simultaneousActiveField = "x";
           renderSystemEntry();
           return;
@@ -8378,3 +8479,5 @@
     </script>
   </body>
 </html>
+
+            
