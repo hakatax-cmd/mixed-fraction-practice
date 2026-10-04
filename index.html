@@ -4306,6 +4306,21 @@
         const next = current + nextValue;
         if (next.length > expected.length) return;
         equationValues[field] = next;
+        // Basic equations have one intermediate value. Move directly to x = as
+        // soon as that value is complete instead of relying on the shared phase
+        // handler, which can be skipped by touch input after the button redraws.
+        if (
+          equationProblem?.kind !== "fraction" &&
+          equationPhase === "middle" &&
+          field === "middle" &&
+          !equationProblem?.coefficientOnRight &&
+          next === expected
+        ) {
+          equationPhase = "final";
+          equationActiveField = "final";
+          renderEquationEntry();
+          return;
+        }
         renderEquationEntry();
         if (next.length === expected.length) equationFinishField();
       }
