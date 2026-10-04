@@ -4197,6 +4197,13 @@
           input.style.setProperty("--equation-slots", String(slots));
           input.classList.toggle("active", field === equationActiveField);
         });
+        // iPad can occasionally lose the completion callback when this button is redrawn.
+        // Detect a completed first line during rendering as well, then expose x = immediately.
+        if (!isFraction && equationPhase === "middle" && equationIsCorrect()) {
+          equationPhase = "final";
+          equationActiveField = equationFinalFields()[0];
+          renderEquationEntry();
+        }
       }
 
       function setEquationActive(field) {
@@ -8479,5 +8486,3 @@
     </script>
   </body>
 </html>
-
-            
