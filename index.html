@@ -2541,8 +2541,12 @@
               </div>
             </div>
             <div class="simultaneousSpacer"></div>
-            <div class="simultaneousStep" id="simultaneousMultiplyStep"></div>
-            <div class="simultaneousStep" id="simultaneousEliminateStep">
+            <div class="simultaneousStep" id="simultaneousMultiplyStep">
+              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span>2x +</span>
+              <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
+              <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
+            </div>
+            <div class="simultaneousStep" id="simultaneousEliminateStep" hidden>
               <span id="simultaneousEliminateText"></span>
               <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="y&#12398;&#20418;&#25968;"></button><span>y =</span>
               <button class="simultaneousInput" id="simultaneousRhsInput" data-system-field="rhs" type="button" aria-label="y&#12398;&#21491;&#36794;"></button>
@@ -3135,6 +3139,9 @@
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
+      const simultaneousScaledYInput = document.querySelector("#simultaneousScaledYInput");
+      const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
+      const simultaneousEliminateStep = document.querySelector("#simultaneousEliminateStep");
       const simultaneousEliminateText = document.querySelector("#simultaneousEliminateText");
       const simultaneousCoefficientInput = document.querySelector("#simultaneousCoefficientInput");
       const simultaneousRhsInput = document.querySelector("#simultaneousRhsInput");
@@ -3168,6 +3175,8 @@
         simplifiedDenominator: equationFractionSimplifiedDenominatorInput,
       };
       const simultaneousFields = {
+        scaledY: simultaneousScaledYInput,
+        scaledRhs: simultaneousScaledRhsInput,
         coefficient: simultaneousCoefficientInput,
         rhs: simultaneousRhsInput,
         y: simultaneousYInput,
@@ -4285,6 +4294,8 @@
 
       function systemExpected(field) {
         if (!simultaneousProblem) return "";
+        if (field === "scaledY") return String(2 * simultaneousProblem.secondY);
+        if (field === "scaledRhs") return String(2 * simultaneousProblem.secondConstant);
         if (field === "coefficient") return String(simultaneousProblem.eliminationCoefficient);
         if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
         if (field === "y") return String(simultaneousProblem.yNumerator);
@@ -4295,6 +4306,7 @@
       }
 
       function systemCurrentFields() {
+        if (simultaneousPhase === "multiply") return ["scaledY", "scaledRhs"];
         if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
         if (simultaneousPhase === "y") {
           return simultaneousProblem?.fractionY ? ["yDenominator", "yNumerator"] : ["y"];
@@ -4304,9 +4316,10 @@
 
       function renderSystemEntry() {
         const showFraction = Boolean(simultaneousProblem?.fractionY);
+        simultaneousEliminateStep.hidden = simultaneousPhase === "multiply";
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
-        simultaneousYStep.hidden = simultaneousPhase === "eliminate";
+        simultaneousYStep.hidden = simultaneousPhase === "multiply" || simultaneousPhase === "eliminate";
         simultaneousSubstituteCaption.hidden = simultaneousPhase !== "x";
         simultaneousSubstituteStep.hidden = simultaneousPhase !== "x";
         simultaneousXStep.hidden = simultaneousPhase !== "x";
@@ -4326,13 +4339,12 @@
         const item = simultaneousProblem;
         simultaneousFirstEquation.innerHTML = "<span>2x " + systemTerm(item.firstY) + "y = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
         simultaneousSecondEquation.innerHTML = "<span>x " + systemTerm(item.secondY) + "y = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
-        simultaneousMultiplyStep.innerHTML = '<span class="simultaneousCaption">②×2</span><span>2x ' + systemTerm(2 * item.secondY) + "y = " + (2 * item.secondConstant) + '</span><span class="simultaneousNumber">…③</span>';
         simultaneousEliminateText.textContent = "①−③ →";
         const substitutionOperator = item.substitutionTerm < 0 ? "−" : "+";
         simultaneousSubstituteStep.textContent = "x " + substitutionOperator + " " + Math.abs(item.substitutionTerm) + " = " + item.secondConstant;
         simultaneousValues = {};
-        simultaneousPhase = "eliminate";
-        simultaneousActiveField = "coefficient";
+        simultaneousPhase = "multiply";
+        simultaneousActiveField = "scaledY";
         renderSystemEntry();
       }
 
@@ -4344,7 +4356,7 @@
 
       function clearSimultaneousFields(fields = systemCurrentFields()) {
         fields.forEach((field) => delete simultaneousValues[field]);
-        simultaneousActiveField = fields[0] || "coefficient";
+        simultaneousActiveField = fields[0] || "scaledY";
         renderSystemEntry();
       }
 
@@ -4382,6 +4394,12 @@
         }
         if (fields.some((field) => (simultaneousValues[field] || "") !== systemExpected(field))) {
           showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
+          return;
+        }
+        if (simultaneousPhase === "multiply") {
+          simultaneousPhase = "eliminate";
+          simultaneousActiveField = "coefficient";
+          renderSystemEntry();
           return;
         }
         if (simultaneousPhase === "eliminate") {
