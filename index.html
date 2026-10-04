@@ -670,6 +670,7 @@
       .equationKnownDenominator { display: grid; place-items: center; height: 100%; }
       .equationOperatorInput { display: grid; place-items: center; width: clamp(48px, 8vmin, 64px); height: clamp(48px, 8vmin, 64px); padding: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: clamp(2.2rem, 7vmin, 4.2rem); font-weight: 900; line-height: 1; }
       .equationOperatorInput.active { filter: drop-shadow(0 0 7px rgba(37, 99, 235, 0.45)); }
+      .equationOperatorStatic { display: grid; place-items: center; width: clamp(48px, 8vmin, 64px); height: clamp(48px, 8vmin, 64px); color: var(--ink); font: inherit; font-size: clamp(2.2rem, 7vmin, 4.2rem); font-weight: 900; line-height: 1; }
       .equationStaticFraction { display: inline-grid; grid-template-rows: 1fr 4px 1fr; min-width: clamp(54px, 10vmin, 78px); text-align: center; align-items: center; vertical-align: middle; }
       .equationStaticFraction i { display: block; height: 4px; background: var(--ink); }
       #equationProblemLine.fractionEquation { width: 100%; min-width: 0; padding-inline: clamp(10px, 3.5vmin, 34px); }
@@ -701,6 +702,7 @@
       }
       #equationProblemLine.fractionEquation .equationFreeInput { font-size: inherit; }
       #equationProblemLine.fractionEquation .equationOperatorInput { width: clamp(36px, 6vmin, 48px); height: clamp(36px, 6vmin, 48px); font-size: clamp(2rem, 5vmin, 2.6rem); }
+      #equationProblemLine.fractionEquation .equationOperatorStatic { width: clamp(36px, 6vmin, 48px); height: clamp(36px, 6vmin, 48px); font-size: clamp(2rem, 5vmin, 2.6rem); }
       @media (max-width: 430px) {
         #equationProblemLine.fractionEquation { gap: 7px; padding-inline: 8px; }
         #equationProblemLine.fractionEquation .equationBase,
@@ -710,6 +712,28 @@
         #equationProblemLine.fractionEquation .equationResultFraction { min-width: 42px; grid-template-rows: 40px 3px 40px; }
         #equationProblemLine.fractionEquation .equationFreeInput { min-width: 38px; height: 100%; font-size: inherit; }
         #equationProblemLine.fractionEquation .equationOperatorInput { width: 36px; height: 36px; font-size: 2.1rem; }
+        #equationProblemLine.fractionEquation .equationOperatorStatic { width: 36px; height: 36px; font-size: 2.1rem; }
+      }
+
+      #simultaneousProblemLine { display: grid; align-content: start; justify-items: start; gap: clamp(10px, 1.8vmin, 18px); width: 100%; padding: clamp(22px, 4vmin, 40px) clamp(20px, 7vmin, 72px) clamp(14px, 3vmin, 30px); font-size: clamp(1.65rem, 4.7vmin, 2.65rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .simultaneousSystem { display: grid; grid-template-columns: auto 1fr; column-gap: clamp(8px, 1.5vmin, 16px); align-items: stretch; }
+      .simultaneousBrace { align-self: stretch; display: grid; align-items: center; font-family: Georgia, serif; font-size: 3.6em; font-weight: 400; line-height: .56; transform: scaleY(1.2); }
+      .simultaneousEquations { display: grid; gap: clamp(8px, 1.2vmin, 12px); }
+      .simultaneousEquation, .simultaneousStep { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(7px, 1.2vmin, 12px); line-height: 1.05; }
+      .simultaneousNumber { color: var(--muted); font-size: .72em; }
+      .simultaneousSpacer { height: clamp(4px, 1vmin, 12px); }
+      .simultaneousCaption { color: var(--muted); font-size: .66em; }
+      .simultaneousInput { display: grid; grid-template-columns: repeat(var(--system-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; overflow: hidden; }
+      .simultaneousInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width)); }
+      .simultaneousInput .systemDigit { display: grid; place-items: center; min-width: 0; height: 100%; }
+      .simultaneousInput .systemDigit + .systemDigit { border-left: 2px solid var(--line); }
+      .simultaneousInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, .15); }
+      .simultaneousFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); min-width: var(--digit-frame-width); text-align: center; vertical-align: middle; }
+      .simultaneousFraction i { display: block; height: 4px; background: var(--ink); }
+      .simultaneousFraction .simultaneousInput { width: 100%; height: 100%; }
+      @media (max-width: 430px) {
+        #simultaneousProblemLine { padding-inline: 14px; font-size: clamp(1.45rem, 7vw, 2rem); gap: 9px; }
+        .simultaneousSystem { column-gap: 6px; }
       }
 
       #groupingProblemLine {
@@ -2057,7 +2081,8 @@
             <button class="menuButton" id="chooseRatio" type="button">&#21106;&#21512;</button>
             <button class="menuButton" id="chooseSpeed" type="button">&#36895;&#12373;</button>
             <button class="menuButton" id="choosePreschool" type="button">&#12362;&#21069;&#12399;<br />&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</button>
-            <button class="menuButton" id="chooseEquation" type="button">&#19968;&#27425;&#26041;&#31243;&#24335;</button>
+            <button class="menuButton" id="chooseEquation" type="button">&#19968;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
+            <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
@@ -2154,10 +2179,18 @@
         </section>
 
         <section class="cover" id="equationCover" hidden>
-          <h1>&#19968;&#27425;&#26041;&#31243;&#24335;</h1>
+          <h1>&#19968;&#20803;&#19968;&#27425;&#26041;&#31243;&#24335;</h1>
           <p class="coverPrompt">&#24335;&#12434;1&#34892;&#12378;&#12388;&#12392;&#12367;&#12424;</p>
           <p class="coverGoal">12&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="equationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="simultaneousCover" hidden>
+          <h1>&#20108;&#20803;&#19968;&#27425;&#26041;&#31243;&#24335;</h1>
+          <p class="coverPrompt">&#28040;&#21435;&#12375;&#12390;&#12363;&#12425;&#20195;&#20837;&#12375;&#12424;&#12358;</p>
+          <p class="coverGoal">6&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="simultaneousStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -2474,7 +2507,7 @@
                 <i></i>
                 <button class="equationFreeInput" id="equationFractionLeftDenominatorInput" data-equation-field="fractionLeftDenominator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#24038;&#12398;&#20998;&#27597;"></button>
               </span>
-              <button class="equationOperatorInput" id="equationFractionOperatorInput" data-equation-field="fractionOperator" type="button" aria-label="&#20998;&#25968;&#12398;&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
+              <span class="equationOperatorStatic" id="equationFractionOperatorInput" aria-label="&#20998;&#25968;&#12398;&#21046;&#31639;">&divide;</span>
               <span class="equationResultFraction">
                 <button class="equationFreeInput" id="equationFractionRightNumeratorInput" data-equation-field="fractionRightNumerator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#21491;&#12398;&#20998;&#23376;"></button>
                 <i></i>
@@ -2482,7 +2515,6 @@
               </span>
             </div>
             <div class="equationLine" id="equationFractionAnswerLine" hidden>
-              <span>x</span>
               <span class="equals">=</span>
               <span class="equationResultFraction" id="equationFinalResultFraction">
                 <button class="equationFreeInput" id="equationFractionFinalNumeratorInput" data-equation-field="fractionFinalNumerator" type="button" aria-label="x&#12398;&#20516;&#12398;&#20998;&#23376;"></button>
@@ -2490,6 +2522,42 @@
                 <button class="equationFreeInput" id="equationFractionFinalDenominatorInput" data-equation-field="fractionFinalDenominator" type="button" aria-label="x&#12398;&#20516;&#12398;&#20998;&#27597;"></button>
               </span>
             </div>
+            <div class="equationLine" id="equationFractionSimplifyLine" hidden>
+              <span>x</span>
+              <span class="equals">=</span>
+              <span class="equationResultFraction">
+                <button class="equationFreeInput" id="equationFractionSimplifiedNumeratorInput" data-equation-field="simplifiedNumerator" type="button" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#23376;"></button>
+                <i></i>
+                <button class="equationFreeInput" id="equationFractionSimplifiedDenominatorInput" data-equation-field="simplifiedDenominator" type="button" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#27597;"></button>
+              </span>
+            </div>
+          </div>
+          <div id="simultaneousProblemLine" hidden>
+            <div class="simultaneousSystem">
+              <span class="simultaneousBrace" aria-hidden="true">{</span>
+              <div class="simultaneousEquations">
+                <div class="simultaneousEquation" id="simultaneousFirstEquation"></div>
+                <div class="simultaneousEquation" id="simultaneousSecondEquation"></div>
+              </div>
+            </div>
+            <div class="simultaneousSpacer"></div>
+            <div class="simultaneousStep" id="simultaneousMultiplyStep"></div>
+            <div class="simultaneousStep" id="simultaneousEliminateStep">
+              <span id="simultaneousEliminateText"></span>
+              <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="y&#12398;&#20418;&#25968;"></button><span>y =</span>
+              <button class="simultaneousInput" id="simultaneousRhsInput" data-system-field="rhs" type="button" aria-label="y&#12398;&#21491;&#36794;"></button>
+            </div>
+            <div class="simultaneousStep" id="simultaneousYStep">
+              <span>y =</span>
+              <button class="simultaneousInput" id="simultaneousYInput" data-system-field="y" type="button" aria-label="y&#12398;&#20516;"></button>
+              <span class="simultaneousFraction" id="simultaneousYFraction" hidden>
+                <button class="simultaneousInput" id="simultaneousYNumeratorInput" data-system-field="yNumerator" type="button" aria-label="y&#12398;&#20998;&#23376;"></button><i></i>
+                <button class="simultaneousInput" id="simultaneousYDenominatorInput" data-system-field="yDenominator" type="button" aria-label="y&#12398;&#20998;&#27597;"></button>
+              </span>
+            </div>
+            <div class="simultaneousStep" id="simultaneousSubstituteCaption" hidden><span class="simultaneousCaption">&#12371;&#12428;&#12434;&#9313;&#12395;&#20195;&#20837;</span></div>
+            <div class="simultaneousStep" id="simultaneousSubstituteStep" hidden></div>
+            <div class="simultaneousStep" id="simultaneousXStep" hidden><span>x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="x&#12398;&#20516;"></button></div>
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
@@ -2719,6 +2787,8 @@
       const SPEED_BEST_KEY = "speedBestTimeMs";
       const EQUATION_TARGET = 12;
       const EQUATION_BEST_KEY = "equationBestTimeMs";
+      const SIMULTANEOUS_TARGET = 6;
+      const SIMULTANEOUS_BEST_KEY = "simultaneousEquationBestTimeMs";
       const PRESCHOOL_SLOTS = ["preschoolAnswerTens", "preschoolAnswerOnes"];
       const PRESCHOOL_BEST_KEY = "preschoolBestTimeMs";
       const DIVISION_SLOTS = [
@@ -2752,6 +2822,7 @@
         RATIO_BEST_KEY,
         SPEED_BEST_KEY,
         EQUATION_BEST_KEY,
+        SIMULTANEOUS_BEST_KEY,
         PRESCHOOL_BEST_KEY,
         FRACTION_BEST_KEY,
         "longMultiplicationBestTimeMs",
@@ -2774,7 +2845,8 @@
         ratio: "\u5272\u5408",
         speed: "\u901f\u3055",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
-        equation: "\u4e00\u6b21\u65b9\u7a0b\u5f0f",
+        equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
+        simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
       };
       const APP_ORDER = [
         "multiplication",
@@ -2791,6 +2863,7 @@
         "speed",
         "preschool",
         "equation",
+        "simultaneous",
       ];
 
       let selectedApp = "menu";
@@ -2840,6 +2913,12 @@
       let equationValues = {};
       let equationPhase = "middle";
       let equationActiveField = "";
+      let simultaneousDeck = [];
+      let simultaneousIndex = 0;
+      let simultaneousProblem = null;
+      let simultaneousValues = {};
+      let simultaneousPhase = "eliminate";
+      let simultaneousActiveField = "";
       let preschoolDeck = [];
       let preschoolIndex = 0;
       let preschoolProblem = null;
@@ -3049,6 +3128,25 @@
       const equationFinalResultFraction = document.querySelector("#equationFinalResultFraction");
       const equationFractionFinalNumeratorInput = document.querySelector("#equationFractionFinalNumeratorInput");
       const equationFractionFinalDenominatorInput = document.querySelector("#equationFractionFinalDenominatorInput");
+      const equationFractionSimplifyLine = document.querySelector("#equationFractionSimplifyLine");
+      const equationFractionSimplifiedNumeratorInput = document.querySelector("#equationFractionSimplifiedNumeratorInput");
+      const equationFractionSimplifiedDenominatorInput = document.querySelector("#equationFractionSimplifiedDenominatorInput");
+      const simultaneousProblemLine = document.querySelector("#simultaneousProblemLine");
+      const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
+      const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
+      const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
+      const simultaneousEliminateText = document.querySelector("#simultaneousEliminateText");
+      const simultaneousCoefficientInput = document.querySelector("#simultaneousCoefficientInput");
+      const simultaneousRhsInput = document.querySelector("#simultaneousRhsInput");
+      const simultaneousYStep = document.querySelector("#simultaneousYStep");
+      const simultaneousYInput = document.querySelector("#simultaneousYInput");
+      const simultaneousYFraction = document.querySelector("#simultaneousYFraction");
+      const simultaneousYNumeratorInput = document.querySelector("#simultaneousYNumeratorInput");
+      const simultaneousYDenominatorInput = document.querySelector("#simultaneousYDenominatorInput");
+      const simultaneousSubstituteCaption = document.querySelector("#simultaneousSubstituteCaption");
+      const simultaneousSubstituteStep = document.querySelector("#simultaneousSubstituteStep");
+      const simultaneousXStep = document.querySelector("#simultaneousXStep");
+      const simultaneousXInput = document.querySelector("#simultaneousXInput");
       const equationFields = {
         middle: equationMiddleInput,
         middleCoefficient: equationMiddleCoefficientInput,
@@ -3066,6 +3164,16 @@
         fractionRightDenominator: equationFractionRightDenominatorInput,
         fractionFinalNumerator: equationFractionFinalNumeratorInput,
         fractionFinalDenominator: equationFractionFinalDenominatorInput,
+        simplifiedNumerator: equationFractionSimplifiedNumeratorInput,
+        simplifiedDenominator: equationFractionSimplifiedDenominatorInput,
+      };
+      const simultaneousFields = {
+        coefficient: simultaneousCoefficientInput,
+        rhs: simultaneousRhsInput,
+        y: simultaneousYInput,
+        yNumerator: simultaneousYNumeratorInput,
+        yDenominator: simultaneousYDenominatorInput,
+        x: simultaneousXInput,
       };
       const preschoolFirst = document.querySelector("#preschoolFirst");
       const preschoolOperator = document.querySelector("#preschoolOperator");
@@ -3094,6 +3202,7 @@
       const speedCover = document.querySelector("#speedCover");
       const preschoolCover = document.querySelector("#preschoolCover");
       const equationCover = document.querySelector("#equationCover");
+      const simultaneousCover = document.querySelector("#simultaneousCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -3108,6 +3217,7 @@
       const chooseSpeed = document.querySelector("#chooseSpeed");
       const choosePreschool = document.querySelector("#choosePreschool");
       const chooseEquation = document.querySelector("#chooseEquation");
+      const chooseSimultaneous = document.querySelector("#chooseSimultaneous");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const cover = document.querySelector("#cover");
@@ -3127,6 +3237,7 @@
       const speedStartButton = document.querySelector("#speedStartButton");
       const preschoolStartButton = document.querySelector("#preschoolStartButton");
       const equationStartButton = document.querySelector("#equationStartButton");
+      const simultaneousStartButton = document.querySelector("#simultaneousStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -3515,23 +3626,24 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 4, denominator: 7 } },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 4, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 8 }, answer: { numerator: 4, denominator: 7 } },
+              // The source fractions use varied, one-digit denominators.  The common-denominator
+              // step is still required, but never falls into the repetitive /3 and /6 pattern.
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 2, denominator: 7 }, answer: { numerator: 6, denominator: 7 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 14, denominator: 35 }, constant: { numerator: 3, denominator: 7 }, answer: { numerator: 3, denominator: 5 } },
+              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 10, denominator: 35 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 2, denominator: 5 } },
+              { coefficient: { numerator: 3, denominator: 7 }, middle: { numerator: 9, denominator: 35 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 3, denominator: 5 } },
             ]).filter((choice) => !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey);
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
             const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
             const middleNumerator = item.middle.numerator * (commonDenominator / item.middle.denominator);
             const constantNumerator = item.constant.numerator * (commonDenominator / item.constant.denominator);
-            if (gcd(middleNumerator, commonDenominator) !== 1) continue;
             const totalNumerator = sourceOperator === "+"
               ? middleNumerator + constantNumerator
               : middleNumerator - constantNumerator;
-            if (totalNumerator < 1 || gcd(totalNumerator, commonDenominator) !== 1) continue;
+            if (totalNumerator < 1) continue;
             const workTerms = [totalNumerator, constantNumerator];
-            if (workTerms.some((term) => term > 99) || workTerms.every((term) => term >= 10)) continue;
+            if (workTerms.some((term) => term > 99)) continue;
             const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}:${item.constant.numerator}/${item.constant.denominator}`;
             used.add(key);
             return {
@@ -3544,6 +3656,14 @@
               workFirst: totalNumerator,
               workSecond: constantNumerator,
               workResultNumerator: middleNumerator,
+              rawAnswer: {
+                numerator: item.middle.numerator * item.coefficient.denominator,
+                denominator: item.middle.denominator * item.coefficient.numerator,
+              },
+              requiresSimplification: gcd(
+                item.middle.numerator * item.coefficient.denominator,
+                item.middle.denominator * item.coefficient.numerator,
+              ) > 1,
             };
           } else if (kind === "bothSides") {
             const differenceMagnitude = Math.random() < 0.5 ? 2 : 3;
@@ -3600,7 +3720,7 @@
           return item;
         }
         return kind === "fraction"
-          ? { kind, coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 1, denominator: 2 }, constant: { numerator: 1, denominator: 3 }, total: sourceOperator === "+" ? { numerator: 5, denominator: 6 } : { numerator: 1, denominator: 6 }, answer: { numerator: 2, denominator: 3 }, sourceOperator, workOperator: sourceOperator === "+" ? "-" : "+", commonDenominator: 6, workFirst: sourceOperator === "+" ? 5 : 1, workSecond: 2, workResultNumerator: 3 }
+          ? { kind, coefficient: { numerator: 2, denominator: 5 }, middle: { numerator: 6, denominator: 35 }, constant: { numerator: 1, denominator: 5 }, total: { numerator: 13, denominator: 35 }, answer: { numerator: 3, denominator: 7 }, sourceOperator: "+", workOperator: "-", commonDenominator: 35, workFirst: 13, workSecond: 7, workResultNumerator: 6, rawAnswer: { numerator: 30, denominator: 70 }, requiresSimplification: true }
           : kind === "bothSides"
             ? allowNegative
               ? { kind, coefficient: 1, middle: -2, answer: -2, leftCoefficient: 3, leftConstant: 6, rightCoefficient: 2, rightConstant: 4 }
@@ -3611,7 +3731,12 @@
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const fractionCoefficientKeys = shuffle(["1/2", "1/3", "2/3", "3/4"]);
+        const fractionVariants = shuffle([
+          { key: "1/3", operator: "+" },
+          { key: "2/3", operator: "+" },
+          { key: "5/7", operator: "-" },
+          { key: "3/7", operator: "+" },
+        ]);
         const plan = [
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
@@ -3627,12 +3752,75 @@
           { kind: "fraction" },
         ];
         return plan.map((item, index) => {
-          if (item.kind === "fraction") return createEquationProblem("fraction", used, false, signs[index], false, fractionCoefficientKeys.shift());
+          if (item.kind === "fraction") {
+            const variant = fractionVariants.shift();
+            return createEquationProblem("fraction", used, false, variant.operator, false, variant.key);
+          }
           if (item.kind === "bothSidesRight") return createEquationProblem("bothSides", used, false, "+", false, "", true);
           if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
           const negativeCoefficient = item.allowNegative && (index === 7 || index === 10);
           return createEquationProblem("basic", used, item.allowNegative, signs[index], negativeCoefficient);
         });
+      }
+
+      function createSimultaneousDeck() {
+        const deck = [];
+        const used = new Set();
+        const addProblem = (fractionY) => {
+          for (let attempt = 0; attempt < 200; attempt += 1) {
+            const x = randomInt(-5, 8);
+            if (x === 0) continue;
+            const multiplier = 2;
+            let yNumerator;
+            let yDenominator;
+            let secondY;
+            if (fractionY) {
+              yDenominator = randomInt(2, 5);
+              yNumerator = randomInt(1, yDenominator - 1);
+              if (gcd(yNumerator, yDenominator) !== 1) continue;
+              secondY = yDenominator;
+            } else {
+              yDenominator = 1;
+              yNumerator = randomInt(1, 6);
+              secondY = randomInt(1, 4);
+            }
+            const eliminationCoefficient = fractionY ? yDenominator : randomInt(1, 4);
+            const firstY = multiplier * secondY + eliminationCoefficient;
+            const yValue = yNumerator / yDenominator;
+            const secondConstant = x + secondY * yValue;
+            const firstConstant = multiplier * x + firstY * yValue;
+            if (!Number.isInteger(secondConstant) || !Number.isInteger(firstConstant)) continue;
+            const substitutionTerm = secondY * yValue;
+            if (!Number.isInteger(substitutionTerm)) continue;
+            const key = [firstY, secondY, firstConstant, secondConstant, x, yNumerator, yDenominator].join(":");
+            if (used.has(key)) continue;
+            used.add(key);
+            return {
+              x,
+              yNumerator,
+              yDenominator,
+              firstY,
+              secondY,
+              firstConstant,
+              secondConstant,
+              multiplier,
+              eliminationCoefficient,
+              eliminationRhs: yNumerator,
+              substitutionTerm,
+              fractionY,
+            };
+          }
+          return null;
+        };
+        while (deck.length < 3) {
+          const problem = addProblem(false);
+          if (problem) deck.push(problem);
+        }
+        while (deck.length < SIMULTANEOUS_TARGET) {
+          const problem = addProblem(true);
+          if (problem) deck.push(problem);
+        }
+        return deck;
       }
 
       function createPreschoolDeck() {
@@ -3892,8 +4080,10 @@
         if (field === "fractionOperator") return "\u00f7";
         if (field === "fractionRightDenominator") return String(equationProblem.coefficient.denominator);
         if (field === "fractionRightNumerator") return String(equationProblem.coefficient.numerator);
-        if (field === "fractionFinalDenominator") return String(equationProblem.answer.denominator);
-        if (field === "fractionFinalNumerator") return String(equationProblem.answer.numerator);
+        if (field === "fractionFinalDenominator") return String(equationProblem.rawAnswer.denominator);
+        if (field === "fractionFinalNumerator") return String(equationProblem.rawAnswer.numerator);
+        if (field === "simplifiedDenominator") return String(equationProblem.answer.denominator);
+        if (field === "simplifiedNumerator") return String(equationProblem.answer.numerator);
         return "";
       }
 
@@ -3901,8 +4091,9 @@
         if (equationProblem?.kind === "fraction") {
           if (equationPhase === "work") return ["middleFirst", "middleOperator", "middleSecond"];
           if (equationPhase === "result") return ["middleNumerator"];
-          if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionOperator", "fractionRightDenominator", "fractionRightNumerator"];
-          if (equationPhase === "answer") return ["fractionFinalDenominator", "fractionFinalNumerator"];
+          if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionRightDenominator", "fractionRightNumerator"];
+          if (equationPhase === "raw") return ["fractionFinalDenominator", "fractionFinalNumerator"];
+          if (equationPhase === "simplify") return ["simplifiedDenominator", "simplifiedNumerator"];
         }
         if (equationPhase === "middle") {
           return equationProblem?.coefficientOnRight ? ["middle", "middleCoefficient"] : ["middle"];
@@ -3922,18 +4113,19 @@
         equationMiddleCoefficientX.hidden = isFraction || !coefficientOnRight;
         equationMiddleLeft.hidden = coefficientOnRight;
         equationMiddleFractionInput.hidden = !isFraction;
-        equationMiddleResultEquals.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
-        equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "answer"].includes(equationPhase);
+        equationMiddleResultEquals.hidden = !isFraction || !["result", "expression", "raw", "simplify"].includes(equationPhase);
+        equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "raw", "simplify"].includes(equationPhase);
         equationFinalLine.hidden = equationPhase !== "final" || isFraction;
-        equationFractionFinalLine.hidden = !isFraction || !["expression", "answer"].includes(equationPhase);
-        equationFractionAnswerLine.hidden = !isFraction || equationPhase !== "answer";
+        equationFractionFinalLine.hidden = !isFraction || !["expression", "raw", "simplify"].includes(equationPhase);
+        equationFractionAnswerLine.hidden = !isFraction || !["raw", "simplify"].includes(equationPhase);
+        equationFractionSimplifyLine.hidden = !isFraction || equationPhase !== "simplify";
         equationFinalInput.hidden = isFraction;
         equationFractionInput.hidden = true;
         Object.entries(equationFields).forEach(([field, input]) => {
           const isOperator = field === "middleOperator" || field === "fractionOperator";
           if (isOperator) {
-            input.textContent = equationValues[field] || "\u25cb";
-            input.classList.toggle("active", field === equationActiveField);
+            input.textContent = field === "fractionOperator" ? "\u00f7" : (equationValues[field] || "\u25cb");
+            input.classList.toggle("active", field === equationActiveField && field !== "fractionOperator");
             return;
           }
           const slots = Math.min(3, Math.max(1, equationExpected(field).length));
@@ -4005,7 +4197,12 @@
           return;
         }
         if (equationProblem?.kind === "fraction") {
-          const nextPhase = { work: "result", result: "expression", expression: "answer" }[equationPhase];
+          const nextPhase = {
+            work: "result",
+            result: "expression",
+            expression: "raw",
+            raw: equationProblem.requiresSimplification ? "simplify" : "",
+          }[equationPhase];
           if (nextPhase) {
             equationPhase = nextPhase;
             equationActiveField = equationCurrentFields()[0];
@@ -4080,6 +4277,154 @@
           equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
         }
         resetEquationEntry();
+      }
+
+      function systemTerm(value) {
+        return value < 0 ? "− " + Math.abs(value) : "+ " + value;
+      }
+
+      function systemExpected(field) {
+        if (!simultaneousProblem) return "";
+        if (field === "coefficient") return String(simultaneousProblem.eliminationCoefficient);
+        if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
+        if (field === "y") return String(simultaneousProblem.yNumerator);
+        if (field === "yNumerator") return String(simultaneousProblem.yNumerator);
+        if (field === "yDenominator") return String(simultaneousProblem.yDenominator);
+        if (field === "x") return String(simultaneousProblem.x);
+        return "";
+      }
+
+      function systemCurrentFields() {
+        if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
+        if (simultaneousPhase === "y") {
+          return simultaneousProblem?.fractionY ? ["yDenominator", "yNumerator"] : ["y"];
+        }
+        return ["x"];
+      }
+
+      function renderSystemEntry() {
+        const showFraction = Boolean(simultaneousProblem?.fractionY);
+        simultaneousYInput.hidden = showFraction;
+        simultaneousYFraction.hidden = !showFraction;
+        simultaneousYStep.hidden = simultaneousPhase === "eliminate";
+        simultaneousSubstituteCaption.hidden = simultaneousPhase !== "x";
+        simultaneousSubstituteStep.hidden = simultaneousPhase !== "x";
+        simultaneousXStep.hidden = simultaneousPhase !== "x";
+        Object.entries(simultaneousFields).forEach(([field, input]) => {
+          const expected = systemExpected(field);
+          const slots = Math.min(3, Math.max(1, expected.length));
+          const value = Array.from(simultaneousValues[field] || "");
+          input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] || "") + "</span>").join("");
+          input.dataset.slots = String(slots);
+          input.style.setProperty("--system-slots", String(slots));
+          input.classList.toggle("active", field === simultaneousActiveField);
+        });
+      }
+
+      function renderSimultaneousProblem() {
+        if (!simultaneousProblem) return;
+        const item = simultaneousProblem;
+        simultaneousFirstEquation.innerHTML = "<span>2x " + systemTerm(item.firstY) + "y = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
+        simultaneousSecondEquation.innerHTML = "<span>x " + systemTerm(item.secondY) + "y = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
+        simultaneousMultiplyStep.innerHTML = '<span class="simultaneousCaption">②×2</span><span>2x ' + systemTerm(2 * item.secondY) + "y = " + (2 * item.secondConstant) + '</span><span class="simultaneousNumber">…③</span>';
+        simultaneousEliminateText.textContent = "①−③ →";
+        const substitutionOperator = item.substitutionTerm < 0 ? "−" : "+";
+        simultaneousSubstituteStep.textContent = "x " + substitutionOperator + " " + Math.abs(item.substitutionTerm) + " = " + item.secondConstant;
+        simultaneousValues = {};
+        simultaneousPhase = "eliminate";
+        simultaneousActiveField = "coefficient";
+        renderSystemEntry();
+      }
+
+      function setSimultaneousActive(field) {
+        if (selectedApp !== "simultaneous" || isAnswerLocked || isFinished || !systemCurrentFields().includes(field)) return;
+        simultaneousActiveField = field;
+        renderSystemEntry();
+      }
+
+      function clearSimultaneousFields(fields = systemCurrentFields()) {
+        fields.forEach((field) => delete simultaneousValues[field]);
+        simultaneousActiveField = fields[0] || "coefficient";
+        renderSystemEntry();
+      }
+
+      function completeSimultaneousProblem() {
+        if (selectedApp !== "simultaneous" || isAnswerLocked || isFinished) return;
+        setLocked(true);
+        showReaction(true);
+        correctCount += 1;
+        updateProgress();
+        if (isLastTimedProblem()) {
+          finalTime = elapsedTime();
+          clearedAt = new Date();
+          isFinished = true;
+          updateProgress();
+          schedule(finishRound);
+          return;
+        }
+        schedule(() => {
+          hideReaction();
+          nextProblem(true);
+        });
+      }
+
+      function finishSimultaneousField() {
+        const fields = systemCurrentFields();
+        const index = fields.indexOf(simultaneousActiveField);
+        if (index >= 0 && index < fields.length - 1) {
+          if ((simultaneousValues[simultaneousActiveField] || "") !== systemExpected(simultaneousActiveField)) {
+            showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
+            return;
+          }
+          simultaneousActiveField = fields[index + 1];
+          renderSystemEntry();
+          return;
+        }
+        if (fields.some((field) => (simultaneousValues[field] || "") !== systemExpected(field))) {
+          showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
+          return;
+        }
+        if (simultaneousPhase === "eliminate") {
+          simultaneousPhase = "y";
+          simultaneousActiveField = systemCurrentFields()[0];
+          renderSystemEntry();
+          return;
+        }
+        if (simultaneousPhase === "y") {
+          simultaneousPhase = "x";
+          simultaneousActiveField = "x";
+          renderSystemEntry();
+          return;
+        }
+        completeSimultaneousProblem();
+      }
+
+      function simultaneousReceive(value) {
+        if (selectedApp !== "simultaneous" || isAnswerLocked || isFinished || !simultaneousActiveField) return;
+        const field = simultaneousActiveField;
+        const expected = systemExpected(field);
+        const current = simultaneousValues[field] || "";
+        const next = value === "\u2212" ? "-" : value;
+        if (next === "-" && (current || !expected.startsWith("-"))) return;
+        if (!/^\d$/.test(next) && next !== "-") return;
+        const result = current + next;
+        if (result.length > expected.length) return;
+        simultaneousValues[field] = result;
+        renderSystemEntry();
+        if (result.length === expected.length) finishSimultaneousField();
+      }
+
+      function simultaneousBackspace() {
+        if (selectedApp !== "simultaneous" || isAnswerLocked || isFinished) return;
+        const current = simultaneousValues[simultaneousActiveField] || "";
+        if (current) {
+          simultaneousValues[simultaneousActiveField] = current.slice(0, -1);
+          renderSystemEntry();
+          return;
+        }
+        const fields = systemCurrentFields();
+        const index = fields.indexOf(simultaneousActiveField);
+        if (index > 0) setSimultaneousActive(fields[index - 1]);
       }
 
       function ratioProblemText(item = ratioProblem) {
@@ -5070,7 +5415,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool" || selectedApp === "equation";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -5084,6 +5429,7 @@
         if (selectedApp === "speed") return speedIndex;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "equation") return equationIndex;
+        if (selectedApp === "simultaneous") return simultaneousIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
@@ -5099,6 +5445,7 @@
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
+        if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
@@ -5118,6 +5465,7 @@
         if (selectedApp === "speed") return speedAnswer();
         if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "equation") return equationProblem?.kind === "fraction" ? equationProblem.answer.numerator : equationProblem?.answer || 0;
+        if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
@@ -5139,6 +5487,13 @@
         if (selectedApp === "equation") return equationProblem?.kind === "fraction"
           ? `${equationProblem.answer.numerator}/${equationProblem.answer.denominator}`
           : String(equationProblem?.answer || "");
+        if (selectedApp === "simultaneous") {
+          if (!simultaneousProblem) return "";
+          const y = simultaneousProblem.yDenominator === 1
+            ? String(simultaneousProblem.yNumerator)
+            : `${simultaneousProblem.yNumerator}/${simultaneousProblem.yDenominator}`;
+          return `x=${simultaneousProblem.x}, y=${y}`;
+        }
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
         }
@@ -5194,6 +5549,7 @@
         }
         if (selectedApp === "ratio") return [];
         if (selectedApp === "equation") return [];
+        if (selectedApp === "simultaneous") return [];
         if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
         if (selectedApp === "preschool") return visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
@@ -5338,6 +5694,7 @@
         if (app === "speed") return SPEED_BEST_KEY;
         if (app === "preschool") return PRESCHOOL_BEST_KEY;
         if (app === "equation") return EQUATION_BEST_KEY;
+        if (app === "simultaneous") return SIMULTANEOUS_BEST_KEY;
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
@@ -5612,6 +5969,9 @@
           input.disabled = locked;
         });
         Object.values(equationFields).forEach((input) => {
+          input.disabled = locked;
+        });
+        Object.values(simultaneousFields).forEach((input) => {
           input.disabled = locked;
         });
       }
@@ -6088,6 +6448,11 @@
           resetEquationEntry();
           return;
         }
+        if (selectedApp === "simultaneous") {
+          setLocked(false);
+          renderSimultaneousProblem();
+          return;
+        }
         if (resetModeLock && selectedApp === "fraction") setModeLocked(false);
         setLocked(false);
         setActive(activeSlotOrder()[0]);
@@ -6146,6 +6511,7 @@
         speedCover.hidden = true;
         preschoolCover.hidden = true;
         equationCover.hidden = true;
+        simultaneousCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -6697,6 +7063,16 @@
               return;
             }
             equationProblem = equationDeck[equationIndex];
+          } else if (selectedApp === "simultaneous") {
+            if (keepChallenge) simultaneousIndex += 1;
+            if (simultaneousIndex >= simultaneousDeck.length) {
+              finalTime = elapsedTime();
+              clearedAt = new Date();
+              isFinished = true;
+              finishRound();
+              return;
+            }
+            simultaneousProblem = simultaneousDeck[simultaneousIndex];
           } else if (selectedApp === "preschool") {
           if (preschoolReviewActive) {
             if (keepChallenge) preschoolReviewIndex += 1;
@@ -6722,6 +7098,37 @@
         } else {
           problem = createNextFractionProblem();
         }
+        renderProblem();
+        resetInputs(true);
+      }
+
+      function startSimultaneousChallenge() {
+        selectedApp = "simultaneous";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        simultaneousDeck = createSimultaneousDeck();
+        simultaneousIndex = 0;
+        simultaneousProblem = simultaneousDeck[0];
+        resetChallenge();
         renderProblem();
         resetInputs(true);
       }
@@ -6756,6 +7163,8 @@
           preschoolCover.hidden = false;
         } else if (selectedApp === "equation") {
           equationCover.hidden = false;
+        } else if (selectedApp === "simultaneous") {
+          simultaneousCover.hidden = false;
         } else {
           cover.hidden = false;
         }
@@ -7409,6 +7818,33 @@
         speedCover.hidden = true;
         preschoolCover.hidden = true;
         equationCover.hidden = false;
+        simultaneousCover.hidden = true;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
+      function showSimultaneousCover() {
+        selectedApp = "simultaneous";
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = false;
         challengeView.hidden = true;
         finishPanel.hidden = true;
         hasStarted = false;
@@ -7453,8 +7889,8 @@
 
       function renderProblem() {
         const ratioDotKey = document.querySelector("#ratioDotKey");
-        ratioDotKey.textContent = selectedApp === "equation" ? "\u2212" : ".";
-        ratioDotKey.setAttribute("aria-label", selectedApp === "equation" ? "\u30de\u30a4\u30ca\u30b9" : "\u5c0f\u6570\u70b9");
+        ratioDotKey.textContent = selectedApp === "equation" || selectedApp === "simultaneous" ? "\u2212" : ".";
+        ratioDotKey.setAttribute("aria-label", selectedApp === "equation" || selectedApp === "simultaneous" ? "\u30de\u30a4\u30ca\u30b9" : "\u5c0f\u6570\u70b9");
         fractionProblemLine.hidden = selectedApp !== "fraction";
         improperFractionProblemLine.hidden = selectedApp !== "improperFraction";
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
@@ -7469,10 +7905,11 @@
         speedProblemLine.hidden = selectedApp !== "speed";
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         equationProblemLine.hidden = selectedApp !== "equation";
+        simultaneousProblemLine.hidden = selectedApp !== "simultaneous";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
-        challengeView.classList.toggle("equationMode", selectedApp === "equation");
+        challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
         if (selectedApp === "multiplication") {
@@ -7519,6 +7956,8 @@
             renderSpeedProblem();
           } else if (selectedApp === "equation") {
             renderEquationProblem();
+          } else if (selectedApp === "simultaneous") {
+            renderSimultaneousProblem();
           } else if (selectedApp === "preschool") {
           renderPreschoolProblem();
         } else {
@@ -7608,6 +8047,10 @@
           equationBackspace();
           return;
         }
+        if (selectedApp === "simultaneous") {
+          simultaneousBackspace();
+          return;
+        }
         resetClearAnswerConfirm();
         pendingWrongSignature = "";
         clearConfirmationMessage();
@@ -7682,15 +8125,17 @@
             return;
           }
         }
-        if (selectedApp === "equation") {
+        if (selectedApp === "equation" || selectedApp === "simultaneous") {
           if (/^\d$/.test(event.key)) {
             event.preventDefault();
-            equationReceive(event.key);
+            if (selectedApp === "equation") equationReceive(event.key);
+            else simultaneousReceive(event.key);
             return;
           }
           if (event.key === "-" || event.key === "_") {
             event.preventDefault();
-            equationReceive("\u2212");
+            if (selectedApp === "equation") equationReceive("\u2212");
+            else simultaneousReceive("\u2212");
             return;
           }
           if (event.key === "+") {
@@ -7736,6 +8181,10 @@
             equationReceive(button.dataset.digit);
             return;
           }
+          if (selectedApp === "simultaneous") {
+            simultaneousReceive(button.dataset.digit);
+            return;
+          }
           setSlotValue(activeSlot, getAnswerValue(activeSlot) + button.dataset.digit);
         });
       });
@@ -7770,6 +8219,16 @@
         });
       });
 
+      document.querySelectorAll("[data-system-field]").forEach((input) => {
+        input.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          if (selectedApp === "simultaneous") setSimultaneousActive(input.dataset.systemField);
+        });
+        input.addEventListener("click", () => {
+          if (selectedApp === "simultaneous") setSimultaneousActive(input.dataset.systemField);
+        });
+      });
+
       bindFastPress(document.querySelector("#ratioTimesKey"), () => {
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
@@ -7786,6 +8245,7 @@
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
         if (selectedApp === "equation") equationReceive("\u2212");
+        if (selectedApp === "simultaneous") simultaneousReceive("\u2212");
       });
 
       doubleDecimalChoices.forEach((button) => {
@@ -7814,6 +8274,7 @@
       chooseSpeed.addEventListener("click", showSpeedCover);
       choosePreschool.addEventListener("click", showPreschoolCover);
       chooseEquation.addEventListener("click", showEquationCover);
+      chooseSimultaneous.addEventListener("click", showSimultaneousCover);
       viewRecordsButton.addEventListener("click", showAllRecords);
       recordsCloseButton.addEventListener("click", hideAllRecords);
       clearRecordsButton.addEventListener("click", showDeletePin);
@@ -7852,6 +8313,7 @@
       speedStartButton.addEventListener("click", startSpeedChallenge);
       preschoolStartButton.addEventListener("click", startPreschoolChallenge);
       equationStartButton.addEventListener("click", startEquationChallenge);
+      simultaneousStartButton.addEventListener("click", startSimultaneousChallenge);
       nextMistakeButton.addEventListener("click", () => {
         if (!manualNextAction) return;
         const action = manualNextAction;
