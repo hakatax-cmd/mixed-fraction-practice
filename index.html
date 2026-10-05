@@ -2520,11 +2520,9 @@
                 <button class="equationFreeInput" id="equationFractionRightDenominatorInput" data-equation-field="fractionRightDenominator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#21491;&#12398;&#20998;&#27597;"></button>
               </span>
             </div>
-            <div class="equationLine" id="equationFractionReducedDivisionLine" hidden>
+            <div class="equationLine" id="equationMiddleSimplifyLine" hidden>
               <span class="equals">=</span>
-              <span class="equationStaticFraction" id="equationReducedDivisionLeft"></span>
-              <span class="equationOperatorStatic">&divide;</span>
-              <span class="equationStaticFraction" id="equationReducedDivisionRight"></span>
+              <span class="equationStaticFraction" id="equationMiddleSimplified"></span>
             </div>
             <div class="equationLine" id="equationFractionMultiplyLine" hidden>
               <span>x</span>
@@ -3162,9 +3160,8 @@
       const equationFinalResultFraction = document.querySelector("#equationFinalResultFraction");
       const equationFractionFinalNumeratorInput = document.querySelector("#equationFractionFinalNumeratorInput");
       const equationFractionFinalDenominatorInput = document.querySelector("#equationFractionFinalDenominatorInput");
-      const equationFractionReducedDivisionLine = document.querySelector("#equationFractionReducedDivisionLine");
-      const equationReducedDivisionLeft = document.querySelector("#equationReducedDivisionLeft");
-      const equationReducedDivisionRight = document.querySelector("#equationReducedDivisionRight");
+      const equationMiddleSimplifyLine = document.querySelector("#equationMiddleSimplifyLine");
+      const equationMiddleSimplified = document.querySelector("#equationMiddleSimplified");
       const equationFractionMultiplyLine = document.querySelector("#equationFractionMultiplyLine");
       const equationMultiplyLeft = document.querySelector("#equationMultiplyLeft");
       const equationMultiplyRight = document.querySelector("#equationMultiplyRight");
@@ -4167,14 +4164,9 @@
         };
       }
 
-      function equationNeedsDivisionReduction() {
+      function equationNeedsMiddleReduction() {
         if (equationProblem?.kind !== "fraction") return false;
-        const left = reduceEquationFraction(equationProblem.middle);
-        const right = reduceEquationFraction(equationProblem.coefficient);
-        return left.numerator !== equationProblem.middle.numerator ||
-          left.denominator !== equationProblem.middle.denominator ||
-          right.numerator !== equationProblem.coefficient.numerator ||
-          right.denominator !== equationProblem.coefficient.denominator;
+        return gcd(equationProblem.workResultNumerator, equationProblem.commonDenominator) > 1;
       }
 
       function equationExpected(field) {
@@ -4191,8 +4183,8 @@
         if (field === "fractionOperator") return "\u00f7";
         if (field === "fractionRightDenominator") return String(equationProblem.coefficient.denominator);
         if (field === "fractionRightNumerator") return String(equationProblem.coefficient.numerator);
-        if (field === "fractionFinalDenominator") return String(equationProblem.rawAnswer.denominator);
-        if (field === "fractionFinalNumerator") return String(equationProblem.rawAnswer.numerator);
+        if (field === "fractionFinalDenominator") return String(equationProblem.answer.denominator);
+        if (field === "fractionFinalNumerator") return String(equationProblem.answer.numerator);
         if (field === "simplifiedDenominator") return String(equationProblem.answer.denominator);
         if (field === "simplifiedNumerator") return String(equationProblem.answer.numerator);
         return "";
@@ -4229,9 +4221,9 @@
         equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "raw", "simplify"].includes(equationPhase);
         equationFinalLine.hidden = equationPhase !== "final" || isFraction;
         equationFractionFinalLine.hidden = !isFraction || !["expression", "raw", "simplify"].includes(equationPhase);
-        equationFractionReducedDivisionLine.hidden = !isFraction || !equationNeedsDivisionReduction() || !["raw", "simplify"].includes(equationPhase);
-        equationFractionMultiplyLine.hidden = !isFraction || !["raw", "simplify"].includes(equationPhase);
-        equationFractionAnswerLine.hidden = !isFraction || !["raw", "simplify"].includes(equationPhase);
+        equationMiddleSimplifyLine.hidden = !isFraction || !equationNeedsMiddleReduction() || !["expression", "raw"].includes(equationPhase);
+        equationFractionMultiplyLine.hidden = !isFraction || !["raw"].includes(equationPhase);
+        equationFractionAnswerLine.hidden = !isFraction || !["raw"].includes(equationPhase);
         equationFractionSimplifyLine.hidden = !isFraction || equationPhase !== "simplify";
         equationFinalInput.hidden = isFraction;
         equationFractionInput.hidden = true;
@@ -4318,7 +4310,7 @@
             work: "result",
             result: "expression",
             expression: "raw",
-            raw: equationProblem.requiresSimplification ? "simplify" : "",
+            raw: "",
           }[equationPhase];
           if (nextPhase) {
             equationPhase = nextPhase;
@@ -4406,15 +4398,13 @@
         equationMiddleLine.classList.toggle("coefficientOnRight", Boolean(equationProblem.coefficientOnRight));
         if (equationProblem.kind === "fraction") {
           const fractionHtml = (value) => `<span>${value.numerator}</span><i></i><span>${value.denominator}</span>`;
-          const reducedMiddle = reduceEquationFraction(equationProblem.middle);
           const reducedCoefficient = reduceEquationFraction(equationProblem.coefficient);
           equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
           equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
           equationCommonDenominator.textContent = equationProblem.commonDenominator;
           equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
-          equationReducedDivisionLeft.innerHTML = fractionHtml(reducedMiddle);
-          equationReducedDivisionRight.innerHTML = fractionHtml(reducedCoefficient);
-          equationMultiplyLeft.innerHTML = fractionHtml(reducedMiddle);
+          equationMiddleSimplified.innerHTML = fractionHtml(equationProblem.middle);
+          equationMultiplyLeft.innerHTML = fractionHtml(equationProblem.middle);
           equationMultiplyRight.innerHTML = fractionHtml({
             numerator: reducedCoefficient.denominator,
             denominator: reducedCoefficient.numerator,
