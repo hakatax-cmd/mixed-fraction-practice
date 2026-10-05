@@ -4309,29 +4309,27 @@
         const next = current + nextValue;
         if (next.length > expected.length) return;
         equationValues[field] = next;
-        // Basic equations have one intermediate value. Move directly to x = as
-        // soon as that value is complete instead of relying on the shared phase
-        // handler, which can be skipped by touch input after the button redraws.
-        if (
-          equationProblem?.kind !== "fraction" &&
-          equationPhase === "middle" &&
-          field === "middle" &&
-          !equationProblem?.coefficientOnRight &&
-          next === expected
-        ) {
-          equationPhase = "final";
-          equationActiveField = "final";
-          renderEquationEntry();
-          return;
-        }
-        if (
-          equationProblem?.kind !== "fraction" &&
-          equationPhase === "final" &&
-          field === "final" &&
-          next === expected
-        ) {
-          completeEquationProblem();
-          return;
+        // Integer equations use a strict, local transition path. This covers
+        // both a single middle box and the two boxes in 4 = 2x, so a completed
+        // correct box cannot leave the child on a finished field.
+        if (equationProblem?.kind !== "fraction" && next === expected) {
+          const fields = equationCurrentFields();
+          const fieldIndex = fields.indexOf(field);
+          if (equationPhase === "middle" && fieldIndex >= 0 && fieldIndex < fields.length - 1) {
+            equationActiveField = fields[fieldIndex + 1];
+            renderEquationEntry();
+            return;
+          }
+          if (equationPhase === "middle") {
+            equationPhase = "final";
+            equationActiveField = "final";
+            renderEquationEntry();
+            return;
+          }
+          if (equationPhase === "final") {
+            completeEquationProblem();
+            return;
+          }
         }
         renderEquationEntry();
         if (next.length === expected.length) equationFinishField();
