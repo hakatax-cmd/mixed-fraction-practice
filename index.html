@@ -683,6 +683,10 @@
         justify-content: flex-start;
         max-width: 100%;
       }
+      #equationProblemLine.fractionEquation .fractionMiddleLine.hasMiddleSimplification {
+        flex-wrap: nowrap;
+        gap: clamp(2px, .55vmin, 5px);
+      }
       #equationProblemLine.fractionEquation {
         gap: clamp(7px, 1.4vmin, 12px);
         padding-top: clamp(16px, 2.8vmin, 28px);
@@ -2494,6 +2498,12 @@
                 <i></i>
                 <span class="equationKnownDenominator" id="equationMiddleResultDenominator"></span>
               </span>
+              <span class="equals" id="equationMiddleSimplifyEquals" hidden>=</span>
+              <span class="equationResultFraction" id="equationMiddleSimplified" hidden>
+                <button class="equationFreeInput" id="equationMiddleSimplifiedNumeratorInput" data-equation-field="middleSimplifiedNumerator" type="button" aria-label="約分後の分子"></button>
+                <i></i>
+                <button class="equationFreeInput" id="equationMiddleSimplifiedDenominatorInput" data-equation-field="middleSimplifiedDenominator" type="button" aria-label="約分後の分母"></button>
+              </span>
             </div>
             <div class="equationLine" id="equationFinalLine" hidden>
               <span>x</span>
@@ -2519,10 +2529,6 @@
                 <i></i>
                 <button class="equationFreeInput" id="equationFractionRightDenominatorInput" data-equation-field="fractionRightDenominator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#21491;&#12398;&#20998;&#27597;"></button>
               </span>
-            </div>
-            <div class="equationLine" id="equationMiddleSimplifyLine" hidden>
-              <span class="equals">=</span>
-              <span class="equationStaticFraction" id="equationMiddleSimplified"></span>
             </div>
             <div class="equationLine" id="equationFractionMultiplyLine" hidden>
               <span>x</span>
@@ -3160,8 +3166,10 @@
       const equationFinalResultFraction = document.querySelector("#equationFinalResultFraction");
       const equationFractionFinalNumeratorInput = document.querySelector("#equationFractionFinalNumeratorInput");
       const equationFractionFinalDenominatorInput = document.querySelector("#equationFractionFinalDenominatorInput");
-      const equationMiddleSimplifyLine = document.querySelector("#equationMiddleSimplifyLine");
+      const equationMiddleSimplifyEquals = document.querySelector("#equationMiddleSimplifyEquals");
       const equationMiddleSimplified = document.querySelector("#equationMiddleSimplified");
+      const equationMiddleSimplifiedNumeratorInput = document.querySelector("#equationMiddleSimplifiedNumeratorInput");
+      const equationMiddleSimplifiedDenominatorInput = document.querySelector("#equationMiddleSimplifiedDenominatorInput");
       const equationFractionMultiplyLine = document.querySelector("#equationFractionMultiplyLine");
       const equationMultiplyLeft = document.querySelector("#equationMultiplyLeft");
       const equationMultiplyRight = document.querySelector("#equationMultiplyRight");
@@ -3208,6 +3216,8 @@
         middleOperator: equationMiddleOperatorInput,
         middleSecond: equationMiddleSecondInput,
         middleNumerator: equationMiddleNumeratorInput,
+        middleSimplifiedNumerator: equationMiddleSimplifiedNumeratorInput,
+        middleSimplifiedDenominator: equationMiddleSimplifiedDenominatorInput,
         final: equationFinalInput,
         numerator: equationFractionNumeratorInput,
         denominator: equationFractionDenominatorInput,
@@ -4177,6 +4187,8 @@
         if (field === "middleOperator") return equationProblem.workOperator;
         if (field === "middleSecond") return String(equationProblem.workSecond);
         if (field === "middleNumerator") return String(equationProblem.workResultNumerator);
+        if (field === "middleSimplifiedDenominator") return String(equationProblem.middle.denominator);
+        if (field === "middleSimplifiedNumerator") return String(equationProblem.middle.numerator);
         if (field === "final") return String(equationProblem.answer);
         if (field === "fractionLeftDenominator") return String(equationProblem.middle.denominator);
         if (field === "fractionLeftNumerator") return String(equationProblem.middle.numerator);
@@ -4194,6 +4206,7 @@
         if (equationProblem?.kind === "fraction") {
           if (equationPhase === "work") return ["middleFirst", "middleOperator", "middleSecond"];
           if (equationPhase === "result") return ["middleNumerator"];
+          if (equationPhase === "middleSimplify") return ["middleSimplifiedDenominator", "middleSimplifiedNumerator"];
           if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionRightDenominator", "fractionRightNumerator"];
           if (equationPhase === "raw") return ["fractionFinalDenominator", "fractionFinalNumerator"];
           if (equationPhase === "simplify") return ["simplifiedDenominator", "simplifiedNumerator"];
@@ -4217,11 +4230,14 @@
         equationMiddleCoefficientX.hidden = isFraction || !coefficientOnRight;
         equationMiddleLeft.hidden = coefficientOnRight;
         equationMiddleFractionInput.hidden = !isFraction;
-        equationMiddleResultEquals.hidden = !isFraction || !["result", "expression", "raw", "simplify"].includes(equationPhase);
-        equationMiddleResultFraction.hidden = !isFraction || !["result", "expression", "raw", "simplify"].includes(equationPhase);
+        equationMiddleResultEquals.hidden = !isFraction || !["result", "middleSimplify", "expression", "raw", "simplify"].includes(equationPhase);
+        equationMiddleResultFraction.hidden = !isFraction || !["result", "middleSimplify", "expression", "raw", "simplify"].includes(equationPhase);
         equationFinalLine.hidden = equationPhase !== "final" || isFraction;
         equationFractionFinalLine.hidden = !isFraction || !["expression", "raw", "simplify"].includes(equationPhase);
-        equationMiddleSimplifyLine.hidden = !isFraction || !equationNeedsMiddleReduction() || !["expression", "raw"].includes(equationPhase);
+        const showMiddleSimplification = isFraction && equationNeedsMiddleReduction() && ["middleSimplify", "expression", "raw"].includes(equationPhase);
+        equationMiddleSimplifyEquals.hidden = !showMiddleSimplification;
+        equationMiddleSimplified.hidden = !showMiddleSimplification;
+        equationMiddleLine.classList.toggle("hasMiddleSimplification", showMiddleSimplification);
         equationFractionMultiplyLine.hidden = !isFraction || !["raw"].includes(equationPhase);
         equationFractionAnswerLine.hidden = !isFraction || !["raw"].includes(equationPhase);
         equationFractionSimplifyLine.hidden = !isFraction || equationPhase !== "simplify";
@@ -4308,7 +4324,8 @@
         if (equationProblem?.kind === "fraction") {
           const nextPhase = {
             work: "result",
-            result: "expression",
+            result: equationNeedsMiddleReduction() ? "middleSimplify" : "expression",
+            middleSimplify: "expression",
             expression: "raw",
             raw: "",
           }[equationPhase];
