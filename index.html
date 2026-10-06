@@ -2574,9 +2574,6 @@
               <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="&#28040;&#21435;&#24460;&#12398;&#20418;&#25968;"></button><span id="simultaneousEliminateVariable">y =</span>
               <button class="simultaneousInput" id="simultaneousRhsInput" data-system-field="rhs" type="button" aria-label="y&#12398;&#21491;&#36794;"></button>
             </div>
-            <div class="simultaneousStep" id="simultaneousDivideStep" hidden>
-              <span id="simultaneousDivideVariable">y</span><span>=</span><span id="simultaneousDivideRhs"></span><span>&divide;</span><span id="simultaneousDivideCoefficient"></span>
-            </div>
             <div class="simultaneousStep" id="simultaneousYStep">
               <span id="simultaneousSolvedLabel">y =</span>
               <button class="simultaneousInput" id="simultaneousYInput" data-system-field="y" type="button" aria-label="y&#12398;&#20516;"></button>
@@ -3189,10 +3186,6 @@
       const simultaneousEliminateVariable = document.querySelector("#simultaneousEliminateVariable");
       const simultaneousCoefficientInput = document.querySelector("#simultaneousCoefficientInput");
       const simultaneousRhsInput = document.querySelector("#simultaneousRhsInput");
-      const simultaneousDivideStep = document.querySelector("#simultaneousDivideStep");
-      const simultaneousDivideVariable = document.querySelector("#simultaneousDivideVariable");
-      const simultaneousDivideRhs = document.querySelector("#simultaneousDivideRhs");
-      const simultaneousDivideCoefficient = document.querySelector("#simultaneousDivideCoefficient");
       const simultaneousYStep = document.querySelector("#simultaneousYStep");
       const simultaneousSolvedLabel = document.querySelector("#simultaneousSolvedLabel");
       const simultaneousYInput = document.querySelector("#simultaneousYInput");
@@ -4420,7 +4413,6 @@
           equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
           equationCommonDenominator.textContent = equationProblem.commonDenominator;
           equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
-          equationMiddleSimplified.innerHTML = fractionHtml(equationProblem.middle);
           equationMultiplyLeft.innerHTML = fractionHtml(equationProblem.middle);
           equationMultiplyRight.innerHTML = fractionHtml({
             numerator: reducedCoefficient.denominator,
@@ -4491,9 +4483,7 @@
 
       function renderSystemEntry() {
         const showFraction = simultaneousFirstSolution().denominator > 1;
-        const needsDivisionStep = Math.abs(simultaneousProblem?.eliminationCoefficient || 1) !== 1;
         simultaneousEliminateStep.hidden = simultaneousPhase === "multiply";
-        simultaneousDivideStep.hidden = !needsDivisionStep || ["multiply", "eliminate"].includes(simultaneousPhase);
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
         simultaneousYStep.hidden = simultaneousPhase === "multiply" || simultaneousPhase === "eliminate";
@@ -4523,9 +4513,6 @@
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
         simultaneousEliminateText.textContent = "①" + item.operation + "③ →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
-        simultaneousDivideVariable.textContent = item.firstSolutionVariable;
-        simultaneousDivideRhs.textContent = item.eliminationRhs;
-        simultaneousDivideCoefficient.textContent = item.eliminationCoefficient;
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
         if (item.firstSolutionVariable === "y") {
