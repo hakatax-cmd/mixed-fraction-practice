@@ -2477,6 +2477,13 @@
           </div>
           <div id="equationProblemLine" hidden>
             <p class="equationBase" id="equationBase"></p>
+            <div class="equationLine" id="equationDirectFractionLine" hidden>
+              <span id="equationDirectFractionLeft"></span>
+              <span class="equals">=</span>
+              <span class="equationStaticFraction" id="equationDirectFractionFirst"></span>
+              <span class="equationOperatorStatic" id="equationDirectFractionOperator"></span>
+              <span class="equationStaticFraction" id="equationDirectFractionSecond"></span>
+            </div>
             <div class="equationLine fractionMiddleLine" id="equationMiddleLine">
               <span id="equationMiddleLeft"></span>
               <span class="equals">=</span>
@@ -3173,6 +3180,11 @@
       const equationFractionSimplifyLine = document.querySelector("#equationFractionSimplifyLine");
       const equationFractionSimplifiedNumeratorInput = document.querySelector("#equationFractionSimplifiedNumeratorInput");
       const equationFractionSimplifiedDenominatorInput = document.querySelector("#equationFractionSimplifiedDenominatorInput");
+      const equationDirectFractionLine = document.querySelector("#equationDirectFractionLine");
+      const equationDirectFractionLeft = document.querySelector("#equationDirectFractionLeft");
+      const equationDirectFractionFirst = document.querySelector("#equationDirectFractionFirst");
+      const equationDirectFractionOperator = document.querySelector("#equationDirectFractionOperator");
+      const equationDirectFractionSecond = document.querySelector("#equationDirectFractionSecond");
       const simultaneousProblemLine = document.querySelector("#simultaneousProblemLine");
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
@@ -3688,12 +3700,13 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              // The source fractions use varied, one-digit denominators.  The common-denominator
-              // step is still required, but never falls into the repetitive /3 and /6 pattern.
+              // Compact questions begin directly with the common-denominator numerator work.
               { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 3, denominator: 5 } },
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
-              { coefficient: { numerator: 3, denominator: 7 }, middle: { numerator: 3, denominator: 5 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 7, denominator: 5 } },
+              // These show the actual fraction addition/subtraction after moving the constant,
+              // then use the same common-denominator work as the fraction-addition mode.
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 19, denominator: 15 }, constant: { numerator: 3, denominator: 5 }, answer: { numerator: 38, denominator: 15 }, directFractionWork: true },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 11, denominator: 20 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 33, denominator: 40 }, directFractionWork: true },
             ]).filter((choice) => !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey);
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
@@ -3711,13 +3724,14 @@
             return {
               kind,
               ...item,
-              total: { numerator: totalNumerator, denominator: commonDenominator },
+              total: reduceEquationFraction({ numerator: totalNumerator, denominator: commonDenominator }),
               sourceOperator,
               workOperator: sourceOperator === "+" ? "-" : "+",
               commonDenominator,
               workFirst: totalNumerator,
               workSecond: constantNumerator,
               workResultNumerator: middleNumerator,
+              directFractionWork: Boolean(item.directFractionWork),
               rawAnswer: {
                 numerator: item.middle.numerator * item.coefficient.denominator,
                 denominator: item.middle.denominator * item.coefficient.numerator,
@@ -3797,7 +3811,7 @@
           { key: "1/3", operator: "+" },
           { key: "2/3", operator: "+" },
           { key: "5/7", operator: "-" },
-          { key: "3/7", operator: "-" },
+          { key: "1/2", operator: "-" },
         ]);
         const plan = [
           { kind: "basic", allowNegative: false },
@@ -4218,6 +4232,8 @@
       function renderEquationEntry() {
         const isFraction = equationProblem?.kind === "fraction";
         const coefficientOnRight = Boolean(equationProblem?.coefficientOnRight);
+        const showDirectFractionWork = isFraction && equationProblem.directFractionWork && ["work", "result"].includes(equationPhase);
+        equationDirectFractionLine.hidden = !showDirectFractionWork;
         equationMiddleInput.hidden = isFraction;
         equationMiddleCoefficientInput.hidden = isFraction || !coefficientOnRight;
         equationMiddleCoefficientX.hidden = isFraction || !coefficientOnRight;
@@ -4411,6 +4427,10 @@
           const reducedCoefficient = reduceEquationFraction(equationProblem.coefficient);
           equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
           equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
+          equationDirectFractionLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
+          equationDirectFractionFirst.innerHTML = fractionHtml(equationProblem.total);
+          equationDirectFractionOperator.textContent = equationProblem.workOperator;
+          equationDirectFractionSecond.innerHTML = fractionHtml(equationProblem.constant);
           equationCommonDenominator.textContent = equationProblem.commonDenominator;
           equationMiddleResultDenominator.textContent = equationProblem.commonDenominator;
           equationMultiplyLeft.innerHTML = fractionHtml(equationProblem.middle);
