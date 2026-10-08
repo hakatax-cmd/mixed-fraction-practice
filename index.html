@@ -200,7 +200,8 @@
         line-height: 1.1;
         box-shadow: 0 6px 0 rgba(22, 32, 42, 0.08);
       }
-      #chooseLongMultiplication { font-size: clamp(0.88rem, 2.5vmin, 1.6rem); }
+      #chooseLongMultiplication,
+      #chooseSubtraction { font-size: clamp(0.88rem, 2.5vmin, 1.6rem); }
       #longMultiplicationCover h1 { font-size: clamp(2.2rem, 7.4vmin, 4.6rem); }
       #chooseGrouping { grid-column: 3; }
       .backToMenuButton { width: max-content; min-height: 44px; margin: 0 auto; padding: 0 20px; background: #edf8ff; color: #24507a; }
@@ -2093,6 +2094,7 @@
             <button class="menuButton" id="choosePreschool" type="button">&#12362;&#21069;&#12399;<br />&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</button>
             <button class="menuButton" id="chooseEquation" type="button">&#19968;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
             <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
+            <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
           </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
@@ -2201,6 +2203,14 @@
           <p class="coverPrompt">&#28040;&#21435;&#12375;&#12390;&#12363;&#12425;&#20195;&#20837;&#12375;&#12424;&#12358;</p>
           <p class="coverGoal">6&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="simultaneousStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="subtractionCover" hidden>
+          <h1>&#22235;&#26689;&#12398;&#24341;&#12365;&#31639;</h1>
+          <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
+          <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="subtractionStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -2615,7 +2625,7 @@
           <div class="longProblemLine" id="longMultiplicationProblemLine" hidden>
             <div class="verticalProblem">
               <span class="topNumber" id="longMultiplicationTop"></span>
-              <span class="timesSign">&times;</span>
+              <span class="timesSign" id="longMultiplicationOperator">&times;</span>
               <span class="bottomNumber" id="longMultiplicationBottom"></span>
               <span class="bar"></span>
               <span class="longAnswer">
@@ -2803,6 +2813,7 @@
       const BASIC_DIVISION_SLOTS = ["basicDivisionAnswer"];
       const LONG_MULTIPLICATION_TARGET = 10;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longTens", "longThousands", "longHundreds"];
+      const SUBTRACTION_TARGET = 10;
       const DOUBLE_MULTIPLICATION_TARGET = 10;
       const DOUBLE_MULTIPLICATION_SLOTS = [
         "doubleP1Ones", "doubleP1Hundreds", "doubleP1Tens",
@@ -2845,6 +2856,7 @@
       const BASIC_DIVISION_BEST_KEY = "basicDivisionBestTimeMs";
       const IMPROPER_FRACTION_BEST_KEY = "improperFractionBestTimeMs";
       const LONG_MULTIPLICATION_BEST_KEY = "longMultiplicationBestTimeMsV3";
+      const SUBTRACTION_BEST_KEY = "fourDigitSubtractionBestTimeMs";
       const DOUBLE_MULTIPLICATION_BEST_KEY = "doubleMultiplicationBestTimeMs";
       const DIVISION_BEST_KEY = "divisionBestTimeMs";
       const FRACTION_CALCULATION_BEST_KEY = "fractionCalculationBestTimeMs";
@@ -2856,6 +2868,7 @@
         BASIC_DIVISION_BEST_KEY,
         IMPROPER_FRACTION_BEST_KEY,
         LONG_MULTIPLICATION_BEST_KEY,
+        SUBTRACTION_BEST_KEY,
         DOUBLE_MULTIPLICATION_BEST_KEY,
         DIVISION_BEST_KEY,
         FRACTION_CALCULATION_BEST_KEY,
@@ -2879,6 +2892,7 @@
         multiplication: "\u4e5d\u4e5d",
         basicDivision: "\u5272\u308a\u7b97",
         longMultiplication: "3\u6841\u00d71\u6841\u306e\u639b\u3051\u7b97",
+        subtraction: "\u56db\u6841\u306e\u5f15\u304d\u7b97",
         doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
@@ -2896,6 +2910,7 @@
         "fraction",
         "improperFraction",
         "longMultiplication",
+        "subtraction",
         "doubleMultiplication",
         "division",
         "fractionCalculation",
@@ -2925,6 +2940,9 @@
       let longMultiplicationDeck = [];
       let longMultiplicationIndex = 0;
       let longMultiplicationProblem = null;
+      let subtractionDeck = [];
+      let subtractionIndex = 0;
+      let subtractionProblem = null;
       let doubleMultiplicationDeck = [];
       let doubleMultiplicationIndex = 0;
       let doubleMultiplicationProblem = null;
@@ -3077,6 +3095,7 @@
       const improperAnswerDenominator = document.querySelector("#improperAnswerDenominator");
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
+      const longMultiplicationOperator = document.querySelector("#longMultiplicationOperator");
       const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
       const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
       const fractionCalculationQuestion = document.querySelector("#fractionCalculationQuestion");
@@ -3277,6 +3296,7 @@
       const preschoolCover = document.querySelector("#preschoolCover");
       const equationCover = document.querySelector("#equationCover");
       const simultaneousCover = document.querySelector("#simultaneousCover");
+      const subtractionCover = document.querySelector("#subtractionCover");
       const chooseMultiplication = document.querySelector("#chooseMultiplication");
       const chooseBasicDivision = document.querySelector("#chooseBasicDivision");
       const chooseFraction = document.querySelector("#chooseFraction");
@@ -3292,6 +3312,7 @@
       const choosePreschool = document.querySelector("#choosePreschool");
       const chooseEquation = document.querySelector("#chooseEquation");
       const chooseSimultaneous = document.querySelector("#chooseSimultaneous");
+      const chooseSubtraction = document.querySelector("#chooseSubtraction");
       const viewRecordsButton = document.querySelector("#viewRecordsButton");
       const clearRecordsButton = document.querySelector("#clearRecordsButton");
       const cover = document.querySelector("#cover");
@@ -3312,6 +3333,7 @@
       const preschoolStartButton = document.querySelector("#preschoolStartButton");
       const equationStartButton = document.querySelector("#equationStartButton");
       const simultaneousStartButton = document.querySelector("#simultaneousStartButton");
+      const subtractionStartButton = document.querySelector("#subtractionStartButton");
       const fractionProblemLine = document.querySelector("#fractionProblemLine");
       const improperFractionProblemLine = document.querySelector("#improperFractionProblemLine");
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
@@ -4806,6 +4828,38 @@
         return deck;
       }
 
+      function createSubtractionDeck() {
+        const deck = [];
+        const used = new Set();
+        while (deck.length < SUBTRACTION_TARGET) {
+          const top = randomInt(3000, 9999);
+          const bottom = randomInt(1000, top - 1000);
+          const answer = top - bottom;
+          if (answer < 1000 || subtractionBorrowCount(top, bottom) < 2) continue;
+          const key = `${top}-${bottom}`;
+          if (used.has(key)) continue;
+          used.add(key);
+          deck.push({ top, bottom });
+        }
+        return deck;
+      }
+
+      function subtractionBorrowCount(top, bottom) {
+        const topDigits = String(top).padStart(4, "0").split("").reverse().map(Number);
+        const bottomDigits = String(bottom).padStart(4, "0").split("").reverse().map(Number);
+        let borrow = 0;
+        let count = 0;
+        for (let index = 0; index < 4; index += 1) {
+          if (topDigits[index] - borrow < bottomDigits[index]) {
+            borrow = 1;
+            count += 1;
+          } else {
+            borrow = 0;
+          }
+        }
+        return count;
+      }
+
       function createDoubleMultiplicationDeck() {
         const deck = [];
         const used = new Set();
@@ -4985,6 +5039,10 @@
 
       function longMultiplicationAnswer() {
         return longMultiplicationProblem ? longMultiplicationProblem.top * longMultiplicationProblem.bottom : 0;
+      }
+
+      function subtractionAnswer() {
+        return subtractionProblem ? subtractionProblem.top - subtractionProblem.bottom : 0;
       }
 
       function doubleMultiplicationAnswer() {
@@ -5640,7 +5698,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -5656,6 +5714,7 @@
         if (selectedApp === "equation") return equationIndex;
         if (selectedApp === "simultaneous") return simultaneousIndex;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationIndex;
+        if (selectedApp === "subtraction") return subtractionIndex;
         return selectedApp === "longMultiplication" ? longMultiplicationIndex : multiplicationIndex;
       }
 
@@ -5672,6 +5731,7 @@
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
         if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationDeck.length;
+        if (selectedApp === "subtraction") return subtractionDeck.length || SUBTRACTION_TARGET;
         return selectedApp === "longMultiplication" ? longMultiplicationDeck.length : multiplicationDeck.length;
       }
 
@@ -5692,6 +5752,7 @@
         if (selectedApp === "equation") return equationProblem?.kind === "fraction" ? equationProblem.answer.numerator : equationProblem?.answer || 0;
         if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
         if (selectedApp === "doubleMultiplication") return doubleMultiplicationAnswer();
+        if (selectedApp === "subtraction") return subtractionAnswer();
         return selectedApp === "longMultiplication" ? longMultiplicationAnswer() : multiplicationAnswer();
       }
 
@@ -5777,7 +5838,7 @@
         if (selectedApp === "simultaneous") return [];
         if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
         if (selectedApp === "preschool") return visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
-        if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
+        if (selectedApp === "longMultiplication" || selectedApp === "subtraction") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
         return FRACTION_SLOTS;
@@ -5817,8 +5878,8 @@
           const slots = visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
           return digits[slots.indexOf(slot)] || "";
         }
-        if (selectedApp === "longMultiplication") {
-          const answer = String(longMultiplicationAnswer()).padStart(4, "0");
+        if (selectedApp === "longMultiplication" || selectedApp === "subtraction") {
+          const answer = String(selectedApp === "subtraction" ? subtractionAnswer() : longMultiplicationAnswer()).padStart(4, "0");
           return {
             longThousands: answer[0],
             longHundreds: answer[1],
@@ -5922,6 +5983,7 @@
         if (app === "simultaneous") return SIMULTANEOUS_BEST_KEY;
         if (app === "doubleMultiplication") return DOUBLE_MULTIPLICATION_BEST_KEY;
         if (app === "longMultiplication") return LONG_MULTIPLICATION_BEST_KEY;
+        if (app === "subtraction") return SUBTRACTION_BEST_KEY;
         if (app === "multiplication") return MULTIPLICATION_BEST_KEY;
         if (app === "fraction") return FRACTION_BEST_KEY;
         return null;
@@ -6408,6 +6470,7 @@
           || selectedApp === "fraction"
           || selectedApp === "improperFraction"
           || selectedApp === "longMultiplication"
+          || selectedApp === "subtraction"
           || selectedApp === "fractionCalculation"
           || selectedApp === "fractionAddSubtract"
           || selectedApp === "grouping"
@@ -6737,6 +6800,7 @@
         preschoolCover.hidden = true;
         equationCover.hidden = true;
         simultaneousCover.hidden = true;
+        subtractionCover.hidden = true;
         cover.hidden = true;
         challengeView.hidden = true;
         gameArea.hidden = false;
@@ -7024,6 +7088,13 @@
           });
           return;
         }
+        if (selectedApp === "subtraction") {
+          mistakes.push({
+            problem: `${subtractionProblem.top}−${subtractionProblem.bottom}`,
+            answer: String(subtractionAnswer()),
+          });
+          return;
+        }
         if (selectedApp === "doubleMultiplication") {
           mistakes.push({
             problem: `${formatDecimalAnswer(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0)}×${formatDecimalAnswer(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0)}`,
@@ -7208,6 +7279,16 @@
             return;
           }
           longMultiplicationProblem = longMultiplicationDeck[longMultiplicationIndex];
+        } else if (selectedApp === "subtraction") {
+          if (keepChallenge) subtractionIndex += 1;
+          if (subtractionIndex >= subtractionDeck.length) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            finishRound();
+            return;
+          }
+          subtractionProblem = subtractionDeck[subtractionIndex];
         } else if (selectedApp === "doubleMultiplication") {
           if (keepChallenge) doubleMultiplicationIndex += 1;
           if (doubleMultiplicationIndex >= doubleMultiplicationDeck.length) {
@@ -7363,6 +7444,38 @@
         resetInputs(true);
       }
 
+      function startSubtractionChallenge() {
+        selectedApp = "subtraction";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = true;
+        subtractionCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        subtractionDeck = createSubtractionDeck();
+        subtractionIndex = 0;
+        subtractionProblem = subtractionDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function restartRound() {
         finishPanel.hidden = true;
         challengeView.hidden = true;
@@ -7375,6 +7488,8 @@
           improperFractionCover.hidden = false;
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationCover.hidden = false;
+        } else if (selectedApp === "subtraction") {
+          subtractionCover.hidden = false;
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationCover.hidden = false;
         } else if (selectedApp === "division") {
@@ -7864,6 +7979,33 @@
         resetInputs(true);
       }
 
+      function showSubtractionCover() {
+        selectedApp = "subtraction";
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = true;
+        subtractionCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function showDoubleMultiplicationCover() {
         selectedApp = "doubleMultiplication";
         challengeView.classList.remove("divisionMode");
@@ -8125,7 +8267,7 @@
         improperFractionProblemLine.hidden = selectedApp !== "improperFraction";
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
         basicDivisionProblemLine.hidden = selectedApp !== "basicDivision";
-        longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication";
+        longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication" && selectedApp !== "subtraction";
         doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
         divisionProblemLine.hidden = selectedApp !== "division";
         fractionCalculationProblemLine.hidden = selectedApp !== "fractionCalculation";
@@ -8153,6 +8295,11 @@
         } else if (selectedApp === "longMultiplication") {
           longMultiplicationTop.textContent = longMultiplicationProblem.top;
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
+          longMultiplicationOperator.textContent = "×";
+        } else if (selectedApp === "subtraction") {
+          longMultiplicationTop.textContent = subtractionProblem.top;
+          longMultiplicationBottom.textContent = subtractionProblem.bottom;
+          longMultiplicationOperator.textContent = "−";
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationTop.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0);
           doubleMultiplicationBottom.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.bottom, doubleMultiplicationProblem.bottomDecimals || 0);
@@ -8495,6 +8642,7 @@
       chooseFraction.addEventListener("click", showFractionCover);
       chooseImproperFraction.addEventListener("click", showImproperFractionCover);
       chooseLongMultiplication.addEventListener("click", showLongMultiplicationCover);
+      chooseSubtraction.addEventListener("click", showSubtractionCover);
       chooseDoubleMultiplication.addEventListener("click", showDoubleMultiplicationCover);
       chooseDivision.addEventListener("click", showDivisionCover);
       chooseFractionCalculation.addEventListener("click", showFractionCalculationCover);
@@ -8534,6 +8682,7 @@
       multiplicationStartButton.addEventListener("click", startMultiplicationChallenge);
       basicDivisionStartButton.addEventListener("click", startBasicDivisionChallenge);
       longMultiplicationStartButton.addEventListener("click", startLongMultiplicationChallenge);
+      subtractionStartButton.addEventListener("click", startSubtractionChallenge);
       doubleMultiplicationStartButton.addEventListener("click", startDoubleMultiplicationChallenge);
       divisionStartButton.addEventListener("click", startDivisionChallenge);
       fractionCalculationStartButton.addEventListener("click", startFractionCalculationChallenge);
