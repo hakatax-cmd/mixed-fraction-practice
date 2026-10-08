@@ -1005,6 +1005,37 @@
         font-size: inherit;
       }
 
+      /* Four-digit subtraction uses fixed digit columns so every answer box sits under its digit. */
+      .verticalProblem.subtractionLayout {
+        grid-template-columns: auto repeat(4, var(--digit-frame-width));
+        column-gap: 0;
+      }
+
+      .verticalProblem.subtractionLayout .topNumber,
+      .verticalProblem.subtractionLayout .bottomNumber {
+        grid-column: 2 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, var(--digit-frame-width));
+        width: 100%;
+        justify-self: stretch;
+        text-align: center;
+      }
+
+      .verticalProblem.subtractionLayout .topNumber span,
+      .verticalProblem.subtractionLayout .bottomNumber span {
+        display: grid;
+        place-items: center;
+      }
+
+      .verticalProblem.subtractionLayout .longAnswer {
+        grid-column: 2 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, var(--digit-frame-width));
+        width: 100%;
+        justify-content: stretch;
+        gap: 0;
+      }
+
       .doubleProblemLine {
         display: grid;
         align-items: start;
@@ -3339,6 +3370,7 @@
       const multiplicationProblemLine = document.querySelector("#multiplicationProblemLine");
       const basicDivisionProblemLine = document.querySelector("#basicDivisionProblemLine");
       const longMultiplicationProblemLine = document.querySelector("#longMultiplicationProblemLine");
+      const longVerticalProblem = longMultiplicationProblemLine.querySelector(".verticalProblem");
       const doubleMultiplicationProblemLine = document.querySelector("#doubleMultiplicationProblemLine");
       const divisionProblemLine = document.querySelector("#divisionProblemLine");
       const fractionCalculationProblemLine = document.querySelector("#fractionCalculationProblemLine");
@@ -5043,6 +5075,10 @@
 
       function subtractionAnswer() {
         return subtractionProblem ? subtractionProblem.top - subtractionProblem.bottom : 0;
+      }
+
+      function verticalDigitsHtml(value) {
+        return String(value).padStart(4, "0").split("").map((digit) => `<span>${digit}</span>`).join("");
       }
 
       function doubleMultiplicationAnswer() {
@@ -8268,6 +8304,7 @@
         multiplicationProblemLine.hidden = selectedApp !== "multiplication";
         basicDivisionProblemLine.hidden = selectedApp !== "basicDivision";
         longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication" && selectedApp !== "subtraction";
+        longVerticalProblem.classList.toggle("subtractionLayout", selectedApp === "subtraction");
         doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
         divisionProblemLine.hidden = selectedApp !== "division";
         fractionCalculationProblemLine.hidden = selectedApp !== "fractionCalculation";
@@ -8297,8 +8334,8 @@
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
           longMultiplicationOperator.textContent = "×";
         } else if (selectedApp === "subtraction") {
-          longMultiplicationTop.textContent = subtractionProblem.top;
-          longMultiplicationBottom.textContent = subtractionProblem.bottom;
+          longMultiplicationTop.innerHTML = verticalDigitsHtml(subtractionProblem.top);
+          longMultiplicationBottom.innerHTML = verticalDigitsHtml(subtractionProblem.bottom);
           longMultiplicationOperator.textContent = "−";
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationTop.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0);
