@@ -1009,6 +1009,7 @@
       .verticalProblem.subtractionLayout {
         grid-template-columns: auto repeat(4, var(--digit-frame-width));
         column-gap: 0;
+        font-size: clamp(3.4rem, 9vmin, 6.15rem);
       }
 
       .verticalProblem.subtractionLayout .topNumber,
@@ -2845,6 +2846,7 @@
       const LONG_MULTIPLICATION_TARGET = 10;
       const LONG_MULTIPLICATION_SLOTS = ["longOnes", "longTens", "longThousands", "longHundreds"];
       const SUBTRACTION_TARGET = 10;
+      const SUBTRACTION_SLOTS = ["longOnes", "longTens", "longHundreds", "longThousands"];
       const DOUBLE_MULTIPLICATION_TARGET = 10;
       const DOUBLE_MULTIPLICATION_SLOTS = [
         "doubleP1Ones", "doubleP1Hundreds", "doubleP1Tens",
@@ -4863,17 +4865,19 @@
       function createSubtractionDeck() {
         const deck = [];
         const used = new Set();
-        while (deck.length < SUBTRACTION_TARGET) {
-          const top = randomInt(3000, 9999);
-          const bottom = randomInt(1000, top - 1000);
-          const answer = top - bottom;
-          if (answer < 1000 || subtractionBorrowCount(top, bottom) < 2) continue;
-          const key = `${top}-${bottom}`;
-          if (used.has(key)) continue;
-          used.add(key);
-          deck.push({ top, bottom });
-        }
-        return deck;
+        // Ten questions with 20 borrows in total: 1, 1, 1, 2, 2, 2, 2, 3, 3, 3.
+        const borrowPlan = shuffle([1, 1, 1, 2, 2, 2, 2, 3, 3, 3]);
+        return borrowPlan.map((borrowCount) => {
+          while (true) {
+            const top = randomInt(3000, 9999);
+            const bottom = randomInt(1000, top - 1000);
+            const answer = top - bottom;
+            const key = `${top}-${bottom}`;
+            if (answer < 1000 || used.has(key) || subtractionBorrowCount(top, bottom) !== borrowCount) continue;
+            used.add(key);
+            return { top, bottom };
+          }
+        });
       }
 
       function subtractionBorrowCount(top, bottom) {
@@ -5874,7 +5878,8 @@
         if (selectedApp === "simultaneous") return [];
         if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
         if (selectedApp === "preschool") return visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
-        if (selectedApp === "longMultiplication" || selectedApp === "subtraction") return LONG_MULTIPLICATION_SLOTS;
+        if (selectedApp === "subtraction") return SUBTRACTION_SLOTS;
+        if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
         return FRACTION_SLOTS;
