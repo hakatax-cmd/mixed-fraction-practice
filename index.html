@@ -2103,6 +2103,72 @@
         }
       }
 
+      /* Large touch screens use a roomier keypad without changing phone layout. */
+      @media (min-width: 700px) and (min-height: 700px) and (pointer: coarse) and (orientation: portrait) {
+        #appMenu .appChoices {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        #gameArea {
+          grid-template-rows: minmax(0, 1fr) clamp(24px, 3vmin, 34px) minmax(320px, 360px);
+          gap: clamp(8px, 1.2vmin, 12px);
+        }
+
+        #gameArea.secondChanceWarningVisible {
+          grid-template-rows: minmax(0, 1fr) clamp(84px, 11vmin, 116px) minmax(320px, 360px);
+        }
+
+        .keypad {
+          width: min(100%, 704px);
+          max-width: 704px;
+          height: min(100%, 360px);
+          gap: 10px 22px;
+        }
+
+        .keypad button {
+          font-size: clamp(2.7rem, 6.1vmin, 3.65rem);
+        }
+
+        .keypad .toolButton {
+          width: 88px;
+          height: 88px;
+          font-size: 1.08rem;
+        }
+
+        #challengeView.ratioMode .keypad,
+        #challengeView.speedMode .keypad,
+        #challengeView.equationMode .keypad {
+          height: min(100%, 400px);
+          gap: 10px 22px;
+        }
+
+        #challengeView.speedMode .keypad {
+          width: min(100%, 704px);
+          max-width: 704px;
+        }
+      }
+
+      @media (min-width: 700px) and (min-height: 700px) and (pointer: coarse) and (orientation: landscape) {
+        .appShell { visibility: hidden; }
+
+        body::before {
+          content: "\7e26\5411\304d\3067\4f7f\3063\3066\304f\3060\3055\3044\3002";
+          position: fixed;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          padding: 24px;
+          background: #fff;
+          color: var(--ink);
+          font-size: clamp(2rem, 5vw, 3.5rem);
+          font-weight: 900;
+          line-height: 1.35;
+          text-align: center;
+          visibility: visible;
+          z-index: 1000;
+        }
+      }
+
       @supports (height: 100svh) {
         body {
           height: 100svh;
