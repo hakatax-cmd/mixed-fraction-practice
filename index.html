@@ -1037,6 +1037,42 @@
         gap: 0;
       }
 
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout {
+        grid-template-columns: auto repeat(3, var(--digit-frame-width)) 0.32em var(--digit-frame-width);
+      }
+
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout {
+        grid-template-columns: auto repeat(3, var(--digit-frame-width)) 0.32em repeat(2, var(--digit-frame-width));
+      }
+
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .topNumber,
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .bottomNumber,
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer {
+        grid-template-columns: repeat(3, var(--digit-frame-width)) 0.32em var(--digit-frame-width);
+      }
+
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .topNumber,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .bottomNumber,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer {
+        grid-template-columns: repeat(3, var(--digit-frame-width)) 0.32em repeat(2, var(--digit-frame-width));
+      }
+
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longThousands,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longThousands { grid-column: 1; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longHundreds,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longHundreds { grid-column: 2; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longTens,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longTens { grid-column: 3; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .subtractionDecimalPoint,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .subtractionDecimalPoint {
+        grid-column: 4;
+        display: grid;
+        place-items: center;
+      }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longOnes,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longOnes { grid-column: 5; }
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .subtractionHundredths { grid-column: 6; }
+
       .doubleProblemLine {
         display: grid;
         align-items: start;
@@ -2661,10 +2697,12 @@
               <span class="bottomNumber" id="longMultiplicationBottom"></span>
               <span class="bar"></span>
               <span class="longAnswer">
-                <button id="longThousandsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21315;&#12398;&#20301;" data-value="" type="button"></button>
-                <button id="longHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
-                <button id="longTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
-                <button id="longOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="longThousandsInput" class="answerBox longThousands" aria-label="&#31572;&#12360;&#12398;&#21315;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="longHundredsInput" class="answerBox longHundreds" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="longTensInput" class="answerBox longTens" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button"></button>
+                <button id="longOnesInput" class="answerBox longOnes active" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
+                <span class="subtractionDecimalPoint" id="subtractionDecimalPoint" hidden>.</span>
+                <button id="subtractionHundredthsInput" class="answerBox subtractionHundredths" aria-label="&#31572;&#12360;&#12398;&#23567;&#25968;&#31532;2&#20301;" data-value="" type="button" hidden></button>
               </span>
             </div>
           </div>
@@ -3066,6 +3104,7 @@
         longHundreds: document.querySelector("#longHundredsInput"),
         longTens: document.querySelector("#longTensInput"),
         longOnes: document.querySelector("#longOnesInput"),
+        subtractionHundredths: document.querySelector("#subtractionHundredthsInput"),
         doubleP1Hundreds: document.querySelector("#doubleP1HundredsInput"),
         doubleP1Tens: document.querySelector("#doubleP1TensInput"),
         doubleP1Ones: document.querySelector("#doubleP1OnesInput"),
@@ -3129,6 +3168,7 @@
       const longMultiplicationTop = document.querySelector("#longMultiplicationTop");
       const longMultiplicationBottom = document.querySelector("#longMultiplicationBottom");
       const longMultiplicationOperator = document.querySelector("#longMultiplicationOperator");
+      const subtractionDecimalPoint = document.querySelector("#subtractionDecimalPoint");
       const doubleMultiplicationTop = document.querySelector("#doubleMultiplicationTop");
       const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
       const fractionCalculationQuestion = document.querySelector("#fractionCalculationQuestion");
@@ -4863,11 +4903,9 @@
       }
 
       function createSubtractionDeck() {
-        const deck = [];
         const used = new Set();
-        // Ten questions with 20 borrows in total: 1, 1, 1, 2, 2, 2, 2, 3, 3, 3.
-        const borrowPlan = shuffle([1, 1, 1, 2, 2, 2, 2, 3, 3, 3]);
-        return borrowPlan.map((borrowCount) => {
+        // The first six are four-digit integers with two borrows on average.
+        const integerProblems = shuffle([1, 2, 2, 2, 2, 3]).map((borrowCount) => {
           while (true) {
             const top = randomInt(3000, 9999);
             const bottom = randomInt(1000, top - 1000);
@@ -4875,9 +4913,36 @@
             const key = `${top}-${bottom}`;
             if (answer < 1000 || used.has(key) || subtractionBorrowCount(top, bottom) !== borrowCount) continue;
             used.add(key);
-            return { top, bottom };
+            return { type: "integer", top, bottom, precision: 0 };
           }
         });
+        const tenthsProblems = Array.from({ length: 2 }, () => createDecimalSubtractionProblem("tenths", used));
+        const hundredthsProblems = Array.from({ length: 2 }, () => createDecimalSubtractionProblem("hundredths", used));
+        return [...integerProblems, ...shuffle(tenthsProblems), ...shuffle(hundredthsProblems)];
+      }
+
+      function createDecimalSubtractionProblem(type, used) {
+        while (true) {
+          const precision = type === "tenths" ? 1 : 2;
+          const top = type === "tenths"
+            ? randomInt(3000, 9999)
+            : randomInt(3000, 9999) * 10;
+          const bottom = type === "tenths"
+            ? randomInt(1000, top - 1000)
+            : randomInt(1000, 9999);
+          const answer = top - bottom;
+          const key = `${type}:${top}-${bottom}`;
+          if (answer < 10 ** (precision + 2) || used.has(key)) continue;
+          used.add(key);
+          return {
+            type,
+            top,
+            bottom,
+            precision,
+            topPrecision: 1,
+            bottomPrecision: precision,
+          };
+        }
       }
 
       function subtractionBorrowCount(top, bottom) {
@@ -5083,6 +5148,30 @@
 
       function verticalDigitsHtml(value) {
         return String(value).padStart(4, "0").split("").map((digit) => `<span>${digit}</span>`).join("");
+      }
+
+      function subtractionDecimalDigitsHtml(value, precision, visiblePrecision = precision) {
+        const scale = 10 ** precision;
+        const whole = String(Math.floor(value / scale)).padStart(3, " ").slice(-3);
+        const decimal = String(value % scale).padStart(precision, "0");
+        const wholeDigits = whole.split("").map((digit) => `<span>${digit === " " ? "" : digit}</span>`);
+        const decimalDigits = Array.from({ length: precision }, (_, index) => {
+          return `<span>${index < visiblePrecision ? decimal[index] : ""}</span>`;
+        });
+        return [...wholeDigits, '<span class="subtractionDecimalMark">.</span>', ...decimalDigits].join("");
+      }
+
+      function formatSubtractionNumber(value, precision, visiblePrecision = precision) {
+        if (!precision) return String(value);
+        const scale = 10 ** precision;
+        const whole = Math.floor(value / scale);
+        const decimal = String(value % scale).padStart(precision, "0").slice(0, visiblePrecision);
+        return `${whole}.${decimal}`;
+      }
+
+      function formattedSubtractionAnswer() {
+        if (!subtractionProblem) return "";
+        return formatSubtractionNumber(subtractionAnswer(), subtractionProblem.precision || 0);
       }
 
       function doubleMultiplicationAnswer() {
@@ -5810,6 +5899,7 @@
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
         if (selectedApp === "preschool") return String(currentTimedAnswer());
+        if (selectedApp === "subtraction") return formattedSubtractionAnswer();
         if (selectedApp === "equation") return equationProblem?.kind === "fraction"
           ? `${equationProblem.answer.numerator}/${equationProblem.answer.denominator}`
           : String(equationProblem?.answer || "");
@@ -5878,7 +5968,11 @@
         if (selectedApp === "simultaneous") return [];
         if (selectedApp === "speed") return visibleDigitSlots(SPEED_SLOTS, speedAnswer());
         if (selectedApp === "preschool") return visibleDigitSlots(PRESCHOOL_SLOTS, preschoolProblem.answer);
-        if (selectedApp === "subtraction") return SUBTRACTION_SLOTS;
+        if (selectedApp === "subtraction") {
+          return subtractionProblem?.precision === 2
+            ? ["subtractionHundredths", ...SUBTRACTION_SLOTS]
+            : SUBTRACTION_SLOTS;
+        }
         if (selectedApp === "longMultiplication") return LONG_MULTIPLICATION_SLOTS;
         if (selectedApp === "doubleMultiplication") return DOUBLE_MULTIPLICATION_SLOTS;
         if (selectedApp === "division") return DIVISION_SLOTS;
@@ -5920,12 +6014,14 @@
           return digits[slots.indexOf(slot)] || "";
         }
         if (selectedApp === "longMultiplication" || selectedApp === "subtraction") {
-          const answer = String(selectedApp === "subtraction" ? subtractionAnswer() : longMultiplicationAnswer()).padStart(4, "0");
+          const answer = String(selectedApp === "subtraction" ? subtractionAnswer() : longMultiplicationAnswer())
+            .padStart(selectedApp === "subtraction" && subtractionProblem?.precision === 2 ? 5 : 4, "0");
           return {
             longThousands: answer[0],
             longHundreds: answer[1],
             longTens: answer[2],
             longOnes: answer[3],
+            subtractionHundredths: answer[4],
           }[slot];
         }
         if (selectedApp === "doubleMultiplication") {
@@ -7131,8 +7227,8 @@
         }
         if (selectedApp === "subtraction") {
           mistakes.push({
-            problem: `${subtractionProblem.top}−${subtractionProblem.bottom}`,
-            answer: String(subtractionAnswer()),
+            problem: `${formatSubtractionNumber(subtractionProblem.top, subtractionProblem.precision, subtractionProblem.topPrecision)}−${formatSubtractionNumber(subtractionProblem.bottom, subtractionProblem.precision, subtractionProblem.bottomPrecision)}`,
+            answer: formattedSubtractionAnswer(),
           });
           return;
         }
@@ -8310,6 +8406,10 @@
         basicDivisionProblemLine.hidden = selectedApp !== "basicDivision";
         longMultiplicationProblemLine.hidden = selectedApp !== "longMultiplication" && selectedApp !== "subtraction";
         longVerticalProblem.classList.toggle("subtractionLayout", selectedApp === "subtraction");
+        longVerticalProblem.classList.toggle("subtractionTenthsLayout", selectedApp === "subtraction" && subtractionProblem?.precision === 1);
+        longVerticalProblem.classList.toggle("subtractionHundredthsLayout", selectedApp === "subtraction" && subtractionProblem?.precision === 2);
+        subtractionDecimalPoint.hidden = selectedApp !== "subtraction" || !subtractionProblem?.precision;
+        inputs.subtractionHundredths.hidden = selectedApp !== "subtraction" || subtractionProblem?.precision !== 2;
         doubleMultiplicationProblemLine.hidden = selectedApp !== "doubleMultiplication";
         divisionProblemLine.hidden = selectedApp !== "division";
         fractionCalculationProblemLine.hidden = selectedApp !== "fractionCalculation";
@@ -8339,8 +8439,21 @@
           longMultiplicationBottom.textContent = longMultiplicationProblem.bottom;
           longMultiplicationOperator.textContent = "×";
         } else if (selectedApp === "subtraction") {
-          longMultiplicationTop.innerHTML = verticalDigitsHtml(subtractionProblem.top);
-          longMultiplicationBottom.innerHTML = verticalDigitsHtml(subtractionProblem.bottom);
+          if (subtractionProblem.precision) {
+            longMultiplicationTop.innerHTML = subtractionDecimalDigitsHtml(
+              subtractionProblem.top,
+              subtractionProblem.precision,
+              subtractionProblem.topPrecision,
+            );
+            longMultiplicationBottom.innerHTML = subtractionDecimalDigitsHtml(
+              subtractionProblem.bottom,
+              subtractionProblem.precision,
+              subtractionProblem.bottomPrecision,
+            );
+          } else {
+            longMultiplicationTop.innerHTML = verticalDigitsHtml(subtractionProblem.top);
+            longMultiplicationBottom.innerHTML = verticalDigitsHtml(subtractionProblem.bottom);
+          }
           longMultiplicationOperator.textContent = "−";
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationTop.innerHTML = decimalNumberHtml(doubleMultiplicationProblem.top, doubleMultiplicationProblem.topDecimals || 0);
