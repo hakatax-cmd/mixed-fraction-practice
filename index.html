@@ -1073,6 +1073,37 @@
       .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longOnes { grid-column: 5; }
       .verticalProblem.subtractionLayout.subtractionHundredthsLayout .subtractionHundredths { grid-column: 6; }
 
+      /* Keep decimal-subtraction answer cells on one fixed horizontal line. */
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0;
+      }
+
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .answerBox,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .answerBox {
+        flex: 0 0 var(--digit-frame-width);
+        min-width: 0;
+      }
+
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .longThousands,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .longThousands { order: 1; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .longHundreds,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .longHundreds { order: 2; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .longTens,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .longTens { order: 3; }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .subtractionDecimalPoint,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .subtractionDecimalPoint {
+        order: 4;
+        flex: 0 0 0.32em;
+      }
+      .verticalProblem.subtractionLayout.subtractionTenthsLayout .longAnswer .longOnes,
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .longOnes { order: 5; }
+      .verticalProblem.subtractionLayout.subtractionHundredthsLayout .longAnswer .subtractionHundredths { order: 6; }
+
       .doubleProblemLine {
         display: grid;
         align-items: start;
