@@ -3764,25 +3764,54 @@
         return deck;
       }
 
-      function createFractionAddSubtractProblem(operator, used) {
+      function createFractionAddSubtractProblem(operator, used, subtractNegative = true) {
         for (let attempt = 0; attempt < 1200; attempt += 1) {
           let item;
           if (operator === "subtract") {
             const denominator = randomInt(3, 9);
             const leftNumerator = randomInt(1, 9);
-            const minimumDifference = Math.max(1, 10 - leftNumerator);
-            const rawNumerator = randomInt(minimumDifference, 9);
-            const rightNumerator = leftNumerator + rawNumerator;
-            if (gcd(leftNumerator, denominator) !== 1) continue;
-            if (gcd(rightNumerator, denominator) !== 1) continue;
-            if (gcd(rawNumerator, denominator) !== 1) continue;
-            item = {
-              operator,
-              first: { numerator: leftNumerator, denominator },
-              second: { numerator: rightNumerator, denominator },
-              answer: { numerator: rawNumerator, denominator },
-              reduced: null,
-            };
+            let rightNumerator;
+            let rawNumerator;
+            if (subtractNegative) {
+              const minimumDifference = Math.max(1, 10 - leftNumerator);
+              rawNumerator = randomInt(minimumDifference, 9);
+              rightNumerator = leftNumerator + rawNumerator;
+              if (gcd(leftNumerator, denominator) !== 1) continue;
+              if (gcd(rightNumerator, denominator) !== 1) continue;
+              if (gcd(rawNumerator, denominator) !== 1) continue;
+              item = {
+                operator,
+                first: { numerator: leftNumerator, denominator },
+                second: { numerator: rightNumerator, denominator },
+                answer: { numerator: rawNumerator, denominator },
+                reduced: null,
+                negative: true,
+                requiresCommonDenominator: false,
+              };
+            } else {
+              const firstDenominator = randomInt(2, 9);
+              const secondDenominator = randomInt(2, 9);
+              if (gcd(firstDenominator, secondDenominator) !== 1) continue;
+              const firstNumerator = randomInt(1, firstDenominator - 1);
+              const secondNumerator = randomInt(1, secondDenominator - 1);
+              if (gcd(firstNumerator, firstDenominator) !== 1) continue;
+              if (gcd(secondNumerator, secondDenominator) !== 1) continue;
+              const commonFirst = firstNumerator * secondDenominator;
+              const commonSecond = secondNumerator * firstDenominator;
+              rawNumerator = commonFirst - commonSecond;
+              if (rawNumerator < 1 || rawNumerator >= 100) continue;
+              const commonDenominator = firstDenominator * secondDenominator;
+              if (gcd(rawNumerator, commonDenominator) !== 1) continue;
+              item = {
+                operator,
+                first: { numerator: firstNumerator, denominator: firstDenominator },
+                second: { numerator: secondNumerator, denominator: secondDenominator },
+                answer: { numerator: rawNumerator, denominator: commonDenominator },
+                reduced: null,
+                negative: false,
+                requiresCommonDenominator: true,
+              };
+            }
           } else {
             const firstDenominator = randomInt(2, 9);
             const secondDenominator = randomInt(2, 9);
@@ -3811,7 +3840,9 @@
         }
 
         return operator === "subtract"
-          ? { operator, first: { numerator: 4, denominator: 7 }, second: { numerator: 10, denominator: 7 }, answer: { numerator: 6, denominator: 7 }, reduced: null }
+          ? subtractNegative
+            ? { operator, first: { numerator: 4, denominator: 7 }, second: { numerator: 10, denominator: 7 }, answer: { numerator: 6, denominator: 7 }, reduced: null, negative: true, requiresCommonDenominator: false }
+            : { operator, first: { numerator: 3, denominator: 4 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 12 }, reduced: null, negative: false, requiresCommonDenominator: true }
           : { operator, first: { numerator: 1, denominator: 2 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 }, reduced: null };
       }
 
@@ -3819,9 +3850,10 @@
         const used = new Set();
         const deck = [];
         const startWithAddition = Math.random() < 0.5;
+        const subtractionSigns = shuffle([true, true, true, false, false, false]);
         for (let index = 0; index < FRACTION_ADD_SUBTRACT_TARGET; index += 1) {
           const operator = (index % 2 === 0) === startWithAddition ? "add" : "subtract";
-          deck.push(createFractionAddSubtractProblem(operator, used));
+          deck.push(createFractionAddSubtractProblem(operator, used, operator === "subtract" ? subtractionSigns.shift() : true));
         }
         return deck;
       }
@@ -5615,13 +5647,12 @@
       function fractionAddSubtractAnswerText(item = fractionAddSubtractProblem) {
         if (!item) return "";
         const answer = fractionAddSubtractAnswer(item);
-        const raw = item.operator === "subtract"
-          ? `-${answer.numerator}/${answer.denominator}`
-          : `${answer.numerator}/${answer.denominator}`;
+        const sign = item.operator === "subtract" && item.negative ? "-" : "";
+        const raw = `${sign}${answer.numerator}/${answer.denominator}`;
         if (!item.reduced) return raw;
         const reduced = item.reduced.denominator === 1
-          ? `-${item.reduced.numerator}`
-          : `-${item.reduced.numerator}/${item.reduced.denominator}`;
+          ? `${sign}${item.reduced.numerator}`
+          : `${sign}${item.reduced.numerator}/${item.reduced.denominator}`;
         return `${raw}=${reduced}`;
       }
 
@@ -6065,7 +6096,7 @@
           });
         };
         addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
-        if (fractionAddSubtractProblem.operator === "add") {
+        if (fractionAddSubtractProblem.operator === "add" || fractionAddSubtractProblem.requiresCommonDenominator) {
           addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
         }
         if (fractionAddSubtractNeedsWork()) {
@@ -6086,11 +6117,12 @@
         if (!fractionAddSubtractProblem) return;
         const answer = fractionAddSubtractAnswer();
         const addition = fractionAddSubtractProblem.operator === "add";
+        const needsCommonDenominator = addition || fractionAddSubtractProblem.requiresCommonDenominator;
         const needsWork = fractionAddSubtractNeedsWork();
         const terms = fractionAddSubtractWorkTerms();
         const visible = new Set([
           ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
-          ...(addition ? visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator) : []),
+          ...(needsCommonDenominator ? visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator) : []),
         ]);
         [...FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, ...FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS].forEach((slot) => {
           inputs[slot].hidden = !visible.has(slot);
@@ -6107,10 +6139,10 @@
         fractionAddSubtractWorkEquals.hidden = !needsWork;
         fractionAddSubtractWork.hidden = !needsWork;
         fractionAddSubtractWorkDenominator.textContent = needsWork ? answer.denominator : "";
-        fractionAddSubtractPrimaryMinus.hidden = addition;
-        fractionAddSubtractPrimaryDenominatorInputs.hidden = !addition;
-        fractionAddSubtractPrimaryDenominator.hidden = addition;
-        fractionAddSubtractPrimaryDenominator.textContent = addition ? "" : answer.denominator;
+        fractionAddSubtractPrimaryMinus.hidden = addition || !fractionAddSubtractProblem.negative;
+        fractionAddSubtractPrimaryDenominatorInputs.hidden = !needsCommonDenominator;
+        fractionAddSubtractPrimaryDenominator.hidden = needsCommonDenominator;
+        fractionAddSubtractPrimaryDenominator.textContent = needsCommonDenominator ? "" : answer.denominator;
         const showReduced = Boolean(fractionAddSubtractProblem.reduced);
         const reducedIsInteger = showReduced && fractionAddSubtractProblem.reduced.denominator === 1;
         fractionAddSubtractReducedSpacer.hidden = !showReduced;
@@ -6223,7 +6255,8 @@
         }
         if (selectedApp === "fractionAddSubtract") {
           const answer = fractionAddSubtractAnswer();
-          if (fractionAddSubtractProblem.operator === "add") {
+          const needsCommonDenominator = fractionAddSubtractProblem.operator === "add" || fractionAddSubtractProblem.requiresCommonDenominator;
+          if (needsCommonDenominator) {
             if (fractionAddSubtractNeedsWork()) {
               if (fractionAddSubtractAdditionStage === "denominator") {
                 return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
