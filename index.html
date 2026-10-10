@@ -212,8 +212,7 @@
         min-width: 0;
         padding: 0 1px;
       }
-      .menuPage[aria-hidden="true"] { visibility: hidden; }
-      .menuPage[aria-hidden="false"] { visibility: visible; }
+      .menuPage { visibility: visible; }
       #appMenu .appChoices {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         grid-template-rows: repeat(6, minmax(0, 1fr));
@@ -240,8 +239,14 @@
       }
       #appMenu .menuButton[data-menu-app] { transition: transform 120ms ease, box-shadow 120ms ease; }
       #appMenu .menuButton.menuDragging {
-        position: relative;
-        z-index: 3;
+        position: fixed;
+        top: var(--menu-drag-top, 0);
+        left: var(--menu-drag-left, 0);
+        z-index: 10;
+        width: var(--menu-drag-width, auto);
+        height: var(--menu-drag-height, auto);
+        margin: 0;
+        pointer-events: none;
         transform: translate(var(--menu-drag-x, 0), var(--menu-drag-y, 0)) scale(1.04);
         box-shadow: 0 12px 18px rgba(22, 32, 42, 0.2);
       }
@@ -704,6 +709,7 @@
       .speedVisual { width: min(100%, 560px); height: clamp(148px, 25vmin, 220px); align-self: center; overflow: visible; }
 
       #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+      #equationProblemLine:not(.fractionEquation) { --digit-frame-width: 1.05em; --digit-frame-height: 1.575em; }
       .equationBase { display: flex; align-items: center; gap: clamp(7px, 1.2vmin, 12px); margin: 0; font-size: inherit; line-height: 1; }
       .equationLine { display: inline-flex; align-items: center; justify-content: start; gap: clamp(8px, 1.6vmin, 15px); font-size: inherit; line-height: 1; }
       #equationMiddleLine.coefficientOnRight #equationMiddleInput { order: 1; }
@@ -714,10 +720,10 @@
       #equationMiddleLine.coefficientOnLeft #equationMiddleCoefficientX { order: 2; }
       #equationMiddleLine.coefficientOnLeft > .equals { order: 3; }
       #equationMiddleLine.coefficientOnLeft #equationMiddleInput { order: 4; }
-      .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); min-width: 0; height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; font-variant-numeric: tabular-nums; overflow: hidden; }
+      .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); min-width: 0; height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; overflow: hidden; }
       .equationFreeInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width)); }
       .equationFreeInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width)); }
-      .equationFreeInput .equationDigit { display: grid; place-items: center; min-width: 0; height: 100%; }
+      .equationFreeInput .equationDigit { display: grid; place-items: center; min-width: 0; height: 100%; line-height: 1; }
       .equationFreeInput .equationDigit + .equationDigit { border-left: 2px solid var(--line); }
       .equationFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
       .equationWorkFraction, .equationResultFraction { display: inline-grid; grid-template-rows: clamp(52px, 9vmin, 76px) 4px clamp(52px, 9vmin, 76px); align-items: center; min-width: clamp(56px, 10vmin, 76px); vertical-align: middle; }
@@ -2828,9 +2834,12 @@
             </div>
             <div class="simultaneousSpacer"></div>
             <div class="simultaneousStep" id="simultaneousMultiplyStep">
-              <span class="simultaneousCaption">&#9313;&times;2 &#8594;</span><span id="simultaneousScaledXText">2x</span><span id="simultaneousScaledYSign">+</span>
+              <span class="simultaneousCaption">&#9313;&times;</span><button class="simultaneousInput active" id="simultaneousMultiplierInput" data-system-field="multiplier" type="button" aria-label="&#9313;&#12395;&#12363;&#12369;&#12427;&#25968;"></button><span class="simultaneousCaption">&#8594;</span><button class="simultaneousInput" id="simultaneousScaledXInput" data-system-field="scaledX" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;x&#12398;&#20418;&#25968;"></button><span>x</span><span id="simultaneousScaledYSign">+</span>
               <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
               <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
+            </div>
+            <div class="simultaneousStep" id="simultaneousZeroTransformStep" hidden>
+              <span class="simultaneousCaption">&#9312; &#8594; x =</span><button class="simultaneousInput active" id="simultaneousZeroCoefficientInput" data-system-field="zeroCoefficient" type="button" aria-label="xをyで表したときの係数"></button><span>y</span>
             </div>
             <div class="simultaneousStep" id="simultaneousEliminateStep" hidden>
               <span id="simultaneousEliminateText"></span>
@@ -3460,10 +3469,13 @@
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
-      const simultaneousScaledXText = document.querySelector("#simultaneousScaledXText");
+      const simultaneousMultiplierInput = document.querySelector("#simultaneousMultiplierInput");
+      const simultaneousScaledXInput = document.querySelector("#simultaneousScaledXInput");
       const simultaneousScaledYSign = document.querySelector("#simultaneousScaledYSign");
       const simultaneousScaledYInput = document.querySelector("#simultaneousScaledYInput");
       const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
+      const simultaneousZeroTransformStep = document.querySelector("#simultaneousZeroTransformStep");
+      const simultaneousZeroCoefficientInput = document.querySelector("#simultaneousZeroCoefficientInput");
       const simultaneousEliminateStep = document.querySelector("#simultaneousEliminateStep");
       const simultaneousEliminateText = document.querySelector("#simultaneousEliminateText");
       const simultaneousEliminateVariable = document.querySelector("#simultaneousEliminateVariable");
@@ -3508,8 +3520,11 @@
         simplifiedDenominator: equationFractionSimplifiedDenominatorInput,
       };
       const simultaneousFields = {
+        multiplier: simultaneousMultiplierInput,
+        scaledX: simultaneousScaledXInput,
         scaledY: simultaneousScaledYInput,
         scaledRhs: simultaneousScaledRhsInput,
+        zeroCoefficient: simultaneousZeroCoefficientInput,
         coefficient: simultaneousCoefficientInput,
         rhs: simultaneousRhsInput,
         y: simultaneousYInput,
@@ -3566,6 +3581,7 @@
       const chooseSimultaneous = document.querySelector("#chooseSimultaneous");
       const chooseSubtraction = document.querySelector("#chooseSubtraction");
       const menuPagerViewport = document.querySelector("#menuPagerViewport");
+      const menuPager = document.querySelector("#menuPager");
       const menuPageTitle = document.querySelector("#menuPageTitle");
       const activeMenuPage = document.querySelector("#activeMenuPage");
       const graduatedMenuPage = document.querySelector("#graduatedMenuPage");
@@ -4179,13 +4195,14 @@
             const secondConstant = secondX * x + secondY * yValue;
             const firstConstant = firstX * x + firstY * yValue;
             if (!Number.isInteger(secondConstant) || !Number.isInteger(firstConstant)) continue;
+            if (secondConstant === 0 || firstConstant === 0) continue;
             const eliminationRhs = operation === "＋"
               ? firstConstant + multiplier * secondConstant
               : firstConstant - multiplier * secondConstant;
             const expectedRhs = firstSolutionVariable === "y"
               ? eliminationCoefficient * yValue
               : eliminationCoefficient * x;
-            if (!Number.isInteger(eliminationRhs) || eliminationRhs !== expectedRhs) continue;
+            if (!Number.isInteger(eliminationRhs) || eliminationRhs === 0 || eliminationRhs !== expectedRhs) continue;
             const key = [firstX, firstY, secondX, secondY, firstConstant, secondConstant, x, yNumerator, yDenominator].join(":");
             if (used.has(key)) continue;
             used.add(key);
@@ -4210,8 +4227,41 @@
           }
           return null;
         };
+        const addZeroRhsProblem = () => {
+          for (let attempt = 0; attempt < 100; attempt += 1) {
+            const y = randomInt(1, 4);
+            const firstY = randomInt(1, 4);
+            const secondY = firstY + randomInt(1, 4);
+            const x = -firstY * y;
+            const secondConstant = (secondY - firstY) * y;
+            if (!secondConstant) continue;
+            const key = ["zero", firstY, secondY, secondConstant, x, y].join(":");
+            if (used.has(key)) continue;
+            used.add(key);
+            return {
+              x,
+              yNumerator: y,
+              yDenominator: 1,
+              firstX: 1,
+              firstY,
+              secondX: 1,
+              secondY,
+              firstConstant: 0,
+              secondConstant,
+              zeroRhs: true,
+              zeroCoefficient: -firstY,
+              eliminationCoefficient: secondY - firstY,
+              eliminationRhs: secondConstant,
+              firstSolutionVariable: "y",
+              finalVariable: "x",
+            };
+          }
+          return null;
+        };
         while (deck.length < 3) {
-          const problem = addProblem(false, deck.length === 1 ? "y" : "x", deck.length === 1);
+          const problem = deck.length === 2
+            ? addZeroRhsProblem()
+            : addProblem(false, deck.length === 1 ? "y" : "x", deck.length === 1);
           if (problem) deck.push(problem);
         }
         while (deck.length < SIMULTANEOUS_TARGET) {
@@ -4778,8 +4828,11 @@
 
       function systemExpected(field) {
         if (!simultaneousProblem) return "";
-        if (field === "scaledY") return String(Math.abs(2 * simultaneousProblem.secondY));
-        if (field === "scaledRhs") return String(2 * simultaneousProblem.secondConstant);
+        if (field === "multiplier") return String(simultaneousProblem.multiplier);
+        if (field === "scaledX") return String(simultaneousProblem.multiplier * simultaneousProblem.secondX);
+        if (field === "scaledY") return String(Math.abs(simultaneousProblem.multiplier * simultaneousProblem.secondY));
+        if (field === "scaledRhs") return String(simultaneousProblem.multiplier * simultaneousProblem.secondConstant);
+        if (field === "zeroCoefficient") return String(simultaneousProblem.zeroCoefficient);
         if (field === "coefficient") return String(simultaneousProblem.eliminationCoefficient);
         if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
         const first = simultaneousFirstSolution();
@@ -4794,7 +4847,11 @@
       }
 
       function systemCurrentFields() {
-        if (simultaneousPhase === "multiply") return ["scaledY", "scaledRhs"];
+        if (simultaneousProblem?.zeroRhs) {
+          if (simultaneousPhase === "zeroTransform") return ["zeroCoefficient"];
+          if (simultaneousPhase === "zeroSubstitute") return ["coefficient", "rhs"];
+        }
+        if (simultaneousPhase === "multiply") return ["multiplier", "scaledX", "scaledY", "scaledRhs"];
         if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
         if (simultaneousPhase === "solution") {
           return simultaneousFirstSolution().denominator > 1 ? ["yDenominator", "yNumerator"] : ["y"];
@@ -4807,10 +4864,15 @@
 
       function renderSystemEntry() {
         const showFraction = simultaneousFirstSolution().denominator > 1;
-        simultaneousEliminateStep.hidden = simultaneousPhase === "multiply";
+        const zeroRhs = Boolean(simultaneousProblem?.zeroRhs);
+        simultaneousMultiplyStep.hidden = zeroRhs;
+        simultaneousZeroTransformStep.hidden = !zeroRhs || simultaneousPhase !== "zeroTransform";
+        simultaneousEliminateStep.hidden = zeroRhs
+          ? simultaneousPhase !== "zeroSubstitute"
+          : simultaneousPhase === "multiply";
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
-        simultaneousYStep.hidden = simultaneousPhase === "multiply" || simultaneousPhase === "eliminate";
+        simultaneousYStep.hidden = !["solution", "substitute", "final"].includes(simultaneousPhase);
         simultaneousSubstituteInput.hidden = showFraction;
         simultaneousSubstituteFraction.hidden = !showFraction;
         simultaneousSubstituteCaption.hidden = !["substitute", "final"].includes(simultaneousPhase);
@@ -4833,9 +4895,8 @@
         simultaneousFirstEquation.innerHTML = "<span>" + (item.firstX === 1 ? "x" : item.firstX + "x") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
         const secondXText = item.secondX < 0 ? "−x" : "x";
         simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
-        simultaneousScaledXText.textContent = item.secondX < 0 ? "−2x" : "2x";
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
-        simultaneousEliminateText.textContent = "①" + item.operation + "③ →";
+        simultaneousEliminateText.textContent = item.zeroRhs ? "②に代入 →" : "①" + item.operation + "③ →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
@@ -4848,8 +4909,8 @@
           simultaneousSubstituteSuffix.textContent = " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant;
         }
         simultaneousValues = {};
-        simultaneousPhase = "multiply";
-        simultaneousActiveField = "scaledY";
+        simultaneousPhase = item.zeroRhs ? "zeroTransform" : "multiply";
+        simultaneousActiveField = item.zeroRhs ? "zeroCoefficient" : "multiplier";
         renderSystemEntry();
       }
 
@@ -4861,7 +4922,7 @@
 
       function clearSimultaneousFields(fields = systemCurrentFields()) {
         fields.forEach((field) => delete simultaneousValues[field]);
-        simultaneousActiveField = fields[0] || "scaledY";
+        simultaneousActiveField = fields[0] || "multiplier";
         renderSystemEntry();
       }
 
@@ -4901,13 +4962,19 @@
           showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
           return;
         }
+        if (simultaneousPhase === "zeroTransform") {
+          simultaneousPhase = "zeroSubstitute";
+          simultaneousActiveField = "coefficient";
+          renderSystemEntry();
+          return;
+        }
         if (simultaneousPhase === "multiply") {
           simultaneousPhase = "eliminate";
           simultaneousActiveField = "coefficient";
           renderSystemEntry();
           return;
         }
-        if (simultaneousPhase === "eliminate") {
+        if (simultaneousPhase === "eliminate" || simultaneousPhase === "zeroSubstitute") {
           simultaneousPhase = "solution";
           simultaneousActiveField = systemCurrentFields()[0];
           renderSystemEntry();
@@ -7147,6 +7214,7 @@
       let menuLongPressTimer = null;
       let menuLongPressActive = false;
       let menuSuppressClick = false;
+      let menuPagerSnapTimer = null;
 
       function menuSlotCount() {
         return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 18 : 16;
@@ -7230,10 +7298,10 @@
         setMenuPage(menuPage);
       }
 
-      function reorderMenuApp(app, targetApp) {
+      function reorderMenuApp(app, targetApp, page = menuPage) {
         if (!app || !targetApp || app === targetApp) return;
         const layout = readMenuLayout();
-        const apps = layout[menuPage];
+        const apps = layout[page];
         const sourceIndex = apps.indexOf(app);
         const targetIndex = apps.indexOf(targetApp);
         if (sourceIndex < 0 || targetIndex < 0) return;
@@ -7242,18 +7310,62 @@
         saveMenuLayout(layout);
       }
 
-      function moveMenuAppToPage(app, destination) {
-        if (!app || destination === menuPage) return false;
+      function moveMenuAppToPage(app, sourcePage, destination, targetApp = "") {
+        if (!app || destination === sourcePage) return false;
         const layout = readMenuLayout();
         if (layout[destination].length >= menuSlotCount()) return false;
-        const source = layout[menuPage];
+        const source = layout[sourcePage];
         const sourceIndex = source.indexOf(app);
         if (sourceIndex < 0) return false;
         source.splice(sourceIndex, 1);
-        layout[destination].push(app);
+        const targetIndex = layout[destination].indexOf(targetApp);
+        layout[destination].splice(targetIndex < 0 ? layout[destination].length : targetIndex, 0, app);
         saveMenuLayout(layout);
         setMenuPage(destination);
         return true;
+      }
+
+      function menuDragPage(sourcePage, dx) {
+        if (sourcePage === "active" && dx < -52) return "graduated";
+        if (sourcePage === "graduated" && dx > 52) return "active";
+        return sourcePage;
+      }
+
+      function clearMenuPagerTransform() {
+        if (menuPagerSnapTimer) {
+          clearTimeout(menuPagerSnapTimer);
+          menuPagerSnapTimer = null;
+        }
+        menuPager.style.removeProperty("transition");
+        menuPager.style.removeProperty("transform");
+      }
+
+      function updateMenuPagerSwipe(startPage, dx) {
+        const width = menuPagerViewport.getBoundingClientRect().width;
+        if (!width) return;
+        const startOffset = startPage === "graduated" ? -width : 0;
+        const offset = Math.max(-width, Math.min(0, startOffset + dx));
+        menuPager.style.transition = "none";
+        menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
+      }
+
+      function settleMenuPager(startPage, dx) {
+        const width = menuPagerViewport.getBoundingClientRect().width;
+        const threshold = Math.max(56, width * 0.18);
+        const destination = startPage === "active" && dx < -threshold
+          ? "graduated"
+          : startPage === "graduated" && dx > threshold
+            ? "active"
+            : startPage;
+        const targetOffset = destination === "graduated" ? -width : 0;
+        setMenuPage(destination);
+        menuPager.style.transition = "transform 180ms ease";
+        menuPager.style.transform = `translate3d(${targetOffset}px, 0, 0)`;
+        menuPagerSnapTimer = window.setTimeout(() => {
+          menuPagerSnapTimer = null;
+          menuPager.style.removeProperty("transition");
+          menuPager.style.removeProperty("transform");
+        }, 190);
       }
 
       function clearMenuLongPress() {
@@ -7277,6 +7389,9 @@
           pointerId: event.pointerId,
           tile,
           app: tile?.dataset.menuApp || "",
+          sourcePage: menuPage,
+          dragPage: menuPage,
+          paging: false,
         };
         try { menuPagerViewport.setPointerCapture(event.pointerId); } catch {}
         menuLongPressActive = false;
@@ -7284,6 +7399,11 @@
         menuLongPressTimer = window.setTimeout(() => {
           if (!menuGesture?.tile) return;
           menuLongPressActive = true;
+          const rect = tile.getBoundingClientRect();
+          tile.style.setProperty("--menu-drag-top", `${rect.top}px`);
+          tile.style.setProperty("--menu-drag-left", `${rect.left}px`);
+          tile.style.setProperty("--menu-drag-width", `${rect.width}px`);
+          tile.style.setProperty("--menu-drag-height", `${rect.height}px`);
           tile.classList.add("menuDragging");
         }, 450);
       });
@@ -7292,10 +7412,21 @@
         if (!menuGesture || event.pointerId !== menuGesture.pointerId) return;
         const dx = event.clientX - menuGesture.x;
         const dy = event.clientY - menuGesture.y;
-        if (!menuLongPressActive && Math.hypot(dx, dy) > 10) clearMenuLongPress();
+        if (!menuLongPressActive && Math.hypot(dx, dy) > 10) {
+          clearMenuLongPress();
+          if (Math.abs(dx) > Math.abs(dy) * 1.1) {
+            menuGesture.paging = true;
+            updateMenuPagerSwipe(menuGesture.sourcePage, dx);
+          }
+        }
         if (!menuLongPressActive || !menuGesture.tile) return;
         menuGesture.tile.style.setProperty("--menu-drag-x", `${dx}px`);
         menuGesture.tile.style.setProperty("--menu-drag-y", `${dy}px`);
+        const dragPage = menuDragPage(menuGesture.sourcePage, dx);
+        if (dragPage !== menuGesture.dragPage) {
+          menuGesture.dragPage = dragPage;
+          setMenuPage(dragPage);
+        }
         document.querySelectorAll("#appMenu .menuSlot.dragTarget").forEach((slot) => slot.classList.remove("dragTarget"));
         const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuSlot");
         if (target && target.contains(menuGesture.tile) === false) target.classList.add("dragTarget");
@@ -7313,16 +7444,13 @@
           event.preventDefault();
           suppressMenuClick();
           gesture.tile.classList.remove("menuDragging");
-          gesture.tile.style.removeProperty("--menu-drag-x");
-          gesture.tile.style.removeProperty("--menu-drag-y");
-          const destination = Math.abs(dx) > 76
-            ? (menuPage === "active" ? "graduated" : "active")
-            : "";
-          if (destination) {
-            moveMenuAppToPage(gesture.app, destination);
+          ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => gesture.tile.style.removeProperty(property));
+          if (gesture.dragPage !== gesture.sourcePage) {
+            const targetApp = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuButton[data-menu-app]")?.dataset.menuApp;
+            moveMenuAppToPage(gesture.app, gesture.sourcePage, gesture.dragPage, targetApp);
           } else {
             const targetApp = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuButton[data-menu-app]")?.dataset.menuApp;
-            reorderMenuApp(gesture.app, targetApp);
+            reorderMenuApp(gesture.app, targetApp, gesture.sourcePage);
           }
           document.querySelectorAll("#appMenu .menuSlot.dragTarget").forEach((slot) => slot.classList.remove("dragTarget"));
           renderMenu();
@@ -7330,9 +7458,8 @@
           return;
         }
 
-        if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-          if (dx < 0 && menuPage === "active") setMenuPage("graduated");
-          if (dx > 0 && menuPage === "graduated") setMenuPage("active");
+        if (gesture.paging) {
+          settleMenuPager(gesture.sourcePage, dx);
           suppressMenuClick();
         }
       });
@@ -7340,8 +7467,8 @@
       menuPagerViewport.addEventListener("pointercancel", () => {
         clearMenuLongPress();
         menuGesture?.tile?.classList.remove("menuDragging");
-        menuGesture?.tile?.style.removeProperty("--menu-drag-x");
-        menuGesture?.tile?.style.removeProperty("--menu-drag-y");
+        ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => menuGesture?.tile?.style.removeProperty(property));
+        clearMenuPagerTransform();
         menuGesture = null;
         menuLongPressActive = false;
       });
@@ -7350,8 +7477,8 @@
         if (!menuGesture) return;
         clearMenuLongPress();
         menuGesture.tile?.classList.remove("menuDragging");
-        menuGesture.tile?.style.removeProperty("--menu-drag-x");
-        menuGesture.tile?.style.removeProperty("--menu-drag-y");
+        ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => menuGesture.tile?.style.removeProperty(property));
+        clearMenuPagerTransform();
         menuGesture = null;
         menuLongPressActive = false;
       });
