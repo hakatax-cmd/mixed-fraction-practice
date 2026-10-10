@@ -5094,7 +5094,14 @@
             const bottom = randomInt(1000, top - 1000);
             const answer = top - bottom;
             const key = `${top}-${bottom}`;
-            if (answer < 1000 || used.has(key) || subtractionBorrowCount(top, bottom) !== borrowCount) continue;
+            if (
+              answer < 1000
+              || hasZeroAtSmallestVisibleSubtractionPlace(top, 0, 0)
+              || hasZeroAtSmallestVisibleSubtractionPlace(bottom, 0, 0)
+              || hasZeroAtSmallestVisibleSubtractionPlace(answer, 0, 0)
+              || used.has(key)
+              || subtractionBorrowCount(top, bottom) !== borrowCount
+            ) continue;
             used.add(key);
             return { type: "integer", top, bottom, precision: 0 };
           }
@@ -5115,17 +5122,29 @@
             : randomInt(1000, 9999);
           const answer = top - bottom;
           const key = `${type}:${top}-${bottom}`;
-          if (answer < 10 ** (precision + 2) || used.has(key)) continue;
+          const topPrecision = 1;
+          if (
+            answer < 10 ** (precision + 2)
+            || hasZeroAtSmallestVisibleSubtractionPlace(top, precision, topPrecision)
+            || hasZeroAtSmallestVisibleSubtractionPlace(bottom, precision, precision)
+            || hasZeroAtSmallestVisibleSubtractionPlace(answer, precision, precision)
+            || used.has(key)
+          ) continue;
           used.add(key);
           return {
             type,
             top,
             bottom,
             precision,
-            topPrecision: 1,
+            topPrecision,
             bottomPrecision: precision,
           };
         }
+      }
+
+      function hasZeroAtSmallestVisibleSubtractionPlace(value, precision, visiblePrecision) {
+        const hiddenPlaces = precision - visiblePrecision;
+        return Math.floor(value / (10 ** hiddenPlaces)) % 10 === 0;
       }
 
       function subtractionBorrowCount(top, bottom) {
