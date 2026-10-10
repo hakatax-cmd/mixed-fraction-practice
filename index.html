@@ -710,6 +710,10 @@
       #equationMiddleLine.coefficientOnRight > .equals { order: 2; }
       #equationMiddleLine.coefficientOnRight #equationMiddleCoefficientInput { order: 3; }
       #equationMiddleLine.coefficientOnRight #equationMiddleCoefficientX { order: 4; }
+      #equationMiddleLine.coefficientOnLeft #equationMiddleCoefficientInput { order: 1; }
+      #equationMiddleLine.coefficientOnLeft #equationMiddleCoefficientX { order: 2; }
+      #equationMiddleLine.coefficientOnLeft > .equals { order: 3; }
+      #equationMiddleLine.coefficientOnLeft #equationMiddleInput { order: 4; }
       .equationFreeInput { display: grid; grid-template-columns: repeat(var(--equation-slots, 1), minmax(0, 1fr)); width: var(--digit-frame-width); min-width: 0; height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; font-variant-numeric: tabular-nums; overflow: hidden; }
       .equationFreeInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width)); }
       .equationFreeInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width)); }
@@ -4499,7 +4503,12 @@
           return [];
         }
         if (equationPhase === "middle") {
-          return equationProblem?.coefficientOnRight ? ["middle", "middleCoefficient"] : ["middle"];
+          if (equationProblem?.kind === "bothSides") {
+            return equationProblem.coefficientOnRight
+              ? ["middle", "middleCoefficient"]
+              : ["middleCoefficient", "middle"];
+          }
+          return ["middle"];
         }
         return equationFinalFields();
       }
@@ -4510,13 +4519,15 @@
 
       function renderEquationEntry() {
         const isFraction = equationProblem?.kind === "fraction";
+        const isBothSides = equationProblem?.kind === "bothSides";
         const coefficientOnRight = Boolean(equationProblem?.coefficientOnRight);
-        const showDirectFractionWork = isFraction && equationProblem.directFractionWork && ["work", "result"].includes(equationPhase);
+        const showDirectFractionWork = isFraction && equationProblem.directFractionWork && ["result", "middleSimplify", "expression", "raw", "simplify"].includes(equationPhase);
         equationDirectFractionLine.hidden = !showDirectFractionWork;
         equationMiddleInput.hidden = isFraction;
-        equationMiddleCoefficientInput.hidden = isFraction || !coefficientOnRight;
-        equationMiddleCoefficientX.hidden = isFraction || !coefficientOnRight;
-        equationMiddleLeft.hidden = coefficientOnRight;
+        equationMiddleCoefficientInput.hidden = isFraction || !isBothSides;
+        equationMiddleCoefficientX.hidden = isFraction || !isBothSides;
+        equationMiddleLeft.hidden = coefficientOnRight || isBothSides;
+        equationMiddleLine.classList.toggle("coefficientOnLeft", isBothSides && !coefficientOnRight);
         equationMiddleFractionInput.hidden = !isFraction;
         equationMiddleResultEquals.hidden = !isFraction || !["result", "middleSimplify", "expression", "raw", "simplify"].includes(equationPhase);
         equationMiddleResultFraction.hidden = !isFraction || !["result", "middleSimplify", "expression", "raw", "simplify"].includes(equationPhase);
@@ -4573,24 +4584,30 @@
       function completeEquationProblem() {
         if (selectedApp !== "equation" || isAnswerLocked || isFinished) return;
         setLocked(true);
-        showReaction(true);
-        correctCount += 1;
-        updateProgress();
-        if (isLastTimedProblem()) {
-          finalTime = elapsedTime();
-          clearedAt = new Date();
-          isFinished = true;
+        // Paint the final typed digit before showing the large correct mark.
+        renderEquationEntry();
+        const completeAfterPaint = () => {
+          if (selectedApp !== "equation" || !isAnswerLocked || isFinished) return;
+          showReaction(true);
+          correctCount += 1;
           updateProgress();
-          schedule(finishRound);
-          return;
-        }
-        schedule(() => {
-          hideReaction();
-          // The equation answer path locks the keypad for the reaction. Unlock
-          // before replacing the problem so the new first field is immediately usable.
-          setLocked(false);
-          nextProblem(true);
-        });
+          if (isLastTimedProblem()) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            updateProgress();
+            schedule(finishRound);
+            return;
+          }
+          schedule(() => {
+            hideReaction();
+            // The equation answer path locks the keypad for the reaction. Unlock
+            // before replacing the problem so the new first field is immediately usable.
+            setLocked(false);
+            nextProblem(true);
+          });
+        };
+        requestAnimationFrame(() => requestAnimationFrame(completeAfterPaint));
       }
 
       function equationFinishField() {
@@ -7002,6 +7019,7 @@
 
         const wrongSlot = wrongAnswerSlots()[0] || "";
         if (!wrongSlot) {
+          activeSlotOrder().forEach((slot) => inputs[slot].classList.remove("correction"));
           clearDivisionWrongTimer();
           return;
         }
@@ -7032,6 +7050,7 @@
           : digits.slice(0, digitLimit);
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
+        if (value === expected(slot)) inputs[slot].classList.remove("correction");
         if (selectedApp === "grouping" && value.length >= expected(slot).length && value !== expected(slot)) {
           showWrongConfirmation(answerSignature(), () => clearSlotAnswer(slot));
           return;
