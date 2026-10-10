@@ -3983,14 +3983,28 @@
             middle = coefficient * answer;
           } else if (kind === "fraction") {
             const choices = shuffle([
-              // Compact questions begin directly with the common-denominator numerator work.
+              // Use several coefficient, denominator, and numerator combinations so the
+              // fraction questions do not collapse into the same four calculations.
               { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
-              // These show the actual fraction addition/subtraction after moving the constant,
-              // then use the same common-denominator work as the fraction-addition mode.
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 5, denominator: 8 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 15, denominator: 8 }, directFractionWork: true },
+              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 3, denominator: 5 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 9, denominator: 5 } },
               { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 19, denominator: 15 }, constant: { numerator: 3, denominator: 5 }, answer: { numerator: 38, denominator: 15 }, directFractionWork: true },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 11, denominator: 20 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 33, denominator: 40 }, directFractionWork: true },
-            ]).filter((choice) => !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey);
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 3, denominator: 4 } },
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 7, denominator: 9 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 14, denominator: 9 }, directFractionWork: true },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 5, denominator: 4 }, directFractionWork: true },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 9, denominator: 14 } },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 4, denominator: 9 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 2, denominator: 3 } },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 10, denominator: 9 }, directFractionWork: true },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 8, denominator: 15 } },
+              { coefficient: { numerator: 4, denominator: 5 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 15, denominator: 28 }, directFractionWork: true },
+              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
+              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 2, denominator: 3 }, answer: { numerator: 21, denominator: 40 }, directFractionWork: true },
+              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 5, denominator: 9 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 9 } },
+            ]).filter((choice) => {
+              const matchesCoefficient = !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey;
+              const staysPositive = sourceOperator === "+" || choice.middle.numerator * choice.constant.denominator > choice.constant.numerator * choice.middle.denominator;
+              return matchesCoefficient && staysPositive;
+            });
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
             const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
@@ -4090,12 +4104,7 @@
       function createEquationDeck() {
         const used = new Set();
         const signs = ["+", "-", "+", "-", "+", "-", "+", "-", "+", "-", "+", "-"];
-        const fractionVariants = shuffle([
-          { key: "1/3", operator: "+" },
-          { key: "2/3", operator: "+" },
-          { key: "5/7", operator: "-" },
-          { key: "1/2", operator: "-" },
-        ]);
+        const fractionOperators = shuffle(["+", "-", "+", "-"]);
         const plan = [
           { kind: "basic", allowNegative: false },
           { kind: "basic", allowNegative: true },
@@ -4112,8 +4121,7 @@
         ];
         return plan.map((item, index) => {
           if (item.kind === "fraction") {
-            const variant = fractionVariants.shift();
-            return createEquationProblem("fraction", used, false, variant.operator, false, variant.key);
+            return createEquationProblem("fraction", used, false, fractionOperators.shift());
           }
           if (item.kind === "bothSidesRight") return createEquationProblem("bothSides", used, false, "+", false, "", true);
           if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
