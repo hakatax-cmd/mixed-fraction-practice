@@ -2066,7 +2066,12 @@
         .appChoices { grid-template-columns: 1fr; }
         #appMenu .appChoices {
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          grid-template-rows: repeat(7, minmax(0, 1fr));
+          grid-template-rows: repeat(8, minmax(0, 1fr));
+        }
+        #appMenu .menuSlot,
+        #appMenu .menuButton {
+          min-height: clamp(40px, 7.2vh, 64px);
+          min-height: clamp(40px, 7.2svh, 64px);
         }
         #chooseGrouping { grid-column: auto; }
         .progress {
@@ -3162,7 +3167,7 @@
         "equation",
         "simultaneous",
       ];
-      const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV1";
+      const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV2";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -7098,7 +7103,7 @@
       let menuSuppressClick = false;
 
       function menuSlotCount() {
-        return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 18 : 14;
+        return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 18 : 16;
       }
 
       function defaultMenuLayout() {
@@ -7223,21 +7228,22 @@
         menuGesture = {
           x: event.clientX,
           y: event.clientY,
+          pointerId: event.pointerId,
           tile,
           app: tile?.dataset.menuApp || "",
         };
+        try { menuPagerViewport.setPointerCapture(event.pointerId); } catch {}
         menuLongPressActive = false;
         if (!tile) return;
         menuLongPressTimer = window.setTimeout(() => {
           if (!menuGesture?.tile) return;
           menuLongPressActive = true;
           tile.classList.add("menuDragging");
-          try { tile.setPointerCapture(event.pointerId); } catch {}
         }, 450);
       });
 
       menuPagerViewport.addEventListener("pointermove", (event) => {
-        if (!menuGesture) return;
+        if (!menuGesture || event.pointerId !== menuGesture.pointerId) return;
         const dx = event.clientX - menuGesture.x;
         const dy = event.clientY - menuGesture.y;
         if (!menuLongPressActive && Math.hypot(dx, dy) > 10) clearMenuLongPress();
@@ -7250,7 +7256,7 @@
       });
 
       menuPagerViewport.addEventListener("pointerup", (event) => {
-        if (!menuGesture) return;
+        if (!menuGesture || event.pointerId !== menuGesture.pointerId) return;
         const gesture = menuGesture;
         const dx = event.clientX - gesture.x;
         const dy = event.clientY - gesture.y;
@@ -7263,7 +7269,9 @@
           gesture.tile.classList.remove("menuDragging");
           gesture.tile.style.removeProperty("--menu-drag-x");
           gesture.tile.style.removeProperty("--menu-drag-y");
-          const destination = dx < -76 ? "graduated" : dx > 76 ? "active" : "";
+          const destination = Math.abs(dx) > 76
+            ? (menuPage === "active" ? "graduated" : "active")
+            : "";
           if (destination) {
             moveMenuAppToPage(gesture.app, destination);
           } else {
@@ -7288,6 +7296,16 @@
         menuGesture?.tile?.classList.remove("menuDragging");
         menuGesture?.tile?.style.removeProperty("--menu-drag-x");
         menuGesture?.tile?.style.removeProperty("--menu-drag-y");
+        menuGesture = null;
+        menuLongPressActive = false;
+      });
+
+      menuPagerViewport.addEventListener("lostpointercapture", () => {
+        if (!menuGesture) return;
+        clearMenuLongPress();
+        menuGesture.tile?.classList.remove("menuDragging");
+        menuGesture.tile?.style.removeProperty("--menu-drag-x");
+        menuGesture.tile?.style.removeProperty("--menu-drag-y");
         menuGesture = null;
         menuLongPressActive = false;
       });
