@@ -2841,6 +2841,9 @@
             <div class="simultaneousStep" id="simultaneousZeroTransformStep" hidden>
               <span class="simultaneousCaption">&#9312; &#8594; x =</span><button class="simultaneousInput active" id="simultaneousZeroCoefficientInput" data-system-field="zeroCoefficient" type="button" aria-label="xをyで表したときの係数"></button><span>y</span>
             </div>
+            <div class="simultaneousStep" id="simultaneousZeroSubstitutionStep" hidden>
+              <span class="simultaneousCaption">&#9313;に代入 &#8594;</span><span id="simultaneousZeroSubstitutionText"></span>
+            </div>
             <div class="simultaneousStep" id="simultaneousEliminateStep" hidden>
               <span id="simultaneousEliminateText"></span>
               <button class="simultaneousInput active" id="simultaneousCoefficientInput" data-system-field="coefficient" type="button" aria-label="&#28040;&#21435;&#24460;&#12398;&#20418;&#25968;"></button><span id="simultaneousEliminateVariable">y =</span>
@@ -3476,6 +3479,8 @@
       const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
       const simultaneousZeroTransformStep = document.querySelector("#simultaneousZeroTransformStep");
       const simultaneousZeroCoefficientInput = document.querySelector("#simultaneousZeroCoefficientInput");
+      const simultaneousZeroSubstitutionStep = document.querySelector("#simultaneousZeroSubstitutionStep");
+      const simultaneousZeroSubstitutionText = document.querySelector("#simultaneousZeroSubstitutionText");
       const simultaneousEliminateStep = document.querySelector("#simultaneousEliminateStep");
       const simultaneousEliminateText = document.querySelector("#simultaneousEliminateText");
       const simultaneousEliminateVariable = document.querySelector("#simultaneousEliminateVariable");
@@ -4018,7 +4023,7 @@
         return deck;
       }
 
-      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "", coefficientOnRight = false) {
+      function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "", coefficientOnRight = false, useProductDenominator = false) {
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -4055,7 +4060,9 @@
             });
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
-            const commonDenominator = item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
+            const commonDenominator = useProductDenominator
+              ? item.middle.denominator * item.constant.denominator
+              : item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
             const middleNumerator = item.middle.numerator * (commonDenominator / item.middle.denominator);
             const constantNumerator = item.constant.numerator * (commonDenominator / item.constant.denominator);
             const totalNumerator = sourceOperator === "+"
@@ -4077,6 +4084,7 @@
               workSecond: constantNumerator,
               workResultNumerator: middleNumerator,
               directFractionWork: Boolean(item.directFractionWork),
+              useProductDenominator,
               rawAnswer: {
                 numerator: item.middle.numerator * item.coefficient.denominator,
                 denominator: item.middle.denominator * item.coefficient.numerator,
@@ -4169,7 +4177,10 @@
         ];
         return plan.map((item, index) => {
           if (item.kind === "fraction") {
-            return createEquationProblem("fraction", used, false, fractionOperators.shift());
+            // Four fraction questions per round: two use a denominator product,
+            // and two use the least common denominator.
+            const useProductDenominator = index === 2 || index === 8;
+            return createEquationProblem("fraction", used, false, fractionOperators.shift(), false, "", false, useProductDenominator);
           }
           if (item.kind === "bothSidesRight") return createEquationProblem("bothSides", used, false, "+", false, "", true);
           if (item.kind === "bothSides") return createEquationProblem("bothSides", used, item.allowNegative);
@@ -4898,9 +4909,11 @@
         const showFraction = simultaneousFirstSolution().denominator > 1;
         const zeroRhs = Boolean(simultaneousProblem?.zeroRhs);
         simultaneousMultiplyStep.hidden = zeroRhs;
-        simultaneousZeroTransformStep.hidden = !zeroRhs || simultaneousPhase !== "zeroTransform";
+        // Keep completed transformations visible so the calculation can be read top to bottom.
+        simultaneousZeroTransformStep.hidden = !zeroRhs;
+        simultaneousZeroSubstitutionStep.hidden = !zeroRhs || simultaneousPhase === "zeroTransform";
         simultaneousEliminateStep.hidden = zeroRhs
-          ? simultaneousPhase !== "zeroSubstitute"
+          ? simultaneousPhase === "zeroTransform"
           : simultaneousPhase === "multiply";
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
@@ -4928,7 +4941,12 @@
         const secondXText = item.secondX < 0 ? "−x" : "x";
         simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
-        simultaneousEliminateText.textContent = item.zeroRhs ? "②に代入 →" : "①" + item.operation + "③ →";
+        if (item.zeroRhs) {
+          const replacedX = item.zeroCoefficient === -1 ? "−y" : `(${item.zeroCoefficient})y`;
+          const secondY = item.secondY === 1 ? "y" : `${item.secondY}y`;
+          simultaneousZeroSubstitutionText.textContent = `${replacedX} + ${secondY} = ${item.secondConstant}`;
+        }
+        simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →" : "①" + item.operation + "③ →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
@@ -7331,6 +7349,11 @@
         setMenuPage(menuPage);
       }
 
+      function orderedAppsForRecords() {
+        const layout = readMenuLayout();
+        return [...layout.active, ...layout.graduated];
+      }
+
       function reorderMenuApp(app, targetApp, page = menuPage) {
         if (!app || !targetApp || app === targetApp) return;
         const layout = readMenuLayout();
@@ -7932,7 +7955,7 @@
 
       function renderAllRecords() {
         allRecordsList.replaceChildren();
-        APP_ORDER.forEach((app) => {
+        orderedAppsForRecords().forEach((app) => {
           const block = document.createElement("section");
           block.className = "recordsAppBlock";
 
