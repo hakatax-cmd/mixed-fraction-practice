@@ -671,10 +671,10 @@
       #ratioProblemLine.ratioSpecialMode .ratioChangeStack,
       #ratioProblemLine.ratioSpecialMode .ratioRateWorkStack,
       #ratioProblemLine.ratioSpecialMode .ratioIncreaseRateStack { grid-row: 2; }
-      #ratioProblemLine.rateWorkMode { grid-template-rows: auto auto auto auto; }
-      #ratioProblemLine.rateWorkMode > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 2; }
-      #ratioProblemLine.rateWorkMode .ratioRateWorkStack { grid-row: 3; }
-      #ratioProblemLine.rateWorkMode .ratioFinalRow { grid-row: 4; }
+      #ratioProblemLine.rateWorkMode { grid-template-rows: auto auto auto auto auto; }
+      #ratioProblemLine.rateWorkMode > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 3; }
+      #ratioProblemLine.rateWorkMode .ratioRateWorkStack { grid-row: 4; }
+      #ratioProblemLine.rateWorkMode .ratioFinalRow { grid-row: 5; }
 
       @media (max-width: 420px) {
         .ratioChangeEquation,
@@ -4412,7 +4412,13 @@
       }
 
       function createFishingDeck() {
-        const input = (field, value) => ({ type: "input", field, value: String(value) });
+        const input = (field, value, onesFirst = false) => {
+          const displayValue = String(value);
+          const entryValue = onesFirst
+            ? Array.from(displayValue).filter((character) => character !== ".").reverse().join("")
+            : displayValue;
+          return { type: "input", field, value: displayValue, entryValue, onesFirst };
+        };
         const operator = (field, value) => ({ type: "operator", field, value });
         const fraction = (numerator, denominator) => ({ type: "staticFraction", numerator: String(numerator), denominator: String(denominator) });
         const fractionInput = (numerator, numeratorValue, denominator, denominatorValue) => ({
@@ -4422,31 +4428,45 @@
         });
         const question = (fact, text, fields, steps, answerText) => ({ fact, text, fields, steps, answerText });
         const ozMultiplication = [
-          question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56), " g"]], "56 g"),
-          question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84), " g"]], "84 g"),
-          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
-          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
+          question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56, true), " g"]], "56 g"),
+          question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84, true), " g"]], "84 g"),
+          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21, true), " g"]], "21 g"),
+          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35, true), " g"]], "35 g"),
         ];
         const ozDivision = [
           question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfRawDen", "ozHalfRawNum", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfRawNum", 14, "ozHalfRawDen", 28)], ["= ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
           question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersRawDen", "ozThreeQuartersRawNum", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersRawNum", 21, "ozThreeQuartersRawDen", 28)], ["= ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
         ];
-        const oz = [...shuffle(ozMultiplication).slice(0, 2), ...shuffle(ozDivision)];
         const go = [
-          question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
-          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25"), " g"]], "26.25 g"),
-          question("1号は 3.75 g です。", "8号は何 g？", ["goEightDecimal", "goEightMultiply", "goEightCount", "goEightResult"], [[input("goEightDecimal", "3.75"), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30), " g"]], "30 g"),
+          question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5", true), " g"]], "37.5 g"),
+          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", true), " g"]], "26.25 g"),
+          question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
           question("1号は 3.75 g です。", "15 g は何号？", ["goFourWeight", "goFourOperator", "goFourUnit", "goFour"], [[input("goFourWeight", 15), operator("goFourOperator", "÷"), input("goFourUnit", "3.75"), " = ", input("goFour", 4), " 号"]], "4号"),
         ];
         const feet = [
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "7 feet 6 inch は何 cm？", ["feetSevenSixFootUnit", "feetSevenSixFootMultiply", "feetSevenSixFootCount", "feetSevenSixFootResult", "feetSevenSixInchUnit", "feetSevenSixInchMultiply", "feetSevenSixInchCount", "feetSevenSixInchResult", "feetSevenSixFirstResult", "feetSevenSixPlus", "feetSevenSixSecondResult", "feetSevenSix"], [[input("feetSevenSixFootUnit", 30), operator("feetSevenSixFootMultiply", "×"), input("feetSevenSixFootCount", 7), " = ", input("feetSevenSixFootResult", 210)], [input("feetSevenSixInchUnit", "2.5"), operator("feetSevenSixInchMultiply", "×"), input("feetSevenSixInchCount", 6), " = ", input("feetSevenSixInchResult", 15)], [input("feetSevenSixFirstResult", 210), operator("feetSevenSixPlus", "+"), input("feetSevenSixSecondResult", 15), " = ", input("feetSevenSix", 225), " cm"]], "225 cm"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "5 feet 8 inch は何 cm？", ["feetFiveEightFootUnit", "feetFiveEightFootMultiply", "feetFiveEightFootCount", "feetFiveEightFootResult", "feetFiveEightInchUnit", "feetFiveEightInchMultiply", "feetFiveEightInchCount", "feetFiveEightInchResult", "feetFiveEightFirstResult", "feetFiveEightPlus", "feetFiveEightSecondResult", "feetFiveEight"], [[input("feetFiveEightFootUnit", 30), operator("feetFiveEightFootMultiply", "×"), input("feetFiveEightFootCount", 5), " = ", input("feetFiveEightFootResult", 150)], [input("feetFiveEightInchUnit", "2.5"), operator("feetFiveEightInchMultiply", "×"), input("feetFiveEightInchCount", 8), " = ", input("feetFiveEightInchResult", 20)], [input("feetFiveEightFirstResult", 150), operator("feetFiveEightPlus", "+"), input("feetFiveEightSecondResult", 20), " = ", input("feetFiveEight", 170), " cm"]], "170 cm"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "7 feet 6 inch は何 cm？", ["feetSevenSixFootUnit", "feetSevenSixFootMultiply", "feetSevenSixFootCount", "feetSevenSixFootResult", "feetSevenSixInchUnit", "feetSevenSixInchMultiply", "feetSevenSixInchCount", "feetSevenSixInchResult", "feetSevenSixFirstResult", "feetSevenSixPlus", "feetSevenSixSecondResult", "feetSevenSix"], [[input("feetSevenSixFootUnit", 30), operator("feetSevenSixFootMultiply", "×"), input("feetSevenSixFootCount", 7), " = ", input("feetSevenSixFootResult", 210, true)], [input("feetSevenSixInchUnit", "2.5"), operator("feetSevenSixInchMultiply", "×"), input("feetSevenSixInchCount", 6), " = ", input("feetSevenSixInchResult", 15, true)], [input("feetSevenSixFirstResult", 210), operator("feetSevenSixPlus", "+"), input("feetSevenSixSecondResult", 15), " = ", input("feetSevenSix", 225), " cm"]], "225 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "5 feet 8 inch は何 cm？", ["feetFiveEightFootUnit", "feetFiveEightFootMultiply", "feetFiveEightFootCount", "feetFiveEightFootResult", "feetFiveEightInchUnit", "feetFiveEightInchMultiply", "feetFiveEightInchCount", "feetFiveEightInchResult", "feetFiveEightFirstResult", "feetFiveEightPlus", "feetFiveEightSecondResult", "feetFiveEight"], [[input("feetFiveEightFootUnit", 30), operator("feetFiveEightFootMultiply", "×"), input("feetFiveEightFootCount", 5), " = ", input("feetFiveEightFootResult", 150, true)], [input("feetFiveEightInchUnit", "2.5"), operator("feetFiveEightInchMultiply", "×"), input("feetFiveEightInchCount", 8), " = ", input("feetFiveEightInchResult", 20, true)], [input("feetFiveEightFirstResult", 150), operator("feetFiveEightPlus", "+"), input("feetFiveEightSecondResult", 20), " = ", input("feetFiveEight", 170), " cm"]], "170 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120, true)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
           question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
           question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "185 cm は何 feet 何 inch？", ["cm185Length", "cm185Divide", "cm185FootUnit", "cm185Feet", "cm185Remainder", "cm185InchDivide", "cm185InchUnit", "cm185Inch"], [[input("cm185Length", 185), operator("cm185Divide", "÷"), input("cm185FootUnit", 30), " = ", input("cm185Feet", 6), " あまり ", input("cm185Remainder", 5)], ["5 ", operator("cm185InchDivide", "÷"), input("cm185InchUnit", "2.5"), " = ", input("cm185Inch", 2), " inch"]], "6 feet 2 inch"),
           question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "120 cm は何 feet 何 inch？", ["cm120Length", "cm120Divide", "cm120FootUnit", "cm120Feet", "cm120Remainder", "cm120InchDivide", "cm120InchUnit", "cm120Inch"], [[input("cm120Length", 120), operator("cm120Divide", "÷"), input("cm120FootUnit", 30), " = ", input("cm120Feet", 4), " あまり ", input("cm120Remainder", 0)], ["0 ", operator("cm120InchDivide", "÷"), input("cm120InchUnit", "2.5"), " = ", input("cm120Inch", 0), " inch"]], "4 feet 0 inch"),
         ];
-        return [...oz, ...shuffle(go), ...shuffle(feet)];
+        const multiplicationQuestions = [
+          ...shuffle(ozMultiplication).slice(0, 2),
+          ...shuffle(go.slice(0, 3)),
+          ...shuffle(feet.slice(0, 3)),
+        ];
+        const divisionQuestions = [
+          ...shuffle(ozDivision),
+          ...shuffle(go.slice(3)),
+          ...shuffle(feet.slice(3)),
+        ];
+        const deck = [];
+        while (multiplicationQuestions.length || divisionQuestions.length) {
+          if (multiplicationQuestions.length) deck.push(multiplicationQuestions.pop());
+          if (divisionQuestions.length) deck.push(divisionQuestions.pop());
+        }
+        return deck;
       }
 
       function renderFishingPart(part) {
@@ -4486,13 +4506,20 @@
         button.type = "button";
         button.className = "fishingInput";
         button.dataset.fishingField = part.field;
-        const activeIndex = fishingActiveField === part.field
-          ? Array.from(part.value).findIndex((character, index) => index >= value.length && character !== ".")
-          : -1;
-        Array.from(part.value).forEach((character, index) => {
+        const characters = Array.from(part.value);
+        const digitIndices = characters
+          .map((character, index) => ({ character, index }))
+          .filter(({ character }) => character !== ".")
+          .map(({ index }) => index);
+        const entryOrder = part.onesFirst
+          ? [...digitIndices].reverse()
+          : characters.map((_, index) => index);
+        const activeIndex = fishingActiveField === part.field ? entryOrder[value.length] ?? -1 : -1;
+        characters.forEach((character, index) => {
           const digit = document.createElement("span");
           digit.className = character === "." ? "fishingDecimal" : "fishingDigit";
-          digit.textContent = value[index] || (character === "." ? "." : "");
+          const valueIndex = entryOrder.indexOf(index);
+          digit.textContent = character === "." ? "." : value[valueIndex] || "";
           digit.classList.toggle("active", index === activeIndex);
           button.append(digit);
         });
@@ -4527,7 +4554,7 @@
         for (const step of fishingProblem?.steps || []) {
           for (const part of step) {
             if (typeof part !== "object") continue;
-            if ((part.type === "input" || part.type === "operator") && part.field === field) return part.value;
+            if ((part.type === "input" || part.type === "operator") && part.field === field) return part.entryValue || part.value;
             if (part.type === "fraction") {
               if (part.numerator.field === field) return part.numerator.value;
               if (part.denominator.field === field) return part.denominator.value;
