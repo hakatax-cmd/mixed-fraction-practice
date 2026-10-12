@@ -4314,8 +4314,8 @@
         const ozMultiplication = [
           question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56), " g"]], "56 g"),
           question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84), " g"]], "84 g"),
-          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersTop", "ozThreeQuartersDivide", "ozThreeQuartersBottom", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), input("ozThreeQuartersTop", 3), operator("ozThreeQuartersDivide", "÷"), input("ozThreeQuartersBottom", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
-          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersTop", "ozFiveQuartersDivide", "ozFiveQuartersBottom", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), input("ozFiveQuartersTop", 5), operator("ozFiveQuartersDivide", "÷"), input("ozFiveQuartersBottom", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
+          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
+          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
         ];
         const ozDivision = [
           question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfRawDen", "ozHalfRawNum", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfRawNum", 14, "ozHalfRawDen", 28)], ["= ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
@@ -5579,8 +5579,8 @@
         if (item.type === "compare") return `${item.base}${item.unit}\u306e${item.rate.percent}%`;
         if (item.type === "original") return `${item.rate.percent}%\u304c${item.part}${item.unit}\u306e\u3082\u3068\u306e\u91d1\u984d`;
         if (item.type === "rate") return `${item.part}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55\u5272`;
-        if (item.type === "increase") return `${item.base}${item.unit}\u306e${item.rate.percent}\u5272\u5897\u3057`;
-        if (item.type === "discount") return `${item.base}${item.unit}\u306e${item.rate.percent}\u5272\u5f15\u304d`;
+        if (item.type === "increase") return `${item.base}${item.unit}\u306e${item.rate.percent / 10}\u5272\u5897\u3057`;
+        if (item.type === "discount") return `${item.base}${item.unit}\u306e${item.rate.percent / 10}\u5272\u5f15\u304d`;
         return `${item.current}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55%`;
       }
 
@@ -6659,9 +6659,9 @@
         } else if (ratioProblem.type === "rate") {
           ratioQuestion.textContent = `${ratioProblem.part}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55\u5272\uff1f`;
         } else if (ratioProblem.type === "increase") {
-          ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent}\u5272\u5897\u3057\u306f\uff1f`;
+          ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent / 10}\u5272\u5897\u3057\u306f\uff1f`;
         } else if (ratioProblem.type === "discount") {
-          ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent}\u5272\u5f15\u304d\u306f\uff1f`;
+          ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent / 10}\u5272\u5f15\u304d\u306f\uff1f`;
         } else {
           ratioQuestion.textContent = `${ratioProblem.current}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55%\uff1f`;
         }
