@@ -677,7 +677,7 @@
         gap: clamp(16px, 3vmin, 28px);
         min-height: 0;
         padding: clamp(24px, 4vmin, 46px) clamp(14px, 4vmin, 42px);
-        font-size: clamp(1.65rem, 5.3vmin, 3.35rem);
+        font-size: clamp(1.9rem, 6vmin, 3.7rem);
         font-weight: 900;
         font-variant-numeric: tabular-nums;
       }
@@ -688,7 +688,7 @@
       .fishingInput { display: inline-flex; align-items: center; gap: clamp(3px, 0.65vmin, 6px); min-width: 0; min-height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; text-align: center; }
       .fishingDigit { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); border: 3px solid var(--line); border-radius: 6px; background: #fff; }
       .fishingDecimal { display: grid; place-items: end center; width: 0.28em; height: var(--digit-frame-height); padding-bottom: 0.12em; }
-      .fishingInput.active .fishingDigit { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
+      .fishingDigit.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
       .fishingOperator { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; }
       .fishingOperator.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
       .fishingFraction { display: inline-grid; grid-template-rows: 1.45em 4px 1.45em; min-width: 1.32em; align-items: center; justify-items: center; }
@@ -4117,9 +4117,9 @@
         const question = (fact, text, fields, steps, answerText) => ({ fact, text, fields, steps, answerText });
         const oz = [
           question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84), " g"]], "84 g"),
-          question("1 oz は 28 g です。", "3/8 oz は何 g？", ["ozThreeEighthsBase", "ozThreeEighthsMultiply", "ozThreeEighthsTop", "ozThreeEighthsDivide", "ozThreeEighthsBottom", "ozThreeEighths"], [[input("ozThreeEighthsBase", 28), operator("ozThreeEighthsMultiply", "×"), input("ozThreeEighthsTop", 3), operator("ozThreeEighthsDivide", "÷"), input("ozThreeEighthsBottom", 8), " = ", input("ozThreeEighths", "10.5"), " g"]], "10.5 g"),
+          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersTop", "ozThreeQuartersDivide", "ozThreeQuartersBottom", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), input("ozThreeQuartersTop", 3), operator("ozThreeQuartersDivide", "÷"), input("ozThreeQuartersBottom", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
           question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
-          question("1 oz は 28 g です。", "22.4 g は何 oz？", ["ozFourFifthsPart", "ozFourFifthsOperator", "ozFourFifthsBase", "ozFourFifthsDen", "ozFourFifthsNum"], [[input("ozFourFifthsPart", "22.4"), operator("ozFourFifthsOperator", "÷"), input("ozFourFifthsBase", 28), " = ", fractionInput("ozFourFifthsNum", 4, "ozFourFifthsDen", 5), " oz"]], "4/5 oz"),
+          question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
         ];
         const go = [
           question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
@@ -4175,10 +4175,14 @@
         button.type = "button";
         button.className = "fishingInput";
         button.dataset.fishingField = part.field;
+        const activeIndex = fishingActiveField === part.field
+          ? Array.from(part.value).findIndex((character, index) => index >= value.length && character !== ".")
+          : -1;
         Array.from(part.value).forEach((character, index) => {
           const digit = document.createElement("span");
           digit.className = character === "." ? "fishingDecimal" : "fishingDigit";
           digit.textContent = value[index] || (character === "." ? "." : "");
+          digit.classList.toggle("active", index === activeIndex);
           button.append(digit);
         });
         button.classList.toggle("active", fishingActiveField === part.field);
@@ -4335,10 +4339,16 @@
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 2, denominator: 3 }, answer: { numerator: 21, denominator: 40 }, directFractionWork: true },
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 5, denominator: 9 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 9 } },
+              // These deliberately have a shared factor in the denominators.
+              // They are reserved for the "multiply both denominators" method,
+              // so its denominator differs visibly from the least common multiple.
+              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 3 }, productDenominator: true, directFractionWork: true },
+              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 }, productDenominator: true, directFractionWork: true },
+              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 7, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 6 }, productDenominator: true, directFractionWork: true },
             ]).filter((choice) => {
               const matchesCoefficient = !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey;
               const staysPositive = sourceOperator === "+" || choice.middle.numerator * choice.constant.denominator > choice.constant.numerator * choice.middle.denominator;
-              return matchesCoefficient && staysPositive;
+              return matchesCoefficient && staysPositive && Boolean(choice.productDenominator) === useProductDenominator;
             });
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
