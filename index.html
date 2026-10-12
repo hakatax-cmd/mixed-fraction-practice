@@ -729,8 +729,8 @@
       .fishingDigit { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); border: 3px solid var(--line); border-radius: 6px; background: #fff; }
       .fishingDecimal { display: grid; place-items: end center; width: 0.28em; height: var(--digit-frame-height); padding-bottom: 0.12em; }
       .fishingDigit.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
-      .fishingOperator { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 3px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; }
-      .fishingOperator.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
+      .fishingOperator { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); font: inherit; font-size: 1.15em; font-weight: 900; line-height: 1; }
+      .fishingOperator.active { color: var(--blue); box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.22); }
       .fishingFraction { display: inline-grid; grid-template-rows: 1.45em 4px 1.45em; min-width: 1.32em; align-items: center; justify-items: center; }
       .fishingFraction i { width: 100%; height: 4px; background: var(--ink); }
       .fishingFraction .fishingInput { min-height: 1.35em; }
@@ -4311,12 +4311,17 @@
           denominator: input(denominator, denominatorValue),
         });
         const question = (fact, text, fields, steps, answerText) => ({ fact, text, fields, steps, answerText });
-        const oz = [
+        const ozMultiplication = [
+          question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56), " g"]], "56 g"),
           question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84), " g"]], "84 g"),
           question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersTop", "ozThreeQuartersDivide", "ozThreeQuartersBottom", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), input("ozThreeQuartersTop", 3), operator("ozThreeQuartersDivide", "÷"), input("ozThreeQuartersBottom", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
-          question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
-          question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
+          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersTop", "ozFiveQuartersDivide", "ozFiveQuartersBottom", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), input("ozFiveQuartersTop", 5), operator("ozFiveQuartersDivide", "÷"), input("ozFiveQuartersBottom", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
         ];
+        const ozDivision = [
+          question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfRawDen", "ozHalfRawNum", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfRawNum", 14, "ozHalfRawDen", 28)], ["= ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
+          question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersRawDen", "ozThreeQuartersRawNum", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersRawNum", 21, "ozThreeQuartersRawDen", 28)], ["= ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
+        ];
+        const oz = [...shuffle(ozMultiplication).slice(0, 2), ...shuffle(ozDivision)];
         const go = [
           question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
           question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25"), " g"]], "26.25 g"),
@@ -4331,7 +4336,7 @@
           question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "185 cm は何 feet 何 inch？", ["cm185Length", "cm185Divide", "cm185FootUnit", "cm185Feet", "cm185Remainder", "cm185InchDivide", "cm185InchUnit", "cm185Inch"], [[input("cm185Length", 185), operator("cm185Divide", "÷"), input("cm185FootUnit", 30), " = ", input("cm185Feet", 6), " あまり ", input("cm185Remainder", 5)], ["5 ", operator("cm185InchDivide", "÷"), input("cm185InchUnit", "2.5"), " = ", input("cm185Inch", 2), " inch"]], "6 feet 2 inch"),
           question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "120 cm は何 feet 何 inch？", ["cm120Length", "cm120Divide", "cm120FootUnit", "cm120Feet", "cm120Remainder", "cm120InchDivide", "cm120InchUnit", "cm120Inch"], [[input("cm120Length", 120), operator("cm120Divide", "÷"), input("cm120FootUnit", 30), " = ", input("cm120Feet", 4), " あまり ", input("cm120Remainder", 0)], ["0 ", operator("cm120InchDivide", "÷"), input("cm120InchUnit", "2.5"), " = ", input("cm120Inch", 0), " inch"]], "4 feet 0 inch"),
         ];
-        return [...shuffle(oz), ...shuffle(go), ...shuffle(feet)];
+        return [...oz, ...shuffle(go), ...shuffle(feet)];
       }
 
       function renderFishingPart(part) {
