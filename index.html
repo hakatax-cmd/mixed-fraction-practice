@@ -669,6 +669,30 @@
         font-weight: 900;
         line-height: 1;
       }
+
+      #fishingProblemLine {
+        display: grid;
+        align-content: start;
+        justify-items: center;
+        gap: clamp(16px, 3vmin, 28px);
+        min-height: 0;
+        padding: clamp(24px, 4vmin, 46px) clamp(14px, 4vmin, 42px);
+        font-size: clamp(1.65rem, 5.3vmin, 3.35rem);
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+      }
+      .fishingFact { margin: 0; color: var(--muted); font-size: clamp(1.05rem, 3.3vmin, 1.7rem); }
+      .fishingQuestion { margin: 0; text-align: center; line-height: 1.35; }
+      .fishingSteps { display: grid; justify-items: start; gap: clamp(13px, 2.5vmin, 22px); width: min(100%, 650px); }
+      .fishingStep { display: inline-flex; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1.2vmin, 12px); line-height: 1.1; }
+      .fishingInput { min-width: 1.05em; height: 1.58em; padding: 0 0.16em; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; text-align: center; }
+      .fishingInput[data-slots="2"] { min-width: 2.1em; }
+      .fishingInput[data-slots="3"] { min-width: 3.15em; }
+      .fishingInput[data-slots="4"] { min-width: 4.2em; }
+      .fishingInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+      .fishingFraction { display: inline-grid; grid-template-rows: 1.45em 4px 1.45em; min-width: 1.32em; align-items: center; justify-items: center; }
+      .fishingFraction i { width: 100%; height: 4px; background: var(--ink); }
+      .fishingFraction .fishingInput { min-width: 1.1em; height: 1.35em; }
       #preschoolProblemLine {
         display: grid;
         min-height: 100%;
@@ -1629,7 +1653,8 @@
       .keypad [data-key="0"] { grid-column: 4; grid-row: 3; }
       .ratioKey { display: none; }
       #challengeView.ratioMode .keypad,
-      #challengeView.speedMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
+      #challengeView.speedMode .keypad,
+      #challengeView.fishingMode .keypad { grid-template-rows: repeat(4, 1fr); height: min(100%, 300px); }
       #challengeView.speedMode .keypad {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         width: 100%;
@@ -1641,25 +1666,26 @@
       #challengeView.speedMode #gameArea { min-width: 0; overflow-x: clip; }
       #challengeView.speedMode .keypad > button { min-width: 0; max-width: 100%; }
       #challengeView.ratioMode .ratioKey,
-      #challengeView.speedMode .ratioKey { display: block; }
+      #challengeView.speedMode .ratioKey,
+      #challengeView.fishingMode .ratioKey { display: block; }
       #challengeView.ratioMode .keypad:not(.operatorChoice) #ratioTimesKey,
       #challengeView.ratioMode .keypad:not(.operatorChoice) #ratioDivideKey {
         visibility: hidden;
         pointer-events: none;
       }
-      #challengeView.ratioMode .keypad [data-key="1"], #challengeView.speedMode .keypad [data-key="1"] { grid-column: 1; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="2"], #challengeView.speedMode .keypad [data-key="2"] { grid-column: 2; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="3"], #challengeView.speedMode .keypad [data-key="3"] { grid-column: 3; grid-row: 2; }
-      #challengeView.ratioMode .keypad [data-key="4"], #challengeView.speedMode .keypad [data-key="4"] { grid-column: 1; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="5"], #challengeView.speedMode .keypad [data-key="5"] { grid-column: 2; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="6"], #challengeView.speedMode .keypad [data-key="6"] { grid-column: 3; grid-row: 3; }
-      #challengeView.ratioMode .keypad [data-key="7"], #challengeView.speedMode .keypad [data-key="7"] { grid-column: 1; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="8"], #challengeView.speedMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="9"], #challengeView.speedMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
-      #challengeView.ratioMode .keypad [data-key="0"], #challengeView.speedMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
-      #challengeView.ratioMode #ratioTimesKey, #challengeView.speedMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
-      #challengeView.ratioMode #ratioDivideKey, #challengeView.speedMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
-      #challengeView.ratioMode #ratioDotKey, #challengeView.speedMode #ratioDotKey { grid-column: 4; grid-row: 1; }
+      #challengeView.ratioMode .keypad [data-key="1"], #challengeView.speedMode .keypad [data-key="1"], #challengeView.fishingMode .keypad [data-key="1"] { grid-column: 1; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="2"], #challengeView.speedMode .keypad [data-key="2"], #challengeView.fishingMode .keypad [data-key="2"] { grid-column: 2; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="3"], #challengeView.speedMode .keypad [data-key="3"], #challengeView.fishingMode .keypad [data-key="3"] { grid-column: 3; grid-row: 2; }
+      #challengeView.ratioMode .keypad [data-key="4"], #challengeView.speedMode .keypad [data-key="4"], #challengeView.fishingMode .keypad [data-key="4"] { grid-column: 1; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="5"], #challengeView.speedMode .keypad [data-key="5"], #challengeView.fishingMode .keypad [data-key="5"] { grid-column: 2; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="6"], #challengeView.speedMode .keypad [data-key="6"], #challengeView.fishingMode .keypad [data-key="6"] { grid-column: 3; grid-row: 3; }
+      #challengeView.ratioMode .keypad [data-key="7"], #challengeView.speedMode .keypad [data-key="7"], #challengeView.fishingMode .keypad [data-key="7"] { grid-column: 1; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="8"], #challengeView.speedMode .keypad [data-key="8"], #challengeView.fishingMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="9"], #challengeView.speedMode .keypad [data-key="9"], #challengeView.fishingMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
+      #challengeView.ratioMode .keypad [data-key="0"], #challengeView.speedMode .keypad [data-key="0"], #challengeView.fishingMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
+      #challengeView.ratioMode #ratioTimesKey, #challengeView.speedMode #ratioTimesKey, #challengeView.fishingMode #ratioTimesKey { grid-column: 1; grid-row: 1; }
+      #challengeView.ratioMode #ratioDivideKey, #challengeView.speedMode #ratioDivideKey, #challengeView.fishingMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
+      #challengeView.ratioMode #ratioDotKey, #challengeView.speedMode #ratioDotKey, #challengeView.fishingMode #ratioDotKey { grid-column: 4; grid-row: 1; }
       #challengeView.ratioMode .keypad.operatorChoice [data-digit],
       #challengeView.ratioMode .keypad.operatorChoice #ratioDotKey {
         border-color: #cbd2dc;
@@ -1685,6 +1711,22 @@
       #challengeView.equationMode #ratioPlusKey { grid-column: 3; grid-row: 1; font-size: 2.1rem; }
       #challengeView.equationMode #ratioDotKey { grid-column: 4; grid-row: 1; font-size: 2.1rem; }
       #challengeView.ratioMode #ratioPlusKey, #challengeView.speedMode #ratioPlusKey { visibility: hidden; pointer-events: none; }
+      #challengeView.fishingMode #ratioTimesKey,
+      #challengeView.fishingMode #ratioDivideKey,
+      #challengeView.fishingMode #ratioPlusKey { visibility: hidden; pointer-events: none; }
+      #challengeView.fishingMode #backButton { grid-column: 4; grid-row: 2; }
+      #challengeView.fishingMode #clearButton { grid-column: 4; grid-row: 3; }
+      #challengeView.fishingMode .keypad [data-key="1"] { grid-column: 1; grid-row: 2; }
+      #challengeView.fishingMode .keypad [data-key="2"] { grid-column: 2; grid-row: 2; }
+      #challengeView.fishingMode .keypad [data-key="3"] { grid-column: 3; grid-row: 2; }
+      #challengeView.fishingMode .keypad [data-key="4"] { grid-column: 1; grid-row: 3; }
+      #challengeView.fishingMode .keypad [data-key="5"] { grid-column: 2; grid-row: 3; }
+      #challengeView.fishingMode .keypad [data-key="6"] { grid-column: 3; grid-row: 3; }
+      #challengeView.fishingMode .keypad [data-key="7"] { grid-column: 1; grid-row: 4; }
+      #challengeView.fishingMode .keypad [data-key="8"] { grid-column: 2; grid-row: 4; }
+      #challengeView.fishingMode .keypad [data-key="9"] { grid-column: 3; grid-row: 4; }
+      #challengeView.fishingMode .keypad [data-key="0"] { grid-column: 4; grid-row: 4; }
+      #challengeView.fishingMode #ratioDotKey { grid-column: 4; grid-row: 1; }
       #challengeView.equationMode [data-key="1"] { grid-column: 1; grid-row: 2; }
       #challengeView.equationMode [data-key="2"] { grid-column: 2; grid-row: 2; }
       #challengeView.equationMode [data-key="3"] { grid-column: 3; grid-row: 2; }
@@ -2333,6 +2375,7 @@
                   <button class="menuButton" id="chooseGrouping" type="button">&#25499;&#12369;&#31639;&#12434;&#12414;&#12392;&#12417;&#12427;</button>
                   <button class="menuButton" id="chooseRatio" type="button">&#21106;&#21512;</button>
                   <button class="menuButton" id="chooseSpeed" type="button">&#36895;&#12373;</button>
+                  <button class="menuButton" id="chooseFishing" type="button">&#37347;&#12426;&#12398;&#21839;&#38988;</button>
                   <button class="menuButton" id="choosePreschool" type="button">&#12362;&#21069;&#12399;<br />&#24180;&#23569;&#12394;&#12398;&#12363;&#12424;&#12290;</button>
                   <button class="menuButton" id="chooseEquation" type="button">&#19968;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
                   <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
@@ -2431,6 +2474,14 @@
           <p class="coverPrompt">&#31186;&#36895;&#12391;&#12392;&#12367;&#12424;</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="speedStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
+          <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
+        </section>
+
+        <section class="cover" id="fishingCover" hidden>
+          <h1>&#37347;&#12426;&#12398;&#21839;&#38988;</h1>
+          <p class="coverPrompt">&#21336;&#20301;&#12392;&#20013;&#36884;&#24335;&#12391;&#12392;&#12367;&#12424;</p>
+          <p class="coverGoal">14&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <button class="startButton" id="fishingStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
@@ -2724,6 +2775,11 @@
                 <span id="speedAnswerUnit"></span>
               </span>
             </div>
+          </div>
+          <div id="fishingProblemLine" hidden>
+            <p class="fishingFact" id="fishingFact"></p>
+            <p class="fishingQuestion" id="fishingQuestion"></p>
+            <div class="fishingSteps" id="fishingSteps"></div>
           </div>
           <div id="preschoolProblemLine" hidden>
             <div class="preschoolFormula">
@@ -3099,6 +3155,8 @@
       const SPEED_TARGET = 10;
       const SPEED_SLOTS = ["speedAnswerHundreds", "speedAnswerTens", "speedAnswerOnes"];
       const SPEED_BEST_KEY = "speedBestTimeMs";
+      const FISHING_TARGET = 14;
+      const FISHING_BEST_KEY = "fishingBestTimeMs";
       const EQUATION_TARGET = 12;
       const EQUATION_BEST_KEY = "equationBestTimeMs";
       const SIMULTANEOUS_TARGET = 6;
@@ -3137,6 +3195,7 @@
         GROUPING_BEST_KEY,
         RATIO_BEST_KEY,
         SPEED_BEST_KEY,
+        FISHING_BEST_KEY,
         EQUATION_BEST_KEY,
         SIMULTANEOUS_BEST_KEY,
         PRESCHOOL_BEST_KEY,
@@ -3161,6 +3220,7 @@
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
         ratio: "\u5272\u5408",
         speed: "\u901f\u3055",
+        fishing: "\u91e3\u308a\u306e\u554f\u984c",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
         equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
         simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
@@ -3179,6 +3239,7 @@
         "grouping",
         "ratio",
         "speed",
+        "fishing",
         "preschool",
         "equation",
         "simultaneous",
@@ -3224,6 +3285,11 @@
       let ratioDeck = [];
       let ratioIndex = 0;
       let ratioProblem = null;
+      let fishingDeck = [];
+      let fishingIndex = 0;
+      let fishingProblem = null;
+      let fishingValues = {};
+      let fishingActiveField = "";
       let speedDeck = [];
       let speedIndex = 0;
       let speedProblem = null;
@@ -3364,6 +3430,8 @@
       const doubleMultiplicationBottom = document.querySelector("#doubleMultiplicationBottom");
       const fractionCalculationQuestion = document.querySelector("#fractionCalculationQuestion");
       const fractionAddSubtractQuestion = document.querySelector("#fractionAddSubtractQuestion");
+      const fractionAddSubtractPrimaryEquals = document.querySelector("#fractionAddSubtractPrimaryEquals");
+      const fractionAddSubtractPrimaryAnswer = document.querySelector("#fractionAddSubtractPrimaryAnswer");
       const fractionAddSubtractPrimaryMinus = document.querySelector("#fractionAddSubtractPrimaryMinus");
       const fractionAddSubtractPrimaryDenominator = document.querySelector("#fractionAddSubtractPrimaryDenominator");
       const fractionAddSubtractPrimaryDenominatorInputs = document.querySelector("#fractionAddSubtractPrimaryDenominatorInputs");
@@ -3565,6 +3633,7 @@
       const groupingCover = document.querySelector("#groupingCover");
       const ratioCover = document.querySelector("#ratioCover");
       const speedCover = document.querySelector("#speedCover");
+      const fishingCover = document.querySelector("#fishingCover");
       const preschoolCover = document.querySelector("#preschoolCover");
       const equationCover = document.querySelector("#equationCover");
       const simultaneousCover = document.querySelector("#simultaneousCover");
@@ -3581,6 +3650,7 @@
       const chooseGrouping = document.querySelector("#chooseGrouping");
       const chooseRatio = document.querySelector("#chooseRatio");
       const chooseSpeed = document.querySelector("#chooseSpeed");
+      const chooseFishing = document.querySelector("#chooseFishing");
       const choosePreschool = document.querySelector("#choosePreschool");
       const chooseEquation = document.querySelector("#chooseEquation");
       const chooseSimultaneous = document.querySelector("#chooseSimultaneous");
@@ -3611,6 +3681,7 @@
       const groupingStartButton = document.querySelector("#groupingStartButton");
       const ratioStartButton = document.querySelector("#ratioStartButton");
       const speedStartButton = document.querySelector("#speedStartButton");
+      const fishingStartButton = document.querySelector("#fishingStartButton");
       const preschoolStartButton = document.querySelector("#preschoolStartButton");
       const equationStartButton = document.querySelector("#equationStartButton");
       const simultaneousStartButton = document.querySelector("#simultaneousStartButton");
@@ -3628,6 +3699,10 @@
       const groupingProblemLine = document.querySelector("#groupingProblemLine");
       const ratioProblemLine = document.querySelector("#ratioProblemLine");
       const speedProblemLine = document.querySelector("#speedProblemLine");
+      const fishingProblemLine = document.querySelector("#fishingProblemLine");
+      const fishingFact = document.querySelector("#fishingFact");
+      const fishingQuestion = document.querySelector("#fishingQuestion");
+      const fishingSteps = document.querySelector("#fishingSteps");
       const preschoolProblemLine = document.querySelector("#preschoolProblemLine");
       const equationProblemLine = document.querySelector("#equationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
@@ -4021,6 +4096,180 @@
           previousType = type;
         }
         return deck;
+      }
+
+      function createFishingDeck() {
+        const input = (field, value) => ({ type: "input", field, value: String(value) });
+        const fraction = (numerator, denominator) => ({ type: "staticFraction", numerator: String(numerator), denominator: String(denominator) });
+        const fractionInput = (numerator, numeratorValue, denominator, denominatorValue) => ({
+          type: "fraction",
+          numerator: input(numerator, numeratorValue),
+          denominator: input(denominator, denominatorValue),
+        });
+        const question = (fact, text, fields, steps, answerText) => ({ fact, text, fields, steps, answerText });
+        const oz = [
+          question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThree"], [["28 × 3 = ", input("ozThree", 84), " g"]], "84 g"),
+          question("1 oz は 28 g です。", "3/8 oz は何 g？", ["ozThreeEighths"], [["28 × 3 ÷ 8 = ", input("ozThreeEighths", "10.5"), " g"]], "10.5 g"),
+          question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfDen", "ozHalfNum"], [["14 ÷ 28 = ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
+          question("1 oz は 28 g です。", "22.4 g は何 oz？", ["ozFourFifthsDen", "ozFourFifthsNum"], [["22.4 ÷ 28 = ", fractionInput("ozFourFifthsNum", 4, "ozFourFifthsDen", 5), " oz"]], "4/5 oz"),
+        ];
+        const go = [
+          question("1号は 3.75 g です。", "10号は何 g？", ["goTen"], [["3.75 × 10 = ", input("goTen", "37.5"), " g"]], "37.5 g"),
+          question("1号は 3.75 g です。", "7号は何 g？", ["goSeven"], [["3.75 × 7 = ", input("goSeven", "26.25"), " g"]], "26.25 g"),
+          question("1号は 3.75 g です。", "8号は何 g？", ["goEightDen", "goEightNum", "goEightResult"], [["3.75 = ", fractionInput("goEightNum", 30, "goEightDen", 8)], ["8 × ", fraction(30, 8), " = ", input("goEightResult", 30), " g"]], "30 g"),
+          question("1号は 3.75 g です。", "15 g は何号？", ["goFour"], [["15 ÷ 3.75 = ", input("goFour", 4), " 号"]], "4号"),
+        ];
+        const feet = [
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "7 feet 6 inch は何 cm？", ["feetSevenSix"], [["30 × 7 + 2.5 × 6 = ", input("feetSevenSix", 225), " cm"]], "225 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "5 feet 8 inch は何 cm？", ["feetFiveEight"], [["30 × 5 + 2.5 × 8 = ", input("feetFiveEight", 170), " cm"]], "170 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "4 feet 4 inch は何 cm？", ["feetFourFour"], [["30 × 4 + 2.5 × 4 = ", input("feetFourFour", 130), " cm"]], "130 cm"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "280 cm は何 feet 何 inch？", ["cm280Feet", "cm280Remainder", "cm280Inch"], [["280 ÷ 30 = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ÷ 2.5 = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "185 cm は何 feet 何 inch？", ["cm185Feet", "cm185Remainder", "cm185Inch"], [["185 ÷ 30 = ", input("cm185Feet", 6), " あまり ", input("cm185Remainder", 5)], ["5 ÷ 2.5 = ", input("cm185Inch", 2), " inch"]], "6 feet 2 inch"),
+          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "120 cm は何 feet 何 inch？", ["cm120Feet", "cm120Remainder", "cm120Inch"], [["120 ÷ 30 = ", input("cm120Feet", 4), " あまり ", input("cm120Remainder", 0)], ["0 ÷ 2.5 = ", input("cm120Inch", 0), " inch"]], "4 feet 0 inch"),
+        ];
+        return [...shuffle(oz), ...shuffle(go), ...shuffle(feet)];
+      }
+
+      function renderFishingPart(part) {
+        if (typeof part === "string") {
+          const text = document.createElement("span");
+          text.textContent = part;
+          return text;
+        }
+        if (part.type === "fraction") {
+          const fractionPart = document.createElement("span");
+          fractionPart.className = "fishingFraction";
+          fractionPart.append(renderFishingPart(part.numerator), document.createElement("i"), renderFishingPart(part.denominator));
+          return fractionPart;
+        }
+        if (part.type === "staticFraction") {
+          const fractionPart = document.createElement("span");
+          const numerator = document.createElement("span");
+          const denominator = document.createElement("span");
+          const line = document.createElement("i");
+          fractionPart.className = "fishingFraction";
+          numerator.textContent = part.numerator;
+          denominator.textContent = part.denominator;
+          fractionPart.append(numerator, line, denominator);
+          return fractionPart;
+        }
+        const button = document.createElement("button");
+        const value = fishingValues[part.field] || "";
+        button.type = "button";
+        button.className = "fishingInput";
+        button.dataset.fishingField = part.field;
+        button.dataset.slots = String(Math.min(4, Math.max(1, part.value.length)));
+        button.textContent = value;
+        button.classList.toggle("active", fishingActiveField === part.field);
+        return button;
+      }
+
+      function renderFishingProblem() {
+        if (!fishingProblem) return;
+        fishingFact.textContent = fishingProblem.fact;
+        fishingQuestion.textContent = fishingProblem.text;
+        fishingSteps.replaceChildren();
+        const completedFields = new Set();
+        fishingProblem.steps.forEach((parts, stepIndex) => {
+          const priorComplete = [...completedFields].every((field) => fishingValues[field] === fishingExpected(field));
+          if (stepIndex > 0 && !priorComplete) return;
+          const row = document.createElement("div");
+          row.className = "fishingStep";
+          parts.forEach((part) => row.append(renderFishingPart(part)));
+          fishingSteps.append(row);
+          parts.forEach((part) => {
+            if (part?.type === "input") completedFields.add(part.field);
+            if (part?.type === "fraction") {
+              completedFields.add(part.numerator.field);
+              completedFields.add(part.denominator.field);
+            }
+          });
+        });
+      }
+
+      function fishingExpected(field) {
+        for (const step of fishingProblem?.steps || []) {
+          for (const part of step) {
+            if (typeof part !== "object") continue;
+            if (part.type === "input" && part.field === field) return part.value;
+            if (part.type === "fraction") {
+              if (part.numerator.field === field) return part.numerator.value;
+              if (part.denominator.field === field) return part.denominator.value;
+            }
+          }
+        }
+        return "";
+      }
+
+      function setFishingActive(field) {
+        if (selectedApp !== "fishing" || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
+        fishingActiveField = field;
+        renderFishingProblem();
+      }
+
+      function clearFishingFields() {
+        fishingValues = {};
+        fishingActiveField = fishingProblem?.fields[0] || "";
+        renderFishingProblem();
+      }
+
+      function completeFishingProblem() {
+        setLocked(true);
+        renderFishingProblem();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          showReaction(true);
+          correctCount += 1;
+          updateProgress();
+          if (isLastTimedProblem()) {
+            finalTime = elapsedTime();
+            clearedAt = new Date();
+            isFinished = true;
+            updateProgress();
+            schedule(finishRound);
+            return;
+          }
+          schedule(() => {
+            hideReaction();
+            setLocked(false);
+            nextProblem(true);
+          });
+        }));
+      }
+
+      function fishingReceive(value) {
+        if (selectedApp !== "fishing" || isAnswerLocked || isFinished || !fishingActiveField) return;
+        const expectedValue = fishingExpected(fishingActiveField);
+        if (!/^\d$/.test(value) && value !== ".") return;
+        if (value === "." && (!expectedValue.includes(".") || (fishingValues[fishingActiveField] || "").includes("."))) return;
+        const next = (fishingValues[fishingActiveField] || "") + value;
+        if (!expectedValue.startsWith(next)) {
+          showWrongConfirmation(`fishing:${fishingActiveField}:${next}`, clearFishingFields);
+          return;
+        }
+        fishingValues[fishingActiveField] = next;
+        if (next !== expectedValue) {
+          renderFishingProblem();
+          return;
+        }
+        const currentIndex = fishingProblem.fields.indexOf(fishingActiveField);
+        if (currentIndex < fishingProblem.fields.length - 1) {
+          fishingActiveField = fishingProblem.fields[currentIndex + 1];
+          renderFishingProblem();
+          return;
+        }
+        completeFishingProblem();
+      }
+
+      function fishingBackspace() {
+        if (selectedApp !== "fishing" || isAnswerLocked || isFinished) return;
+        const value = fishingValues[fishingActiveField] || "";
+        if (value) {
+          fishingValues[fishingActiveField] = value.slice(0, -1);
+          renderFishingProblem();
+          return;
+        }
+        const index = fishingProblem.fields.indexOf(fishingActiveField);
+        if (index > 0) setFishingActive(fishingProblem.fields[index - 1]);
       }
 
       function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "", coefficientOnRight = false, useProductDenominator = false) {
@@ -6114,9 +6363,6 @@
           });
         };
         addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
-        if (fractionAddSubtractProblem.operator === "add" || fractionAddSubtractProblem.requiresCommonDenominator) {
-          addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
-        }
         if (fractionAddSubtractNeedsWork()) {
           const terms = fractionAddSubtractWorkTerms();
           addDigits(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first);
@@ -6138,10 +6384,7 @@
         const needsCommonDenominator = addition || fractionAddSubtractProblem.requiresCommonDenominator;
         const needsWork = fractionAddSubtractNeedsWork();
         const terms = fractionAddSubtractWorkTerms();
-        const visible = new Set([
-          ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
-          ...(needsCommonDenominator ? visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator) : []),
-        ]);
+        const visible = new Set(visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator));
         [...FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, ...FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS].forEach((slot) => {
           inputs[slot].hidden = !visible.has(slot);
         });
@@ -6158,9 +6401,12 @@
         fractionAddSubtractWork.hidden = !needsWork;
         fractionAddSubtractWorkDenominator.textContent = needsWork ? answer.denominator : "";
         fractionAddSubtractPrimaryMinus.hidden = addition || !fractionAddSubtractProblem.negative;
-        fractionAddSubtractPrimaryDenominatorInputs.hidden = !needsCommonDenominator;
-        fractionAddSubtractPrimaryDenominator.hidden = needsCommonDenominator;
-        fractionAddSubtractPrimaryDenominator.textContent = needsCommonDenominator ? "" : answer.denominator;
+        fractionAddSubtractPrimaryDenominatorInputs.hidden = true;
+        fractionAddSubtractPrimaryDenominator.hidden = false;
+        fractionAddSubtractPrimaryDenominator.textContent = answer.denominator;
+        const showPrimaryAnswer = !needsWork || fractionAddSubtractAdditionStage === "answer";
+        fractionAddSubtractPrimaryEquals.hidden = !showPrimaryAnswer;
+        fractionAddSubtractPrimaryAnswer.hidden = !showPrimaryAnswer;
         const showReduced = Boolean(fractionAddSubtractProblem.reduced);
         const reducedIsInteger = showReduced && fractionAddSubtractProblem.reduced.denominator === 1;
         fractionAddSubtractReducedSpacer.hidden = !showReduced;
@@ -6171,7 +6417,7 @@
       }
 
       function isTimedProblemApp() {
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "fishing" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -6183,6 +6429,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
+        if (selectedApp === "fishing") return fishingIndex;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "equation") return equationIndex;
         if (selectedApp === "simultaneous") return simultaneousIndex;
@@ -6200,6 +6447,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
+        if (selectedApp === "fishing") return fishingDeck.length || FISHING_TARGET;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
         if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
@@ -6221,6 +6469,7 @@
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
         if (selectedApp === "speed") return speedAnswer();
+        if (selectedApp === "fishing") return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
         if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "equation") return equationProblem?.kind === "fraction" ? equationProblem.answer.numerator : equationProblem?.answer || 0;
         if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
@@ -6242,6 +6491,7 @@
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
+        if (selectedApp === "fishing") return fishingProblem?.answerText || "";
         if (selectedApp === "preschool") return String(currentTimedAnswer());
         if (selectedApp === "subtraction") return formattedSubtractionAnswer();
         if (selectedApp === "equation") return equationProblem?.kind === "fraction"
@@ -6276,9 +6526,6 @@
           const needsCommonDenominator = fractionAddSubtractProblem.operator === "add" || fractionAddSubtractProblem.requiresCommonDenominator;
           if (needsCommonDenominator) {
             if (fractionAddSubtractNeedsWork()) {
-              if (fractionAddSubtractAdditionStage === "denominator") {
-                return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator);
-              }
               if (fractionAddSubtractAdditionStage === "work") {
                 const terms = fractionAddSubtractWorkTerms();
                 return [
@@ -6288,10 +6535,7 @@
               }
               return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
             }
-            return [
-              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS, answer.denominator),
-              ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator),
-            ];
+            return visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
           }
           const slots = ["fractionAddSubtractPrimaryNumeratorOnes"];
           if (fractionAddSubtractProblem.reduced) {
@@ -6460,6 +6704,7 @@
         if (app === "grouping") return GROUPING_BEST_KEY;
         if (app === "ratio") return RATIO_BEST_KEY;
         if (app === "speed") return SPEED_BEST_KEY;
+        if (app === "fishing") return FISHING_BEST_KEY;
         if (app === "preschool") return PRESCHOOL_BEST_KEY;
         if (app === "equation") return EQUATION_BEST_KEY;
         if (app === "simultaneous") return SIMULTANEOUS_BEST_KEY;
@@ -7252,6 +7497,7 @@
         grouping: chooseGrouping,
         ratio: chooseRatio,
         speed: chooseSpeed,
+        fishing: chooseFishing,
         preschool: choosePreschool,
         equation: chooseEquation,
         simultaneous: chooseSimultaneous,
@@ -7501,7 +7747,14 @@
           suppressMenuClick();
           gesture.tile.classList.remove("menuDragging");
           ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => gesture.tile.style.removeProperty(property));
-          if (gesture.dragPage !== gesture.sourcePage) {
+          const moved = Math.hypot(dx, dy) > 16;
+          if (!moved) {
+            // A simple long press transfers the tile. Dragging remains available
+            // for reordering, but moving a graduated mode back must not require
+            // dragging across the whole pager.
+            const destination = gesture.sourcePage === "active" ? "graduated" : "active";
+            moveMenuAppToPage(gesture.app, gesture.sourcePage, destination);
+          } else if (gesture.dragPage !== gesture.sourcePage) {
             const targetApp = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuButton[data-menu-app]")?.dataset.menuApp;
             moveMenuAppToPage(gesture.app, gesture.sourcePage, gesture.dragPage, targetApp);
           } else {
@@ -7578,7 +7831,7 @@
         appMenu.hidden = false;
         setMenuPage("active");
         renderMenu();
-        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode", "fishingMode");
         multiplicationCover.hidden = true;
         basicDivisionCover.hidden = true;
         improperFractionCover.hidden = true;
@@ -7590,6 +7843,7 @@
         groupingCover.hidden = true;
         ratioCover.hidden = true;
         speedCover.hidden = true;
+        fishingCover.hidden = true;
         preschoolCover.hidden = true;
         equationCover.hidden = true;
         simultaneousCover.hidden = true;
@@ -7712,7 +7966,7 @@
             showWrongConfirmation(answerSignature(), clearActiveAnswers);
             return;
           }
-          fractionAddSubtractAdditionStage = fractionAddSubtractAdditionStage === "denominator" ? "work" : "answer";
+          fractionAddSubtractAdditionStage = "answer";
           updateFractionAddSubtractSlots();
           setActive(activeSlotOrder()[0]);
           return;
@@ -8152,6 +8406,16 @@
             return;
           }
             speedProblem = speedDeck[speedIndex];
+          } else if (selectedApp === "fishing") {
+            if (keepChallenge) fishingIndex += 1;
+            if (fishingIndex >= fishingDeck.length) {
+              finalTime = elapsedTime();
+              clearedAt = new Date();
+              isFinished = true;
+              finishRound();
+              return;
+            }
+            fishingProblem = fishingDeck[fishingIndex];
           } else if (selectedApp === "equation") {
             if (keepChallenge) equationIndex += 1;
             if (equationIndex >= equationDeck.length) {
@@ -8606,6 +8870,38 @@
         resetInputs(true);
       }
 
+      function startFishingChallenge() {
+        selectedApp = "fishing";
+        hasStarted = true;
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        fishingCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = true;
+        challengeView.hidden = false;
+        gameArea.hidden = false;
+        finishPanel.hidden = true;
+        fishingDeck = createFishingDeck();
+        fishingIndex = 0;
+        fishingProblem = fishingDeck[0];
+        resetChallenge();
+        renderProblem();
+        resetInputs(true);
+      }
+
       function startPreschoolChallenge() {
         selectedApp = "preschool";
         hasStarted = true;
@@ -8941,6 +9237,33 @@
         resetInputs(true);
       }
 
+      function showFishingCover() {
+        selectedApp = "fishing";
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
+        appMenu.hidden = true;
+        cover.hidden = true;
+        multiplicationCover.hidden = true;
+        basicDivisionCover.hidden = true;
+        improperFractionCover.hidden = true;
+        longMultiplicationCover.hidden = true;
+        doubleMultiplicationCover.hidden = true;
+        divisionCover.hidden = true;
+        fractionCalculationCover.hidden = true;
+        fractionAddSubtractCover.hidden = true;
+        groupingCover.hidden = true;
+        ratioCover.hidden = true;
+        speedCover.hidden = true;
+        preschoolCover.hidden = true;
+        equationCover.hidden = true;
+        simultaneousCover.hidden = true;
+        fishingCover.hidden = false;
+        challengeView.hidden = true;
+        finishPanel.hidden = true;
+        hasStarted = false;
+        hideReaction();
+        resetInputs(true);
+      }
+
       function showPreschoolCover() {
         selectedApp = "preschool";
         challengeView.classList.remove("divisionMode", "ratioMode");
@@ -9073,12 +9396,14 @@
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
         speedProblemLine.hidden = selectedApp !== "speed";
+        fishingProblemLine.hidden = selectedApp !== "fishing";
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         equationProblemLine.hidden = selectedApp !== "equation";
         simultaneousProblemLine.hidden = selectedApp !== "simultaneous";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
+        challengeView.classList.toggle("fishingMode", selectedApp === "fishing");
         challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -9131,7 +9456,7 @@
         } else if (selectedApp === "fractionAddSubtract") {
           const sign = fractionAddSubtractProblem.operator === "add" ? "+" : "-";
           fractionAddSubtractQuestion.innerHTML = `${fraction(fractionAddSubtractProblem.first.numerator, fractionAddSubtractProblem.first.denominator)}<span class="fractionAddSubtractOperator">${sign}</span>${fraction(fractionAddSubtractProblem.second.numerator, fractionAddSubtractProblem.second.denominator)}`;
-          fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "denominator" : "answer";
+          fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "work" : "answer";
           updateFractionAddSubtractSlots();
         } else if (selectedApp === "grouping") {
           const sign = groupingProblem.operator === "add" ? "+" : "-";
@@ -9142,6 +9467,10 @@
           renderRatioProblem();
           } else if (selectedApp === "speed") {
             renderSpeedProblem();
+          } else if (selectedApp === "fishing") {
+            fishingValues = {};
+            fishingActiveField = fishingProblem?.fields[0] || "";
+            renderFishingProblem();
           } else if (selectedApp === "equation") {
             renderEquationProblem();
           } else if (selectedApp === "simultaneous") {
@@ -9231,6 +9560,10 @@
           speedBackspace();
           return;
         }
+        if (selectedApp === "fishing") {
+          fishingBackspace();
+          return;
+        }
         if (selectedApp === "equation") {
           equationBackspace();
           return;
@@ -9267,6 +9600,10 @@
           }
           if (selectedApp === "speed") {
             resetInputs();
+            return;
+          }
+          if (selectedApp === "fishing") {
+            clearFishingFields();
             return;
           }
           if (selectedApp === "equation") {
@@ -9312,6 +9649,11 @@
             speedReceive("\u00f7");
             return;
           }
+        }
+        if (selectedApp === "fishing" && (/^\d$/.test(event.key) || event.key === ".")) {
+          event.preventDefault();
+          fishingReceive(event.key);
+          return;
         }
         if (selectedApp === "equation" || selectedApp === "simultaneous") {
           if (/^\d$/.test(event.key)) {
@@ -9365,6 +9707,10 @@
             speedReceive(button.dataset.digit);
             return;
           }
+          if (selectedApp === "fishing") {
+            fishingReceive(button.dataset.digit);
+            return;
+          }
           if (selectedApp === "equation") {
             equationReceive(button.dataset.digit);
             return;
@@ -9395,6 +9741,17 @@
         input.addEventListener("click", () => {
           if (selectedApp === "speed") setSpeedActive(input.dataset.speedField);
         });
+      });
+
+      fishingSteps.addEventListener("pointerdown", (event) => {
+        const input = event.target.closest("[data-fishing-field]");
+        if (!input) return;
+        event.preventDefault();
+        setFishingActive(input.dataset.fishingField);
+      });
+      fishingSteps.addEventListener("click", (event) => {
+        const input = event.target.closest("[data-fishing-field]");
+        if (input) setFishingActive(input.dataset.fishingField);
       });
 
       document.querySelectorAll("[data-equation-field]").forEach((input) => {
@@ -9432,6 +9789,7 @@
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
+        if (selectedApp === "fishing") fishingReceive(".");
         if (selectedApp === "equation") equationReceive("\u2212");
         if (selectedApp === "simultaneous") simultaneousReceive("\u2212");
       });
@@ -9461,6 +9819,7 @@
       chooseGrouping.addEventListener("click", showGroupingCover);
       chooseRatio.addEventListener("click", showRatioCover);
       chooseSpeed.addEventListener("click", showSpeedCover);
+      chooseFishing.addEventListener("click", showFishingCover);
       choosePreschool.addEventListener("click", showPreschoolCover);
       chooseEquation.addEventListener("click", showEquationCover);
       chooseSimultaneous.addEventListener("click", showSimultaneousCover);
@@ -9501,6 +9860,7 @@
       groupingStartButton.addEventListener("click", startGroupingChallenge);
       ratioStartButton.addEventListener("click", startRatioChallenge);
       speedStartButton.addEventListener("click", startSpeedChallenge);
+      fishingStartButton.addEventListener("click", startFishingChallenge);
       preschoolStartButton.addEventListener("click", startPreschoolChallenge);
       equationStartButton.addEventListener("click", startEquationChallenge);
       simultaneousStartButton.addEventListener("click", startSimultaneousChallenge);
