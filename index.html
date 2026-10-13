@@ -178,9 +178,12 @@
         color: var(--coral);
       }
       #appMenu {
-        align-content: center;
+        align-content: start;
         gap: clamp(7px, 1.35vmin, 13px);
         transform: translateY(-8px);
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+        height: 100%;
+        overflow: hidden;
       }
       #appMenu h1 { font-size: clamp(2.3rem, 8vmin, 5rem); }
       #appMenu .coverIllustration {
@@ -197,25 +200,40 @@
       }
       .menuPagerViewport {
         width: 100%;
-        overflow: hidden;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         touch-action: pan-y;
+        padding: 0 2px clamp(16px, 3vmin, 28px);
       }
       .menuPager {
-        display: flex;
-        width: 200%;
-        transition: transform 220ms ease;
+        display: grid;
+        width: 100%;
+        gap: clamp(14px, 2.5vmin, 26px);
       }
-      .menuPagerViewport[data-menu-page="graduated"] .menuPager { transform: translateX(-50%); }
       .menuPage {
         display: grid;
-        flex: 0 0 50%;
         min-width: 0;
         padding: 0 1px;
       }
       .menuPage { visibility: visible; }
+      .menuGraduationDivider {
+        display: grid;
+        place-items: center;
+        min-height: clamp(40px, 7vmin, 58px);
+        border-top: 3px solid var(--ink);
+        color: var(--ink);
+        font-size: clamp(1.05rem, 3vmin, 1.55rem);
+        font-weight: 900;
+      }
+      .menuGraduationDivider span {
+        padding: 0 clamp(12px, 2.5vmin, 22px);
+        background: #fff;
+        transform: translateY(-50%);
+      }
       #appMenu .appChoices {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-template-rows: repeat(6, minmax(0, 1fr));
+        grid-auto-rows: minmax(clamp(46px, 8.4vh, 76px), auto);
         gap: clamp(8px, 1.5vmin, 12px);
         width: min(100%, 900px);
       }
@@ -251,7 +269,7 @@
         box-shadow: 0 12px 18px rgba(22, 32, 42, 0.2);
       }
       #appMenu .menuSlot.dragTarget { outline: 3px solid rgba(37, 99, 235, 0.42); outline-offset: 2px; }
-      .menuPageDots { display: flex; justify-content: center; gap: 8px; min-height: 10px; }
+      .menuPageDots { display: none; }
       .menuPageDot { width: 8px; height: 8px; border-radius: 999px; background: #d2d9e2; transition: width 160ms ease, background 160ms ease; }
       .menuPageDot.isActive { width: 22px; background: #6f7f92; }
       #chooseMultiplication, #chooseFraction, #chooseLongMultiplication, #chooseFractionAddSubtract { background: #eef8f2; }
@@ -658,7 +676,16 @@
       .ratioRateLine .ratioFraction { width: max-content; min-width: clamp(58px, 11vmin, 82px); }
       .ratioIncreaseRateStack { display: grid; gap: clamp(6px, 1.4vmin, 12px); }
       .ratioIncreaseLine > :first-child { margin-left: clamp(4px, 1.5vmin, 16px); }
-      .ratioIncreaseLine .ratioFraction { width: clamp(58px, 11vmin, 82px); min-width: 0; }
+      .ratioIncreaseLine .ratioFraction { width: max-content; min-width: clamp(58px, 11vmin, 82px); }
+      .ratioIncreaseStaticValue {
+        display: inline;
+        min-width: 0;
+        height: auto;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
       .ratioChangeRateInput { min-width: clamp(68px, 13vmin, 110px); }
       .ratioIncreaseWariInput { min-width: clamp(60px, 11vmin, 86px); }
       .ratioChangeSign { min-width: 0.7em; text-align: center; }
@@ -2229,7 +2256,7 @@
         .appChoices { grid-template-columns: 1fr; }
         #appMenu .appChoices {
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          grid-template-rows: repeat(8, minmax(0, 1fr));
+          grid-auto-rows: minmax(clamp(44px, 7.4vh, 68px), auto);
         }
         #appMenu .menuSlot,
         #appMenu .menuButton {
@@ -2493,7 +2520,8 @@
                   <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
                 </div>
               </section>
-              <section class="menuPage" id="graduatedMenuPage" aria-label="&#21330;&#26989;&#12375;&#12383;&#12514;&#12540;&#12489;" aria-hidden="true">
+              <div class="menuGraduationDivider" role="separator" aria-label="卒業したもの"><span>&#21330;&#26989;&#12375;&#12383;&#12514;&#12398;</span></div>
+              <section class="menuPage" id="graduatedMenuPage" aria-label="&#21330;&#26989;&#12375;&#12383;&#12514;&#12540;&#12489;" aria-hidden="false">
                 <div class="appChoices" id="graduatedAppChoices"></div>
               </section>
             </div>
@@ -2911,10 +2939,12 @@
               </div>
             </div>
             <div class="ratioIncreaseRateStack" id="ratioIncreaseRateStack" hidden>
-              <div class="ratioIncreaseLine" id="ratioIncreaseRawLine">
-                <button class="ratioKnownValue ratioFreeInput" id="ratioIncreaseCurrentInput" data-ratio-field="increaseCurrent" type="button" aria-label="増えた後の金額"></button>
-                <span>÷</span>
-                <button class="ratioKnownValue ratioFreeInput" id="ratioIncreaseBaseInput" data-ratio-field="increaseBase" type="button" aria-label="もとの金額"></button>
+              <div class="ratioIncreaseLine" id="ratioIncreaseExpressionLine">
+                <button class="ratioFreeInput" id="ratioIncreaseCurrentInput" data-ratio-field="increaseCurrent" type="button" aria-label="増えた後の金額"></button>
+                <button class="ratioOperatorInput" id="ratioIncreaseOperatorInput" data-ratio-field="increaseOperator" type="button" aria-label="割り算の記号">○</button>
+                <button class="ratioFreeInput" id="ratioIncreaseBaseInput" data-ratio-field="increaseBase" type="button" aria-label="もとの金額"></button>
+              </div>
+              <div class="ratioIncreaseLine" id="ratioIncreaseRawLine" hidden>
                 <span>=</span>
                 <span class="ratioFraction">
                   <button class="ratioFreeInput" id="ratioIncreaseRawNumeratorInput" data-ratio-field="increaseRawNumerator" type="button" aria-label="約分前の分子"></button>
@@ -3461,7 +3491,7 @@
         "equation",
         "simultaneous",
       ];
-      const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV2";
+      const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
 
       let selectedApp = "menu";
       let mode = "easy";
@@ -3990,6 +4020,7 @@
         changeAnswerTens: document.querySelector("#ratioChangeAnswerTensInput"),
         changeAnswerOnes: document.querySelector("#ratioChangeAnswerOnesInput"),
         increaseCurrent: document.querySelector("#ratioIncreaseCurrentInput"),
+        increaseOperator: document.querySelector("#ratioIncreaseOperatorInput"),
         increaseBase: document.querySelector("#ratioIncreaseBaseInput"),
         increaseRawNumerator: document.querySelector("#ratioIncreaseRawNumeratorInput"),
         increaseRawDenominator: document.querySelector("#ratioIncreaseRawDenominatorInput"),
@@ -4245,8 +4276,8 @@
         const increaseRateProblems = [
           { base: 360, current: 450, rawNumerator: 45, rawDenominator: 36, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
           { base: 160, current: 200, rawNumerator: 20, rawDenominator: 16, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
-          { base: 80, current: 200, rawNumerator: 20, rawDenominator: 8, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.50", percent: 150, wari: "15" },
-          { base: 120, current: 300, rawNumerator: 30, rawDenominator: 12, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.50", percent: 150, wari: "15" },
+          { base: 80, current: 200, rawNumerator: 20, rawDenominator: 8, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.5", percent: 150, wari: "15" },
+          { base: 120, current: 300, rawNumerator: 30, rawDenominator: 12, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.5", percent: 150, wari: "15" },
         ];
 
         if (type === "increaseRate") {
@@ -4443,30 +4474,24 @@
           question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
           question("1号は 3.75 g です。", "15 g は何号？", ["goFourWeight", "goFourOperator", "goFourUnit", "goFour"], [[input("goFourWeight", 15), operator("goFourOperator", "÷"), input("goFourUnit", "3.75"), " = ", input("goFour", 4), " 号"]], "4号"),
         ];
-        const feet = [
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "7 feet 6 inch は何 cm？", ["feetSevenSixFootUnit", "feetSevenSixFootMultiply", "feetSevenSixFootCount", "feetSevenSixFootResult", "feetSevenSixInchUnit", "feetSevenSixInchMultiply", "feetSevenSixInchCount", "feetSevenSixInchResult", "feetSevenSixFirstResult", "feetSevenSixPlus", "feetSevenSixSecondResult", "feetSevenSix"], [[input("feetSevenSixFootUnit", 30), operator("feetSevenSixFootMultiply", "×"), input("feetSevenSixFootCount", 7), " = ", input("feetSevenSixFootResult", 210, true)], [input("feetSevenSixInchUnit", "2.5"), operator("feetSevenSixInchMultiply", "×"), input("feetSevenSixInchCount", 6), " = ", input("feetSevenSixInchResult", 15, true)], [input("feetSevenSixFirstResult", 210), operator("feetSevenSixPlus", "+"), input("feetSevenSixSecondResult", 15), " = ", input("feetSevenSix", 225), " cm"]], "225 cm"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "5 feet 8 inch は何 cm？", ["feetFiveEightFootUnit", "feetFiveEightFootMultiply", "feetFiveEightFootCount", "feetFiveEightFootResult", "feetFiveEightInchUnit", "feetFiveEightInchMultiply", "feetFiveEightInchCount", "feetFiveEightInchResult", "feetFiveEightFirstResult", "feetFiveEightPlus", "feetFiveEightSecondResult", "feetFiveEight"], [[input("feetFiveEightFootUnit", 30), operator("feetFiveEightFootMultiply", "×"), input("feetFiveEightFootCount", 5), " = ", input("feetFiveEightFootResult", 150, true)], [input("feetFiveEightInchUnit", "2.5"), operator("feetFiveEightInchMultiply", "×"), input("feetFiveEightInchCount", 8), " = ", input("feetFiveEightInchResult", 20, true)], [input("feetFiveEightFirstResult", 150), operator("feetFiveEightPlus", "+"), input("feetFiveEightSecondResult", 20), " = ", input("feetFiveEight", 170), " cm"]], "170 cm"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120, true)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "185 cm は何 feet 何 inch？", ["cm185Length", "cm185Divide", "cm185FootUnit", "cm185Feet", "cm185Remainder", "cm185InchDivide", "cm185InchUnit", "cm185Inch"], [[input("cm185Length", 185), operator("cm185Divide", "÷"), input("cm185FootUnit", 30), " = ", input("cm185Feet", 6), " あまり ", input("cm185Remainder", 5)], ["5 ", operator("cm185InchDivide", "÷"), input("cm185InchUnit", "2.5"), " = ", input("cm185Inch", 2), " inch"]], "6 feet 2 inch"),
-          question("1 feet は 30 cm です。　1 inch は 2.5 cm です。", "120 cm は何 feet 何 inch？", ["cm120Length", "cm120Divide", "cm120FootUnit", "cm120Feet", "cm120Remainder", "cm120InchDivide", "cm120InchUnit", "cm120Inch"], [[input("cm120Length", 120), operator("cm120Divide", "÷"), input("cm120FootUnit", 30), " = ", input("cm120Feet", 4), " あまり ", input("cm120Remainder", 0)], ["0 ", operator("cm120InchDivide", "÷"), input("cm120InchUnit", "2.5"), " = ", input("cm120Inch", 0), " inch"]], "4 feet 0 inch"),
+        const lengthFact = "1 feet は 30 cm です。　1 inch は 2.5 cm です。　1 feet は 12 inch です。";
+        const feetOnly = [
+          question(lengthFact, "2 feet は何 cm？", ["footTwoUnit", "footTwoOperator", "footTwoCount", "footTwo"], [[input("footTwoUnit", 30), operator("footTwoOperator", "×"), input("footTwoCount", 2), " = ", input("footTwo", 60, true), " cm"]], "60 cm"),
+          question(lengthFact, "4 feet は何 cm？", ["footFourUnit", "footFourOperator", "footFourCount", "footFour"], [[input("footFourUnit", 30), operator("footFourOperator", "×"), input("footFourCount", 4), " = ", input("footFour", 120, true), " cm"]], "120 cm"),
         ];
-        const multiplicationQuestions = [
-          ...shuffle(ozMultiplication).slice(0, 2),
-          ...shuffle(go.slice(0, 3)),
-          ...shuffle(feet.slice(0, 3)),
+        const inchOnly = [
+          question(lengthFact, "4 inch は何 cm？", ["inchFourUnit", "inchFourOperator", "inchFourCount", "inchFour"], [[input("inchFourUnit", "2.5"), operator("inchFourOperator", "×"), input("inchFourCount", 4), " = ", input("inchFour", 10, true), " cm"]], "10 cm"),
+          question(lengthFact, "8 inch は何 cm？", ["inchEightUnit", "inchEightOperator", "inchEightCount", "inchEight"], [[input("inchEightUnit", "2.5"), operator("inchEightOperator", "×"), input("inchEightCount", 8), " = ", input("inchEight", 20, true), " cm"]], "20 cm"),
         ];
-        const divisionQuestions = [
-          ...shuffle(ozDivision),
-          ...shuffle(go.slice(3)),
-          ...shuffle(feet.slice(3)),
+        const mixedLength = [
+          question(lengthFact, "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120, true)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
+          question(lengthFact, "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
         ];
-        const deck = [];
-        while (multiplicationQuestions.length || divisionQuestions.length) {
-          if (multiplicationQuestions.length) deck.push(multiplicationQuestions.pop());
-          if (divisionQuestions.length) deck.push(divisionQuestions.pop());
-        }
-        return deck;
+        return [
+          ozMultiplication[0], ozMultiplication[1], ozDivision[0], ozMultiplication[2],
+          go[0], go[1], go[3], go[2],
+          ...feetOnly, ...inchOnly, ...mixedLength,
+        ];
       }
 
       function renderFishingPart(part) {
@@ -6496,6 +6521,12 @@
           : 1 - Number(item.rate.decimal);
       }
 
+      function ratioIncreaseDecimalFields(item = ratioProblem) {
+        const decimalDigits = String(item?.decimal || "").split(".")[1] || "";
+        const slots = ["increaseDecimalTenths", "increaseDecimalHundredths"];
+        return ["increaseDecimalWhole", ...slots.slice(0, decimalDigits.length)];
+      }
+
       function ratioSpecialStages(item = ratioProblem) {
         if (!ratioIsSpecial(item)) return [];
         if (item.type === "increase" || item.type === "discount") {
@@ -6506,10 +6537,10 @@
           ];
         }
         return [
-          { phase: "increaseRaw", fields: ["increaseCurrent", "increaseBase", "increaseRawDenominator", "increaseRawNumerator"] },
+          { phase: "increaseExpression", fields: ["increaseCurrent", "increaseOperator", "increaseBase"] },
+          { phase: "increaseRaw", fields: ["increaseRawDenominator", "increaseRawNumerator"] },
           { phase: "increaseReduced", fields: ["increaseReducedDenominator", "increaseReducedNumerator"] },
-          { phase: "increaseMixed", fields: ["increaseMixedWhole", "increaseMixedDenominator", "increaseMixedNumerator"] },
-          { phase: "increaseDecimal", fields: ["increaseDecimalWhole", "increaseDecimalTenths", "increaseDecimalHundredths"] },
+          { phase: "increaseDecimal", fields: ratioIncreaseDecimalFields(item) },
           { phase: "increasePercent", fields: ratioSpecialDigitFields(["increasePercentHundreds", "increasePercentTens", "increasePercentOnes"], item.percent) },
           { phase: "increaseWari", fields: ["increaseWari"] },
         ];
@@ -6586,6 +6617,7 @@
             changeFactor: Math.round(ratioChangeMultiplier(item) * 100),
             changeCount: item.base / 100,
             increaseCurrent: item.current,
+            increaseOperator: "÷",
             increaseBase: item.base,
             increaseRawNumerator: item.rawNumerator,
             increaseRawDenominator: item.rawDenominator,
@@ -6646,7 +6678,7 @@
         if (ratioAnswerStageFields().includes(field) && !ratioExpressionIsCorrect()) return;
         ratioActiveField = field;
         Object.entries(ratioFields).forEach(([key, input]) => input.classList.toggle("active", key === field));
-        keypad.classList.toggle("operatorChoice", field === "operator");
+        keypad.classList.toggle("operatorChoice", ["operator", "increaseOperator"].includes(field));
       }
 
       function renderRatioDigitTiles(input, field, value) {
@@ -6667,15 +6699,15 @@
       function renderRatioEntry() {
         Object.entries(ratioFields).forEach(([field, input]) => {
           const value = ratioValues[field] || "";
-          if (field !== "operator" && input.classList.contains("ratioFreeInput")) {
+          if (!["operator", "increaseOperator"].includes(field) && input.classList.contains("ratioFreeInput")) {
             renderRatioDigitTiles(input, field, value);
           } else {
             input.classList.remove("ratioDigitInput");
-            input.textContent = value || (field === "operator" ? "\u25cb" : "");
+            input.textContent = value || (["operator", "increaseOperator"].includes(field) ? "\u25cb" : "");
           }
           input.classList.toggle("active", field === ratioActiveField);
         });
-        keypad.classList.toggle("operatorChoice", ratioActiveField === "operator");
+        keypad.classList.toggle("operatorChoice", ["operator", "increaseOperator"].includes(ratioActiveField));
       }
 
       function resetRatioEntry() {
@@ -6728,16 +6760,17 @@
 
           const stageIndex = ratioSpecialStages().findIndex((stage) => stage.phase === ratioPhase);
           const showThrough = Math.max(0, stageIndex);
-          document.querySelector("#ratioIncreaseRawLine").hidden = false;
-          document.querySelector("#ratioIncreaseReducedLine").hidden = showThrough < 1;
-          document.querySelector("#ratioIncreaseMixedLine").hidden = showThrough < 2;
+          document.querySelector("#ratioIncreaseExpressionLine").hidden = false;
+          document.querySelector("#ratioIncreaseRawLine").hidden = showThrough < 1;
+          document.querySelector("#ratioIncreaseReducedLine").hidden = showThrough < 2;
+          document.querySelector("#ratioIncreaseMixedLine").hidden = true;
           document.querySelector("#ratioIncreaseDecimalLine").hidden = showThrough < 3;
           document.querySelector("#ratioIncreasePercentLine").hidden = showThrough < 4;
           document.querySelector("#ratioIncreaseWariLine").hidden = showThrough < 5;
-          ["increaseCurrent", "increaseBase", "increaseRawNumerator", "increaseRawDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 1) ["increaseReducedNumerator", "increaseReducedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 2) ["increaseMixedWhole", "increaseMixedNumerator", "increaseMixedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 3) ["increaseDecimalWhole", "increaseDecimalTenths", "increaseDecimalHundredths"].forEach((field) => { ratioFields[field].hidden = false; });
+          ["increaseCurrent", "increaseOperator", "increaseBase"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (showThrough >= 1) ["increaseRawNumerator", "increaseRawDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (showThrough >= 2) ["increaseReducedNumerator", "increaseReducedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (showThrough >= 3) ratioIncreaseDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
           if (showThrough >= 4) ratioSpecialDigitFields(["increasePercentHundreds", "increasePercentTens", "increasePercentOnes"], ratioProblem.percent)
             .forEach((field) => { ratioFields[field].hidden = false; });
           if (showThrough >= 5) ratioFields.increaseWari.hidden = false;
@@ -7663,7 +7696,7 @@
           if (!stage.fields.includes(field)) return;
           if (field === stage.fields.at(-1)) {
             if (!stage.fields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
-              showWrongConfirmation(ratioSignature(), () => clearRatioFields(stage.fields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(stage.fields));
               return;
             }
             const stages = ratioSpecialStages();
@@ -7686,7 +7719,7 @@
         const fields = ratioFieldOrder();
         if (expressionFields.includes(field) && field === expressionFields.at(-1)) {
           if (!ratioExpressionIsCorrect()) {
-            showWrongConfirmation(ratioSignature(), () => clearRatioFields(expressionFields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(expressionFields));
             return;
           }
           ratioAdvance(field);
@@ -7694,7 +7727,7 @@
         }
         if (answerFields.includes(field) && field === answerFields.at(-1)) {
           if (!answerFields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
-            showWrongConfirmation(ratioSignature(), () => clearRatioFields(answerFields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(answerFields));
             return;
           }
           completeRatioProblem();
@@ -7707,7 +7740,7 @@
       function ratioReceive(value) {
         if (selectedApp !== "ratio" || isAnswerLocked || isFinished || !ratioActiveField) return;
         const field = ratioActiveField;
-        const isOperator = field === "operator";
+        const isOperator = ["operator", "increaseOperator"].includes(field);
         const specialDecimalField = ["changeRate", "increaseWari"].includes(field);
         const allowed = isOperator
           ? value === "\u00d7" || value === "\u00f7"
@@ -7721,7 +7754,7 @@
         if (next.length > wanted.length) return;
         ratioSetValue(field, next);
         if (isOperator && next !== wanted) {
-          showOperatorPenalty(() => clearRatioFields(["operator"]));
+          showOperatorPenalty(() => clearRatioFields([field]));
           return;
         }
         if (ratioProblem.type === "rate" && field === "decimalTenths" && next.length === wanted.length) {
@@ -7784,6 +7817,12 @@
         renderRatioEntry();
         renderRatioDiagram();
         setRatioActive(fields[0] || ratioFieldOrder()[0] || "");
+      }
+
+      function clearIncorrectRatioFields(fields) {
+        const incorrect = fields.filter((field) => (ratioValues[field] || "") !== ratioExpected(field));
+        if (!incorrect.length) return;
+        clearRatioFields(incorrect);
       }
 
       function completeRatioProblem() {
@@ -8161,15 +8200,13 @@
       }
 
       function defaultMenuLayout() {
-        const capacity = menuSlotCount();
         return {
-          active: APP_ORDER.slice(0, capacity),
-          graduated: APP_ORDER.slice(capacity),
+          active: [...APP_ORDER],
+          graduated: [],
         };
       }
 
       function normalizeMenuLayout(layout) {
-        const capacity = menuSlotCount();
         const used = new Set();
         const sanitize = (items) => (Array.isArray(items) ? items : [])
           .filter((app) => APP_ORDER.includes(app) && !used.has(app) && used.add(app));
@@ -8178,11 +8215,10 @@
 
         APP_ORDER.forEach((app) => {
           if (used.has(app)) return;
-          (active.length < capacity ? active : graduated).push(app);
+          active.push(app);
           used.add(app);
         });
 
-        while (active.length > capacity) graduated.unshift(active.pop());
         return { active, graduated };
       }
 
@@ -8206,22 +8242,21 @@
       function setMenuPage(page) {
         menuPage = page === "graduated" ? "graduated" : "active";
         menuPagerViewport.dataset.menuPage = menuPage;
-        menuPageTitle.textContent = menuPage === "active" ? "学習中のもの" : "卒業したもの";
-        activeMenuPage.setAttribute("aria-hidden", String(menuPage !== "active"));
-        graduatedMenuPage.setAttribute("aria-hidden", String(menuPage !== "graduated"));
-        activeMenuDot.classList.toggle("isActive", menuPage === "active");
-        graduatedMenuDot.classList.toggle("isActive", menuPage === "graduated");
+        menuPageTitle.textContent = "学習中のもの";
+        activeMenuPage.setAttribute("aria-hidden", "false");
+        graduatedMenuPage.setAttribute("aria-hidden", "false");
       }
 
-      function renderMenuPage(container, apps) {
-        const capacity = menuSlotCount();
+      function renderMenuPage(container, apps, page) {
         // A page is always packed from its top-left slot; blanks belong only at the end.
         const packedApps = apps.filter(Boolean);
         container.replaceChildren();
-        for (let index = 0; index < capacity; index += 1) {
+        const slotCount = packedApps.length + (page === "graduated" ? 1 : 0);
+        for (let index = 0; index < slotCount; index += 1) {
           const slot = document.createElement("div");
           slot.className = "menuSlot";
           slot.dataset.menuIndex = String(index);
+          slot.dataset.menuPage = page;
           const app = packedApps[index];
           if (app) {
             slot.classList.add("hasTile");
@@ -8233,9 +8268,9 @@
 
       function renderMenu() {
         const layout = readMenuLayout();
-        renderMenuPage(activeAppChoices, layout.active);
-        renderMenuPage(graduatedAppChoices, layout.graduated);
-        setMenuPage(menuPage);
+        renderMenuPage(activeAppChoices, layout.active, "active");
+        renderMenuPage(graduatedAppChoices, layout.graduated, "graduated");
+        setMenuPage("active");
       }
 
       function orderedAppsForRecords() {
@@ -8258,7 +8293,6 @@
       function moveMenuAppToPage(app, sourcePage, destination, targetApp = "") {
         if (!app || destination === sourcePage) return false;
         const layout = readMenuLayout();
-        if (layout[destination].length >= menuSlotCount()) return false;
         const source = layout[sourcePage];
         const sourceIndex = source.indexOf(app);
         if (sourceIndex < 0) return false;
@@ -8266,7 +8300,6 @@
         const targetIndex = layout[destination].indexOf(targetApp);
         layout[destination].splice(targetIndex < 0 ? layout[destination].length : targetIndex, 0, app);
         saveMenuLayout(layout);
-        setMenuPage(destination);
         return true;
       }
 
@@ -8334,11 +8367,10 @@
           pointerId: event.pointerId,
           tile,
           app: tile?.dataset.menuApp || "",
-          sourcePage: menuPage,
-          dragPage: menuPage,
+          sourcePage: tile?.closest(".menuPage")?.id === "graduatedMenuPage" ? "graduated" : "active",
+          dragPage: tile?.closest(".menuPage")?.id === "graduatedMenuPage" ? "graduated" : "active",
           paging: false,
         };
-        try { menuPagerViewport.setPointerCapture(event.pointerId); } catch {}
         menuLongPressActive = false;
         if (!tile) return;
         menuLongPressTimer = window.setTimeout(() => {
@@ -8350,6 +8382,7 @@
           tile.style.setProperty("--menu-drag-width", `${rect.width}px`);
           tile.style.setProperty("--menu-drag-height", `${rect.height}px`);
           tile.classList.add("menuDragging");
+          try { menuPagerViewport.setPointerCapture(event.pointerId); } catch {}
         }, 450);
       });
 
@@ -8359,22 +8392,17 @@
         const dy = event.clientY - menuGesture.y;
         if (!menuLongPressActive && Math.hypot(dx, dy) > 10) {
           clearMenuLongPress();
-          if (Math.abs(dx) > Math.abs(dy) * 1.1) {
-            menuGesture.paging = true;
-            updateMenuPagerSwipe(menuGesture.sourcePage, dx);
-          }
         }
         if (!menuLongPressActive || !menuGesture.tile) return;
+        event.preventDefault();
         menuGesture.tile.style.setProperty("--menu-drag-x", `${dx}px`);
         menuGesture.tile.style.setProperty("--menu-drag-y", `${dy}px`);
-        const dragPage = menuDragPage(menuGesture.sourcePage, dx);
-        if (dragPage !== menuGesture.dragPage) {
-          menuGesture.dragPage = dragPage;
-          setMenuPage(dragPage);
-        }
         document.querySelectorAll("#appMenu .menuSlot.dragTarget").forEach((slot) => slot.classList.remove("dragTarget"));
         const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuSlot");
-        if (target && target.contains(menuGesture.tile) === false) target.classList.add("dragTarget");
+        if (target) {
+          menuGesture.dragPage = target.dataset.menuPage || menuGesture.sourcePage;
+          if (target.contains(menuGesture.tile) === false) target.classList.add("dragTarget");
+        }
       });
 
       menuPagerViewport.addEventListener("pointerup", (event) => {
@@ -8392,11 +8420,7 @@
           ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => gesture.tile.style.removeProperty(property));
           const moved = Math.hypot(dx, dy) > 16;
           if (!moved) {
-            // A simple long press transfers the tile. Dragging remains available
-            // for reordering, but moving a graduated mode back must not require
-            // dragging across the whole pager.
-            const destination = gesture.sourcePage === "active" ? "graduated" : "active";
-            moveMenuAppToPage(gesture.app, gesture.sourcePage, destination);
+            // Long press only enters rearrangement; it never changes graduation by itself.
           } else if (gesture.dragPage !== gesture.sourcePage) {
             const targetApp = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuButton[data-menu-app]")?.dataset.menuApp;
             moveMenuAppToPage(gesture.app, gesture.sourcePage, gesture.dragPage, targetApp);
@@ -8410,10 +8434,6 @@
           return;
         }
 
-        if (gesture.paging) {
-          settleMenuPager(gesture.sourcePage, dx);
-          suppressMenuClick();
-        }
       });
 
       menuPagerViewport.addEventListener("pointercancel", () => {
