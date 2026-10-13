@@ -202,7 +202,7 @@
         width: 100%;
         min-height: 0;
         overflow-x: hidden;
-        overflow-y: auto;
+        overflow-y: hidden;
         overscroll-behavior: contain;
         touch-action: pan-y;
         padding: 0 2px clamp(16px, 3vmin, 28px);
@@ -8258,11 +8258,11 @@
         menuPager.style.transform = `translate3d(${-menuPageIndex * width}px, 0, 0)`;
       }
 
-      function createMenuChoices(apps, page, pageIndex) {
+      function createMenuChoices(apps, page, pageIndex, slotTotal = menuSlotCount()) {
         const choices = document.createElement("div");
         choices.className = "appChoices";
         const packedApps = apps.filter(Boolean);
-        for (let index = 0; index < menuSlotCount(); index += 1) {
+        for (let index = 0; index < slotTotal; index += 1) {
           const slot = document.createElement("div");
           slot.className = "menuSlot";
           slot.dataset.menuIndex = String(index);
@@ -8293,8 +8293,25 @@
           divider.setAttribute("role", "separator");
           divider.innerHTML = "<span>卒業したもの</span>";
           section.append(divider);
-          section.append(createMenuChoices(graduatedApps, "graduated", pageIndex));
+          const graduatedSlots = Math.max(2, Math.min(menuSlotCount(), graduatedApps.length + 1));
+          section.append(createMenuChoices(graduatedApps, "graduated", pageIndex, graduatedSlots));
         }
+        return section;
+      }
+
+      function createGraduatedMenuPage(apps, pageIndex) {
+        const section = document.createElement("section");
+        section.className = "menuPage";
+        section.dataset.menuPage = "graduated";
+        section.dataset.menuPageIndex = String(pageIndex);
+        section.setAttribute("aria-label", "卒業したモード");
+        const divider = document.createElement("div");
+        divider.className = "menuGraduationDivider";
+        divider.setAttribute("role", "separator");
+        divider.innerHTML = "<span>卒業したもの</span>";
+        section.append(divider);
+        const graduatedSlots = Math.max(2, Math.min(menuSlotCount(), apps.length + 1));
+        section.append(createMenuChoices(apps, "graduated", pageIndex, graduatedSlots));
         return section;
       }
 
@@ -8312,10 +8329,15 @@
         let pageIndex = 0;
         activePages.forEach((apps, index) => {
           const isLastActivePage = index === activePages.length - 1;
-          const firstGraduatedPage = isLastActivePage ? graduatedPages.shift() : null;
+          const canFitGraduationBelow = isLastActivePage && apps.length < menuSlotCount();
+          const firstGraduatedPage = canFitGraduationBelow ? graduatedPages.shift() : null;
           menuPager.append(createMenuPage(apps, "active", pageIndex, firstGraduatedPage));
           pageIndex += 1;
         });
+        if (graduatedPages.length) {
+          menuPager.append(createGraduatedMenuPage(graduatedPages.shift(), pageIndex));
+          pageIndex += 1;
+        }
         graduatedPages.forEach((apps) => {
           menuPager.append(createMenuPage(apps, "graduated", pageIndex));
           pageIndex += 1;
