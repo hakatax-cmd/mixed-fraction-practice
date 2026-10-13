@@ -200,81 +200,91 @@
       }
       .menuPagerViewport {
         width: 100%;
+        height: 100%;
         min-height: 0;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        overscroll-behavior: contain;
-        touch-action: pan-y;
-        padding: 0 2px clamp(16px, 3vmin, 28px);
+        overflow: hidden;
+        overscroll-behavior: none;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        padding: 5px;
       }
       .menuPager {
+        --menu-gap: 10px;
+        --menu-columns: 2;
+        --menu-rows: 8;
         display: flex;
         width: 100%;
-        align-items: flex-start;
+        height: 100%;
         will-change: transform;
       }
-      .menuPage {
+      #appMenu .menuPage {
+        position: relative;
         display: grid;
+        grid-template-columns: repeat(var(--menu-columns), minmax(0, 1fr));
+        grid-template-rows: repeat(var(--menu-rows), minmax(0, 1fr));
+        gap: var(--menu-gap);
         flex: 0 0 100%;
+        width: 100%;
+        height: 100%;
         min-width: 0;
-        padding: 0 1px;
+        min-height: 0;
+        padding: 0;
+        visibility: visible;
       }
-      .menuPage { visibility: visible; }
-      .menuGraduationDivider {
+      #appMenu .menuPage > .menuSlot {
         display: grid;
-        place-items: center;
-        min-height: clamp(40px, 7vmin, 58px);
-        border-top: 3px solid var(--ink);
-        color: var(--ink);
-        font-size: clamp(1.05rem, 3vmin, 1.55rem);
-        font-weight: 900;
-      }
-      .menuGraduationDivider span {
-        padding: 0 clamp(12px, 2.5vmin, 22px);
-        background: #fff;
-        transform: translateY(-50%);
-      }
-      #appMenu .appChoices {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-auto-rows: minmax(clamp(46px, 8.4vh, 76px), auto);
-        gap: clamp(8px, 1.5vmin, 12px);
-        width: min(100%, 900px);
-      }
-      #appMenu .menuSlot {
-        display: grid;
-        min-height: clamp(46px, 8.4vh, 76px);
-        min-height: clamp(46px, 8.4svh, 76px);
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
         border: 2px solid #e1e5eb;
         border-radius: 8px;
         background: #fff;
       }
-      #appMenu .menuSlot.hasTile { border-color: transparent; background: transparent; }
-      #appMenu .menuButton {
+      #appMenu .menuPage > .menuSlot.hasTile {
+        border-color: transparent;
+        background: transparent;
+      }
+      #appMenu .menuPage .menuButton {
         width: 100%;
         height: 100%;
-        min-height: clamp(46px, 8.4vh, 76px);
-        min-height: clamp(46px, 8.4svh, 76px);
-        font-size: clamp(0.9rem, 2.8vmin, 1.8rem);
-        line-height: 1.1;
-        box-shadow: 0 6px 0 rgba(22, 32, 42, 0.08);
-      }
-      #appMenu .menuButton[data-menu-app] { transition: transform 120ms ease, box-shadow 120ms ease; }
-      #appMenu .menuButton.menuDragging {
-        position: fixed;
-        top: var(--menu-drag-top, 0);
-        left: var(--menu-drag-left, 0);
-        z-index: 10;
-        width: var(--menu-drag-width, auto);
-        height: var(--menu-drag-height, auto);
+        min-width: 0;
+        min-height: 0;
         margin: 0;
-        pointer-events: none;
-        transform: translate(var(--menu-drag-x, 0), var(--menu-drag-y, 0)) scale(1.04);
-        box-shadow: 0 12px 18px rgba(22, 32, 42, 0.2);
+        padding: 2px;
+        font-size: var(--menu-label-size, 18px);
+        line-height: 1.1;
+        overflow-wrap: anywhere;
+        touch-action: none;
+        box-shadow: 0 3px 0 rgba(22, 32, 42, 0.08);
+        transition: opacity 100ms ease;
       }
-      #appMenu .menuSlot.dragTarget { outline: 3px solid rgba(37, 99, 235, 0.42); outline-offset: 2px; }
+      #appMenu .menuPage .menuDragSource { opacity: 0.25; }
+      #appMenu .menuGraduationDivider {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 3px;
+        min-height: 0;
+        background: #111;
+        z-index: 2;
+        pointer-events: none;
+      }
+      #appMenu .dragTarget { outline: 3px solid rgba(37, 99, 235, 0.65); outline-offset: -2px; }
+      .menuDragGhost {
+        position: fixed;
+        display: block;
+        text-align: center;
+        z-index: 10000;
+        margin: 0;
+        padding: 2px;
+        pointer-events: none;
+        box-shadow: 0 8px 18px rgba(22, 32, 42, 0.22);
+        will-change: transform;
+      }
       .menuPageDots { display: none; }
-      .menuPageDot { width: 8px; height: 8px; border-radius: 999px; background: #d2d9e2; transition: width 160ms ease, background 160ms ease; }
-      .menuPageDot.isActive { width: 22px; background: #6f7f92; }
       #chooseMultiplication, #chooseFraction, #chooseLongMultiplication, #chooseFractionAddSubtract { background: #eef8f2; }
       #chooseBasicDivision, #chooseImproperFraction, #chooseDoubleMultiplication, #chooseDivision { background: #eef5ff; }
       #chooseFractionCalculation, #chooseGrouping, #chooseRatio, #choosePreschool { background: #fff6df; }
@@ -8194,19 +8204,20 @@
       let menuPageIndex = 0;
       let menuGesture = null;
       let menuLongPressTimer = null;
-      let menuLongPressActive = false;
       let menuSuppressClick = false;
-      let menuPagerSnapTimer = null;
+      let menuAnimationFrame = null;
+      let menuLayoutCache = null;
+
+      function menuColumns() {
+        return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 3 : 2;
+      }
 
       function menuSlotCount() {
-        return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 18 : 16;
+        return menuColumns() === 3 ? 18 : 16;
       }
 
       function defaultMenuLayout() {
-        return {
-          active: [...APP_ORDER],
-          graduated: [],
-        };
+        return { active: [...APP_ORDER], graduated: [] };
       }
 
       function normalizeMenuLayout(layout) {
@@ -8215,31 +8226,46 @@
           .filter((app) => APP_ORDER.includes(app) && !used.has(app) && used.add(app));
         const active = sanitize(layout?.active);
         const graduated = sanitize(layout?.graduated);
-
         APP_ORDER.forEach((app) => {
-          if (used.has(app)) return;
-          active.push(app);
-          used.add(app);
+          if (!used.has(app)) active.push(app);
         });
-
         return { active, graduated };
       }
 
       function readMenuLayout() {
+        if (menuLayoutCache) return normalizeMenuLayout(menuLayoutCache);
         try {
-          const saved = JSON.parse(localStorage.getItem(MENU_LAYOUT_KEY) || "null");
-          return normalizeMenuLayout(saved || defaultMenuLayout());
+          return normalizeMenuLayout(JSON.parse(localStorage.getItem(MENU_LAYOUT_KEY) || "null") || defaultMenuLayout());
         } catch {
           return defaultMenuLayout();
         }
       }
 
       function saveMenuLayout(layout) {
+        menuLayoutCache = normalizeMenuLayout(layout);
         try {
-          localStorage.setItem(MENU_LAYOUT_KEY, JSON.stringify(normalizeMenuLayout(layout)));
+          localStorage.setItem(MENU_LAYOUT_KEY, JSON.stringify(menuLayoutCache));
         } catch {
-          // The menu still works when browser storage is unavailable.
+          // Keep rearrangements usable when storage is unavailable.
         }
+      }
+
+      function buildMenuPages(layout, columns, capacity) {
+        // Both groups share one grid; only the unfinished active row is padded.
+        const boundary = Math.ceil(layout.active.length / columns) * columns;
+        const length = Math.max(capacity, Math.ceil((boundary + Math.max(1, layout.graduated.length)) / capacity) * capacity);
+        return Array.from({ length: length / capacity }, (_, pageIndex) => {
+          const start = pageIndex * capacity;
+          const slots = Array.from({ length: capacity }, (_, index) => {
+            const position = start + index;
+            const group = position < boundary ? "active" : "graduated";
+            const groupIndex = group === "active" ? position : position - boundary;
+            return { group, index: Math.min(groupIndex, layout[group].length), app: layout[group][groupIndex] || "" };
+          });
+          const dividerRow = boundary >= start && boundary <= start + capacity
+            ? (boundary - start) / columns : null;
+          return { slots, dividerRow };
+        });
       }
 
       function menuPages() {
@@ -8250,99 +8276,57 @@
         const pages = menuPages();
         if (!pages.length) return;
         menuPageIndex = Math.max(0, Math.min(index, pages.length - 1));
-        const page = pages[menuPageIndex];
-        const width = menuPagerViewport.getBoundingClientRect().width;
-        menuPagerViewport.dataset.menuPage = page.dataset.menuPage || "active";
-        menuPageTitle.textContent = page.dataset.menuPage === "graduated" ? "卒業したもの" : "学習中のもの";
-        menuPager.style.transition = animate ? "transform 180ms ease" : "none";
-        menuPager.style.transform = `translate3d(${-menuPageIndex * width}px, 0, 0)`;
+        menuPager.style.transition = animate ? "transform 200ms ease-out" : "none";
+        menuPager.style.transform = `translate3d(${-menuPageIndex * menuPager.clientWidth}px, 0, 0)`;
+        pages.forEach((page, position) => {
+          page.inert = position !== menuPageIndex;
+          page.setAttribute("aria-hidden", String(position !== menuPageIndex));
+        });
+        const current = pages[menuPageIndex];
+        menuPageTitle.textContent = current.dataset.menuTitle;
       }
 
-      function createMenuChoices(apps, page, pageIndex, slotTotal = menuSlotCount()) {
-        const choices = document.createElement("div");
-        choices.className = "appChoices";
-        const packedApps = apps.filter(Boolean);
-        for (let index = 0; index < slotTotal; index += 1) {
-          const slot = document.createElement("div");
-          slot.className = "menuSlot";
-          slot.dataset.menuIndex = String(index);
-          slot.dataset.menuPage = page;
-          slot.dataset.menuPageIndex = String(pageIndex);
-          const app = packedApps[index];
-          if (app) {
-            slot.classList.add("hasTile");
-            slot.append(menuButtons[app]);
-          }
-          choices.append(slot);
-        }
-        return choices;
-      }
-
-      function createMenuPage(apps, page, pageIndex, graduatedApps = null) {
-        const section = document.createElement("section");
-        section.className = "menuPage";
-        section.dataset.menuPage = page;
-        section.dataset.menuPageIndex = String(pageIndex);
-        section.setAttribute("aria-label", page === "graduated" ? "卒業したモード" : "学習中のモード");
-
-        section.append(createMenuChoices(apps, page, pageIndex));
-
-        if (graduatedApps) {
-          const divider = document.createElement("div");
-          divider.className = "menuGraduationDivider";
-          divider.setAttribute("role", "separator");
-          divider.innerHTML = "<span>卒業したもの</span>";
-          section.append(divider);
-          const graduatedSlots = Math.max(2, Math.min(menuSlotCount(), graduatedApps.length + 1));
-          section.append(createMenuChoices(graduatedApps, "graduated", pageIndex, graduatedSlots));
-        }
-        return section;
-      }
-
-      function createGraduatedMenuPage(apps, pageIndex) {
-        const section = document.createElement("section");
-        section.className = "menuPage";
-        section.dataset.menuPage = "graduated";
-        section.dataset.menuPageIndex = String(pageIndex);
-        section.setAttribute("aria-label", "卒業したモード");
-        const divider = document.createElement("div");
-        divider.className = "menuGraduationDivider";
-        divider.setAttribute("role", "separator");
-        divider.innerHTML = "<span>卒業したもの</span>";
-        section.append(divider);
-        const graduatedSlots = Math.max(2, Math.min(menuSlotCount(), apps.length + 1));
-        section.append(createMenuChoices(apps, "graduated", pageIndex, graduatedSlots));
-        return section;
-      }
-
-      function splitMenuPages(apps) {
-        const capacity = menuSlotCount();
-        if (!apps.length) return [[]];
-        return Array.from({ length: Math.ceil(apps.length / capacity) }, (_, index) => apps.slice(index * capacity, (index + 1) * capacity));
-      }
-
-      function renderMenu() {
+      function renderMenu(index = menuPageIndex) {
         const layout = readMenuLayout();
-        const activePages = splitMenuPages(layout.active);
-        const graduatedPages = splitMenuPages(layout.graduated);
+        const columns = menuColumns();
+        const rows = menuSlotCount() / columns;
+        const pages = buildMenuPages(layout, columns, menuSlotCount());
+        menuPager.style.setProperty("--menu-columns", String(columns));
+        menuPager.style.setProperty("--menu-rows", String(rows));
+        menuPager.style.setProperty("--menu-label-size", columns === 3 ? "22px" : "18px");
         menuPager.replaceChildren();
-        let pageIndex = 0;
-        activePages.forEach((apps, index) => {
-          const isLastActivePage = index === activePages.length - 1;
-          const canFitGraduationBelow = isLastActivePage && apps.length < menuSlotCount();
-          const firstGraduatedPage = canFitGraduationBelow ? graduatedPages.shift() : null;
-          menuPager.append(createMenuPage(apps, "active", pageIndex, firstGraduatedPage));
-          pageIndex += 1;
+        pages.forEach((model) => {
+          const page = document.createElement("section");
+          page.className = "menuPage";
+          const active = model.slots.some((slot) => slot.group === "active");
+          const graduated = model.slots.some((slot) => slot.group === "graduated" && slot.app);
+          page.dataset.menuTitle = active ? (graduated ? "学習中のもの・卒業したもの" : "学習中のもの") : "卒業したもの";
+          page.setAttribute("aria-label", page.dataset.menuTitle);
+          model.slots.forEach(({ group, index: groupIndex, app }) => {
+            const slot = document.createElement("div");
+            slot.className = "menuSlot";
+            slot.dataset.menuGroup = group;
+            slot.dataset.menuIndex = String(groupIndex);
+            if (app) {
+              slot.classList.add("hasTile");
+              slot.dataset.menuApp = app;
+              slot.append(menuButtons[app]);
+            }
+            page.append(slot);
+          });
+          if (model.dividerRow !== null) {
+            const line = document.createElement("div");
+            line.className = "menuGraduationDivider";
+            line.setAttribute("role", "separator");
+            line.setAttribute("aria-label", "この線より下が卒業したもの");
+            const row = model.dividerRow;
+            line.style.top = row === 0 ? "1px" : row === rows ? "calc(100% - 3px)"
+              : `calc((100% - (var(--menu-rows) - 1) * var(--menu-gap)) / var(--menu-rows) * ${row} + var(--menu-gap) * ${row - 0.5} - 1px)`;
+            page.append(line);
+          }
+          menuPager.append(page);
         });
-        if (graduatedPages.length) {
-          menuPager.append(createGraduatedMenuPage(graduatedPages.shift(), pageIndex));
-          pageIndex += 1;
-        }
-        graduatedPages.forEach((apps) => {
-          menuPager.append(createMenuPage(apps, "graduated", pageIndex));
-          pageIndex += 1;
-        });
-        setMenuPage(0);
+        setMenuPage(index);
       }
 
       function orderedAppsForRecords() {
@@ -8350,203 +8334,182 @@
         return [...layout.active, ...layout.graduated];
       }
 
-      function reorderMenuApp(app, page, targetIndex) {
-        if (!app || !Number.isInteger(targetIndex)) return;
-        const layout = readMenuLayout();
-        const apps = layout[page];
-        const sourceIndex = apps.indexOf(app);
-        if (sourceIndex < 0) return;
-        apps.splice(sourceIndex, 1);
-        const insertionIndex = Math.max(0, Math.min(sourceIndex < targetIndex ? targetIndex - 1 : targetIndex, apps.length));
-        apps.splice(insertionIndex, 0, app);
-        saveMenuLayout(layout);
-      }
-
-      function moveMenuAppToPage(app, sourcePage, destination, targetIndex) {
-        if (!app || destination === sourcePage) return false;
-        const layout = readMenuLayout();
-        const source = layout[sourcePage];
-        const sourceIndex = source.indexOf(app);
-        if (sourceIndex < 0) return false;
-        source.splice(sourceIndex, 1);
-        const insertionIndex = Math.max(0, Math.min(Number.isInteger(targetIndex) ? targetIndex : layout[destination].length, layout[destination].length));
-        layout[destination].splice(insertionIndex, 0, app);
-        saveMenuLayout(layout);
-        return true;
-      }
-
-      function clearMenuPagerTransform() {
-        if (menuPagerSnapTimer) {
-          clearTimeout(menuPagerSnapTimer);
-          menuPagerSnapTimer = null;
-        }
-        setMenuPage(menuPageIndex);
-      }
-
-      function updateMenuPagerSwipe(startIndex, dx) {
-        const width = menuPagerViewport.getBoundingClientRect().width;
-        if (!width) return;
-        const lastOffset = -width * Math.max(0, menuPages().length - 1);
-        const startOffset = -width * startIndex;
-        const offset = Math.max(lastOffset, Math.min(0, startOffset + dx));
-        menuPager.style.transition = "none";
-        menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
-      }
-
-      function settleMenuPager(startIndex, dx) {
-        const width = menuPagerViewport.getBoundingClientRect().width;
-        const threshold = Math.max(56, width * 0.18);
-        const destination = dx < -threshold ? startIndex + 1 : dx > threshold ? startIndex - 1 : startIndex;
-        setMenuPage(destination, true);
-        menuPagerSnapTimer = window.setTimeout(() => {
-          menuPagerSnapTimer = null;
-          menuPager.style.transition = "none";
-        }, 190);
-      }
-
-      function maybeTurnMenuPageWhileDragging(event) {
-        if (!menuGesture || !menuLongPressActive) return;
-        const rect = menuPagerViewport.getBoundingClientRect();
-        const edge = Math.min(42, rect.width * 0.12);
-        const now = performance.now();
-        if (now - (menuGesture.lastPageTurnAt || 0) < 350) return;
-        if (event.clientX <= rect.left + edge && menuPageIndex > 0) {
-          menuGesture.lastPageTurnAt = now;
-          setMenuPage(menuPageIndex - 1, true);
-        } else if (event.clientX >= rect.right - edge && menuPageIndex < menuPages().length - 1) {
-          menuGesture.lastPageTurnAt = now;
-          setMenuPage(menuPageIndex + 1, true);
-        }
+      function placeMenuApp(layout, app, destination, index) {
+        const source = layout.active.includes(app) ? "active" : "graduated";
+        const sourceIndex = layout[source].indexOf(app);
+        if (sourceIndex < 0 || !["active", "graduated"].includes(destination)) return layout;
+        const next = { active: [...layout.active], graduated: [...layout.graduated] };
+        next[source].splice(sourceIndex, 1);
+        // Dropping onto a slot means occupying that position, including the next slot.
+        next[destination].splice(Math.max(0, Math.min(index, next[destination].length)), 0, app);
+        return next;
       }
 
       function clearMenuLongPress() {
-        if (menuLongPressTimer) {
-          clearTimeout(menuLongPressTimer);
-          menuLongPressTimer = null;
-        }
+        clearTimeout(menuLongPressTimer);
+        menuLongPressTimer = null;
       }
 
       function suppressMenuClick() {
         menuSuppressClick = true;
-        window.setTimeout(() => { menuSuppressClick = false; }, 350);
+        window.setTimeout(() => { menuSuppressClick = false; }, 400);
+      }
+
+      function menuDropTarget(x, y) {
+        const page = menuPages()[menuPageIndex];
+        if (!page) return null;
+        const bounds = page.getBoundingClientRect();
+        if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) return null;
+        const line = page.querySelector(".menuGraduationDivider");
+        if (line && menuGesture) {
+          const rect = line.getBoundingClientRect();
+          if (Math.abs(y - (rect.top + rect.height / 2)) < 8) {
+            const group = menuGesture.sourceGroup === "active" ? "graduated" : "active";
+            return { group, index: group === "active" ? readMenuLayout().active.length : 0, element: line };
+          }
+        }
+        let closest = null;
+        let distance = Infinity;
+        page.querySelectorAll(".menuSlot").forEach((slot) => {
+          const rect = slot.getBoundingClientRect();
+          const dx = Math.max(rect.left - x, 0, x - rect.right);
+          const dy = Math.max(rect.top - y, 0, y - rect.bottom);
+          const score = dx * dx + dy * dy;
+          if (score < distance) {
+            closest = slot;
+            distance = score;
+          }
+        });
+        return closest ? { group: closest.dataset.menuGroup, index: Number(closest.dataset.menuIndex), element: closest } : null;
+      }
+
+      function updateMenuDrag(time) {
+        const gesture = menuGesture;
+        if (!gesture?.dragging) return;
+        gesture.ghost.style.transform = `translate3d(${gesture.lastX - gesture.x}px, ${gesture.lastY - gesture.y}px, 0) scale(1.03)`;
+        const bounds = menuPagerViewport.getBoundingClientRect();
+        const direction = gesture.lastX < bounds.left + 28 ? -1 : gesture.lastX > bounds.right - 28 ? 1 : 0;
+        if (direction !== gesture.edgeDirection) {
+          gesture.edgeDirection = direction;
+          gesture.edgeSince = time;
+        }
+        if (direction && time - gesture.edgeSince > 500) {
+          const next = Math.max(0, Math.min(menuPageIndex + direction, menuPages().length - 1));
+          if (next !== menuPageIndex) setMenuPage(next, true);
+          gesture.edgeSince = time;
+        }
+        const target = menuDropTarget(gesture.lastX, gesture.lastY);
+        if (gesture.target?.element !== target?.element) {
+          gesture.target?.element.classList.remove("dragTarget");
+          target?.element.classList.add("dragTarget");
+        }
+        gesture.target = target;
+        menuAnimationFrame = requestAnimationFrame(updateMenuDrag);
+      }
+
+      function beginMenuDrag() {
+        const gesture = menuGesture;
+        if (!gesture?.tile || gesture.swiping || gesture.moved) return;
+        gesture.dragging = true;
+        suppressMenuClick();
+        const rect = gesture.tile.getBoundingClientRect();
+        const appearance = getComputedStyle(gesture.tile);
+        const ghost = gesture.tile.cloneNode(true);
+        ghost.removeAttribute("id");
+        ghost.removeAttribute("data-menu-app");
+        ghost.className = "menuDragGhost";
+        ghost.setAttribute("aria-hidden", "true");
+        Object.assign(ghost.style, {
+          left: rect.left + "px", top: rect.top + "px", width: rect.width + "px", height: rect.height + "px",
+          font: appearance.font, color: appearance.color, background: appearance.backgroundColor,
+          border: appearance.border, borderRadius: appearance.borderRadius, lineHeight: appearance.lineHeight,
+        });
+        document.body.append(ghost);
+        gesture.ghost = ghost;
+        gesture.tile.classList.add("menuDragSource");
+        menuAnimationFrame = requestAnimationFrame(updateMenuDrag);
+      }
+
+      function finishMenuGesture(commit = false) {
+        const gesture = menuGesture;
+        if (!gesture) return;
+        clearMenuLongPress();
+        cancelAnimationFrame(menuAnimationFrame);
+        const wasDrag = gesture.dragging;
+        const target = wasDrag ? menuDropTarget(gesture.lastX, gesture.lastY) : null;
+        gesture.target?.element.classList.remove("dragTarget");
+        gesture.ghost?.remove();
+        gesture.tile?.classList.remove("menuDragSource");
+        menuGesture = null;
+        if (menuPagerViewport.hasPointerCapture(gesture.pointerId)) menuPagerViewport.releasePointerCapture(gesture.pointerId);
+        if (wasDrag) {
+          suppressMenuClick();
+          if (commit && target && (Math.hypot(gesture.lastX - gesture.x, gesture.lastY - gesture.y) > 10 || menuPageIndex !== gesture.startPage)) {
+            saveMenuLayout(placeMenuApp(readMenuLayout(), gesture.app, target.group, target.index));
+            renderMenu(menuPageIndex);
+          } else setMenuPage(menuPageIndex, true);
+        } else if (gesture.moved) {
+          suppressMenuClick();
+          const dx = gesture.lastX - gesture.x;
+          const elapsed = Math.max(1, performance.now() - gesture.startedAt);
+          const passed = Math.abs(dx) > menuPager.clientWidth * 0.18 || (Math.abs(dx) > 28 && Math.abs(dx) / elapsed > 0.35);
+          setMenuPage(gesture.startPage + (commit && gesture.swiping && passed ? (dx < 0 ? 1 : -1) : 0), true);
+        }
       }
 
       menuPagerViewport.addEventListener("pointerdown", (event) => {
-        if (event.button !== undefined && event.button !== 0) return;
+        if (menuGesture || (event.button !== undefined && event.button !== 0) || event.isPrimary === false) return;
         const tile = event.target.closest(".menuButton[data-menu-app]");
-        const page = tile?.closest(".menuPage");
         menuGesture = {
-          x: event.clientX,
-          y: event.clientY,
-          pointerId: event.pointerId,
-          tile,
-          app: tile?.dataset.menuApp || "",
-          sourcePage: page?.dataset.menuPage || "active",
-          sourcePageIndex: Number(page?.dataset.menuPageIndex || menuPageIndex),
-          paging: false,
-          lastPageTurnAt: 0,
+          pointerId: event.pointerId, tile, app: tile?.dataset.menuApp || "",
+          sourceGroup: tile?.closest(".menuSlot")?.dataset.menuGroup || "active",
+          x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY,
+          startPage: menuPageIndex, startedAt: performance.now(), moved: false, swiping: false, dragging: false,
+          edgeDirection: 0, edgeSince: 0, target: null,
         };
-        menuLongPressActive = false;
-        if (!tile) return;
-        menuLongPressTimer = window.setTimeout(() => {
-          if (!menuGesture?.tile) return;
-          menuLongPressActive = true;
-          const rect = tile.getBoundingClientRect();
-          tile.style.setProperty("--menu-drag-top", `${rect.top}px`);
-          tile.style.setProperty("--menu-drag-left", `${rect.left}px`);
-          tile.style.setProperty("--menu-drag-width", `${rect.width}px`);
-          tile.style.setProperty("--menu-drag-height", `${rect.height}px`);
-          tile.classList.add("menuDragging");
-          try { menuPagerViewport.setPointerCapture(event.pointerId); } catch {}
-        }, 450);
+        if (tile) menuLongPressTimer = window.setTimeout(beginMenuDrag, 360);
       });
 
       menuPagerViewport.addEventListener("pointermove", (event) => {
-        if (!menuGesture || event.pointerId !== menuGesture.pointerId) return;
-        const dx = event.clientX - menuGesture.x;
-        const dy = event.clientY - menuGesture.y;
-        if (!menuLongPressActive && Math.hypot(dx, dy) > 10) {
+        const gesture = menuGesture;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+        gesture.lastX = event.clientX;
+        gesture.lastY = event.clientY;
+        const dx = gesture.lastX - gesture.x;
+        const dy = gesture.lastY - gesture.y;
+        if (gesture.dragging || Math.hypot(dx, dy) > 8) {
+          if (!menuPagerViewport.hasPointerCapture(event.pointerId)) menuPagerViewport.setPointerCapture(event.pointerId);
+          event.preventDefault();
+        }
+        if (gesture.dragging) return;
+        if (!gesture.moved && Math.hypot(dx, dy) > 8) {
+          gesture.moved = true;
+          gesture.swiping = Math.abs(dx) > Math.abs(dy);
           clearMenuLongPress();
         }
-        if (!menuLongPressActive) {
-          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-            menuGesture.paging = true;
-            event.preventDefault();
-            updateMenuPagerSwipe(menuGesture.sourcePageIndex, dx);
-          }
-          return;
-        }
-        if (!menuGesture.tile) return;
-        event.preventDefault();
-        menuGesture.tile.style.setProperty("--menu-drag-x", `${dx}px`);
-        menuGesture.tile.style.setProperty("--menu-drag-y", `${dy}px`);
-        maybeTurnMenuPageWhileDragging(event);
-        document.querySelectorAll("#appMenu .menuSlot.dragTarget").forEach((slot) => slot.classList.remove("dragTarget"));
-        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuSlot");
-        if (target) {
-          if (target.contains(menuGesture.tile) === false) target.classList.add("dragTarget");
+        if (gesture.swiping) {
+          const width = menuPager.clientWidth;
+          const offset = Math.max(-(menuPages().length - 1) * width, Math.min(0, -gesture.startPage * width + dx));
+          menuPager.style.transition = "none";
+          menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
         }
       });
 
       menuPagerViewport.addEventListener("pointerup", (event) => {
-        if (!menuGesture || event.pointerId !== menuGesture.pointerId) return;
-        const gesture = menuGesture;
-        const dx = event.clientX - gesture.x;
-        const dy = event.clientY - gesture.y;
-        clearMenuLongPress();
-        menuGesture = null;
-
-        if (menuLongPressActive && gesture.tile) {
-          event.preventDefault();
-          suppressMenuClick();
-          gesture.tile.classList.remove("menuDragging");
-          ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => gesture.tile.style.removeProperty(property));
-          const moved = Math.hypot(dx, dy) > 16;
-          if (!moved) {
-            // Long press only enters rearrangement; it never changes graduation by itself.
-          } else {
-            const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".menuSlot");
-            const destination = target?.dataset.menuPage;
-            const targetIndex = Number(target?.dataset.menuIndex);
-            if (destination && Number.isInteger(targetIndex)) {
-              if (destination === gesture.sourcePage) {
-                reorderMenuApp(gesture.app, gesture.sourcePage, targetIndex);
-              } else {
-                moveMenuAppToPage(gesture.app, gesture.sourcePage, destination, targetIndex);
-              }
-            }
-          }
-          document.querySelectorAll("#appMenu .menuSlot.dragTarget").forEach((slot) => slot.classList.remove("dragTarget"));
-          renderMenu();
-          menuLongPressActive = false;
-          return;
-        }
-
-        if (gesture.paging) {
-          settleMenuPager(gesture.sourcePageIndex, dx);
-        }
-
+        if (!menuGesture || menuGesture.pointerId !== event.pointerId) return;
+        menuGesture.lastX = event.clientX;
+        menuGesture.lastY = event.clientY;
+        finishMenuGesture(true);
       });
-
-      menuPagerViewport.addEventListener("pointercancel", () => {
-        clearMenuLongPress();
-        menuGesture?.tile?.classList.remove("menuDragging");
-        ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => menuGesture?.tile?.style.removeProperty(property));
-        clearMenuPagerTransform();
-        menuGesture = null;
-        menuLongPressActive = false;
+      menuPagerViewport.addEventListener("pointercancel", (event) => {
+        if (menuGesture?.pointerId === event.pointerId) finishMenuGesture(false);
       });
-
-      menuPagerViewport.addEventListener("lostpointercapture", () => {
-        if (!menuGesture) return;
-        clearMenuLongPress();
-        menuGesture.tile?.classList.remove("menuDragging");
-        ["--menu-drag-x", "--menu-drag-y", "--menu-drag-top", "--menu-drag-left", "--menu-drag-width", "--menu-drag-height"].forEach((property) => menuGesture.tile?.style.removeProperty(property));
-        clearMenuPagerTransform();
-        menuGesture = null;
-        menuLongPressActive = false;
+      menuPagerViewport.addEventListener("lostpointercapture", (event) => {
+        if (event.target === menuPagerViewport && !menuPagerViewport.hasPointerCapture(event.pointerId)) finishMenuGesture(false);
       });
-
+      menuPagerViewport.addEventListener("contextmenu", (event) => event.preventDefault());
+      menuPagerViewport.addEventListener("dragstart", (event) => event.preventDefault());
+      menuPagerViewport.addEventListener("wheel", (event) => event.preventDefault(), { passive: false });
       menuPagerViewport.addEventListener("click", (event) => {
         if (!menuSuppressClick) return;
         event.preventDefault();
@@ -8584,7 +8547,7 @@
         correctCount = 0;
         mistakeCount = 0;
         appMenu.hidden = false;
-        renderMenu();
+        renderMenu(0);
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode", "fishingMode");
         multiplicationCover.hidden = true;
         basicDivisionCover.hidden = true;
@@ -10647,7 +10610,10 @@
         if (event.touches.length > 1) event.preventDefault();
       }, { passive: false });
       window.addEventListener("resize", () => {
-        if (!appMenu.hidden) renderMenu();
+        if (!appMenu.hidden) {
+          finishMenuGesture(false);
+          renderMenu();
+        }
       });
       window.setInterval(updateProgress, 100);
       showCoverScreen();
