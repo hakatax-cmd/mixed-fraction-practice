@@ -8205,8 +8205,10 @@
       let menuGesture = null;
       let menuLongPressTimer = null;
       let menuSuppressClick = false;
+      let menuClickTimer = null;
       let menuAnimationFrame = null;
       let menuLayoutCache = null;
+      let menuRenderedColumns = 0;
 
       function menuColumns() {
         return window.matchMedia("(min-width: 700px) and (min-height: 700px) and (orientation: portrait)").matches ? 3 : 2;
@@ -8279,7 +8281,7 @@
         menuPager.style.transition = animate ? "transform 200ms ease-out" : "none";
         menuPager.style.transform = `translate3d(${-menuPageIndex * menuPager.clientWidth}px, 0, 0)`;
         pages.forEach((page, position) => {
-          page.inert = position !== menuPageIndex;
+          page.inert = !menuGesture?.dragging && position !== menuPageIndex;
           page.setAttribute("aria-hidden", String(position !== menuPageIndex));
         });
         const current = pages[menuPageIndex];
@@ -8289,6 +8291,7 @@
       function renderMenu(index = menuPageIndex) {
         const layout = readMenuLayout();
         const columns = menuColumns();
+        menuRenderedColumns = columns;
         const rows = menuSlotCount() / columns;
         const pages = buildMenuPages(layout, columns, menuSlotCount());
         menuPager.style.setProperty("--menu-columns", String(columns));
@@ -8329,6 +8332,16 @@
         setMenuPage(index);
       }
 
+      function resizeMenuLayout() {
+        if (menuColumns() !== menuRenderedColumns) {
+          finishMenuGesture(false);
+          renderMenu();
+        } else if (!menuGesture?.swiping) {
+          // Mobile browser bars may resize the viewport while a tile is held.
+          setMenuPage(menuPageIndex);
+        }
+      }
+
       function orderedAppsForRecords() {
         const layout = readMenuLayout();
         return [...layout.active, ...layout.graduated];
@@ -8351,18 +8364,37 @@
       }
 
       function suppressMenuClick() {
+        clearTimeout(menuClickTimer);
         menuSuppressClick = true;
-        window.setTimeout(() => { menuSuppressClick = false; }, 400);
+        menuClickTimer = window.setTimeout(() => {
+          if (!menuGesture?.dragging) menuSuppressClick = false;
+        }, 400);
       }
 
       function menuDropTarget(x, y) {
         const page = menuPages()[menuPageIndex];
         if (!page) return null;
-        const bounds = page.getBoundingClientRect();
-        if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) return null;
+        const pageRect = page.getBoundingClientRect();
+        const viewportRect = menuPagerViewport.getBoundingClientRect();
+        const style = getComputedStyle(menuPagerViewport);
+        const left = viewportRect.left + (parseFloat(style.paddingLeft) || 0);
+        const top = viewportRect.top + (parseFloat(style.paddingTop) || 0);
+        const right = left + menuPager.clientWidth;
+        const bottom = top + pageRect.height;
+        if (x < left - 32 || x > right + 32 || y < top - 32 || y > bottom + 32) return null;
+        // Use the settled grid, even while its page is still sliding into view.
+        x = Math.max(left, Math.min(right, x));
+        y = Math.max(top, Math.min(bottom, y));
+        const settledRect = (element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            left: left + rect.left - pageRect.left, right: left + rect.right - pageRect.left,
+            top: top + rect.top - pageRect.top, bottom: top + rect.bottom - pageRect.top, height: rect.height,
+          };
+        };
         const line = page.querySelector(".menuGraduationDivider");
         if (line && menuGesture) {
-          const rect = line.getBoundingClientRect();
+          const rect = settledRect(line);
           if (Math.abs(y - (rect.top + rect.height / 2)) < 8) {
             const group = menuGesture.sourceGroup === "active" ? "graduated" : "active";
             return { group, index: group === "active" ? readMenuLayout().active.length : 0, element: line };
@@ -8371,7 +8403,7 @@
         let closest = null;
         let distance = Infinity;
         page.querySelectorAll(".menuSlot").forEach((slot) => {
-          const rect = slot.getBoundingClientRect();
+          const rect = settledRect(slot);
           const dx = Math.max(rect.left - x, 0, x - rect.right);
           const dy = Math.max(rect.top - y, 0, y - rect.bottom);
           const score = dx * dx + dy * dy;
@@ -8388,15 +8420,17 @@
         if (!gesture?.dragging) return;
         gesture.ghost.style.transform = `translate3d(${gesture.lastX - gesture.x}px, ${gesture.lastY - gesture.y}px, 0) scale(1.03)`;
         const bounds = menuPagerViewport.getBoundingClientRect();
-        const direction = gesture.lastX < bounds.left + 28 ? -1 : gesture.lastX > bounds.right - 28 ? 1 : 0;
+        const edgeWidth = Math.min(64, Math.max(44, bounds.width * 0.14));
+        const direction = gesture.lastX < bounds.left + edgeWidth ? -1 : gesture.lastX > bounds.right - edgeWidth ? 1 : 0;
         if (direction !== gesture.edgeDirection) {
           gesture.edgeDirection = direction;
           gesture.edgeSince = time;
+          gesture.edgeTurned = false;
         }
-        if (direction && time - gesture.edgeSince > 500) {
+        if (direction && !gesture.edgeTurned && time - gesture.edgeSince > 420) {
           const next = Math.max(0, Math.min(menuPageIndex + direction, menuPages().length - 1));
           if (next !== menuPageIndex) setMenuPage(next, true);
-          gesture.edgeSince = time;
+          gesture.edgeTurned = true;
         }
         const target = menuDropTarget(gesture.lastX, gesture.lastY);
         if (gesture.target?.element !== target?.element) {
@@ -8411,6 +8445,8 @@
         const gesture = menuGesture;
         if (!gesture?.tile || gesture.swiping || gesture.moved) return;
         gesture.dragging = true;
+        menuPagerViewport.setPointerCapture(gesture.pointerId);
+        menuPages().forEach((page) => { page.inert = false; });
         suppressMenuClick();
         const rect = gesture.tile.getBoundingClientRect();
         const appearance = getComputedStyle(gesture.tile);
@@ -8465,7 +8501,7 @@
           sourceGroup: tile?.closest(".menuSlot")?.dataset.menuGroup || "active",
           x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY,
           startPage: menuPageIndex, startedAt: performance.now(), moved: false, swiping: false, dragging: false,
-          edgeDirection: 0, edgeSince: 0, target: null,
+          edgeDirection: 0, edgeSince: 0, edgeTurned: false, target: null,
         };
         if (tile) menuLongPressTimer = window.setTimeout(beginMenuDrag, 360);
       });
@@ -8477,12 +8513,12 @@
         gesture.lastY = event.clientY;
         const dx = gesture.lastX - gesture.x;
         const dy = gesture.lastY - gesture.y;
-        if (gesture.dragging || Math.hypot(dx, dy) > 8) {
+        if (gesture.dragging || Math.hypot(dx, dy) > 14) {
           if (!menuPagerViewport.hasPointerCapture(event.pointerId)) menuPagerViewport.setPointerCapture(event.pointerId);
           event.preventDefault();
         }
         if (gesture.dragging) return;
-        if (!gesture.moved && Math.hypot(dx, dy) > 8) {
+        if (!gesture.moved && Math.hypot(dx, dy) > 14) {
           gesture.moved = true;
           gesture.swiping = Math.abs(dx) > Math.abs(dy);
           clearMenuLongPress();
@@ -10610,10 +10646,7 @@
         if (event.touches.length > 1) event.preventDefault();
       }, { passive: false });
       window.addEventListener("resize", () => {
-        if (!appMenu.hidden) {
-          finishMenuGesture(false);
-          renderMenu();
-        }
+        if (!appMenu.hidden) resizeMenuLayout();
       });
       window.setInterval(updateProgress, 100);
       showCoverScreen();
