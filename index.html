@@ -278,7 +278,7 @@
         background: #2563eb;
         transform-origin: left;
         pointer-events: none;
-        animation: menuHoldProgress 3s linear forwards;
+        animation: menuHoldProgress 2.2s linear forwards;
       }
       @keyframes menuHoldProgress {
         from { transform: scaleX(0); }
@@ -4495,15 +4495,15 @@
         const ozMultiplication = [
           question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56, true), " g"]], "56 g"),
           question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84, true), " g"]], "84 g"),
-          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21, true), " g"]], "21 g"),
-          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35, true), " g"]], "35 g"),
+          question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
+          question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
         ];
         const ozDivision = [
           question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfRawDen", "ozHalfRawNum", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfRawNum", 14, "ozHalfRawDen", 28)], ["= ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
           question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersRawDen", "ozThreeQuartersRawNum", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersRawNum", 21, "ozThreeQuartersRawDen", 28)], ["= ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
         ];
         const go = [
-          question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5", true), " g"]], "37.5 g"),
+          question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
           question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", true), " g"]], "26.25 g"),
           question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
           question("1号は 3.75 g です。", "15 g は何号？", ["goFourWeight", "goFourOperator", "goFourUnit", "goFour"], [[input("goFourWeight", 15), operator("goFourOperator", "÷"), input("goFourUnit", "3.75"), " = ", input("goFour", 4), " 号"]], "4号"),
@@ -4678,7 +4678,9 @@
         if (value === "." && (!expectedValue.includes(".") || (fishingValues[fishingActiveField] || "").includes("."))) return;
         const next = (fishingValues[fishingActiveField] || "") + value;
         if (!expectedValue.startsWith(next)) {
-          showWrongConfirmation(`fishing:${fishingActiveField}:${next}`, clearFishingFields);
+          const field = fishingActiveField;
+          // The rejected character was not stored; preserve every accepted digit.
+          showWrongConfirmation(`fishing:${field}:${next}`, () => setFishingActive(field));
           return;
         }
         fishingValues[fishingActiveField] = next;
@@ -8294,7 +8296,7 @@
         const pages = menuPages();
         if (!pages.length) return;
         menuPageIndex = Math.max(0, Math.min(index, pages.length - 1));
-        menuPager.style.transition = animate ? "transform 200ms ease-out" : "none";
+        menuPager.style.transition = animate ? "transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1)" : "none";
         menuPager.style.transform = `translate3d(${-menuPageIndex * 100}%, 0, 0)`;
         pages.forEach((page, position) => {
           page.inert = position !== menuPageIndex;
@@ -8374,14 +8376,17 @@
         menuPagerViewport.setPointerCapture(gesture.pointerId);
         suppressMenuClick();
         const layout = readMenuLayout();
+        const previousPages = buildMenuPages(layout, menuColumns(), menuSlotCount());
+        const visibleGroup = previousPages[menuPageIndex].group;
+        const groupPageIndex = previousPages.slice(0, menuPageIndex).filter((page) => page.group === visibleGroup).length;
         const source = layout.active.includes(gesture.app) ? "active" : "graduated";
         const destination = source === "active" ? "graduated" : "active";
         layout[source] = layout[source].filter((app) => app !== gesture.app);
         layout[destination].push(gesture.app);
         saveMenuLayout(layout);
         const pages = buildMenuPages(layout, menuColumns(), menuSlotCount());
-        const destinationPage = pages.findIndex((page) => page.slots.some((slot) => slot.app === gesture.app));
-        renderMenu(destinationPage);
+        const groupPages = pages.map((page, index) => page.group === visibleGroup ? index : -1).filter((index) => index >= 0);
+        renderMenu(groupPages[Math.min(groupPageIndex, groupPages.length - 1)]);
       }
 
       function finishMenuGesture(commit = false) {
@@ -8395,9 +8400,11 @@
         } else if (gesture.moved) {
           suppressMenuClick();
           const dx = gesture.lastX - gesture.x;
-          const elapsed = Math.max(1, performance.now() - gesture.startedAt);
-          const passed = Math.abs(dx) > menuPager.getBoundingClientRect().width * 0.18 || (Math.abs(dx) > 28 && Math.abs(dx) / elapsed > 0.35);
-          setMenuPage(gesture.startPage + (commit && gesture.swiping && passed ? (dx < 0 ? 1 : -1) : 0), true);
+          const velocity = performance.now() - gesture.lastMotionAt < 100 ? gesture.velocity : 0;
+          const flick = Math.abs(dx) > 18 && Math.abs(velocity) > 0.45;
+          const passed = Math.abs(dx) > gesture.width * 0.18 || flick;
+          const direction = (flick ? velocity : dx) < 0 ? 1 : -1;
+          setMenuPage(gesture.startPage + (commit && gesture.swiping && passed ? direction : 0), true);
         } else if (gesture.tile && performance.now() - gesture.startedAt >= 500) {
           // Releasing an unfinished hold must not launch the exercise.
           suppressMenuClick();
@@ -8407,14 +8414,27 @@
       menuPagerViewport.addEventListener("pointerdown", (event) => {
         if (menuGesture || (event.button !== undefined && event.button !== 0) || event.isPrimary === false) return;
         const tile = event.target.closest(".menuButton[data-menu-app]");
+        const rect = menuPager.getBoundingClientRect();
+        const offset = rect.left - menuPagerViewport.getBoundingClientRect().left;
+        const interrupted = Math.abs(offset + menuPageIndex * rect.width) > 1;
+        // Freeze an in-flight transition at its visible position, without jumping.
+        menuPager.style.transition = "none";
+        menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
+        const now = performance.now();
         menuGesture = {
           pointerId: event.pointerId, tile, app: tile?.dataset.menuApp || "",
           x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY,
-          startPage: menuPageIndex, startedAt: performance.now(), moved: false, swiping: false, transferred: false,
+          startPage: Math.round(-offset / rect.width), startedAt: now,
+          width: rect.width, startOffset: offset, minOffset: -(menuPages().length - 1) * rect.width,
+          lastMotionAt: now, lastMotionX: event.clientX, velocity: 0,
+          moved: interrupted, swiping: interrupted, transferred: false,
         };
-        if (tile) {
+        if (interrupted) {
+          suppressMenuClick();
+          menuPagerViewport.setPointerCapture(event.pointerId);
+        } else if (tile) {
           tile.classList.add("menuHolding");
-          menuLongPressTimer = window.setTimeout(completeMenuLongPress, 3000);
+          menuLongPressTimer = window.setTimeout(completeMenuLongPress, 2200);
         }
       });
 
@@ -8429,6 +8449,11 @@
         }
         const dx = gesture.lastX - gesture.x;
         const dy = gesture.lastY - gesture.y;
+        const now = performance.now();
+        const elapsed = now - gesture.lastMotionAt;
+        if (elapsed > 0) gesture.velocity = (gesture.lastX - gesture.lastMotionX) / elapsed;
+        gesture.lastMotionAt = now;
+        gesture.lastMotionX = gesture.lastX;
         if (Math.hypot(dx, dy) > 14) {
           if (!menuPagerViewport.hasPointerCapture(event.pointerId)) menuPagerViewport.setPointerCapture(event.pointerId);
           event.preventDefault();
@@ -8439,8 +8464,7 @@
           }
         }
         if (gesture.swiping) {
-          const width = menuPager.getBoundingClientRect().width;
-          const offset = Math.max(-(menuPages().length - 1) * width, Math.min(0, -gesture.startPage * width + dx));
+          const offset = Math.max(gesture.minOffset, Math.min(0, gesture.startOffset + dx));
           menuPager.style.transition = "none";
           menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
         }
