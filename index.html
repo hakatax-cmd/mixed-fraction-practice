@@ -178,6 +178,8 @@
         color: var(--coral);
       }
       #appMenu {
+        width: 100%;
+        min-width: 0;
         align-content: start;
         gap: clamp(7px, 1.35vmin, 13px);
         transform: translateY(-8px);
@@ -201,6 +203,7 @@
       .menuPagerViewport {
         width: 100%;
         height: 100%;
+        min-width: 0;
         min-height: 0;
         overflow: hidden;
         overscroll-behavior: none;
@@ -208,7 +211,7 @@
         user-select: none;
         -webkit-user-select: none;
         -webkit-touch-callout: none;
-        padding: 5px;
+        padding: 0;
       }
       .menuPager {
         --menu-gap: 10px;
@@ -230,7 +233,9 @@
         height: 100%;
         min-width: 0;
         min-height: 0;
-        padding: 0;
+        padding: 5px 8px;
+        overflow: hidden;
+        background: #fff;
         visibility: visible;
       }
       #appMenu .menuPage > .menuSlot {
@@ -278,16 +283,6 @@
       @keyframes menuHoldProgress {
         from { transform: scaleX(0); }
         to { transform: scaleX(1); }
-      }
-      #appMenu .menuGraduationDivider {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 3px;
-        min-height: 0;
-        background: #111;
-        z-index: 2;
-        pointer-events: none;
       }
       .menuPageDots { display: none; }
       #chooseMultiplication, #chooseFraction, #chooseLongMultiplication, #chooseFractionAddSubtract { background: #eef8f2; }
@@ -716,10 +711,28 @@
       #ratioProblemLine.ratioSpecialMode .ratioChangeStack,
       #ratioProblemLine.ratioSpecialMode .ratioRateWorkStack,
       #ratioProblemLine.ratioSpecialMode .ratioIncreaseRateStack { grid-row: 2; }
-      #ratioProblemLine.rateWorkMode { grid-template-rows: auto auto auto auto auto; }
-      #ratioProblemLine.rateWorkMode > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 3; }
-      #ratioProblemLine.rateWorkMode .ratioRateWorkStack { grid-row: 4; }
-      #ratioProblemLine.rateWorkMode .ratioFinalRow { grid-row: 5; }
+      #ratioProblemLine.rateWorkMode {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto auto auto auto;
+        --rate-equals-width: 0.7em;
+        --rate-line-gap: 6px;
+      }
+      #ratioProblemLine.rateWorkMode > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) {
+        grid-row: 3;
+        width: min(100%, 520px);
+        justify-self: start;
+        justify-content: flex-start;
+        padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
+      }
+      #ratioProblemLine.rateWorkMode .ratioRateWorkStack { grid-row: 4; justify-self: start; }
+      #ratioProblemLine.rateWorkMode .ratioRateLine {
+        display: grid;
+        grid-template-columns: var(--rate-equals-width) max-content;
+        column-gap: var(--rate-line-gap);
+        margin-left: 0;
+      }
+      #ratioProblemLine.rateWorkMode .ratioFinalRow { grid-row: 5; justify-self: start; }
 
       @media (max-width: 420px) {
         .ratioChangeEquation,
@@ -2952,8 +2965,11 @@
                 </span>
               </div>
               <div class="ratioRateLine" id="ratioRateDecimalLine" hidden>
-                <span>= 0.</span>
-                <button class="ratioAnswerBox" id="ratioRateWorkTenthsInput" data-ratio-field="rateWorkTenths" type="button" aria-label="小数第一位"></button>
+                <span>=</span>
+                <span class="ratioDecimal">
+                  <span>0.</span>
+                  <button class="ratioAnswerBox" id="ratioRateWorkTenthsInput" data-ratio-field="rateWorkTenths" type="button" aria-label="小数第一位"></button>
+                </span>
               </div>
             </div>
             <div class="ratioIncreaseRateStack" id="ratioIncreaseRateStack" hidden>
@@ -6695,8 +6711,7 @@
         if (ratioIsSpecial() && !ratioExpressionFields().includes(field)) return;
         if (ratioAnswerStageFields().includes(field) && !ratioExpressionIsCorrect()) return;
         ratioActiveField = field;
-        Object.entries(ratioFields).forEach(([key, input]) => input.classList.toggle("active", key === field));
-        keypad.classList.toggle("operatorChoice", ["operator", "increaseOperator"].includes(field));
+        renderRatioEntry();
       }
 
       function renderRatioDigitTiles(input, field, value) {
@@ -6750,7 +6765,7 @@
         ratioProblemLine.classList.toggle("rateWorkMode", !special && rateWork);
         document.querySelector(".ratioSpecialStack").hidden = special;
         changeStack.hidden = !special || ratioProblem.type === "increaseRate";
-        rateWorkStack.hidden = special || !rateWork || ratioPhase === "rateExpression";
+        rateWorkStack.hidden = special || !rateWork;
         increaseStack.hidden = !special || ratioProblem.type !== "increaseRate";
         ratioVisual.hidden = special || rateWork;
         if (special) {
@@ -6796,7 +6811,7 @@
         }
         ratioVisual.hidden = rateWork;
         changeStack.hidden = true;
-        rateWorkStack.hidden = !rateWork || ratioPhase === "rateExpression";
+        rateWorkStack.hidden = !rateWork;
         increaseStack.hidden = true;
         const rateQuestion = ratioProblem.type === "rate";
         const fractionStep = ratioNeedsFractionStep();
@@ -8261,21 +8276,14 @@
       }
 
       function buildMenuPages(layout, columns, capacity) {
-        // Both groups share one grid; only the unfinished active row is padded.
-        const boundary = Math.ceil(layout.active.length / columns) * columns;
-        const length = Math.max(capacity, Math.ceil((boundary + Math.max(1, layout.graduated.length)) / capacity) * capacity);
-        return Array.from({ length: length / capacity }, (_, pageIndex) => {
-          const start = pageIndex * capacity;
-          const slots = Array.from({ length: capacity }, (_, index) => {
-            const position = start + index;
-            const group = position < boundary ? "active" : "graduated";
-            const groupIndex = group === "active" ? position : position - boundary;
-            return { group, index: Math.min(groupIndex, layout[group].length), app: layout[group][groupIndex] || "" };
-          });
-          const dividerRow = boundary >= start && boundary <= start + capacity
-            ? (boundary - start) / columns : null;
-          return { slots, dividerRow };
-        });
+        return ["active", "graduated"].flatMap((group) =>
+          Array.from({ length: Math.max(1, Math.ceil(layout[group].length / capacity)) }, (_, pageIndex) => ({
+            group,
+            slots: Array.from({ length: capacity }, (_, index) => {
+              const groupIndex = pageIndex * capacity + index;
+              return { group, index: Math.min(groupIndex, layout[group].length), app: layout[group][groupIndex] || "" };
+            }),
+          })));
       }
 
       function menuPages() {
@@ -8287,7 +8295,7 @@
         if (!pages.length) return;
         menuPageIndex = Math.max(0, Math.min(index, pages.length - 1));
         menuPager.style.transition = animate ? "transform 200ms ease-out" : "none";
-        menuPager.style.transform = `translate3d(${-menuPageIndex * menuPager.clientWidth}px, 0, 0)`;
+        menuPager.style.transform = `translate3d(${-menuPageIndex * 100}%, 0, 0)`;
         pages.forEach((page, position) => {
           page.inert = position !== menuPageIndex;
           page.setAttribute("aria-hidden", String(position !== menuPageIndex));
@@ -8309,9 +8317,7 @@
         pages.forEach((model) => {
           const page = document.createElement("section");
           page.className = "menuPage";
-          const active = model.slots.some((slot) => slot.group === "active");
-          const graduated = model.slots.some((slot) => slot.group === "graduated" && slot.app);
-          page.dataset.menuTitle = active ? (graduated ? "学習中のもの・卒業したもの" : "学習中のもの") : "卒業したもの";
+          page.dataset.menuTitle = model.group === "active" ? "学習中のもの" : "卒業したもの";
           page.setAttribute("aria-label", page.dataset.menuTitle);
           model.slots.forEach(({ group, index: groupIndex, app }) => {
             const slot = document.createElement("div");
@@ -8325,16 +8331,6 @@
             }
             page.append(slot);
           });
-          if (model.dividerRow !== null) {
-            const line = document.createElement("div");
-            line.className = "menuGraduationDivider";
-            line.setAttribute("role", "separator");
-            line.setAttribute("aria-label", "この線より下が卒業したもの");
-            const row = model.dividerRow;
-            line.style.top = row === 0 ? "1px" : row === rows ? "calc(100% - 3px)"
-              : `calc((100% - (var(--menu-rows) - 1) * var(--menu-gap)) / var(--menu-rows) * ${row} + var(--menu-gap) * ${row - 0.5} - 1px)`;
-            page.append(line);
-          }
           menuPager.append(page);
         });
         setMenuPage(index);
@@ -8400,7 +8396,7 @@
           suppressMenuClick();
           const dx = gesture.lastX - gesture.x;
           const elapsed = Math.max(1, performance.now() - gesture.startedAt);
-          const passed = Math.abs(dx) > menuPager.clientWidth * 0.18 || (Math.abs(dx) > 28 && Math.abs(dx) / elapsed > 0.35);
+          const passed = Math.abs(dx) > menuPager.getBoundingClientRect().width * 0.18 || (Math.abs(dx) > 28 && Math.abs(dx) / elapsed > 0.35);
           setMenuPage(gesture.startPage + (commit && gesture.swiping && passed ? (dx < 0 ? 1 : -1) : 0), true);
         } else if (gesture.tile && performance.now() - gesture.startedAt >= 500) {
           // Releasing an unfinished hold must not launch the exercise.
@@ -8443,7 +8439,7 @@
           }
         }
         if (gesture.swiping) {
-          const width = menuPager.clientWidth;
+          const width = menuPager.getBoundingClientRect().width;
           const offset = Math.max(-(menuPages().length - 1) * width, Math.min(0, -gesture.startPage * width + dx));
           menuPager.style.transition = "none";
           menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
