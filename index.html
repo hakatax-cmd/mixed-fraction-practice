@@ -4764,9 +4764,7 @@
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 2, denominator: 3 }, answer: { numerator: 21, denominator: 40 }, directFractionWork: true },
               { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 5, denominator: 9 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 9 } },
-              // These deliberately have a shared factor in the denominators.
-              // They are reserved for the "multiply both denominators" method,
-              // so its denominator differs visibly from the least common multiple.
+              // These are reserved for multiplying the displayed denominators.
               { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 3 }, productDenominator: true, directFractionWork: true },
               { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 }, productDenominator: true, directFractionWork: true },
               { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 7, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 6 }, productDenominator: true, directFractionWork: true },
@@ -4777,15 +4775,21 @@
             });
             const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
             if (!item) continue;
+            const total = reduceEquationFraction({
+              numerator: item.middle.numerator * item.constant.denominator
+                + (sourceOperator === "+" ? 1 : -1) * item.constant.numerator * item.middle.denominator,
+              denominator: item.middle.denominator * item.constant.denominator,
+            });
+            if (total.numerator < 1) continue;
+            // The child works with the displayed total and constant, not the hidden middle value.
             const commonDenominator = useProductDenominator
-              ? item.middle.denominator * item.constant.denominator
-              : item.middle.denominator * item.constant.denominator / gcd(item.middle.denominator, item.constant.denominator);
-            const middleNumerator = item.middle.numerator * (commonDenominator / item.middle.denominator);
+              ? total.denominator * item.constant.denominator
+              : total.denominator * item.constant.denominator / gcd(total.denominator, item.constant.denominator);
+            const totalNumerator = total.numerator * (commonDenominator / total.denominator);
             const constantNumerator = item.constant.numerator * (commonDenominator / item.constant.denominator);
-            const totalNumerator = sourceOperator === "+"
-              ? middleNumerator + constantNumerator
-              : middleNumerator - constantNumerator;
-            if (totalNumerator < 1) continue;
+            const middleNumerator = sourceOperator === "+"
+              ? totalNumerator - constantNumerator
+              : totalNumerator + constantNumerator;
             const workTerms = [totalNumerator, constantNumerator];
             if (workTerms.some((term) => term > 99)) continue;
             const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}:${item.constant.numerator}/${item.constant.denominator}`;
@@ -4793,7 +4797,7 @@
             return {
               kind,
               ...item,
-              total: reduceEquationFraction({ numerator: totalNumerator, denominator: commonDenominator }),
+              total,
               sourceOperator,
               workOperator: sourceOperator === "+" ? "-" : "+",
               commonDenominator,
