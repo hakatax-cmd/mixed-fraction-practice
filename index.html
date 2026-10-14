@@ -742,6 +742,24 @@
         justify-self: start;
         padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
       }
+      .ratioInlineConversion {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .ratioInlineConversion .ratioFraction { min-width: 0; width: max-content; }
+      #ratioProblemLine.rateWorkMode #ratioPrimaryEquation,
+      #ratioIncreaseExpressionLine { gap: 4px; flex-wrap: nowrap; }
+      #ratioProblemLine.rateWorkMode #ratioPrimaryEquation .ratioDigitInput,
+      #ratioIncreaseExpressionLine .ratioDigitInput { gap: 3px; }
+      #ratioProblemLine.rateWorkMode #ratioPrimaryEquation .ratioOperatorInput,
+      #ratioIncreaseExpressionLine .ratioOperatorInput {
+        width: 1.1em;
+        height: 1.2em;
+        font-size: inherit;
+        flex-shrink: 0;
+      }
 
       @media (max-width: 420px) {
         .ratioChangeEquation,
@@ -851,8 +869,8 @@
       .ratioFraction .ratioInlineDecimal { height: 100%; }
 
       #ratioIncreaseMixedWholeInput {
-        width: clamp(58px, 11vmin, 82px);
-        height: clamp(84px, 14.2vmin, 128px);
+        width: var(--digit-frame-width);
+        height: var(--digit-frame-height);
       }
       .fishingFact { margin: 0; color: var(--muted); font-size: clamp(1.05rem, 3.3vmin, 1.7rem); }
       .fishingQuestion { margin: 0; text-align: center; line-height: 1.35; }
@@ -2883,7 +2901,7 @@
               <span id="ratioGuideRight"></span>
             </div>
             <div class="ratioSpecialStack">
-            <div class="ratioEquation">
+            <div class="ratioEquation" id="ratioPrimaryEquation">
               <button class="ratioKnownValue ratioFreeInput" id="ratioKnownValue" data-ratio-field="knownValue" type="button" aria-label="&#24335;&#12398;&#26368;&#21021;&#12398;&#25968;"></button>
               <button class="ratioOperatorInput" id="ratioOperatorInput" data-ratio-field="operator" type="button" aria-label="&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
               <span class="ratioFraction" id="ratioFractionInput">
@@ -2894,6 +2912,14 @@
               <button class="ratioFreeInput" id="ratioFactorDecimalInput" data-ratio-field="factorDecimal" type="button" aria-label="&#21106;&#21512;&#12398;&#23567;&#25968;" hidden></button>
               <button class="ratioKnownValue ratioFreeInput" id="ratioSecondKnownValue" data-ratio-field="knownSecondValue" type="button" aria-label="&#24335;&#12398;&#20108;&#12388;&#30446;&#12398;&#25968;" hidden></button>
               <span class="ratioEquals" id="ratioPrimaryEquals">=</span>
+              <span class="ratioInlineConversion" id="ratioRateRawLine" hidden>
+                <span>=</span>
+                <span class="ratioFraction">
+                  <button class="ratioFreeInput" id="ratioRateRawNumeratorInput" data-ratio-field="rateRawNumerator" type="button" aria-label="最初の分子"></button>
+                  <i></i>
+                  <button class="ratioFreeInput" id="ratioRateRawDenominatorInput" data-ratio-field="rateRawDenominator" type="button" aria-label="最初の分母"></button>
+                </span>
+              </span>
               <span class="ratioDecimal" id="ratioDecimalInput" hidden>
                 <span class="ratioDecimalPrefix">0.</span>
                 <span class="ratioAnswerDigits" id="ratioDecimalDigits">
@@ -2974,14 +3000,6 @@
               </div>
             </div>
             <div class="ratioRateWorkStack" id="ratioRateWorkStack" hidden>
-              <div class="ratioRateLine" id="ratioRateRawLine">
-                <span>=</span>
-                <span class="ratioFraction">
-                  <button class="ratioFreeInput" id="ratioRateRawNumeratorInput" data-ratio-field="rateRawNumerator" type="button" aria-label="最初の分子"></button>
-                  <i></i>
-                  <button class="ratioFreeInput" id="ratioRateRawDenominatorInput" data-ratio-field="rateRawDenominator" type="button" aria-label="最初の分母"></button>
-                </span>
-              </div>
               <div class="ratioRateLine" id="ratioRateReducedLine" hidden>
                 <span>=</span>
                 <span class="ratioFraction">
@@ -2995,6 +3013,7 @@
                 <span class="ratioDecimal">
                   <span>0.</span>
                   <button class="ratioAnswerBox" id="ratioRateWorkTenthsInput" data-ratio-field="rateWorkTenths" type="button" aria-label="小数第一位"></button>
+                  <span>倍</span>
                 </span>
               </div>
             </div>
@@ -3003,13 +3022,13 @@
                 <button class="ratioFreeInput" id="ratioIncreaseCurrentInput" data-ratio-field="increaseCurrent" type="button" aria-label="増えた後の金額"></button>
                 <button class="ratioOperatorInput" id="ratioIncreaseOperatorInput" data-ratio-field="increaseOperator" type="button" aria-label="割り算の記号">○</button>
                 <button class="ratioFreeInput" id="ratioIncreaseBaseInput" data-ratio-field="increaseBase" type="button" aria-label="もとの金額"></button>
-              </div>
-              <div class="ratioIncreaseLine" id="ratioIncreaseRawLine" hidden>
-                <span>=</span>
-                <span class="ratioFraction">
-                  <button class="ratioFreeInput" id="ratioIncreaseRawNumeratorInput" data-ratio-field="increaseRawNumerator" type="button" aria-label="約分前の分子"></button>
-                  <i></i>
-                  <button class="ratioFreeInput" id="ratioIncreaseRawDenominatorInput" data-ratio-field="increaseRawDenominator" type="button" aria-label="約分前の分母"></button>
+                <span class="ratioInlineConversion" id="ratioIncreaseRawLine">
+                  <span>=</span>
+                  <span class="ratioFraction">
+                    <button class="ratioFreeInput" id="ratioIncreaseRawNumeratorInput" data-ratio-field="increaseRawNumerator" type="button" aria-label="約分前の分子"></button>
+                    <i></i>
+                    <button class="ratioFreeInput" id="ratioIncreaseRawDenominatorInput" data-ratio-field="increaseRawDenominator" type="button" aria-label="約分前の分母"></button>
+                  </span>
                 </span>
               </div>
               <div class="ratioIncreaseLine" id="ratioIncreaseReducedLine" hidden>
@@ -3055,7 +3074,7 @@
               </div>
             </div>
             <div class="ratioFinalRow" id="ratioFinalRow" hidden>
-              <span>&#31572;&#12360;</span>
+              <span>つまり</span>
               <span class="ratioAnswerDigits" id="ratioFinalDigits">
                 <button class="ratioAnswerBox" id="ratioFinalHundredsInput" data-ratio-field="finalHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
                 <button class="ratioAnswerBox" id="ratioFinalTensInput" data-ratio-field="finalTens" type="button" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" hidden></button>
@@ -4334,6 +4353,7 @@
           { percent: 40, decimal: "0.4" },
         ];
         const increaseRateProblems = [
+          { base: 240, current: 300, rawNumerator: 30, rawDenominator: 24, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
           { base: 360, current: 450, rawNumerator: 45, rawDenominator: 36, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
           { base: 160, current: 200, rawNumerator: 20, rawDenominator: 16, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
           { base: 80, current: 200, rawNumerator: 20, rawDenominator: 8, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.5", percent: 150, wari: "15" },
@@ -5806,10 +5826,10 @@
         if (!item) return "";
         if (item.type === "compare") return `${item.base}${item.unit}\u306e${item.rate.percent}%`;
         if (item.type === "original") return `${item.rate.percent}%\u304c${item.part}${item.unit}\u306e\u3082\u3068\u306e\u91d1\u984d`;
-        if (item.type === "rate") return `${item.part}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55\u5272`;
+        if (item.type === "rate") return `${item.part}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55\u500d`;
         if (item.type === "increase") return `${item.base}${item.unit}\u306e${item.rate.percent / 10}\u5272\u5897\u3057`;
         if (item.type === "discount") return `${item.base}${item.unit}\u306e${item.rate.percent / 10}\u5272\u5f15\u304d`;
-        return `${item.current}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55%`;
+        return `${item.current}${item.unit}\u306f${item.base}${item.unit}\u306e\u4f55\u500d`;
       }
 
       function createMultiplicationDeck() {
@@ -6606,6 +6626,9 @@
           { phase: "increaseExpression", fields: ["increaseCurrent", "increaseOperator", "increaseBase"] },
           { phase: "increaseRaw", fields: ["increaseRawDenominator", "increaseRawNumerator"] },
           { phase: "increaseReduced", fields: ["increaseReducedDenominator", "increaseReducedNumerator"] },
+          ...(item.numerator > item.denominator && item.numerator % item.denominator !== 0
+            ? [{ phase: "increaseMixed", fields: ["increaseMixedWhole", "increaseMixedDenominator", "increaseMixedNumerator"] }]
+            : []),
           { phase: "increaseDecimal", fields: ratioIncreaseDecimalFields(item) },
           { phase: "increasePercent", fields: ratioSpecialDigitFields(["increasePercentHundreds", "increasePercentTens", "increasePercentOnes"], item.percent) },
           { phase: "increaseWari", fields: ["increaseWari"] },
@@ -6689,8 +6712,8 @@
             increaseRawDenominator: item.rawDenominator,
             increaseReducedNumerator: item.numerator,
             increaseReducedDenominator: item.denominator,
-            increaseMixedWhole: item.mixedWhole,
-            increaseMixedNumerator: item.remainder,
+            increaseMixedWhole: Math.floor(item.numerator / item.denominator),
+            increaseMixedNumerator: item.numerator % item.denominator,
             increaseMixedDenominator: item.denominator,
             increaseDecimalWhole: item.decimal?.[0],
             increaseDecimalTenths: item.decimal?.[2],
@@ -6793,6 +6816,7 @@
         const increaseStack = document.querySelector("#ratioIncreaseRateStack");
         const special = ratioIsSpecial();
         const rateWork = ratioProblem.type === "rate";
+        document.querySelector("#ratioRateRawLine").hidden = special || !rateWork;
         ratioProblemLine.classList.toggle("ratioSpecialMode", special);
         ratioProblemLine.classList.toggle("rateWorkMode", !special && rateWork);
         document.querySelector(".ratioSpecialStack").hidden = special;
@@ -6823,22 +6847,28 @@
             return;
           }
 
-          const stageIndex = ratioSpecialStages().findIndex((stage) => stage.phase === ratioPhase);
+          const stages = ratioSpecialStages();
+          const stageIndex = stages.findIndex((stage) => stage.phase === ratioPhase);
           const showThrough = Math.max(0, stageIndex);
+          const reached = (phase) => {
+            const index = stages.findIndex((stage) => stage.phase === phase);
+            return index >= 0 && index <= showThrough;
+          };
           document.querySelector("#ratioIncreaseExpressionLine").hidden = false;
-          document.querySelector("#ratioIncreaseRawLine").hidden = showThrough < 1;
-          document.querySelector("#ratioIncreaseReducedLine").hidden = showThrough < 2;
-          document.querySelector("#ratioIncreaseMixedLine").hidden = true;
-          document.querySelector("#ratioIncreaseDecimalLine").hidden = showThrough < 3;
-          document.querySelector("#ratioIncreasePercentLine").hidden = showThrough < 4;
-          document.querySelector("#ratioIncreaseWariLine").hidden = showThrough < 5;
+          document.querySelector("#ratioIncreaseRawLine").hidden = false;
+          document.querySelector("#ratioIncreaseReducedLine").hidden = !reached("increaseReduced");
+          document.querySelector("#ratioIncreaseMixedLine").hidden = !reached("increaseMixed");
+          document.querySelector("#ratioIncreaseDecimalLine").hidden = !reached("increaseDecimal");
+          document.querySelector("#ratioIncreasePercentLine").hidden = !reached("increasePercent");
+          document.querySelector("#ratioIncreaseWariLine").hidden = !reached("increaseWari");
           ["increaseCurrent", "increaseOperator", "increaseBase"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 1) ["increaseRawNumerator", "increaseRawDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 2) ["increaseReducedNumerator", "increaseReducedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 3) ratioIncreaseDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 4) ratioSpecialDigitFields(["increasePercentHundreds", "increasePercentTens", "increasePercentOnes"], ratioProblem.percent)
+          ["increaseRawNumerator", "increaseRawDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (reached("increaseReduced")) ["increaseReducedNumerator", "increaseReducedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (reached("increaseMixed")) ["increaseMixedWhole", "increaseMixedDenominator", "increaseMixedNumerator"].forEach((field) => { ratioFields[field].hidden = false; });
+          if (reached("increaseDecimal")) ratioIncreaseDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
+          if (reached("increasePercent")) ratioSpecialDigitFields(["increasePercentHundreds", "increasePercentTens", "increasePercentOnes"], ratioProblem.percent)
             .forEach((field) => { ratioFields[field].hidden = false; });
-          if (showThrough >= 5) ratioFields.increaseWari.hidden = false;
+          if (reached("increaseWari")) ratioFields.increaseWari.hidden = false;
           return;
         }
         ratioVisual.hidden = rateWork;
@@ -6969,13 +6999,13 @@
         } else if (ratioProblem.type === "original") {
           ratioQuestion.textContent = `\u25a1${ratioProblem.unit}\u306e ${ratioProblem.rate.percent}% \u304c ${ratioProblem.part}${ratioProblem.unit}\u3002\u3082\u3068\u306e\u91d1\u984d\u306f\uff1f`;
         } else if (ratioProblem.type === "rate") {
-          ratioQuestion.textContent = `${ratioProblem.part}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55\u5272\uff1f`;
+          ratioQuestion.textContent = `${ratioProblem.part}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55\u500d\u3067\u3059\u304b\uff1f`;
         } else if (ratioProblem.type === "increase") {
           ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent / 10}\u5272\u5897\u3057\u306f\uff1f`;
         } else if (ratioProblem.type === "discount") {
           ratioQuestion.textContent = `${ratioProblem.base}${ratioProblem.unit}\u306e ${ratioProblem.rate.percent / 10}\u5272\u5f15\u304d\u306f\uff1f`;
         } else {
-          ratioQuestion.textContent = `${ratioProblem.current}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55%\uff1f`;
+          ratioQuestion.textContent = `${ratioProblem.current}${ratioProblem.unit}\u306f ${ratioProblem.base}${ratioProblem.unit}\u306e\u4f55\u500d\u3067\u3059\u304b\uff1f`;
         }
         renderRatioSlots();
         renderRatioDiagram();
@@ -6984,8 +7014,8 @@
       function ratioAnswerText(item = ratioProblem) {
         if (!item) return "";
         if (item.type === "increase" || item.type === "discount") return `${item.answer}${item.unit}`;
-        if (item.type === "increaseRate") return `${item.wari}\u5272\u5897\u3057`;
-        return item.type === "rate" ? `${item.answer}\u5272` : `${item.answer}${item.unit}`;
+        if (item.type === "increaseRate") return `${item.decimal}\u500d (${item.wari}\u5272\u5897\u3057)`;
+        return item.type === "rate" ? `${Number(item.decimal)}\u500d (${item.answer}\u5272)` : `${item.answer}${item.unit}`;
       }
 
       function visibleDigitSlots(slots, value) {
