@@ -524,7 +524,7 @@
         align-content: start;
         gap: clamp(10px, 1.8vmin, 18px);
         padding: clamp(42px, 7vmin, 72px) 0 clamp(20px, 3.8vmin, 42px);
-        font-size: clamp(1.7rem, 5.5vmin, 3.4rem);
+        font-size: 2rem;
         font-weight: 900;
         line-height: 1;
       }
@@ -683,7 +683,15 @@
         white-space: nowrap;
       }
 
-      .ratioChangeEquation { justify-content: center; }
+      .ratioChangeStack { display: grid; width: max-content; max-width: 100%; gap: 10px; }
+      .ratioChangeEquation { justify-content: flex-start; gap: 6px; font-size: inherit; }
+      .ratioChangeEquation:first-child { padding-left: calc(0.7em + 6px); }
+      .ratioChangeEquation:not(:first-child) > :first-child {
+        display: inline-grid;
+        place-items: center;
+        flex: 0 0 0.7em;
+      }
+      .ratioChangeEquation .ratioDigitInput { gap: 3px; }
       .ratioRateWorkStack { display: grid; justify-items: start; gap: clamp(6px, 1.4vmin, 12px); }
       .ratioRateLine { margin-left: clamp(4px, 1.5vmin, 16px); }
       .ratioRateLine .ratioFraction { width: max-content; min-width: clamp(58px, 11vmin, 82px); }
@@ -765,10 +773,11 @@
         .ratioChangeEquation,
         .ratioRateLine,
         .ratioIncreaseLine { gap: 4px; }
-        .ratioChangeEquation { font-size: clamp(1.35rem, 5.3vmin, 1.75rem); }
-        .ratioIncreaseRateStack { font-size: clamp(1.4rem, 5.6vmin, 1.85rem); }
+        .ratioChangeEquation:first-child { padding-left: calc(0.7em + 4px); }
         .ratioIncreaseLine > :first-child { margin-left: 0; }
       }
+      @media (max-width: 360px) { #ratioProblemLine { font-size: 1.8rem; } }
+      @media (min-width: 700px) { #ratioProblemLine { font-size: 2.5rem; } }
 
       .ratioAnswerBox {
         display: grid;
@@ -876,6 +885,10 @@
       .fishingQuestion { margin: 0; text-align: center; line-height: 1.35; }
       .fishingSteps { display: grid; justify-items: start; gap: clamp(13px, 2.5vmin, 22px); width: min(100%, 650px); }
       .fishingStep { display: inline-flex; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1.2vmin, 12px); line-height: 1.1; }
+      .fishingSteps.fishingConversionSteps { gap: 10px; }
+      .fishingConversionSteps .fishingStep { display: grid; grid-template-columns: 0.7em minmax(0, 1fr); gap: 6px; width: 100%; }
+      .fishingConversionSteps .fishingStepBody { display: flex; align-items: center; gap: 6px; min-width: 0; }
+      .fishingConversionSteps .fishingStepEquals { text-align: center; }
       .fishingInput { display: inline-flex; align-items: center; gap: clamp(3px, 0.65vmin, 6px); min-width: 0; min-height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; text-align: center; }
       .fishingDigit { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); border: 3px solid var(--line); border-radius: 6px; background: #fff; }
       .fishingDecimal { display: grid; place-items: end center; width: 0.28em; height: var(--digit-frame-height); padding-bottom: 0.12em; }
@@ -4552,7 +4565,14 @@
           question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
           question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", true), " g"]], "26.25 g"),
           question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
-          question("1号は 3.75 g です。", "15 g は何号？", ["goFourWeight", "goFourOperator", "goFourUnit", "goFour"], [[input("goFourWeight", 15), operator("goFourOperator", "÷"), input("goFourUnit", "3.75"), " = ", input("goFour", 4), " 号"]], "4号"),
+          { ...question("1号は 3.75 g です。", "15 g は何号？",
+            ["goFourWeight", "goFourOperator", "goFourUnit", "goFourDivisorDenominator", "goFourDivisorNumerator", "goFour"],
+            [
+              [input("goFourWeight", 15), operator("goFourOperator", "÷"), input("goFourUnit", "3.75")],
+              ["=", "15 ÷ ", fractionInput("goFourDivisorNumerator", 15, "goFourDivisorDenominator", 4)],
+              ["=", "15 × ", fraction(4, 15)],
+              ["=", input("goFour", 4), " 号"],
+            ], "4号"), alignedConversion: true },
         ];
         const lengthFact = "1 feet は 30 cm です。　1 inch は 2.5 cm です。　1 feet は 12 inch です。";
         const feetOnly = [
@@ -4568,8 +4588,8 @@
           question(lengthFact, "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
         ];
         return [
-          ozMultiplication[0], ozMultiplication[1], ozDivision[0], ozMultiplication[2],
-          go[0], go[1], go[3], go[2],
+          ozMultiplication[1], ozDivision[0], ozMultiplication[2], ozDivision[1],
+          go[0], go[1], go[2], go[3],
           ...feetOnly, ...inchOnly, ...mixedLength,
         ];
       }
@@ -4637,13 +4657,25 @@
         fishingFact.textContent = fishingProblem.fact;
         fishingQuestion.textContent = fishingProblem.text;
         fishingSteps.replaceChildren();
+        fishingSteps.classList.toggle("fishingConversionSteps", Boolean(fishingProblem.alignedConversion));
         const completedFields = new Set();
         fishingProblem.steps.forEach((parts, stepIndex) => {
           const priorComplete = [...completedFields].every((field) => fishingValues[field] === fishingExpected(field));
           if (stepIndex > 0 && !priorComplete) return;
           const row = document.createElement("div");
           row.className = "fishingStep";
-          parts.forEach((part) => row.append(renderFishingPart(part)));
+          if (fishingProblem.alignedConversion) {
+            const equals = document.createElement("span");
+            equals.className = "fishingStepEquals";
+            const hasEquals = parts[0] === "=";
+            equals.textContent = hasEquals ? "=" : "";
+            const body = document.createElement("span");
+            body.className = "fishingStepBody";
+            (hasEquals ? parts.slice(1) : parts).forEach((part) => body.append(renderFishingPart(part)));
+            row.append(equals, body);
+          } else {
+            parts.forEach((part) => row.append(renderFishingPart(part)));
+          }
           fishingSteps.append(row);
           parts.forEach((part) => {
             if (part?.type === "input" || part?.type === "operator") completedFields.add(part.field);
@@ -6703,8 +6735,8 @@
           const simpleValues = {
             changeBase: item.base,
             changeRate: item.rate?.decimal,
-            changeFactor: Math.round(ratioChangeMultiplier(item) * 100),
-            changeCount: item.base / 100,
+            changeFactor: item.base / 10,
+            changeCount: Math.round(ratioChangeMultiplier(item) * 10),
             increaseCurrent: item.current,
             increaseOperator: "÷",
             increaseBase: item.base,
