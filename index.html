@@ -725,7 +725,10 @@
         grid-template-rows: auto auto auto auto auto;
         --rate-equals-width: 0.7em;
         --rate-line-gap: 6px;
+        padding: 16px 0 12px;
+        gap: 8px;
       }
+      #ratioProblemLine.rateWorkMode .ratioQuestion { margin-bottom: 8px; }
       #ratioProblemLine.rateWorkMode > .ratioQuestion,
       #ratioProblemLine.rateWorkMode > .ratioGuideFormula,
       #ratioProblemLine.rateWorkMode > .ratioVisual { grid-column: 1 / -1; }
@@ -738,6 +741,36 @@
         padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
       }
       #ratioProblemLine.rateWorkMode .ratioRateWorkStack { grid-column: 2; grid-row: 4; width: max-content; justify-self: start; }
+      #ratioProblemLine.rateWorkMode .ratioIncreaseRateStack { display: contents; }
+      #ratioProblemLine.rateWorkMode .ratioIncreaseLine {
+        gap: var(--rate-line-gap);
+        min-height: var(--digit-frame-height);
+        justify-self: start;
+      }
+      #ratioProblemLine.rateWorkMode .ratioIncreaseLine > :first-child { margin-left: 0; }
+      #ratioProblemLine.rateWorkMode .ratioIncreaseLine:not(#ratioIncreaseExpressionLine):not(.ratioIncreaseConclusion) > :first-child {
+        flex: 0 0 var(--rate-equals-width);
+        text-align: center;
+      }
+      #ratioProblemLine.rateWorkMode #ratioIncreaseExpressionLine {
+        grid-column: 2;
+        grid-row: 3;
+        padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
+      }
+      #ratioProblemLine.rateWorkMode #ratioIncreaseReductionRow {
+        display: flex;
+        align-items: center;
+        gap: var(--rate-line-gap);
+        grid-column: 2;
+        grid-row: 4;
+        justify-self: start;
+      }
+      #ratioProblemLine.rateWorkMode #ratioIncreaseDecimalLine { grid-column: 2; grid-row: 5; }
+      #ratioProblemLine.rateWorkMode #ratioIncreasePercentLine { grid-column: 2; grid-row: 6; }
+      #ratioProblemLine.rateWorkMode #ratioIncreaseWariLine { grid-column: 2; grid-row: 7; }
+      #ratioProblemLine.rateWorkMode .ratioIncreaseConclusion {
+        padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
+      }
       #ratioProblemLine.rateWorkMode .ratioRateLine {
         display: grid;
         grid-template-columns: var(--rate-equals-width) max-content;
@@ -3053,6 +3086,7 @@
                   </span>
                 </span>
               </div>
+              <div id="ratioIncreaseReductionRow" hidden>
               <div class="ratioIncreaseLine" id="ratioIncreaseReducedLine" hidden>
                 <span>=</span>
                 <span class="ratioFraction">
@@ -3069,6 +3103,7 @@
                   <i></i>
                   <button class="ratioFreeInput" id="ratioIncreaseMixedDenominatorInput" data-ratio-field="increaseMixedDenominator" type="button" aria-label="帯分数の分母"></button>
                 </span>
+              </div>
               </div>
               <div class="ratioIncreaseLine" id="ratioIncreaseDecimalLine" hidden>
                 <span>=</span>
@@ -6850,7 +6885,7 @@
         const rateWork = ratioProblem.type === "rate";
         document.querySelector("#ratioRateRawLine").hidden = special || !rateWork;
         ratioProblemLine.classList.toggle("ratioSpecialMode", special);
-        ratioProblemLine.classList.toggle("rateWorkMode", !special && rateWork);
+        ratioProblemLine.classList.toggle("rateWorkMode", rateWork || ratioProblem.type === "increaseRate");
         document.querySelector(".ratioSpecialStack").hidden = special;
         changeStack.hidden = !special || ratioProblem.type === "increaseRate";
         rateWorkStack.hidden = special || !rateWork;
@@ -6879,6 +6914,10 @@
             return;
           }
 
+          ratioGuideFormula.hidden = false;
+          ratioGuideLeft.textContent = `${ratioProblem.base}${ratioProblem.unit}`;
+          ratioGuideFactor.textContent = "X\u500d";
+          ratioGuideRight.textContent = `${ratioProblem.current}${ratioProblem.unit}`;
           const stages = ratioSpecialStages();
           const stageIndex = stages.findIndex((stage) => stage.phase === ratioPhase);
           const showThrough = Math.max(0, stageIndex);
@@ -6888,6 +6927,7 @@
           };
           document.querySelector("#ratioIncreaseExpressionLine").hidden = false;
           document.querySelector("#ratioIncreaseRawLine").hidden = false;
+          document.querySelector("#ratioIncreaseReductionRow").hidden = !reached("increaseReduced");
           document.querySelector("#ratioIncreaseReducedLine").hidden = !reached("increaseReduced");
           document.querySelector("#ratioIncreaseMixedLine").hidden = !reached("increaseMixed");
           document.querySelector("#ratioIncreaseDecimalLine").hidden = !reached("increaseDecimal");
