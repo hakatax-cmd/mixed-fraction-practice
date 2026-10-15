@@ -745,10 +745,10 @@
         margin-left: 0;
       }
       #ratioProblemLine.rateWorkMode .ratioFinalRow {
-        grid-column: 2;
-        grid-row: 5;
-        justify-self: start;
-        padding-left: calc(var(--rate-equals-width) + var(--rate-line-gap));
+        gap: 4px;
+        margin-left: 6px;
+        padding: 0;
+        white-space: nowrap;
       }
       .ratioInlineConversion {
         display: inline-flex;
@@ -3027,6 +3027,15 @@
                   <span>0.</span>
                   <button class="ratioAnswerBox" id="ratioRateWorkTenthsInput" data-ratio-field="rateWorkTenths" type="button" aria-label="小数第一位"></button>
                   <span>倍</span>
+                  <span class="ratioFinalRow" id="ratioFinalRow" hidden>
+                    <span>つまり</span>
+                    <span class="ratioAnswerDigits" id="ratioFinalDigits">
+                      <button class="ratioAnswerBox" id="ratioFinalHundredsInput" data-ratio-field="finalHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
+                      <button class="ratioAnswerBox" id="ratioFinalTensInput" data-ratio-field="finalTens" type="button" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" hidden></button>
+                      <button class="ratioAnswerBox" id="ratioFinalOnesInput" data-ratio-field="finalOnes" type="button" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;"></button>
+                    </span>
+                    <span class="ratioUnit" id="ratioFinalUnit"></span>
+                  </span>
                 </span>
               </div>
             </div>
@@ -3085,15 +3094,6 @@
                 <button class="ratioFreeInput ratioIncreaseWariInput" id="ratioIncreaseWariInput" data-ratio-field="increaseWari" type="button" aria-label="割増し"></button>
                 <span>割 増し</span>
               </div>
-            </div>
-            <div class="ratioFinalRow" id="ratioFinalRow" hidden>
-              <span>つまり</span>
-              <span class="ratioAnswerDigits" id="ratioFinalDigits">
-                <button class="ratioAnswerBox" id="ratioFinalHundredsInput" data-ratio-field="finalHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
-                <button class="ratioAnswerBox" id="ratioFinalTensInput" data-ratio-field="finalTens" type="button" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" hidden></button>
-                <button class="ratioAnswerBox" id="ratioFinalOnesInput" data-ratio-field="finalOnes" type="button" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;"></button>
-              </span>
-              <span class="ratioUnit" id="ratioFinalUnit"></span>
             </div>
             <svg class="ratioVisual" id="ratioVisual" viewBox="0 0 560 220" role="img"></svg>
           </div>
