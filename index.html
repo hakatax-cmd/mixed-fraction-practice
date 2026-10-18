@@ -922,11 +922,14 @@
       .fishingConversionSteps .fishingStep { display: grid; grid-template-columns: 0.7em minmax(0, 1fr); gap: 6px; width: 100%; }
       .fishingConversionSteps .fishingStepBody { display: flex; align-items: center; gap: 6px; min-width: 0; }
       .fishingConversionSteps .fishingStepEquals { text-align: center; }
-      .fishingInput { display: inline-flex; align-items: center; gap: clamp(3px, 0.65vmin, 6px); min-width: 0; min-height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; text-align: center; }
-      .fishingDigit { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); border: 3px solid var(--line); border-radius: 6px; background: #fff; }
+      .fishingInput { display: inline-flex; align-items: center; flex: 0 0 auto; gap: clamp(3px, 0.65vmin, 6px); min-width: 0; min-height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 900; line-height: 1; text-align: center; }
+      .fishingDigit { display: grid; place-items: center; flex: 0 0 auto; position: relative; width: var(--digit-frame-width); height: var(--digit-frame-height); border: 3px solid var(--line); border-radius: 0; background: #fff; }
       .fishingDecimal { display: grid; place-items: end center; width: 0.28em; height: var(--digit-frame-height); padding-bottom: 0.12em; }
-      .fishingDigit.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); }
-      .fishingOperator { display: grid; place-items: center; width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); font: inherit; font-size: 1.15em; font-weight: 900; line-height: 1; }
+      .fishingDigit.active { border-color: var(--blue); }
+      .fishingDigit.active::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15); pointer-events: none; }
+      .fishingInput, .fishingOperator { appearance: none; -webkit-appearance: none; outline: none; }
+      .fishingInput:focus-visible, .fishingOperator:focus-visible { outline: 2px solid var(--blue); outline-offset: 7px; }
+      .fishingOperator { display: grid; place-items: center; flex: 0 0 auto; width: var(--digit-frame-width); height: var(--digit-frame-height); margin-inline: 6px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); font: inherit; font-size: 1.15em; font-weight: 900; line-height: 1; }
       .fishingOperator.active { color: var(--blue); box-shadow: 0 0 14px 7px rgba(37, 99, 235, 0.22); }
       .fishingFraction { display: inline-grid; grid-template-rows: 1.45em 4px 1.45em; min-width: 1.32em; align-items: center; justify-items: center; }
       .fishingFraction i { width: 100%; height: 4px; background: var(--ink); }
@@ -2542,10 +2545,22 @@
 
         #challengeView.ratioMode .keypad,
         #challengeView.speedMode .keypad,
-        #challengeView.equationMode .keypad {
+        #challengeView.equationMode .keypad,
+        #challengeView.fishingMode .keypad {
+          grid-template-rows: repeat(4, minmax(0, 1fr));
           height: min(100%, 400px);
           gap: 10px 22px;
         }
+
+        #challengeView:is(.ratioMode, .speedMode, .equationMode, .fishingMode) .keypad .toolButton {
+          width: auto;
+          height: min(100%, 88px);
+          max-width: 100%;
+          aspect-ratio: 1;
+          padding: 0;
+        }
+
+        .fishingOperator { margin-inline: 10px; }
 
         #challengeView.speedMode .keypad {
           width: min(100%, 704px);
@@ -7865,7 +7880,8 @@
         if (ratioIsSpecial()) {
           const stage = ratioSpecialCurrentStage();
           if (!stage.fields.includes(field)) return;
-          if (field === stage.fields.at(-1)) {
+          const pending = stage.fields.find((name) => (ratioValues[name] || "").length < ratioExpected(name).length);
+          if (!pending) {
             if (!stage.fields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
               showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(stage.fields));
               return;
@@ -7882,21 +7898,31 @@
             setRatioActive(stages[index + 1].fields[0]);
             return;
           }
-          setRatioActive(stage.fields[stage.fields.indexOf(field) + 1]);
+          setRatioActive(pending);
           return;
         }
         const expressionFields = ratioExpressionFields();
         const answerFields = ratioAnswerStageFields();
         const fields = ratioFieldOrder();
-        if (expressionFields.includes(field) && field === expressionFields.at(-1)) {
+        if (expressionFields.includes(field)) {
+          const pending = expressionFields.find((name) => (ratioValues[name] || "").length < ratioExpected(name).length);
+          if (pending) {
+            setRatioActive(pending);
+            return;
+          }
           if (!ratioExpressionIsCorrect()) {
               showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(expressionFields));
             return;
           }
-          ratioAdvance(field);
+          ratioAdvance(expressionFields.at(-1));
           return;
         }
-        if (answerFields.includes(field) && field === answerFields.at(-1)) {
+        if (answerFields.includes(field)) {
+          const pending = answerFields.find((name) => (ratioValues[name] || "").length < ratioExpected(name).length);
+          if (pending) {
+            setRatioActive(pending);
+            return;
+          }
           if (!answerFields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
               showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(answerFields));
             return;
