@@ -1945,7 +1945,7 @@
       #challengeView.ratioMode #ratioDivideKey, #challengeView.speedMode #ratioDivideKey, #challengeView.fishingMode #ratioDivideKey { grid-column: 3; grid-row: 1; }
       #challengeView.ratioMode #ratioDotKey, #challengeView.speedMode #ratioDotKey, #challengeView.fishingMode #ratioDotKey { grid-column: 4; grid-row: 1; }
       #challengeView.ratioMode .keypad.operatorChoice [data-digit],
-      #challengeView.ratioMode .keypad.operatorChoice #ratioDotKey {
+      #challengeView.ratioMode #ratioDotKey {
         border-color: #cbd2dc;
         background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px);
         color: transparent;
@@ -1973,7 +1973,7 @@
       #challengeView.fishingMode .keypad:not(.operatorChoice) #ratioTimesKey,
       #challengeView.fishingMode .keypad:not(.operatorChoice) #ratioDivideKey,
       #challengeView.fishingMode .keypad:not(.operatorChoice) #ratioPlusKey,
-      #challengeView.fishingMode .keypad:not(.decimalChoice) #ratioDotKey,
+      #challengeView.fishingMode #ratioDotKey,
       #challengeView.fishingMode .keypad.operatorChoice [data-digit],
       #challengeView.fishingMode .keypad.operatorChoice #ratioDotKey { border-color: #cbd2dc; background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px); color: transparent; pointer-events: none; }
       #challengeView.fishingMode #backButton { grid-column: 4; grid-row: 2; }
@@ -4588,9 +4588,8 @@
       function createFishingDeck() {
         const input = (field, value, onesFirst = false) => {
           const displayValue = String(value);
-          const entryValue = onesFirst
-            ? Array.from(displayValue).filter((character) => character !== ".").reverse().join("")
-            : displayValue;
+          const digits = Array.from(displayValue).filter((character) => character !== ".");
+          const entryValue = (onesFirst ? digits.reverse() : digits).join("");
           return { type: "input", field, value: displayValue, entryValue, onesFirst };
         };
         const operator = (field, value) => ({ type: "operator", field, value });
@@ -4626,16 +4625,28 @@
         ];
         const lengthFact = "1 feet は 30 cm です。　1 inch は 2.5 cm です。　1 feet は 12 inch です。";
         const feetOnly = [
-          question(lengthFact, "2 feet は何 cm？", ["footTwoUnit", "footTwoOperator", "footTwoCount", "footTwo"], [[input("footTwoUnit", 30), operator("footTwoOperator", "×"), input("footTwoCount", 2), " = ", input("footTwo", 60, true), " cm"]], "60 cm"),
-          question(lengthFact, "4 feet は何 cm？", ["footFourUnit", "footFourOperator", "footFourCount", "footFour"], [[input("footFourUnit", 30), operator("footFourOperator", "×"), input("footFourCount", 4), " = ", input("footFour", 120, true), " cm"]], "120 cm"),
+          question(lengthFact, "4 feet は何 cm？", ["footFourUnit", "footFourOperator", "footFourCount", "footFour"], [[input("footFourUnit", 30), operator("footFourOperator", "×"), input("footFourCount", 4), " = ", input("footFour", 120), " cm"]], "120 cm"),
         ];
         const inchOnly = [
           question(lengthFact, "4 inch は何 cm？", ["inchFourUnit", "inchFourOperator", "inchFourCount", "inchFour"], [[input("inchFourUnit", "2.5"), operator("inchFourOperator", "×"), input("inchFourCount", 4), " = ", input("inchFour", 10, true), " cm"]], "10 cm"),
-          question(lengthFact, "8 inch は何 cm？", ["inchEightUnit", "inchEightOperator", "inchEightCount", "inchEight"], [[input("inchEightUnit", "2.5"), operator("inchEightOperator", "×"), input("inchEightCount", 8), " = ", input("inchEight", 20, true), " cm"]], "20 cm"),
         ];
         const mixedLength = [
-          question(lengthFact, "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120, true)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
-          question(lengthFact, "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"]], "9 feet 4 inch"),
+          question(lengthFact, "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
+          question(lengthFact, "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch", "cm280AnswerFeet", "cm280AnswerInch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"], [input("cm280AnswerFeet", 9), "フィート", input("cm280AnswerInch", 4), "インチです。"]], "9 feet 4 inch"),
+          question(lengthFact, "7 feet 6 inch は何 cm？",
+            ["feetSevenSixFootUnit", "feetSevenSixFootMultiply", "feetSevenSixFootCount", "feetSevenSixFootResult", "feetSevenSixInchUnit", "feetSevenSixInchMultiply", "feetSevenSixInchCount", "feetSevenSixInchResult", "feetSevenSixFirstResult", "feetSevenSixPlus", "feetSevenSixSecondResult", "feetSevenSix"],
+            [
+              [input("feetSevenSixFootUnit", 30), operator("feetSevenSixFootMultiply", "×"), input("feetSevenSixFootCount", 7), " = ", input("feetSevenSixFootResult", 210)],
+              [input("feetSevenSixInchUnit", "2.5"), operator("feetSevenSixInchMultiply", "×"), input("feetSevenSixInchCount", 6), " = ", input("feetSevenSixInchResult", 15, true)],
+              [input("feetSevenSixFirstResult", 210), operator("feetSevenSixPlus", "+"), input("feetSevenSixSecondResult", 15), " = ", input("feetSevenSix", 225), " cm"],
+            ], "225 cm"),
+          question(lengthFact, "225 cm は何 feet 何 inch？",
+            ["cm225Length", "cm225Divide", "cm225FootUnit", "cm225Feet", "cm225Remainder", "cm225InchDivide", "cm225InchUnit", "cm225Inch", "cm225AnswerFeet", "cm225AnswerInch"],
+            [
+              [input("cm225Length", 225), operator("cm225Divide", "÷"), input("cm225FootUnit", 30), " = ", input("cm225Feet", 7), " あまり ", input("cm225Remainder", 15)],
+              ["15 ", operator("cm225InchDivide", "÷"), input("cm225InchUnit", "2.5"), " = ", input("cm225Inch", 6), " inch"],
+              [input("cm225AnswerFeet", 7), "フィート", input("cm225AnswerInch", 6), "インチです。"],
+            ], "7 feet 6 inch"),
         ];
         return [
           ozMultiplication[1], ozDivision[0], ozMultiplication[2], ozDivision[1],
@@ -4688,7 +4699,7 @@
           .map(({ index }) => index);
         const entryOrder = part.onesFirst
           ? [...digitIndices].reverse()
-          : characters.map((_, index) => index);
+          : digitIndices;
         const activeIndex = fishingActiveField === part.field ? entryOrder[value.length] ?? -1 : -1;
         characters.forEach((character, index) => {
           const digit = document.createElement("span");
@@ -4758,7 +4769,6 @@
         fishingActiveField = field;
         const expected = fishingExpected(field);
         keypad.classList.toggle("operatorChoice", /^[×÷+]$/.test(expected));
-        keypad.classList.toggle("decimalChoice", expected.includes("."));
         renderFishingProblem();
       }
 
@@ -4767,7 +4777,6 @@
         fishingActiveField = fishingProblem?.fields[0] || "";
         const expected = fishingExpected(fishingActiveField);
         keypad.classList.toggle("operatorChoice", /^[×÷+]$/.test(expected));
-        keypad.classList.toggle("decimalChoice", expected.includes("."));
         renderFishingProblem();
       }
 
@@ -4800,10 +4809,9 @@
         const expectsOperator = /^[×÷+]$/.test(expectedValue);
         if (expectsOperator) {
           if (!/^[×÷+]$/.test(value)) return;
-        } else if (!/^\d$/.test(value) && value !== ".") {
+        } else if (!/^\d$/.test(value)) {
           return;
         }
-        if (value === "." && (!expectedValue.includes(".") || (fishingValues[fishingActiveField] || "").includes("."))) return;
         const next = (fishingValues[fishingActiveField] || "") + value;
         if (!expectedValue.startsWith(next)) {
           const field = fishingActiveField;
@@ -7938,16 +7946,15 @@
         if (selectedApp !== "ratio" || isAnswerLocked || isFinished || !ratioActiveField) return;
         const field = ratioActiveField;
         const isOperator = ["operator", "increaseOperator"].includes(field);
-        const specialDecimalField = ["changeRate", "increaseWari"].includes(field);
         const allowed = isOperator
           ? value === "\u00d7" || value === "\u00f7"
-          : field === "factorDecimal" || specialDecimalField
-            ? /^\d$|^\.$/.test(value)
-            : /^\d$/.test(value);
+          : /^\d$/.test(value);
         if (!allowed) return;
         const wanted = ratioExpected(field);
         const current = ratioValues[field] || "";
-        const next = isOperator ? value : current + value;
+        let next = isOperator ? value : current + value;
+        // Decimal separators are printed already and never consume a keypress.
+        if (!isOperator && wanted[next.length] === ".") next += ".";
         if (next.length > wanted.length) return;
         ratioSetValue(field, next);
         if (isOperator && next !== wanted) {
@@ -7970,7 +7977,7 @@
         if (selectedApp !== "ratio" || isAnswerLocked || isFinished) return;
         const current = ratioValues[ratioActiveField] || "";
         if (current.length > 0) {
-          ratioSetValue(ratioActiveField, current.slice(0, -1));
+          ratioSetValue(ratioActiveField, current.slice(0, current.endsWith(".") ? -2 : -1));
           return;
         }
         if (ratioIsSpecial()) {
