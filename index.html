@@ -720,6 +720,11 @@
       #ratioProblemLine.ratioSpecialMode .ratioIncreaseRateStack { grid-row: 2; }
       #ratioProblemLine.rateWorkMode {
         width: 100%;
+        min-height: 0;
+        height: 100%;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scroll-padding: 8px;
         grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);
         grid-template-rows: auto auto auto auto auto;
         --rate-equals-width: 0.7em;
@@ -782,6 +787,11 @@
         padding: 0;
         white-space: nowrap;
       }
+      .ratioRateDecimalBody { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+      #ratioProblemLine.rateWorkMode .ratioRateWorkStack { max-width: calc(100vw - 48px); }
+      #ratioProblemLine.rateWorkMode .ratioRateLine { grid-template-columns: var(--rate-equals-width) minmax(0, 1fr); max-width: 100%; }
+      .ratioDiscountConclusion { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding-left: calc(0.7em + 6px); }
+      .practiceCard:has(#challengeView.ratioMode:not([hidden])) { touch-action: pan-y; }
       .ratioInlineConversion {
         display: inline-flex;
         align-items: center;
@@ -3074,20 +3084,34 @@
               </div>
               <div class="ratioRateLine" id="ratioRateDecimalLine" hidden>
                 <span>=</span>
+                <span class="ratioRateDecimalBody">
                 <span class="ratioDecimal">
                   <span>0.</span>
                   <button class="ratioAnswerBox" id="ratioRateWorkTenthsInput" data-ratio-field="rateWorkTenths" type="button" aria-label="小数第一位"></button>
+                  <button class="ratioAnswerBox" id="ratioRateWorkHundredthsInput" data-ratio-field="rateWorkHundredths" type="button" aria-label="小数第二位" hidden></button>
+                  <button class="ratioAnswerBox" id="ratioRateWorkThousandthsInput" data-ratio-field="rateWorkThousandths" type="button" aria-label="小数第三位" hidden></button>
                   <span>倍</span>
+                </span>
                   <span class="ratioFinalRow" id="ratioFinalRow" hidden>
                     <span>つまり</span>
                     <span class="ratioAnswerDigits" id="ratioFinalDigits">
                       <button class="ratioAnswerBox" id="ratioFinalHundredsInput" data-ratio-field="finalHundreds" type="button" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" hidden></button>
                       <button class="ratioAnswerBox" id="ratioFinalTensInput" data-ratio-field="finalTens" type="button" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" hidden></button>
-                      <button class="ratioAnswerBox" id="ratioFinalOnesInput" data-ratio-field="finalOnes" type="button" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;"></button>
+                      <button class="ratioFreeInput" id="ratioFinalOnesInput" data-ratio-field="finalOnes" type="button" aria-label="割合を割で入力"></button>
                     </span>
                     <span class="ratioUnit" id="ratioFinalUnit"></span>
                   </span>
                 </span>
+              </div>
+              <div class="ratioDiscountConclusion" id="ratioDiscountWariLine" hidden>
+                <span>つまり</span>
+                <button class="ratioFreeInput" id="ratioDiscountWariInput" data-ratio-field="discountWari" type="button" aria-label="何割引き"></button>
+                <span>割引き</span>
+              </div>
+              <div class="ratioDiscountConclusion" id="ratioDiscountPercentLine" hidden>
+                <span>つまり</span>
+                <button class="ratioFreeInput" id="ratioDiscountPercentInput" data-ratio-field="discountPercent" type="button" aria-label="何パーセント引き"></button>
+                <span>％引き</span>
               </div>
             </div>
             <div class="ratioIncreaseRateStack" id="ratioIncreaseRateStack" hidden>
@@ -3126,7 +3150,7 @@
               <div class="ratioIncreaseLine" id="ratioIncreaseDecimalLine" hidden>
                 <span>=</span>
                 <button class="ratioAnswerBox" id="ratioIncreaseDecimalWholeInput" data-ratio-field="increaseDecimalWhole" type="button" aria-label="倍の整数部分"></button>
-                <span>.</span>
+                <span id="ratioIncreaseDecimalPoint">.</span>
                 <span class="ratioAnswerDigits">
                   <button class="ratioAnswerBox" id="ratioIncreaseDecimalTenthsInput" data-ratio-field="increaseDecimalTenths" type="button" aria-label="倍の小数第一位"></button>
                   <button class="ratioAnswerBox" id="ratioIncreaseDecimalHundredthsInput" data-ratio-field="increaseDecimalHundredths" type="button" aria-label="倍の小数第二位"></button>
@@ -4187,6 +4211,10 @@
         rateReducedNumerator: document.querySelector("#ratioRateReducedNumeratorInput"),
         rateReducedDenominator: document.querySelector("#ratioRateReducedDenominatorInput"),
         rateWorkTenths: document.querySelector("#ratioRateWorkTenthsInput"),
+        rateWorkHundredths: document.querySelector("#ratioRateWorkHundredthsInput"),
+        rateWorkThousandths: document.querySelector("#ratioRateWorkThousandthsInput"),
+        discountWari: document.querySelector("#ratioDiscountWariInput"),
+        discountPercent: document.querySelector("#ratioDiscountPercentInput"),
       };
 
       function randomInt(min, max) {
@@ -4419,24 +4447,23 @@
           { percent: 30, decimal: "0.3" },
           { percent: 40, decimal: "0.4" },
         ];
-        const increaseRateProblems = [
-          { base: 240, current: 300, rawNumerator: 30, rawDenominator: 24, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
-          { base: 360, current: 450, rawNumerator: 45, rawDenominator: 36, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
-          { base: 160, current: 200, rawNumerator: 20, rawDenominator: 16, numerator: 5, denominator: 4, mixedWhole: 1, remainder: 1, decimal: "1.25", percent: 25, wari: "2.5" },
-          { base: 80, current: 200, rawNumerator: 20, rawDenominator: 8, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.5", percent: 150, wari: "15" },
-          { base: 120, current: 300, rawNumerator: 30, rawDenominator: 12, numerator: 5, denominator: 2, mixedWhole: 2, remainder: 1, decimal: "2.5", percent: 150, wari: "15" },
-        ];
-
         if (type === "increaseRate") {
-          const choices = shuffle(increaseRateProblems);
-          for (const choice of choices) {
-            const item = { type, ...choice, unit: "\u5186" };
-            const key = ratioProblemText(item);
-            if (used.has(key)) continue;
-            used.add(key);
-            return item;
-          }
-          return { type, ...increaseRateProblems[0], unit: "\u5186" };
+          // Both the fraction and its reciprocal terminate; vary the family within a round.
+          const pairs = shuffle([[1, 2], [1, 4], [1, 5], [1, 8], [2, 5], [4, 5], [5, 8]]);
+          const [denominator, numerator] = pairs.find(([n, d]) => !used.has(`pair:${n}/${d}`)) || pairs[0];
+          used.add(`pair:${denominator}/${numerator}`);
+          const scale = randomInt(2, Math.floor(99 / numerator));
+          const base = denominator * scale * 10;
+          const current = numerator * scale * 10;
+          const item = {
+            type, base, current, numerator, denominator,
+            rawNumerator: numerator * scale, rawDenominator: denominator * scale,
+            decimal: String(numerator / denominator),
+            percent: (numerator - denominator) * 100 / denominator,
+            wari: String((numerator - denominator) * 10 / denominator), unit: "\u5186",
+          };
+          used.add(ratioProblemText(item));
+          return item;
         }
 
         if (type === "increase" || type === "discount") {
@@ -4532,7 +4559,7 @@
             part: reverse.base,
             unit: "\u5186",
             operator: "\u00f7",
-            decimal: `0.${wari}`,
+            decimal: String(reverse.base / reverse.current),
             answer: wari,
             rawNumerator: reverse.base / 10,
             rawDenominator: reverse.current / 10,
@@ -6708,6 +6735,18 @@
       }
 
       function ratioSpecialStages(item = ratioProblem) {
+        if (item?.type === "rate") {
+          const decimal = String(Number(item.decimal)).split(".")[1] || "";
+          return [
+            { phase: "rateExpression", fields: ["knownValue", "operator", "knownSecondValue"] },
+            { phase: "rateRaw", fields: ["rateRawDenominator", "rateRawNumerator"] },
+            { phase: "rateReduced", fields: ["rateReducedDenominator", "rateReducedNumerator"] },
+            { phase: "rateDecimal", fields: ["rateWorkTenths", "rateWorkHundredths", "rateWorkThousandths"].slice(0, decimal.length) },
+            { phase: "rateAnswer", fields: ["finalOnes"] },
+            { phase: "rateDiscountWari", fields: ["discountWari"] },
+            { phase: "rateDiscountPercent", fields: ["discountPercent"] },
+          ];
+        }
         if (!ratioIsSpecial(item)) return [];
         if (item.type === "increase" || item.type === "discount") {
           return [
@@ -6746,11 +6785,7 @@
         if (!ratioProblem) return [];
         if (ratioIsSpecial()) return ratioSpecialCurrentStage().fields;
         if (ratioProblem.type === "rate") {
-          if (ratioPhase === "rateRaw") return ["rateRawDenominator", "rateRawNumerator"];
-          if (ratioPhase === "rateReduced") return ["rateReducedDenominator", "rateReducedNumerator"];
-          if (ratioPhase === "rateDecimal") return ["rateWorkTenths"];
-          if (ratioPhase === "rateAnswer") return [];
-          return ["knownValue", "operator", "knownSecondValue"];
+          return ratioSpecialCurrentStage().fields;
         }
         if (ratioNeedsFractionStep()) {
           if (ratioPhase === "fraction") {
@@ -6772,7 +6807,7 @@
       function ratioAnswerStageFields() {
         if (ratioIsSpecial()) return [];
         if (ratioProblem?.type === "rate") {
-          return ratioPhase === "rateAnswer" ? ratioAnswerFields("final", ratioProblem.answer) : [];
+          return [];
         }
         if (!ratioProblem || (ratioNeedsFractionStep() && ratioPhase !== "multiply")) return [];
         const prefix = ratioNeedsFractionStep()
@@ -6782,7 +6817,7 @@
       }
 
       function ratioFieldOrder() {
-        if (ratioIsSpecial()) return ratioSpecialStages().flatMap((stage) => stage.fields);
+        if (ratioIsSpecial() || ratioProblem?.type === "rate") return ratioSpecialStages().flatMap((stage) => stage.fields);
         return [...ratioExpressionFields(), ...ratioAnswerStageFields()];
       }
 
@@ -6832,7 +6867,15 @@
         if (field === "rateRawDenominator") return String(ratioProblem.rawDenominator ?? ratioProblem.base);
         if (field === "rateReducedNumerator") return String(ratioProblem.rate.numerator);
         if (field === "rateReducedDenominator") return String(ratioProblem.rate.denominator);
-        if (field === "rateWorkTenths") return ratioProblem.decimal.replace(/^0\./, "")[0] || "";
+        if (["rateWorkTenths", "rateWorkHundredths", "rateWorkThousandths"].includes(field)) {
+          const index = ["rateWorkTenths", "rateWorkHundredths", "rateWorkThousandths"].indexOf(field);
+          return String(Number(ratioProblem.decimal)).split(".")[1]?.[index] || "";
+        }
+        if (ratioProblem.type === "rate") {
+          if (field === "finalOnes") return String(ratioProblem.rate.numerator * 10 / ratioProblem.rate.denominator);
+          if (field === "discountWari") return String((ratioProblem.rate.denominator - ratioProblem.rate.numerator) * 10 / ratioProblem.rate.denominator);
+          if (field === "discountPercent") return String((ratioProblem.rate.denominator - ratioProblem.rate.numerator) * 100 / ratioProblem.rate.denominator);
+        }
         if (field === "knownValue") {
           return String(ratioProblem.type === "compare" ? ratioProblem.base : ratioProblem.part);
         }
@@ -6859,10 +6902,13 @@
       function setRatioActive(field) {
         if (isAnswerLocked || isFinished) return;
         if (!ratioFieldOrder().includes(field)) return;
-        if (ratioIsSpecial() && !ratioExpressionFields().includes(field)) return;
+        if ((ratioIsSpecial() || ratioProblem?.type === "rate") && !ratioExpressionFields().includes(field)) return;
         if (ratioAnswerStageFields().includes(field) && !ratioExpressionIsCorrect()) return;
         ratioActiveField = field;
         renderRatioEntry();
+        if (ratioProblem?.type === "rate" || ratioProblem?.type === "increaseRate") {
+          ratioFields[field]?.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "instant" });
+        }
       }
 
       function renderRatioDigitTiles(input, field, value) {
@@ -6962,6 +7008,7 @@
           document.querySelector("#ratioIncreaseReducedLine").hidden = !reached("increaseReduced");
           document.querySelector("#ratioIncreaseMixedLine").hidden = !reached("increaseMixed");
           document.querySelector("#ratioIncreaseDecimalLine").hidden = !reached("increaseDecimal");
+          document.querySelector("#ratioIncreaseDecimalPoint").hidden = !String(ratioProblem.decimal).includes(".");
           document.querySelector("#ratioIncreasePercentLine").hidden = !reached("increasePercent");
           document.querySelector("#ratioIncreaseWariLine").hidden = !reached("increaseWari");
           ["increaseCurrent", "increaseOperator", "increaseBase"].forEach((field) => { ratioFields[field].hidden = false; });
@@ -7033,15 +7080,19 @@
         ["decimalTenths", "decimalHundredths", "decimalThousandths"].forEach((field) => { ratioFields[field].hidden = true; });
         ["rateRawNumerator", "rateRawDenominator", "rateReducedNumerator", "rateReducedDenominator", "rateWorkTenths"].forEach((field) => { ratioFields[field].hidden = true; });
         if (rateWork) {
-          const phases = ["rateRaw", "rateReduced", "rateDecimal", "rateAnswer"];
-          const stageIndex = phases.indexOf(ratioPhase);
+          const stages = ratioSpecialStages();
+          const stageIndex = stages.findIndex((stage) => stage.phase === ratioPhase);
+          const reached = (phase) => stageIndex >= stages.findIndex((stage) => stage.phase === phase);
           document.querySelector("#ratioRateRawLine").hidden = false;
-          document.querySelector("#ratioRateReducedLine").hidden = stageIndex < 1;
-          document.querySelector("#ratioRateDecimalLine").hidden = stageIndex < 2;
+          document.querySelector("#ratioRateReducedLine").hidden = !reached("rateReduced");
+          document.querySelector("#ratioRateDecimalLine").hidden = !reached("rateDecimal");
+          ratioFinalRow.hidden = !reached("rateAnswer");
+          document.querySelector("#ratioDiscountWariLine").hidden = !reached("rateDiscountWari");
+          document.querySelector("#ratioDiscountPercentLine").hidden = !reached("rateDiscountPercent");
           ["rateRawNumerator", "rateRawDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (stageIndex >= 1) ["rateReducedNumerator", "rateReducedDenominator"].forEach((field) => { ratioFields[field].hidden = false; });
-          if (stageIndex >= 2) ratioFields.rateWorkTenths.hidden = false;
-          if (stageIndex >= 3) ratioAnswerFields("final", ratioProblem.answer).forEach((field) => { ratioFields[field].hidden = false; });
+          stages.slice(0, stageIndex + 1).forEach((stage) => {
+            stage.fields.forEach((field) => { ratioFields[field].hidden = false; });
+          });
           return;
         }
         ratioDecimalFields().forEach((field) => { ratioFields[field].hidden = false; });
@@ -7081,7 +7132,7 @@
         const partWidth = width * ratioProblem.rate.percent / 100;
         const wholeLabel = ratioProblem.type === "original" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.base}${ratioProblem.unit}`;
         const partLabel = ratioProblem.type === "compare" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.part}${ratioProblem.unit}`;
-        const finalRateFields = ratioAnswerFields("final", ratioProblem.answer);
+        const finalRateFields = ["finalOnes"];
         const rateSolved = ratioProblem.type === "rate" && finalRateFields.every((field) => (ratioValues[field] || "") === ratioExpected(field));
         const solvedRateLabel = rateSolved
           ? groupingLabel(x + partWidth / 2, 22, `${ratioProblem.answer}\u5272`, "#2563eb")
@@ -7118,7 +7169,9 @@
         if (!item) return "";
         if (item.type === "increase" || item.type === "discount") return `${item.answer}${item.unit}`;
         if (item.type === "increaseRate") return `${item.decimal}\u500d (${item.wari}\u5272\u5897\u3057)`;
-        return item.type === "rate" ? `${Number(item.decimal)}\u500d (${item.answer}\u5272)` : `${item.answer}${item.unit}`;
+        return item.type === "rate"
+          ? `${Number(item.decimal)}倍 (${item.answer}割、${(item.rate.denominator - item.rate.numerator) * 10 / item.rate.denominator}割引き・${(item.rate.denominator - item.rate.numerator) * 100 / item.rate.denominator}％引き)`
+          : `${item.answer}${item.unit}`;
       }
 
       function visibleDigitSlots(slots, value) {
@@ -7893,7 +7946,7 @@
       }
 
       function ratioFinishField(field) {
-        if (ratioIsSpecial()) {
+        if (ratioIsSpecial() || ratioProblem?.type === "rate") {
           const stage = ratioSpecialCurrentStage();
           if (!stage.fields.includes(field)) return;
           const pending = stage.fields.find((name) => (ratioValues[name] || "").length < ratioExpected(name).length);
@@ -7989,7 +8042,7 @@
           ratioSetValue(ratioActiveField, current.slice(0, current.endsWith(".") ? -2 : -1));
           return;
         }
-        if (ratioIsSpecial()) {
+        if (ratioIsSpecial() || ratioProblem?.type === "rate") {
           const stages = ratioSpecialStages();
           const stageIndex = stages.findIndex((stage) => stage.phase === ratioPhase);
           const fieldIndex = ratioSpecialCurrentStage().fields.indexOf(ratioActiveField);
