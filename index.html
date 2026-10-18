@@ -518,6 +518,8 @@
       }
 
       #ratioProblemLine {
+        --digit-frame-width: 0.8em;
+        --digit-frame-height: calc(var(--digit-frame-width) * 1.618034);
         display: grid;
         grid-template-rows: auto auto auto minmax(130px, 1fr);
         place-items: center;
@@ -546,7 +548,7 @@
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
-      .ratioEquation { display: inline-flex; align-items: center; justify-content: center; gap: clamp(4px, 1.2vmin, 12px); min-width: 0; font-variant-numeric: tabular-nums; }
+      .ratioEquation { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(4px, 1.2vmin, 12px); min-width: 0; max-width: 100%; font-variant-numeric: tabular-nums; }
       .ratioSpecialStack { display: contents; }
       #ratioProblemLine > .ratioSpecialStack > .ratioEquation:not(.ratioFractionStep):not(.ratioMultiplyStep) { grid-row: 2; }
       .ratioFractionStep, .ratioFinalRow { grid-row: 3; }
@@ -613,23 +615,20 @@
 
       #ratioProblemLine.fractionStepMode {
         --ratio-step-lead-equals-width: clamp(22px, 4.8vmin, 34px);
-        --ratio-step-known-width: clamp(48px, 10vmin, 70px);
         --ratio-step-operator-width: clamp(40px, 8vmin, 58px);
-        --ratio-step-factor-width: clamp(88px, 16vmin, 112px);
-        --ratio-step-fraction-width: clamp(58px, 10.5vmin, 74px);
-        --ratio-step-equals-width: clamp(24px, 5vmin, 34px);
         grid-template-rows: auto auto minmax(130px, 1fr);
       }
 
       #ratioProblemLine.fractionStepMode .ratioSpecialStack {
         display: grid;
-        grid-template-columns: var(--ratio-step-lead-equals-width) var(--ratio-step-known-width) var(--ratio-step-operator-width) var(--ratio-step-factor-width) var(--ratio-step-equals-width) minmax(0, 1fr);
+        grid-template-columns: var(--ratio-step-lead-equals-width) max-content var(--ratio-step-operator-width) max-content;
         grid-template-rows: auto auto auto auto;
         row-gap: clamp(10px, 1.8vmin, 18px);
         column-gap: clamp(4px, 1vmin, 8px);
         justify-content: start;
         justify-self: center;
-        width: min(100%, 360px);
+        width: max-content;
+        max-width: 100%;
         grid-row: 2;
       }
 
@@ -643,7 +642,7 @@
       #ratioProblemLine.fractionStepMode .ratioResultStep { grid-row: auto; }
 
       #ratioProblemLine.fractionStepMode .ratioLeadEquals { grid-column: 1; justify-self: start; align-self: center; color: var(--muted); }
-      #ratioProblemLine.fractionStepMode .ratioKnownValue { grid-column: 2; width: var(--ratio-step-known-width); min-width: 0; }
+      #ratioProblemLine.fractionStepMode .ratioKnownValue { grid-column: 2; width: max-content; min-width: 0; justify-self: start; }
       #ratioProblemLine.fractionStepMode .ratioOperatorInput,
       #ratioProblemLine.fractionStepMode .ratioFractionStepOperator,
       #ratioProblemLine.fractionStepMode .ratioMultiplyOperator {
@@ -658,9 +657,9 @@
         grid-column: 4;
         min-width: 0;
       }
-      #ratioProblemLine.fractionStepMode #ratioFactorDecimalInput { width: var(--ratio-step-factor-width); }
+      #ratioProblemLine.fractionStepMode #ratioFactorDecimalInput { width: max-content; justify-self: start; }
       #ratioProblemLine.fractionStepMode .ratioFractionStep .ratioFraction,
-      #ratioProblemLine.fractionStepMode .ratioMultiplyStep .ratioFraction { width: var(--ratio-step-fraction-width); }
+      #ratioProblemLine.fractionStepMode .ratioMultiplyStep .ratioFraction { width: max-content; justify-self: start; }
       #ratioProblemLine.fractionStepMode .ratioResultStep .ratioAnswer { grid-column: 2 / -1; justify-self: start; }
       .ratioAnswer { display: inline-flex; align-items: center; gap: clamp(5px, 1vmin, 9px); }
       .ratioAnswerDigits { display: inline-flex; gap: clamp(4px, 0.9vmin, 8px); }
@@ -815,6 +814,7 @@
       .ratioAnswerBox {
         display: grid;
         place-items: center;
+        flex: 0 0 auto;
         width: var(--digit-frame-width);
         height: var(--digit-frame-height);
         padding: 0;
@@ -863,6 +863,7 @@
       .ratioFreeInput.ratioDigitInput {
         display: inline-flex;
         align-items: center;
+        flex: 0 0 auto;
         gap: clamp(4px, 0.9vmin, 8px);
         width: auto;
         min-width: 0;
@@ -878,6 +879,7 @@
       .ratioInlineDigit {
         display: grid;
         place-items: center;
+        flex: 0 0 auto;
         width: var(--digit-frame-width);
         height: var(--digit-frame-height);
         border: 3px solid var(--line);
@@ -893,6 +895,7 @@
       .ratioInlineDecimal {
         display: grid;
         place-items: end center;
+        flex: 0 0 auto;
         width: 0.28em;
         height: var(--digit-frame-height);
         padding-bottom: 0.12em;
