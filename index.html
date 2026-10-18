@@ -3042,7 +3042,7 @@
                 <span>=</span>
                 <span id="ratioChangeExpandedBase"></span>
                 <span>×</span>
-                <span id="ratioChangeMultiplier"></span>
+                <button class="ratioFreeInput" id="ratioChangeMultiplier" data-ratio-field="changeMultiplier" type="button" aria-label="増減後の倍率"></button>
               </div>
               <div class="ratioChangeEquation" id="ratioChangeIntermediateLine" hidden>
                 <span>=</span>
@@ -4156,6 +4156,7 @@
         stepAnswerOnes: document.querySelector("#ratioStepAnswerOnesInput"),
         changeBase: document.querySelector("#ratioChangeBaseInput"),
         changeRate: document.querySelector("#ratioChangeRateInput"),
+        changeMultiplier: document.querySelector("#ratioChangeMultiplier"),
         changeFactor: document.querySelector("#ratioChangeFactorInput"),
         changeCount: document.querySelector("#ratioChangeCountInput"),
         changeAnswerHundreds: document.querySelector("#ratioChangeAnswerHundredsInput"),
@@ -6708,6 +6709,7 @@
         if (item.type === "increase" || item.type === "discount") {
           return [
             { phase: "changeEquation", fields: ["changeBase", "changeRate"] },
+            { phase: "changeMultiplier", fields: ["changeMultiplier"] },
             { phase: "changeIntermediate", fields: ["changeFactor", "changeCount"] },
             { phase: "changeAnswer", fields: ratioSpecialDigitFields(["changeAnswerHundreds", "changeAnswerTens", "changeAnswerOnes"], item.answer) },
           ];
@@ -6793,6 +6795,7 @@
           const simpleValues = {
             changeBase: item.base,
             changeRate: item.rate?.decimal,
+            changeMultiplier: ratioChangeMultiplier(item),
             changeFactor: item.base / 10,
             changeCount: Math.round(ratioChangeMultiplier(item) * 10),
             increaseCurrent: item.current,
@@ -6862,6 +6865,8 @@
       function renderRatioDigitTiles(input, field, value) {
         const expected = ratioExpected(field);
         const characters = Array.from(expected || value || "");
+        const entryIndex = value.length >= characters.length ? 0 : value.length;
+        const activeIndex = characters.findIndex((character, index) => index >= entryIndex && character !== ".");
         input.classList.add("ratioDigitInput");
         input.replaceChildren();
         characters.forEach((character, index) => {
@@ -6869,7 +6874,7 @@
           const isDecimal = character === ".";
           tile.className = isDecimal ? "ratioInlineDecimal" : "ratioInlineDigit";
           tile.textContent = isDecimal ? "." : (value[index] || "");
-          tile.classList.toggle("active", !isDecimal && field === ratioActiveField && index === value.length);
+          tile.classList.toggle("active", !isDecimal && field === ratioActiveField && index === activeIndex);
           input.append(tile);
         });
       }
@@ -6926,13 +6931,13 @@
             document.querySelector("#ratioChangeSign").textContent = ratioProblem.type === "increase" ? "+" : "−";
             const stageIndex = ratioSpecialStages().findIndex((stage) => stage.phase === ratioPhase);
             document.querySelector("#ratioChangeStaticLine").hidden = stageIndex < 1;
-            document.querySelector("#ratioChangeIntermediateLine").hidden = stageIndex < 1;
-            document.querySelector("#ratioChangeAnswerLine").hidden = stageIndex < 2;
+            document.querySelector("#ratioChangeIntermediateLine").hidden = stageIndex < 2;
+            document.querySelector("#ratioChangeAnswerLine").hidden = stageIndex < 3;
             document.querySelector("#ratioChangeExpandedBase").textContent = String(ratioProblem.base);
-            document.querySelector("#ratioChangeMultiplier").textContent = String(ratioChangeMultiplier());
             ["changeBase", "changeRate"].forEach((field) => { ratioFields[field].hidden = false; });
-            if (stageIndex >= 1) ["changeFactor", "changeCount"].forEach((field) => { ratioFields[field].hidden = false; });
-            if (stageIndex >= 2) ratioSpecialDigitFields(["changeAnswerHundreds", "changeAnswerTens", "changeAnswerOnes"], ratioProblem.answer)
+            if (stageIndex >= 1) ratioFields.changeMultiplier.hidden = false;
+            if (stageIndex >= 2) ["changeFactor", "changeCount"].forEach((field) => { ratioFields[field].hidden = false; });
+            if (stageIndex >= 3) ratioSpecialDigitFields(["changeAnswerHundreds", "changeAnswerTens", "changeAnswerOnes"], ratioProblem.answer)
               .forEach((field) => { ratioFields[field].hidden = false; });
             return;
           }
@@ -7951,7 +7956,8 @@
           : /^\d$/.test(value);
         if (!allowed) return;
         const wanted = ratioExpected(field);
-        const current = ratioValues[field] || "";
+        const stored = ratioValues[field] || "";
+        const current = stored.length >= wanted.length ? "" : stored;
         let next = isOperator ? value : current + value;
         // Decimal separators are printed already and never consume a keypress.
         if (!isOperator && wanted[next.length] === ".") next += ".";
