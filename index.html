@@ -2663,6 +2663,54 @@
           }
         }
       }
+      #chooseArea { background: #edf8f4; }
+      #areaProblemLine {
+        --area-number-size: 28px;
+        font-size: var(--area-number-size);
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        width: 100%; height: 100%; min-height: 0; min-width: 0;
+        overflow-y: auto; overflow-x: hidden;
+        overscroll-behavior: contain; touch-action: pan-y;
+        padding: 8px 8px 20px; scroll-padding: 12px;
+      }
+      .practiceCard:has(#challengeView.areaMode:not([hidden])) { touch-action: pan-y; }
+      .areaQuestion { margin: 0; font-size: 21px; text-align: center; }
+      .areaDiagram { position: relative; width: min(100%, 500px); height: 280px; margin: 4px auto 12px; }
+      .areaDiagram svg { position: absolute; width: 100%; height: calc(100% - 60px); }
+      .areaDiagram .areaShape { fill: #e9f5ef; stroke: #264b43; stroke-width: 2.5; }
+      .areaDiagram .areaHeightLine { stroke: #607080; stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
+      .areaDimension { position: absolute; display: flex; align-items: center; gap: 4px; transform: translateX(-50%); white-space: nowrap; }
+      .areaDimension.base { left: 56%; bottom: 0; }
+      .areaDimension.height { left: 14%; top: 26%; }
+      .areaDimension.top { left: 55%; top: 0; }
+      .areaDimension.surface { left: 62%; top: 30%; }
+      .areaDiagram.triangle .areaDimension.surface { left: 48%; top: 32%; }
+      .areaDimension .areaUnit { font-size: 16px; }
+      .areaHint { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; width: fit-content; max-width: 100%; margin: 4px auto 16px; padding: 8px; border: 2px solid #e4bb44; background: #fff4be; border-radius: 4px; }
+      .areaSteps { width: min(100%, 650px); margin-inline: auto; display: grid; gap: 14px; }
+      .areaRow { display: grid; grid-template-columns: 0.8em minmax(0, 1fr); gap: 5px; align-items: center; }
+      .areaEquals { text-align: center; }
+      .areaRowBody { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+      .areaFraction { display: inline-grid; grid-template-rows: 1.2em 2px 1.2em; align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: .8em; }
+      .areaFraction i { height: 2px; width: 100%; background: var(--ink); }
+      .areaInput { display: inline-flex; gap: 2px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; flex: 0 0 auto; }
+      .areaDigit { position: relative; display: grid; place-items: center; width: .8em; height: 1.2em; border: 2px solid var(--line); border-radius: 0; background: white; }
+      .areaDigit.active { border-color: var(--blue); box-shadow: 0 0 0 3px #2563eb25; }
+      .areaOperator { display: grid; place-items: center; width: 1.15em; height: 1.15em; margin-inline: 4px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: white; color: inherit; font: inherit; flex: 0 0 auto; }
+      .areaOperator.active { border-color: var(--blue); box-shadow: 0 0 0 3px #2563eb25; }
+      .areaInput:focus-visible, .areaOperator:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+      #areaProblemLine .areaInput:disabled, #areaProblemLine .areaOperator:disabled { color: inherit; opacity: 1; }
+      #challengeView.areaMode .keypad { grid-template-rows: repeat(4, minmax(0, 1fr)); }
+      #challengeView.areaMode .keypad [data-area-blocked="true"] { border-color: #cbd2dc; background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px); color: transparent; pointer-events: none; }
+      @media (min-width: 700px) and (min-height: 700px) {
+        #areaProblemLine { --area-number-size: 36px; padding: 12px 18px 24px; }
+        .areaQuestion { font-size: 26px; }
+        .areaDiagram { height: 340px; }
+        .areaDimension .areaUnit { font-size: 20px; }
+        .areaRowBody { gap: 8px; }
+      }
+      @media (max-width: 359px) { #areaProblemLine { --area-number-size: 24px; } }
     </style>
   </head>
   <body>
@@ -2692,6 +2740,7 @@
                   <button class="menuButton" id="chooseEquation" type="button">&#19968;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
                   <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
                   <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
+                  <button class="menuButton" id="chooseArea" type="button">長方形・三角形<br />台形の面積</button>
                 </div>
               </section>
               <div class="menuGraduationDivider" role="separator" aria-label="卒業したもの"><span>&#21330;&#26989;&#12375;&#12383;&#12514;&#12398;</span></div>
@@ -2822,6 +2871,12 @@
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
 
+        <section class="cover" id="areaCover" hidden>
+          <h1>長方形・三角形・台形の面積</h1>
+          <p class="coverGoal">8問<br />タイムアタック</p>
+          <button class="startButton" id="areaStartButton" type="button">スタート</button>
+          <button class="backToMenuButton" data-back-menu type="button">えらびなおす</button>
+        </section>
         <section class="cover" id="subtractionCover" hidden>
           <h1>&#22235;&#26689;&#12398;&#24341;&#12365;&#31639;</h1>
           <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
@@ -3222,6 +3277,12 @@
             <p class="fishingQuestion" id="fishingQuestion"></p>
             <div class="fishingSteps" id="fishingSteps"></div>
           </div>
+          <div id="areaProblemLine" hidden>
+            <p class="areaQuestion" id="areaQuestion"></p>
+            <div class="areaDiagram" id="areaDiagram" role="img"></div>
+            <div class="areaHint" id="areaHint" hidden></div>
+            <div class="areaSteps" id="areaSteps"></div>
+          </div>
           <div id="preschoolProblemLine" hidden>
             <div class="preschoolFormula">
               <span id="preschoolFirst"></span>
@@ -3336,7 +3397,7 @@
               <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
             </div>
             <div class="simultaneousStep" id="simultaneousZeroTransformStep" hidden>
-              <span class="simultaneousCaption">&#9312; &#8594; x =</span><button class="simultaneousInput active" id="simultaneousZeroCoefficientInput" data-system-field="zeroCoefficient" type="button" aria-label="xをyで表したときの係数"></button><span>y</span>
+              <span class="simultaneousCaption" id="simultaneousZeroTransformLabel">&#9312; &#8594; x =</span><button class="simultaneousInput active" id="simultaneousZeroCoefficientInput" data-system-field="zeroCoefficient" type="button" aria-label="xをyで表したときの係数"></button><span id="simultaneousZeroTransformVariable">y</span>
             </div>
             <div class="simultaneousStep" id="simultaneousZeroSubstitutionStep" hidden>
               <span class="simultaneousCaption">&#9313;に代入 &#8594;</span><span id="simultaneousZeroSubstitutionText"></span>
@@ -3354,7 +3415,7 @@
                 <button class="simultaneousInput" id="simultaneousYDenominatorInput" data-system-field="yDenominator" type="button" aria-label="y&#12398;&#20998;&#27597;"></button>
               </span>
             </div>
-            <div class="simultaneousStep" id="simultaneousSubstituteCaption" hidden><span class="simultaneousCaption">&#12371;&#12428;&#12434;&#9313;&#12395;&#20195;&#20837;</span></div>
+            <div class="simultaneousStep" id="simultaneousSubstituteCaption" hidden><span class="simultaneousCaption" id="simultaneousSubstituteCaptionText">&#12371;&#12428;&#12434;&#9313;&#12395;&#20195;&#20837;</span></div>
             <div class="simultaneousStep" id="simultaneousSubstituteStep" hidden>
               <span id="simultaneousSubstitutePrefix"></span>
               <button class="simultaneousInput" id="simultaneousSubstituteInput" data-system-field="substitute" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20516;"></button>
@@ -3598,6 +3659,8 @@
       const SPEED_SLOTS = ["speedAnswerHundreds", "speedAnswerTens", "speedAnswerOnes"];
       const SPEED_BEST_KEY = "speedBestTimeMs";
       const FISHING_TARGET = 14;
+      const AREA_TARGET = 8;
+      const AREA_BEST_KEY = "areaBestTimeMs";
       const FISHING_BEST_KEY = "fishingBestTimeMs";
       const EQUATION_TARGET = 12;
       const EQUATION_BEST_KEY = "equationBestTimeMs";
@@ -3638,6 +3701,7 @@
         RATIO_BEST_KEY,
         SPEED_BEST_KEY,
         FISHING_BEST_KEY,
+        AREA_BEST_KEY,
         EQUATION_BEST_KEY,
         SIMULTANEOUS_BEST_KEY,
         PRESCHOOL_BEST_KEY,
@@ -3663,6 +3727,7 @@
         ratio: "\u5272\u5408",
         speed: "\u901f\u3055",
         fishing: "\u91e3\u308a\u306e\u554f\u984c",
+        area: "長方形・三角形・台形の面積",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
         equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
         simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
@@ -3685,6 +3750,7 @@
         "preschool",
         "equation",
         "simultaneous",
+        "area",
       ];
       const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
 
@@ -3732,6 +3798,11 @@
       let fishingProblem = null;
       let fishingValues = {};
       let fishingActiveField = "";
+      let areaDeck = [];
+      let areaIndex = 0;
+      let areaProblem = null;
+      let areaValues = {};
+      let areaActiveField = "";
       let speedDeck = [];
       let speedIndex = 0;
       let speedProblem = null;
@@ -3989,6 +4060,8 @@
       const simultaneousScaledYInput = document.querySelector("#simultaneousScaledYInput");
       const simultaneousScaledRhsInput = document.querySelector("#simultaneousScaledRhsInput");
       const simultaneousZeroTransformStep = document.querySelector("#simultaneousZeroTransformStep");
+      const simultaneousZeroTransformLabel = document.querySelector("#simultaneousZeroTransformLabel");
+      const simultaneousZeroTransformVariable = document.querySelector("#simultaneousZeroTransformVariable");
       const simultaneousZeroCoefficientInput = document.querySelector("#simultaneousZeroCoefficientInput");
       const simultaneousZeroSubstitutionStep = document.querySelector("#simultaneousZeroSubstitutionStep");
       const simultaneousZeroSubstitutionText = document.querySelector("#simultaneousZeroSubstitutionText");
@@ -4004,8 +4077,10 @@
       const simultaneousYNumeratorInput = document.querySelector("#simultaneousYNumeratorInput");
       const simultaneousYDenominatorInput = document.querySelector("#simultaneousYDenominatorInput");
       const simultaneousSubstituteCaption = document.querySelector("#simultaneousSubstituteCaption");
+      const simultaneousSubstituteCaptionText = document.querySelector("#simultaneousSubstituteCaptionText");
       const simultaneousSubstituteStep = document.querySelector("#simultaneousSubstituteStep");
       const simultaneousSubstitutePrefix = document.querySelector("#simultaneousSubstitutePrefix");
+      const simultaneousSubstituteSuffix = document.querySelector("#simultaneousSubstituteSuffix");
       const simultaneousSubstituteInput = document.querySelector("#simultaneousSubstituteInput");
       const simultaneousSubstituteFraction = document.querySelector("#simultaneousSubstituteFraction");
       const simultaneousSubstituteNumeratorInput = document.querySelector("#simultaneousSubstituteNumeratorInput");
@@ -4146,6 +4221,14 @@
       const fishingFact = document.querySelector("#fishingFact");
       const fishingQuestion = document.querySelector("#fishingQuestion");
       const fishingSteps = document.querySelector("#fishingSteps");
+      const chooseArea = document.querySelector("#chooseArea");
+      const areaCover = document.querySelector("#areaCover");
+      const areaStartButton = document.querySelector("#areaStartButton");
+      const areaProblemLine = document.querySelector("#areaProblemLine");
+      const areaQuestion = document.querySelector("#areaQuestion");
+      const areaDiagram = document.querySelector("#areaDiagram");
+      const areaHint = document.querySelector("#areaHint");
+      const areaSteps = document.querySelector("#areaSteps");
       const preschoolProblemLine = document.querySelector("#preschoolProblemLine");
       const equationProblemLine = document.querySelector("#equationProblemLine");
       const streakLabel = document.querySelector("#streakLabel");
@@ -4903,6 +4986,339 @@
         }
         const index = fishingProblem.fields.indexOf(fishingActiveField);
         if (index > 0) setFishingActive(fishingProblem.fields[index - 1]);
+      }
+
+      function areaFraction(n, d = 1) {
+        const divisor = gcd(n, d);
+        return { n: n / divisor, d: d / divisor };
+      }
+
+      function areaFractionText(value) {
+        return value.d === 1 ? String(value.n) : `${value.n}/${value.d}`;
+      }
+
+      function areaCancelFactors(factors) {
+        const result = factors.map(value => ({ ...value }));
+        for (const numerator of result) {
+          for (const denominator of result) {
+            const divisor = gcd(numerator.n, denominator.d);
+            numerator.n /= divisor;
+            denominator.d /= divisor;
+          }
+        }
+        return result;
+      }
+
+      function areaPartFields(parts) {
+        return parts.flatMap(part => {
+          if (part?.type === "input" || part?.type === "operator") return [part];
+          if (part?.type === "fraction") return areaPartFields([part.denominator, part.numerator]);
+          return [];
+        });
+      }
+
+      function createAreaDeck() {
+        const pick = items => items[randomInt(0, items.length - 1)];
+        const number = (field, value, onesFirst = false) => ({ type: "input", field, value: String(value), onesFirst });
+        const operator = (field, value) => ({ type: "operator", field, value });
+        const fixed = value => value.d === 1 ? String(value.n) : ({ type: "staticFraction", ...value });
+        const inputFraction = (field, value) => value.d === 1 ? number(field, value.n) : ({
+          type: "fraction", numerator: number(`${field}N`, value.n), denominator: number(`${field}D`, value.d),
+        });
+        const row = (parts, equals = true) => ({ parts, equals });
+        const question = (kind, shape, unknown, measures, answer, steps, hint = []) => {
+          const unit = unknown === "surface" ? "cm²" : "cm";
+          const label = { surface: "面積", base: shape === "rectangle" ? "横の長さ" : "底辺", height: "高さ", top: "上底" }[unknown];
+          const shapeName = { rectangle: "長方形", triangle: "直角三角形", trapezoid: "台形" }[shape];
+          return { kind, shape, unknown, measures, answer, unit, text: `${shapeName}の${label}を求めよ。`,
+            answerText: `${areaFractionText(answer)} ${unit}`, steps, hint,
+            fields: steps.flatMap(step => areaPartFields(step.parts)) };
+        };
+        const result = (answer, unit, onesFirst = false) => row([
+          answer.d === 1 ? number("answer", answer.n, onesFirst) : inputFraction("answer", answer), unit,
+        ]);
+        const product = factors => factors.flatMap((value, index) => index ? ["×", fixed(value)] : [fixed(value)]);
+        const fractions = [];
+        for (let n = 1; n <= 9; n += 1) {
+          for (let d = 2; d <= 9; d += 1) if (gcd(n, d) === 1) fractions.push(areaFraction(n, d));
+        }
+        const deck = [];
+        const width = randomInt(11, 19), height = randomInt(3, 9);
+        deck.push(question("rectangleArea", "rectangle", "surface", {
+          base: areaFraction(width), height: areaFraction(height), surface: areaFraction(width * height),
+        }, areaFraction(width * height), [
+          row([number("base", width), operator("multiply", "×"), number("height", height)], false),
+          result(areaFraction(width * height), "cm²", true),
+        ]));
+
+        const rectangleArea = pick(fractions);
+        const rectangleHeight = pick(fractions.filter(value => areaFractionText(value) !== areaFractionText(rectangleArea)));
+        const rectangleBase = areaFraction(rectangleArea.n * rectangleHeight.d, rectangleArea.d * rectangleHeight.n);
+        deck.push(question("rectangleSide", "rectangle", "base", {
+          base: rectangleBase, height: rectangleHeight, surface: rectangleArea,
+        }, rectangleBase, [
+          row([inputFraction("surface", rectangleArea), operator("divide", "÷"), inputFraction("height", rectangleHeight)], false),
+          row(product([rectangleArea, areaFraction(rectangleHeight.d, rectangleHeight.n)])),
+          result(rectangleBase, "cm"),
+        ]));
+
+        const trianglePairs = [];
+        for (const base of fractions) {
+          for (const height of fractions) {
+            if (gcd(base.n * height.n, base.d * height.d * 2) === 1) continue;
+            const surface = areaFraction(base.n * height.n, base.d * height.d * 2);
+            if (surface.n <= 81 && surface.d <= 81) trianglePairs.push({ base, height, surface });
+          }
+        }
+        const triangle = pick(trianglePairs);
+        const cancelled = areaCancelFactors([triangle.base, triangle.height, areaFraction(1, 2)]);
+        deck.push(question("triangleArea", "triangle", "surface", triangle, triangle.surface, [
+          row([inputFraction("base", triangle.base), operator("multiply", "×"), inputFraction("height", triangle.height),
+            operator("halfMultiply", "×"), inputFraction("half", areaFraction(1, 2))], false),
+          row(product(cancelled)), result(triangle.surface, "cm²"),
+        ]));
+
+        const baseProblems = [];
+        for (let base = 2; base <= 9; base += 1) {
+          for (const height of fractions) {
+            const surface = areaFraction(base * height.n, 2 * height.d);
+            if (surface.n <= 9 && surface.d <= 9 && surface.d > 1) baseProblems.push({ base: areaFraction(base), height, surface });
+          }
+        }
+        const baseProblem = pick(baseProblems);
+        deck.push(question("triangleBase", "triangle", "base", baseProblem, baseProblem.base, [
+          row([inputFraction("surface", baseProblem.surface), "× 2", operator("divide", "÷"), inputFraction("height", baseProblem.height)], false),
+          row(product([baseProblem.surface, areaFraction(2), areaFraction(baseProblem.height.d, baseProblem.height.n)])),
+          result(baseProblem.base, "cm"),
+        ], ["X ×", fixed(baseProblem.height), "÷ 2 =", fixed(baseProblem.surface)]));
+
+        const surface = areaFraction(randomInt(2, 9));
+        const base = pick(fractions.filter(value => {
+          const height = areaFraction(surface.n * 2 * value.d, value.n);
+          return height.d > 1 && height.n <= 81;
+        }));
+        const fractionalHeight = areaFraction(surface.n * 2 * base.d, base.n);
+        deck.push(question("triangleHeight", "triangle", "height", { base, height: fractionalHeight, surface }, fractionalHeight, [
+          row([number("surface", surface.n), "× 2", operator("divide", "÷"), inputFraction("base", base)], false),
+          row(product([surface, areaFraction(2), areaFraction(base.d, base.n)])), result(fractionalHeight, "cm"),
+        ], [fixed(base), "× X ÷ 2 =", fixed(surface)]));
+
+        const trapezoids = [];
+        for (let top = 1; top < 10; top += 1) {
+          for (let base = top + 1; base <= 10; base += 1) {
+            for (let height = 2; height <= 10; height += 1) {
+              if ((top + base) * height % 2 === 0) trapezoids.push({ top, base, height, surface: (top + base) * height / 2 });
+            }
+          }
+        }
+        const used = new Set();
+        for (const unknown of ["surface", "height", "top"]) {
+          const item = pick(trapezoids.filter(value => !used.has(JSON.stringify(value)) && (unknown !== "height" || (value.top + value.base) % 2 === 0)));
+          used.add(JSON.stringify(item));
+          const sum = item.top + item.base;
+          const measures = Object.fromEntries(Object.entries(item).map(([key, value]) => [key, areaFraction(value)]));
+          let steps, hint = [];
+          if (unknown === "surface") {
+            steps = [row(["(", number("top", item.top), operator("add", "+"), number("base", item.base), ")",
+              operator("multiply", "×"), number("height", item.height), operator("divide", "÷"), number("half", 2)], false),
+            row([number("sum", sum), `× ${item.height} ÷ 2`]), result(measures.surface, "cm²")];
+          } else if (unknown === "height") {
+            hint = [`${sum} ÷ 2 × X = ${item.surface}`];
+            steps = [row([number("surface", item.surface), operator("divide", "÷"), "(", number("sum", sum), "÷ 2 )"], false),
+              row([String(item.surface), "÷", number("halfSum", sum / 2)]), result(measures.height, "cm")];
+          } else {
+            steps = [row([`( x + ${item.base} ) × ${item.height} ÷ 2 = ${item.surface}`], false),
+              row([`( x + ${item.base} ) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
+              row([`x + ${item.base} =`, number("sum", sum)], false),
+              row(["x =", number("total", sum), "−", number("base", item.base)], false),
+              row(["x =", number("answer", item.top), "cm"], false)];
+          }
+          deck.push(question(`trapezoid${unknown === "surface" ? "Area" : unknown === "height" ? "Height" : "Top"}`,
+            "trapezoid", unknown, measures, measures[unknown], steps, hint));
+        }
+        return deck;
+      }
+
+      function areaExpected(part) {
+        return part.onesFirst ? Array.from(part.value).reverse().join("") : part.value;
+      }
+
+      function renderAreaPart(part) {
+        const element = document.createElement(typeof part === "object" && ["input", "operator"].includes(part.type) ? "button" : "span");
+        if (typeof part === "string") { element.textContent = part; return element; }
+        if (part.type === "fraction" || part.type === "staticFraction") {
+          element.className = "areaFraction";
+          const numerator = part.type === "fraction" ? part.numerator : String(part.n);
+          const denominator = part.type === "fraction" ? part.denominator : String(part.d);
+          element.append(renderAreaPart(numerator), document.createElement("i"), renderAreaPart(denominator));
+          return element;
+        }
+        element.type = "button";
+        element.dataset.areaField = part.field;
+        element.disabled = isAnswerLocked || isFinished;
+        const value = areaValues[part.field] || "";
+        const active = areaActiveField === part.field;
+        if (part.type === "operator") {
+          element.className = "areaOperator";
+          element.textContent = value;
+          element.classList.toggle("active", active);
+          element.setAttribute("aria-label", "計算記号");
+          return element;
+        }
+        element.className = "areaInput";
+        element.setAttribute("aria-label", `${part.value.length}桁の数値入力`);
+        for (let index = 0; index < part.value.length; index += 1) {
+          const position = part.onesFirst ? part.value.length - index - 1 : index;
+          const digit = document.createElement("span");
+          digit.className = "areaDigit";
+          digit.textContent = value[position] || "";
+          digit.classList.toggle("active", active && position === (value.length < part.value.length ? value.length : 0));
+          element.append(digit);
+        }
+        return element;
+      }
+
+      function renderAreaDiagram() {
+        const item = areaProblem;
+        areaDiagram.className = `areaDiagram ${item.shape}`;
+        const points = item.shape === "rectangle" ? "110,35 340,35 340,150 110,150"
+          : item.shape === "triangle" ? "110,30 340,150 110,150" : "160,40 280,40 340,150 100,150";
+        areaDiagram.innerHTML = `<svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true"><polygon class="areaShape" points="${points}"/>${item.shape === "trapezoid"
+          ? '<path class="areaHeightLine" d="M100 40H160M100 40V150"/><path d="M100 140H110V150" fill="none" stroke="#264b43" stroke-width="2"/>'
+          : '<path d="M110 140H120V150" fill="none" stroke="#264b43" stroke-width="2"/>'}</svg>`;
+        const labels = [];
+        for (const key of ["top", "base", "height", "surface"]) {
+          if (!item.measures[key]) continue;
+          const label = document.createElement("span");
+          label.className = `areaDimension ${key}`;
+          const value = item.measures[key];
+          const unknown = item.unknown === key;
+          label.append(renderAreaPart(unknown ? "x" : value.d === 1 ? String(value.n) : { type: "staticFraction", ...value }));
+          const unit = document.createElement("span");
+          unit.className = "areaUnit";
+          unit.textContent = key === "surface" ? "cm²" : "cm";
+          label.append(unit);
+          areaDiagram.append(label);
+          labels.push(`${{ top: "上底", base: "底辺", height: "高さ", surface: "面積" }[key]} ${unknown ? "x" : areaFractionText(value)} ${unit.textContent}`);
+        }
+        areaDiagram.setAttribute("aria-label", labels.join("、"));
+      }
+
+      function renderAreaEntry(scroll = false) {
+        if (!areaProblem) return;
+        areaSteps.replaceChildren();
+        let priorComplete = true;
+        for (const step of areaProblem.steps) {
+          if (!priorComplete) break;
+          const row = document.createElement("div");
+          row.className = "areaRow";
+          const equals = document.createElement("span");
+          equals.className = "areaEquals";
+          equals.textContent = step.equals ? "=" : "";
+          const body = document.createElement("div");
+          body.className = "areaRowBody";
+          step.parts.forEach(part => body.append(renderAreaPart(part)));
+          row.append(equals, body);
+          areaSteps.append(row);
+          priorComplete = areaPartFields(step.parts).every(part => areaValues[part.field] === areaExpected(part));
+        }
+        const active = areaProblem.fields.find(part => part.field === areaActiveField);
+        const operator = active?.type === "operator";
+        keypad.classList.toggle("operatorChoice", operator);
+        for (const [id, value] of [["ratioTimesKey", "×"], ["ratioDivideKey", "÷"], ["ratioPlusKey", "+"]]) {
+          document.querySelector(`#${id}`).dataset.areaBlocked = String(!operator || (value === "+" && active?.value !== "+"));
+        }
+        if (scroll) areaSteps.querySelector(`[data-area-field="${areaActiveField}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+      }
+
+      function resetAreaEntry() {
+        areaValues = {};
+        areaActiveField = areaProblem?.fields[0]?.field || "";
+        if (!areaProblem) return;
+        areaQuestion.textContent = areaProblem.text;
+        renderAreaDiagram();
+        areaHint.replaceChildren();
+        areaHint.hidden = !areaProblem.hint.length;
+        areaProblem.hint.forEach(part => areaHint.append(renderAreaPart(part)));
+        renderAreaEntry();
+        areaProblemLine.scrollTop = 0;
+        requestAnimationFrame(() => {
+          if (selectedApp === "area" && !isAnswerLocked) {
+            areaSteps.querySelector(`[data-area-field="${areaActiveField}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+          }
+        });
+      }
+
+      function setAreaActive(field) {
+        if (selectedApp !== "area" || isAnswerLocked || isFinished) return;
+        const fields = areaProblem.fields;
+        const index = fields.findIndex(part => part.field === field);
+        const incomplete = fields.findIndex(part => areaValues[part.field] !== areaExpected(part));
+        if (index < 0 || (incomplete >= 0 && index > incomplete)) return;
+        areaActiveField = field;
+        renderAreaEntry();
+      }
+
+      function completeAreaProblem() {
+        setLocked(true);
+        renderAreaEntry();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          showReaction(true);
+          correctCount += 1;
+          updateProgress();
+          if (isLastTimedProblem()) {
+            finalTime = elapsedTime(); clearedAt = new Date(); isFinished = true;
+            updateProgress(); schedule(finishRound); return;
+          }
+          schedule(() => { hideReaction(); nextProblem(true); });
+        }));
+      }
+
+      function areaReceive(value) {
+        if (selectedApp !== "area" || isAnswerLocked || isFinished || !areaProblem) return;
+        const part = areaProblem.fields.find(item => item.field === areaActiveField);
+        if (!part || !(part.type === "operator" ? /^[×÷+]$/.test(value) : /^\d$/.test(value))) return;
+        const expected = areaExpected(part);
+        const stored = areaValues[part.field] || "";
+        const next = (stored.length >= expected.length ? "" : stored) + value;
+        if (!expected.startsWith(next)) {
+          showWrongConfirmation(`area:${part.field}:${next}`, () => renderAreaEntry());
+          return;
+        }
+        areaValues[part.field] = next;
+        if (next !== expected) { renderAreaEntry(); return; }
+        const incomplete = areaProblem.fields.find(item => areaValues[item.field] !== areaExpected(item));
+        if (!incomplete) { completeAreaProblem(); return; }
+        areaActiveField = incomplete.field;
+        renderAreaEntry(true);
+      }
+
+      function areaBackspace() {
+        if (selectedApp !== "area" || isAnswerLocked || isFinished || !areaProblem) return;
+        const stored = areaValues[areaActiveField] || "";
+        if (stored) areaValues[areaActiveField] = stored.slice(0, -1);
+        else {
+          const index = areaProblem.fields.findIndex(part => part.field === areaActiveField);
+          if (index > 0) areaActiveField = areaProblem.fields[index - 1].field;
+        }
+        renderAreaEntry(true);
+      }
+
+      function showAreaCover() {
+        selectedApp = "area";
+        document.querySelectorAll(".cover").forEach(element => { element.hidden = true; });
+        areaCover.hidden = false;
+        challengeView.hidden = true; finishPanel.hidden = true; hasStarted = false;
+        hideReaction(); resetInputs(true);
+      }
+
+      function startAreaChallenge() {
+        selectedApp = "area";
+        hasStarted = true;
+        document.querySelectorAll(".cover").forEach(element => { element.hidden = true; });
+        challengeView.hidden = false; gameArea.hidden = false; finishPanel.hidden = true;
+        areaDeck = createAreaDeck(); areaIndex = 0; areaProblem = areaDeck[0];
+        resetChallenge(); renderProblem(); resetInputs(true);
       }
 
       function createEquationProblem(kind, used, allowNegative = false, sourceOperator = "+", negativeCoefficient = false, fractionCoefficientKey = "", coefficientOnRight = false, useProductDenominator = false) {
@@ -5840,16 +6256,29 @@
         simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
         if (item.zeroRhs) {
-          const replacedX = item.zeroCoefficient === -1 ? "−y" : `(${item.zeroCoefficient})y`;
-          const xTerm = item.secondX === 1 ? replacedX : `${item.secondX}×${replacedX}`;
-          const secondY = item.secondY === 1 ? "y" : `${item.secondY}y`;
-          simultaneousZeroSubstitutionText.textContent = `${xTerm} + ${secondY} = ${item.secondConstant}`;
+          const variable = item.firstSolutionVariable;
+          simultaneousZeroTransformLabel.textContent = `① → ${item.finalVariable} =`;
+          simultaneousZeroTransformVariable.textContent = variable;
+          simultaneousZeroCoefficientInput.setAttribute("aria-label", `${item.finalVariable}を${variable}で表したときの係数`);
+          const replaced = item.zeroCoefficient === -1 ? `−${variable}` : `(${item.zeroCoefficient})${variable}`;
+          const factor = item.finalVariable === "x" ? item.secondX : item.secondY;
+          const remaining = item.finalVariable === "x" ? item.secondY : item.secondX;
+          const term = factor === 1 ? replaced : `${factor}×${replaced}`;
+          simultaneousZeroSubstitutionText.textContent = `${term} ${systemVariableTerm(remaining, variable)} = ${item.secondConstant}`;
         }
         simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →" : "①" + item.operation + "③ →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
-        if (item.firstSolutionVariable === "y") {
+        simultaneousSubstituteCaptionText.textContent = "これを②に代入";
+        if (item.zeroRhs) {
+          const relation = systemVariableTerm(item.zeroCoefficient, item.firstSolutionVariable).replace(/^\+ /, "");
+          simultaneousSubstituteCaptionText.textContent = `①で変形した ${item.finalVariable} = ${relation} に代入`;
+          const negativeValue = simultaneousFirstSolution().numerator < 0;
+          const coefficient = String(item.zeroCoefficient).replace("-", "−");
+          simultaneousSubstitutePrefix.textContent = `${item.finalVariable} = ${coefficient}×${negativeValue ? "(" : ""}`;
+          simultaneousSubstituteSuffix.textContent = negativeValue ? ")" : "";
+        } else if (item.firstSolutionVariable === "y") {
           const factor = Math.abs(item.secondY);
           const xTerm = item.secondX === 1 ? "x" : `${item.secondX}x`;
           simultaneousSubstitutePrefix.textContent = xTerm + " " + (item.secondY < 0 ? "− " : "+ ") + (factor === 1 ? "" : factor + "×");
@@ -7364,10 +7793,12 @@
       }
 
       function isTimedProblemApp() {
+        if (selectedApp === "area") return true;
         return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "fishing" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
+        if (selectedApp === "area") return areaIndex;
         if (selectedApp === "basicDivision") return basicDivisionIndex;
         if (selectedApp === "improperFraction") return improperFractionIndex;
         if (selectedApp === "division") return divisionIndex;
@@ -7386,6 +7817,7 @@
       }
 
       function currentTimedLength() {
+        if (selectedApp === "area") return areaDeck.length || AREA_TARGET;
         if (selectedApp === "basicDivision") return basicDivisionDeck.length;
         if (selectedApp === "improperFraction") return improperFractionDeck.length || IMPROPER_FRACTION_TARGET;
         if (selectedApp === "division") return divisionDeck.length;
@@ -7408,6 +7840,7 @@
       }
 
       function currentTimedAnswer() {
+        if (selectedApp === "area") return areaProblem ? areaProblem.answer.n / areaProblem.answer.d : 0;
         if (selectedApp === "basicDivision") return basicDivisionAnswer();
         if (selectedApp === "improperFraction") return improperFractionAnswer();
         if (selectedApp === "division") return divisionProblem ? divisionProblem.quotient : 0;
@@ -7426,6 +7859,7 @@
       }
 
       function currentTimedAnswerText() {
+        if (selectedApp === "area") return areaProblem?.answerText || "";
         if (selectedApp === "fraction") {
           const answer = solve();
           return `${answer.whole}\u3068${answer.rest}/${problem.denominator}`;
@@ -7458,6 +7892,7 @@
       }
 
       function activeSlotOrder() {
+        if (selectedApp === "area") return [];
         if (selectedApp === "multiplication") return MULTIPLICATION_SLOTS;
         if (selectedApp === "basicDivision") return BASIC_DIVISION_SLOTS;
         if (selectedApp === "improperFraction") return IMPROPER_FRACTION_SLOTS;
@@ -7654,6 +8089,7 @@
         if (app === "ratio") return RATIO_BEST_KEY;
         if (app === "speed") return SPEED_BEST_KEY;
         if (app === "fishing") return FISHING_BEST_KEY;
+        if (app === "area") return AREA_BEST_KEY;
         if (app === "preschool") return PRESCHOOL_BEST_KEY;
         if (app === "equation") return EQUATION_BEST_KEY;
         if (app === "simultaneous") return SIMULTANEOUS_BEST_KEY;
@@ -8472,6 +8908,11 @@
         correctAnswer.hidden = true;
         correctAnswer.textContent = "";
         resetDoubleDecimalChoice();
+        if (selectedApp === "area") {
+          setLocked(false);
+          resetAreaEntry();
+          return;
+        }
         if (selectedApp === "ratio") {
           setLocked(false);
           resetRatioEntry();
@@ -8506,6 +8947,7 @@
       }
 
       const menuButtons = {
+        area: chooseArea,
         multiplication: chooseMultiplication,
         basicDivision: chooseBasicDivision,
         fraction: chooseFraction,
@@ -8831,7 +9273,8 @@
         mistakeCount = 0;
         appMenu.hidden = false;
         renderMenu(0);
-        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode", "fishingMode");
+        challengeView.classList.remove("divisionMode", "ratioMode", "speedMode", "fishingMode", "areaMode");
+        areaCover.hidden = true;
         multiplicationCover.hidden = true;
         basicDivisionCover.hidden = true;
         improperFractionCover.hidden = true;
@@ -8895,10 +9338,11 @@
       }
 
       function showOperatorPenalty(cleanup) {
-        timePenaltyMs += OPERATOR_PENALTY_MS;
+        const applyTimePenalty = selectedApp !== "ratio";
+        if (applyTimePenalty) timePenaltyMs += OPERATOR_PENALTY_MS;
         updateProgress();
         setLocked(true);
-        showReaction(false, false, "+50\u79d2");
+        showReaction(false, false, applyTimePenalty ? "+50\u79d2" : "");
         schedule(() => {
           hideReaction();
           setLocked(false);
@@ -9107,6 +9551,10 @@
       }
 
       function recordMistake() {
+        if (selectedApp === "area") {
+          mistakes.push({ problem: areaProblem.text, answer: areaProblem.answerText });
+          return;
+        }
         if (selectedApp === "multiplication") {
           mistakes.push({
             problem: `${multiplicationProblem.first}×${multiplicationProblem.second}`,
@@ -9406,6 +9854,13 @@
             return;
           }
             speedProblem = speedDeck[speedIndex];
+          } else if (selectedApp === "area") {
+            if (keepChallenge) areaIndex += 1;
+            if (areaIndex >= areaDeck.length) {
+              finalTime = elapsedTime(); clearedAt = new Date(); isFinished = true;
+              finishRound(); return;
+            }
+            areaProblem = areaDeck[areaIndex];
           } else if (selectedApp === "fishing") {
             if (keepChallenge) fishingIndex += 1;
             if (fishingIndex >= fishingDeck.length) {
@@ -9534,6 +9989,10 @@
       }
 
       function restartRound() {
+        if (selectedApp === "area") {
+          startedAt = null; isFinished = false; setLocked(false);
+          showAreaCover(); return;
+        }
         finishPanel.hidden = true;
         challengeView.hidden = true;
         challengeView.classList.remove("divisionMode");
@@ -10376,6 +10835,11 @@
       }
 
       function renderProblem() {
+        areaProblemLine.hidden = selectedApp !== "area";
+        challengeView.classList.toggle("areaMode", selectedApp === "area");
+        if (selectedApp !== "area") {
+          keypad.querySelectorAll("[data-area-blocked]").forEach(button => delete button.dataset.areaBlocked);
+        }
         const ratioDotKey = document.querySelector("#ratioDotKey");
         ratioDotKey.textContent = selectedApp === "equation" || selectedApp === "simultaneous" ? "\u2212" : ".";
         ratioDotKey.setAttribute("aria-label", selectedApp === "equation" || selectedApp === "simultaneous" ? "\u30de\u30a4\u30ca\u30b9" : "\u5c0f\u6570\u70b9");
@@ -10399,7 +10863,7 @@
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
-        challengeView.classList.toggle("fishingMode", selectedApp === "fishing");
+        challengeView.classList.toggle("fishingMode", selectedApp === "fishing" || selectedApp === "area");
         challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -10465,6 +10929,8 @@
           renderRatioProblem();
           } else if (selectedApp === "speed") {
             renderSpeedProblem();
+          } else if (selectedApp === "area") {
+            resetAreaEntry();
           } else if (selectedApp === "fishing") {
             fishingValues = {};
             fishingActiveField = fishingProblem?.fields[0] || "";
@@ -10550,6 +11016,7 @@
 
       function backspaceAnswer() {
         if (isAnswerLocked || isFinished) return;
+        if (selectedApp === "area") { areaBackspace(); return; }
         if (selectedApp === "ratio") {
           ratioBackspace();
           return;
@@ -10590,6 +11057,9 @@
 
       function clearAnswer() {
         if (!isAnswerLocked && !isFinished) {
+          if (selectedApp === "area") {
+            resetClearAnswerConfirm(); clearConfirmationMessage(); resetAreaEntry(); return;
+          }
           resetClearAnswerConfirm();
           pendingWrongSignature = "";
           if (selectedApp === "ratio") {
@@ -10614,6 +11084,12 @@
 
       document.addEventListener("keydown", (event) => {
         if (!hasStarted || isAnswerLocked || isFinished) return;
+        if (selectedApp === "area") {
+          if (event.key === "Backspace" || event.key === "Delete") { event.preventDefault(); areaBackspace(); return; }
+          const key = ({ "*": "×", "x": "×", "X": "×", "/": "÷" })[event.key] || event.key;
+          if (/^[\d×÷+]$/.test(key)) { event.preventDefault(); areaReceive(key); }
+          return;
+        }
         if (selectedApp === "ratio") {
           if (/^\d$/.test(event.key) || event.key === ".") {
             event.preventDefault();
@@ -10697,6 +11173,7 @@
       document.querySelectorAll("[data-digit]").forEach((button) => {
         bindFastPress(button, () => {
           resetClearAnswerConfirm();
+          if (selectedApp === "area") { areaReceive(button.dataset.digit); return; }
           if (selectedApp === "ratio") {
             ratioReceive(button.dataset.digit);
             return;
@@ -10747,6 +11224,15 @@
         event.preventDefault();
         setFishingActive(input.dataset.fishingField);
       });
+      areaSteps.addEventListener("pointerdown", (event) => {
+        const input = event.target.closest("[data-area-field]");
+        if (!input) return;
+        event.preventDefault(); setAreaActive(input.dataset.areaField);
+      });
+      areaSteps.addEventListener("click", (event) => {
+        const input = event.target.closest("[data-area-field]");
+        if (input) setAreaActive(input.dataset.areaField);
+      });
       fishingSteps.addEventListener("click", (event) => {
         const input = event.target.closest("[data-fishing-field]");
         if (input) setFishingActive(input.dataset.fishingField);
@@ -10773,18 +11259,21 @@
       });
 
       bindFastPress(document.querySelector("#ratioTimesKey"), () => {
+        if (selectedApp === "area") areaReceive("×");
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
         if (selectedApp === "fishing") fishingReceive("\u00d7");
         if (selectedApp === "equation") equationReceive("\u00d7");
       });
       bindFastPress(document.querySelector("#ratioDivideKey"), () => {
+        if (selectedApp === "area") areaReceive("÷");
         if (selectedApp === "ratio") ratioReceive("\u00f7");
         if (selectedApp === "speed") speedReceive("\u00f7");
         if (selectedApp === "fishing") fishingReceive("\u00f7");
         if (selectedApp === "equation") equationReceive("\u00f7");
       });
       bindFastPress(document.querySelector("#ratioPlusKey"), () => {
+        if (selectedApp === "area") areaReceive("+");
         if (selectedApp === "fishing") fishingReceive("+");
         if (selectedApp === "equation") equationReceive("+");
       });
@@ -10821,6 +11310,8 @@
       chooseRatio.addEventListener("click", showRatioCover);
       chooseSpeed.addEventListener("click", showSpeedCover);
       chooseFishing.addEventListener("click", showFishingCover);
+      chooseArea.addEventListener("click", showAreaCover);
+      areaStartButton.addEventListener("click", startAreaChallenge);
       choosePreschool.addEventListener("click", showPreschoolCover);
       chooseEquation.addEventListener("click", showEquationCover);
       chooseSimultaneous.addEventListener("click", showSimultaneousCover);
