@@ -2665,7 +2665,7 @@
       }
       #chooseArea { background: #edf8f4; }
       #areaProblemLine {
-        --area-number-size: 28px;
+        --area-number-size: 36px;
         font-size: var(--area-number-size);
         font-weight: 900;
         font-variant-numeric: tabular-nums;
@@ -2676,20 +2676,26 @@
       }
       .practiceCard:has(#challengeView.areaMode:not([hidden])) { touch-action: pan-y; }
       .areaQuestion { margin: 0; font-size: 21px; text-align: center; }
-      .areaDiagram { position: relative; width: min(100%, 500px); height: 280px; margin: 4px auto 12px; }
-      .areaDiagram svg { position: absolute; width: 100%; height: calc(100% - 60px); }
+      .areaDiagram { position: relative; width: min(100%, 500px); aspect-ratio: 5 / 4; margin: 4px auto 12px; }
+      .areaDiagram svg { position: absolute; inset: 0; width: 100%; height: 100%; }
       .areaDiagram .areaShape { fill: #e9f5ef; stroke: #264b43; stroke-width: 2.5; }
       .areaDiagram .areaHeightLine { stroke: #607080; stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
-      .areaDimension { position: absolute; display: flex; align-items: center; gap: 4px; transform: translateX(-50%); white-space: nowrap; }
-      .areaDimension.base { left: 56%; bottom: 0; }
-      .areaDimension.height { left: 14%; top: 26%; }
-      .areaDimension.top { left: 55%; top: 0; }
-      .areaDimension.surface { left: 62%; top: 30%; }
-      .areaDiagram.triangle .areaDimension.surface { left: 48%; top: 32%; }
+      .areaDiagram .areaMeasureLine { stroke: #607080; stroke-width: 1.5; fill: none; }
+      .areaDimension { position: absolute; display: flex; align-items: center; gap: 3px; transform: translateX(-50%); white-space: nowrap; }
+      .areaDimension.base { left: 57.5%; top: 71.25%; }
+      .areaDimension.height { right: 78%; top: 42.1875%; transform: translateY(-50%); }
+      .areaDimension.top { left: 55%; top: 5%; }
+      .areaDimension.surface { left: 57.5%; top: 42.1875%; transform: translate(-50%, -50%); }
+      .areaDiagram.triangle .areaDimension.surface { left: 41.25%; top: 47.8125%; }
       .areaDimension .areaUnit { font-size: 16px; }
       .areaHint { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; width: fit-content; max-width: 100%; margin: 4px auto 16px; padding: 8px; border: 2px solid #e4bb44; background: #fff4be; border-radius: 4px; }
       .areaSteps { width: min(100%, 650px); margin-inline: auto; display: grid; gap: 14px; }
       .areaRow { display: grid; grid-template-columns: 0.8em minmax(0, 1fr); gap: 5px; align-items: center; }
+      .areaSteps.areaChain { display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 16px; }
+      .areaChain .areaRow { display: contents; }
+      .areaChain .areaRowBody { display: contents; }
+      .areaTerm { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+      .areaTerm > span { white-space: nowrap; }
       .areaEquals { text-align: center; }
       .areaRowBody { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
       .areaFraction { display: inline-grid; grid-template-rows: 1.2em 2px 1.2em; align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: .8em; }
@@ -2704,13 +2710,11 @@
       #challengeView.areaMode .keypad { grid-template-rows: repeat(4, minmax(0, 1fr)); }
       #challengeView.areaMode .keypad [data-area-blocked="true"] { border-color: #cbd2dc; background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px); color: transparent; pointer-events: none; }
       @media (min-width: 700px) and (min-height: 700px) {
-        #areaProblemLine { --area-number-size: 36px; padding: 12px 18px 24px; }
+        #areaProblemLine { --area-number-size: 44px; padding: 12px 18px 24px; }
         .areaQuestion { font-size: 26px; }
-        .areaDiagram { height: 340px; }
         .areaDimension .areaUnit { font-size: 20px; }
         .areaRowBody { gap: 8px; }
       }
-      @media (max-width: 359px) { #areaProblemLine { --area-number-size: 24px; } }
     </style>
   </head>
   <body>
@@ -5181,11 +5185,13 @@
       function renderAreaDiagram() {
         const item = areaProblem;
         areaDiagram.className = `areaDiagram ${item.shape}`;
-        const points = item.shape === "rectangle" ? "110,35 340,35 340,150 110,150"
-          : item.shape === "triangle" ? "110,30 340,150 110,150" : "160,40 280,40 340,150 100,150";
-        areaDiagram.innerHTML = `<svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true"><polygon class="areaShape" points="${points}"/>${item.shape === "trapezoid"
-          ? '<path class="areaHeightLine" d="M100 40H160M100 40V150"/><path d="M100 140H110V150" fill="none" stroke="#264b43" stroke-width="2"/>'
-          : '<path d="M110 140H120V150" fill="none" stroke="#264b43" stroke-width="2"/>'}</svg>`;
+        const points = item.shape === "rectangle" ? "110,60 350,60 350,210 110,210"
+          : item.shape === "triangle" ? "110,60 350,210 110,210" : "160,60 280,60 350,210 110,210";
+        // Labels and dimension ticks share this coordinate plane, including on narrow screens.
+        areaDiagram.innerHTML = `<svg viewBox="0 0 400 320" aria-hidden="true"><polygon class="areaShape" points="${points}"/>
+          <path class="areaMeasureLine" d="M110 220H350M107 225L113 215M347 225L353 215M96 60V210M91 63L101 57M91 213L101 207"/>
+          ${item.shape === "trapezoid" ? '<path class="areaHeightLine" d="M110 60H160M110 60V210"/><path class="areaMeasureLine" d="M160 50H280M157 55L163 45M277 55L283 45"/>' : ''}
+          <path d="M110 200H120V210" fill="none" stroke="#264b43" stroke-width="2"/></svg>`;
         const labels = [];
         for (const key of ["top", "base", "height", "surface"]) {
           if (!item.measures[key]) continue;
@@ -5204,12 +5210,30 @@
         areaDiagram.setAttribute("aria-label", labels.join("、"));
       }
 
+      function fitAreaLayout() {
+        if (!areaSteps.getBoundingClientRect || !areaProblemLine.clientWidth) return;
+        areaProblemLine.style.removeProperty("--area-number-size");
+        const available = areaSteps.getBoundingClientRect().width;
+        const terms = areaSteps.querySelectorAll(".areaTerm, .areaRowBody > span");
+        let size = parseFloat(getComputedStyle(areaProblemLine).fontSize);
+        while (size > 24 && Array.from(terms).some(term => term.getBoundingClientRect().width > available)) {
+          size -= 2;
+          areaProblemLine.style.setProperty("--area-number-size", `${size}px`);
+        }
+        const diagramBottom = areaDiagram.getBoundingClientRect().bottom;
+        const labelBottom = Math.max(diagramBottom, ...Array.from(areaDiagram.querySelectorAll(".areaDimension"), label => label.getBoundingClientRect().bottom));
+        areaDiagram.style.marginBottom = `${Math.ceil(labelBottom - diagramBottom) + 16}px`;
+      }
+
       function renderAreaEntry(scroll = false) {
         if (!areaProblem) return;
         areaSteps.replaceChildren();
+        const chain = areaProblem.kind !== "trapezoidTop";
+        areaSteps.classList.toggle("areaChain", chain);
         let priorComplete = true;
-        for (const step of areaProblem.steps) {
-          if (!priorComplete) break;
+        for (const [index, step] of areaProblem.steps.entries()) {
+          if (!chain && !priorComplete) break;
+          if (chain && !priorComplete && index !== areaProblem.steps.length - 1) continue;
           const row = document.createElement("div");
           row.className = "areaRow";
           const equals = document.createElement("span");
@@ -5217,10 +5241,28 @@
           equals.textContent = step.equals ? "=" : "";
           const body = document.createElement("div");
           body.className = "areaRowBody";
-          step.parts.forEach(part => body.append(renderAreaPart(part)));
-          row.append(equals, body);
+          if (chain) {
+            // Keep each operation with its operand, and keep '=' with the answer.
+            let term = document.createElement("span");
+            term.className = "areaTerm";
+            if (step.equals) term.append(equals);
+            for (const part of step.parts) {
+              const startsOperation = part?.type === "operator" || (typeof part === "string" && /^[×÷+]/.test(part));
+              if (startsOperation && term.children.length) {
+                body.append(term);
+                term = document.createElement("span");
+                term.className = "areaTerm";
+              }
+              term.append(renderAreaPart(part));
+            }
+            body.append(term);
+            row.append(body);
+          } else {
+            step.parts.forEach(part => body.append(renderAreaPart(part)));
+            row.append(equals, body);
+          }
           areaSteps.append(row);
-          priorComplete = areaPartFields(step.parts).every(part => areaValues[part.field] === areaExpected(part));
+          priorComplete = priorComplete && areaPartFields(step.parts).every(part => areaValues[part.field] === areaExpected(part));
         }
         const active = areaProblem.fields.find(part => part.field === areaActiveField);
         const operator = active?.type === "operator";
@@ -5228,6 +5270,7 @@
         for (const [id, value] of [["ratioTimesKey", "×"], ["ratioDivideKey", "÷"], ["ratioPlusKey", "+"]]) {
           document.querySelector(`#${id}`).dataset.areaBlocked = String(!operator || (value === "+" && active?.value !== "+"));
         }
+        fitAreaLayout();
         if (scroll) areaSteps.querySelector(`[data-area-field="${areaActiveField}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
       }
 
@@ -11383,6 +11426,7 @@
       }, { passive: false });
       window.addEventListener("resize", () => {
         if (!appMenu.hidden) resizeMenuLayout();
+        if (selectedApp === "area" && !challengeView.hidden) fitAreaLayout();
       });
       window.setInterval(updateProgress, 100);
       showCoverScreen();
