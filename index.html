@@ -2675,20 +2675,22 @@
         padding: 8px 8px 20px; scroll-padding: 12px;
       }
       .practiceCard:has(#challengeView.areaMode:not([hidden])) { touch-action: pan-y; }
-      .areaQuestion { margin: 0; font-size: 21px; text-align: center; }
-      .areaDiagram { position: relative; width: min(100%, 500px); aspect-ratio: 10 / 7; margin: 4px auto 8px; font-size: 26px; }
+      .areaOverview { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 12px; width: min(100%, 650px); margin: 0 auto 16px; }
+      .areaPrompt { min-width: 0; }
+      .areaQuestion { margin: 0; font-size: 18px; line-height: 1.4; text-align: left; overflow-wrap: anywhere; }
+      .areaDiagram { position: relative; width: 100%; aspect-ratio: 5 / 4; margin: 4px auto 8px; font-size: 20px; line-height: 1; }
       .areaDiagram svg { position: absolute; inset: 0; width: 100%; height: 100%; }
       .areaDiagram .areaShape { fill: #e9f5ef; stroke: #264b43; stroke-width: 2.5; }
       .areaDiagram .areaHeightLine { stroke: #607080; stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
       .areaDiagram .areaMeasureLine { stroke: #607080; stroke-width: 1.5; fill: none; }
       .areaDimension { position: absolute; display: flex; align-items: center; gap: 3px; transform: translateX(-50%); white-space: nowrap; }
-      .areaDimension.base { left: 57.5%; top: 81.4286%; }
-      .areaDimension.height { right: 78%; top: 48.2143%; transform: translateY(-50%); }
-      .areaDimension.top { left: 55%; top: 5.7143%; }
-      .areaDimension.surface { left: 57.5%; top: 48.2143%; transform: translate(-50%, -50%); }
-      .areaDiagram.triangle .areaDimension.surface { left: 41.25%; top: 54.6429%; }
-      .areaDimension .areaUnit { font-size: 14px; }
-      .areaHint { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; width: fit-content; max-width: 100%; margin: 4px auto 12px; padding: 5px 8px; font-size: 22px; line-height: 1.3; border: 2px solid #e4bb44; background: #fff4be; border-radius: 4px; }
+      .areaDimension.base { left: 57.5%; top: 71.25%; }
+      .areaDimension.height { right: 78%; top: 42.1875%; transform: translateY(-50%); }
+      .areaDimension.top { left: 55%; top: 5%; }
+      .areaDimension.surface { left: 57.5%; top: 42.1875%; transform: translate(-50%, -50%); }
+      .areaDiagram.triangle .areaDimension.surface { left: 41.25%; top: 47.8125%; }
+      .areaDimension .areaUnit { font-size: 11px; }
+      .areaHint { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 4px; width: fit-content; max-width: 100%; margin: 8px 0 0; padding: 5px 6px; font-size: 16px; line-height: 1.3; border: 2px solid #e4bb44; background: #fff4be; border-radius: 4px; }
       .areaSteps { width: min(100%, 650px); margin-inline: auto; display: grid; gap: 14px; }
       .areaRow { display: grid; grid-template-columns: 0.8em minmax(0, 1fr); gap: 5px; align-items: center; }
       .areaSteps.areaChain { display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 16px; }
@@ -2698,11 +2700,10 @@
       .areaTerm > span { white-space: nowrap; }
       .areaEquals { text-align: center; }
       .areaRowBody { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
-      .areaFraction { display: inline-grid; grid-template-rows: 1.2em 2px 1.2em; align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: .8em; }
+      .areaFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 2px var(--digit-frame-height); align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: var(--digit-frame-width); line-height: 1; }
       .areaFraction i { height: 2px; width: 100%; background: var(--ink); }
-      .areaInput { display: inline-flex; gap: 2px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; flex: 0 0 auto; }
-      .areaDigit { position: relative; display: grid; place-items: center; width: .8em; height: 1.2em; border: 2px solid var(--line); border-radius: 0; background: white; }
-      .areaDigit.active { border-color: var(--blue); box-shadow: 0 0 0 3px #2563eb25; }
+      .areaInput { display: inline-flex; gap: 2px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; line-height: 1; flex: 0 0 auto; }
+      .areaDigit { position: relative; flex: 0 0 auto; }
       .areaOperator { display: grid; place-items: center; width: 1.15em; height: 1.15em; margin-inline: 4px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: white; color: inherit; font: inherit; flex: 0 0 auto; }
       .areaOperator.active { border-color: var(--blue); box-shadow: 0 0 0 3px #2563eb25; }
       .areaInput:focus-visible, .areaOperator:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
@@ -2711,10 +2712,11 @@
       #challengeView.areaMode .keypad [data-area-blocked="true"] { border-color: #cbd2dc; background: repeating-linear-gradient(45deg, #d8dee7 0 5px, #eef1f5 5px 10px); color: transparent; pointer-events: none; }
       @media (min-width: 700px) and (min-height: 700px) {
         #areaProblemLine { --area-number-size: 44px; padding: 12px 18px 24px; }
-        .areaQuestion { font-size: 26px; }
-        .areaDiagram { font-size: 32px; }
-        .areaHint { font-size: 26px; }
-        .areaDimension .areaUnit { font-size: 18px; }
+        .areaOverview { gap: 20px; }
+        .areaQuestion { font-size: 22px; }
+        .areaDiagram { font-size: 26px; }
+        .areaHint { font-size: 22px; }
+        .areaDimension .areaUnit { font-size: 14px; }
         .areaRowBody { gap: 8px; }
       }
     </style>
@@ -3284,9 +3286,13 @@
             <div class="fishingSteps" id="fishingSteps"></div>
           </div>
           <div id="areaProblemLine" hidden>
-            <p class="areaQuestion" id="areaQuestion"></p>
-            <div class="areaDiagram" id="areaDiagram" role="img"></div>
-            <div class="areaHint" id="areaHint" hidden></div>
+            <div class="areaOverview">
+              <div class="areaDiagram" id="areaDiagram" role="img"></div>
+              <div class="areaPrompt">
+                <p class="areaQuestion" id="areaQuestion"></p>
+                <div class="areaHint" id="areaHint" hidden></div>
+              </div>
+            </div>
             <div class="areaSteps" id="areaSteps"></div>
           </div>
           <div id="preschoolProblemLine" hidden>
@@ -5023,6 +5029,13 @@
         });
       }
 
+      function areaSurfaceMatchesSide(measures) {
+        return ["base", "height", "top"].some(key => {
+          const side = measures[key];
+          return side && measures.surface.n * side.d === side.n * measures.surface.d;
+        });
+      }
+
       function createAreaDeck() {
         const pick = items => items[randomInt(0, items.length - 1)];
         const number = (field, value, onesFirst = false) => ({ type: "input", field, value: String(value), onesFirst });
@@ -5058,7 +5071,10 @@
         ]));
 
         const rectangleArea = pick(fractions);
-        const rectangleHeight = pick(fractions.filter(value => areaFractionText(value) !== areaFractionText(rectangleArea)));
+        const rectangleHeight = pick(fractions.filter(height => !areaSurfaceMatchesSide({
+          surface: rectangleArea, height,
+          base: areaFraction(rectangleArea.n * height.d, rectangleArea.d * height.n),
+        })));
         const rectangleBase = areaFraction(rectangleArea.n * rectangleHeight.d, rectangleArea.d * rectangleHeight.n);
         deck.push(question("rectangleSide", "rectangle", "base", {
           base: rectangleBase, height: rectangleHeight, surface: rectangleArea,
@@ -5073,7 +5089,9 @@
           for (const height of fractions) {
             if (gcd(base.n * height.n, base.d * height.d * 2) === 1) continue;
             const surface = areaFraction(base.n * height.n, base.d * height.d * 2);
-            if (surface.n <= 81 && surface.d <= 81) trianglePairs.push({ base, height, surface });
+            if (surface.n <= 81 && surface.d <= 81 && !areaSurfaceMatchesSide({ base, height, surface })) {
+              trianglePairs.push({ base, height, surface });
+            }
           }
         }
         const triangle = pick(trianglePairs);
@@ -5087,7 +5105,9 @@
         for (let base = 2; base <= 9; base += 1) {
           for (const height of fractions) {
             const surface = areaFraction(base * height.n, 2 * height.d);
-            if (surface.n <= 9 && surface.d <= 9 && surface.d > 1) baseProblems.push({ base: areaFraction(base), height, surface });
+            const measures = { base: areaFraction(base), height, surface };
+            if (surface.n <= 9 && surface.d <= 9 && surface.d > 1 &&
+                surface.n !== 2 * surface.d && !areaSurfaceMatchesSide(measures)) baseProblems.push(measures);
           }
         }
         const baseProblem = pick(baseProblems);
@@ -5097,10 +5117,10 @@
           result(baseProblem.base, "cm"),
         ], ["X ×", fixed(baseProblem.height), "÷ 2 =", fixed(baseProblem.surface)]));
 
-        const surface = areaFraction(randomInt(2, 9));
+        const surface = areaFraction(randomInt(3, 9));
         const base = pick(fractions.filter(value => {
           const height = areaFraction(surface.n * 2 * value.d, value.n);
-          return height.d > 1 && height.n <= 81;
+          return height.d > 1 && height.n <= 81 && !areaSurfaceMatchesSide({ base: value, height, surface });
         }));
         const fractionalHeight = areaFraction(surface.n * 2 * base.d, base.n);
         deck.push(question("triangleHeight", "triangle", "height", { base, height: fractionalHeight, surface }, fractionalHeight, [
@@ -5112,7 +5132,10 @@
         for (let top = 1; top < 10; top += 1) {
           for (let base = top + 1; base <= 10; base += 1) {
             for (let height = 2; height <= 10; height += 1) {
-              if ((top + base) * height % 2 === 0) trapezoids.push({ top, base, height, surface: (top + base) * height / 2 });
+              const surface = (top + base) * height / 2;
+              if (Number.isInteger(surface) && ![top, base, height].includes(surface)) {
+                trapezoids.push({ top, base, height, surface });
+              }
             }
           }
         }
@@ -5175,7 +5198,7 @@
         for (let index = 0; index < part.value.length; index += 1) {
           const position = part.onesFirst ? part.value.length - index - 1 : index;
           const digit = document.createElement("span");
-          digit.className = "areaDigit";
+          digit.className = "answerBox areaDigit";
           digit.textContent = value[position] || "";
           digit.classList.toggle("active", active && position === (value.length < part.value.length ? value.length : 0));
           element.append(digit);
@@ -5189,7 +5212,7 @@
         const points = item.shape === "rectangle" ? "110,60 350,60 350,210 110,210"
           : item.shape === "triangle" ? "110,60 350,210 110,210" : "160,60 280,60 350,210 110,210";
         // Labels and dimension ticks share this coordinate plane, including on narrow screens.
-        areaDiagram.innerHTML = `<svg viewBox="0 0 400 280" aria-hidden="true"><polygon class="areaShape" points="${points}"/>
+        areaDiagram.innerHTML = `<svg viewBox="0 0 400 320" aria-hidden="true"><polygon class="areaShape" points="${points}"/>
           <path class="areaMeasureLine" d="M110 220H350M107 225L113 215M347 225L353 215M96 60V210M91 63L101 57M91 213L101 207"/>
           ${item.shape === "trapezoid" ? '<path class="areaHeightLine" d="M110 60H160M110 60V210"/><path class="areaMeasureLine" d="M160 50H280M157 55L163 45M277 55L283 45"/>' : ''}
           <path d="M110 200H120V210" fill="none" stroke="#264b43" stroke-width="2"/></svg>`;
@@ -5200,7 +5223,7 @@
           label.className = `areaDimension ${key}`;
           const value = item.measures[key];
           const unknown = item.unknown === key;
-          label.append(renderAreaPart(unknown ? "x" : areaFractionText(value)));
+          label.append(renderAreaPart(unknown ? "x" : value.d === 1 ? String(value.n) : { type: "staticFraction", ...value }));
           const unit = document.createElement("span");
           unit.className = "areaUnit";
           unit.textContent = key === "surface" ? "cm²" : "cm";
@@ -5275,9 +5298,7 @@
         renderAreaDiagram();
         areaHint.replaceChildren();
         areaHint.hidden = !areaProblem.hint.length;
-        areaProblem.hint.forEach(part => areaHint.append(renderAreaPart(
-          part?.type === "staticFraction" ? areaFractionText(part) : part
-        )));
+        areaProblem.hint.forEach(part => areaHint.append(renderAreaPart(part)));
         renderAreaEntry();
         areaProblemLine.scrollTop = 0;
         requestAnimationFrame(() => {
