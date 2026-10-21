@@ -1074,11 +1074,16 @@
       .simultaneousInput { --system-gap: clamp(3px, .55vmin, 6px); display: inline-grid; grid-template-columns: repeat(var(--system-slots, 1), var(--digit-frame-width)); gap: var(--system-gap); width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; overflow: visible; }
       .simultaneousInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--system-gap)); }
       .simultaneousInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width) + var(--system-gap) + var(--system-gap)); }
+      .simultaneousInput[data-slots] { width: calc(var(--digit-frame-width) * var(--system-slots) + var(--system-gap) * (var(--system-slots) - 1)); }
       .simultaneousInput .systemDigit { display: grid; place-items: center; min-width: 0; height: 100%; border: 3px solid var(--line); border-radius: 6px; background: #fff; }
       .simultaneousInput.active .systemDigit { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, .15); }
       .simultaneousFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); min-width: var(--digit-frame-width); text-align: center; vertical-align: middle; }
       .simultaneousFraction i { display: block; height: 4px; background: var(--ink); }
-      .simultaneousFraction .simultaneousInput { width: 100%; height: 100%; }
+      .simultaneousFraction { justify-items: center; }
+      .simultaneousFraction i { width: 100%; }
+      .simultaneousFraction .simultaneousInput { height: 100%; }
+      #simultaneousProblemLine { height: 100%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; scroll-padding: 12px; }
+      .practiceCard:has(#simultaneousProblemLine:not([hidden])) { touch-action: pan-y; }
       @media (max-width: 430px) {
         #simultaneousProblemLine { padding-inline: 14px; font-size: clamp(1.45rem, 7vw, 2rem); gap: 9px; }
         .simultaneousSystem { column-gap: 6px; }
@@ -3408,10 +3413,16 @@
               </div>
             </div>
             <div class="simultaneousSpacer"></div>
+            <div class="simultaneousStep" id="simultaneousFirstMultiplyStep" hidden>
+              <span class="simultaneousCaption">①×</span><button class="simultaneousInput" id="simultaneousFirstMultiplierInput" data-system-field="firstMultiplier" type="button" aria-label="①にかける数"></button><span class="simultaneousCaption">→</span>
+              <button class="simultaneousInput" id="simultaneousFirstScaledXInput" data-system-field="firstScaledX" type="button" aria-label="①を何倍かしたxの係数"></button><span>x</span><span id="simultaneousFirstScaledYSign">+</span>
+              <button class="simultaneousInput" id="simultaneousFirstScaledYInput" data-system-field="firstScaledY" type="button" aria-label="①を何倍かしたyの係数"></button><span>y =</span>
+              <button class="simultaneousInput" id="simultaneousFirstScaledRhsInput" data-system-field="firstScaledRhs" type="button" aria-label="①を何倍かした右辺"></button><span class="simultaneousNumber">…③</span>
+            </div>
             <div class="simultaneousStep" id="simultaneousMultiplyStep">
               <span class="simultaneousCaption">&#9313;&times;</span><button class="simultaneousInput active" id="simultaneousMultiplierInput" data-system-field="multiplier" type="button" aria-label="&#9313;&#12395;&#12363;&#12369;&#12427;&#25968;"></button><span class="simultaneousCaption">&#8594;</span><button class="simultaneousInput" id="simultaneousScaledXInput" data-system-field="scaledX" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;x&#12398;&#20418;&#25968;"></button><span>x</span><span id="simultaneousScaledYSign">+</span>
               <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
-              <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;&#21491;&#36794;"></button><span class="simultaneousNumber">&#8230;&#9314;</span>
+              <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="②を何倍かした右辺"></button><span class="simultaneousNumber" id="simultaneousScaledNumber">…③</span>
             </div>
             <div class="simultaneousStep" id="simultaneousZeroTransformStep" hidden>
               <span class="simultaneousCaption" id="simultaneousZeroTransformLabel">&#9312; &#8594; x =</span><button class="simultaneousInput active" id="simultaneousZeroCoefficientInput" data-system-field="zeroCoefficient" type="button" aria-label="xをyで表したときの係数"></button><span id="simultaneousZeroTransformVariable">y</span>
@@ -3442,7 +3453,16 @@
               </span>
               <span id="simultaneousSubstituteSuffix"></span>
             </div>
-            <div class="simultaneousStep" id="simultaneousXStep" hidden><span id="simultaneousFinalLabel">x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="&#26368;&#24460;&#12398;&#31572;&#12360;"></button></div>
+            <div class="simultaneousStep" id="simultaneousFinalMiddleStep" hidden>
+              <span id="simultaneousFinalMiddleLabel"></span><button class="simultaneousInput" id="simultaneousFinalMiddleInput" data-system-field="finalMiddle" type="button" aria-label="定数項を移した右辺"></button>
+            </div>
+            <div class="simultaneousStep" id="simultaneousXStep" hidden>
+              <span id="simultaneousFinalLabel">x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="最後の答え"></button>
+              <span class="simultaneousFraction" id="simultaneousXFraction" hidden>
+                <button class="simultaneousInput" id="simultaneousXNumeratorInput" data-system-field="xNumerator" type="button" aria-label="最後の答えの分子"></button><i></i>
+                <button class="simultaneousInput" id="simultaneousXDenominatorInput" data-system-field="xDenominator" type="button" aria-label="最後の答えの分母"></button>
+              </span>
+            </div>
           </div>
           <div class="basicDivisionProblemLine" id="basicDivisionProblemLine" hidden>
             <div class="basicDivisionStack">
@@ -4071,6 +4091,13 @@
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
+      const simultaneousFirstMultiplyStep = document.querySelector("#simultaneousFirstMultiplyStep");
+      const simultaneousFirstMultiplierInput = document.querySelector("#simultaneousFirstMultiplierInput");
+      const simultaneousFirstScaledXInput = document.querySelector("#simultaneousFirstScaledXInput");
+      const simultaneousFirstScaledYInput = document.querySelector("#simultaneousFirstScaledYInput");
+      const simultaneousFirstScaledRhsInput = document.querySelector("#simultaneousFirstScaledRhsInput");
+      const simultaneousFirstScaledYSign = document.querySelector("#simultaneousFirstScaledYSign");
+      const simultaneousScaledNumber = document.querySelector("#simultaneousScaledNumber");
       const simultaneousMultiplierInput = document.querySelector("#simultaneousMultiplierInput");
       const simultaneousScaledXInput = document.querySelector("#simultaneousScaledXInput");
       const simultaneousScaledYSign = document.querySelector("#simultaneousScaledYSign");
@@ -4105,6 +4132,12 @@
       const simultaneousXStep = document.querySelector("#simultaneousXStep");
       const simultaneousFinalLabel = document.querySelector("#simultaneousFinalLabel");
       const simultaneousXInput = document.querySelector("#simultaneousXInput");
+      const simultaneousXFraction = document.querySelector("#simultaneousXFraction");
+      const simultaneousXNumeratorInput = document.querySelector("#simultaneousXNumeratorInput");
+      const simultaneousXDenominatorInput = document.querySelector("#simultaneousXDenominatorInput");
+      const simultaneousFinalMiddleStep = document.querySelector("#simultaneousFinalMiddleStep");
+      const simultaneousFinalMiddleLabel = document.querySelector("#simultaneousFinalMiddleLabel");
+      const simultaneousFinalMiddleInput = document.querySelector("#simultaneousFinalMiddleInput");
       const equationFields = {
         middle: equationMiddleInput,
         middleCoefficient: equationMiddleCoefficientInput,
@@ -4128,6 +4161,10 @@
         simplifiedDenominator: equationFractionSimplifiedDenominatorInput,
       };
       const simultaneousFields = {
+        firstMultiplier: simultaneousFirstMultiplierInput,
+        firstScaledX: simultaneousFirstScaledXInput,
+        firstScaledY: simultaneousFirstScaledYInput,
+        firstScaledRhs: simultaneousFirstScaledRhsInput,
         multiplier: simultaneousMultiplierInput,
         scaledX: simultaneousScaledXInput,
         scaledY: simultaneousScaledYInput,
@@ -4142,6 +4179,9 @@
         substituteNumerator: simultaneousSubstituteNumeratorInput,
         substituteDenominator: simultaneousSubstituteDenominatorInput,
         x: simultaneousXInput,
+        xNumerator: simultaneousXNumeratorInput,
+        xDenominator: simultaneousXDenominatorInput,
+        finalMiddle: simultaneousFinalMiddleInput,
       };
       const preschoolFirst = document.querySelector("#preschoolFirst");
       const preschoolOperator = document.querySelector("#preschoolOperator");
@@ -5577,134 +5617,75 @@
       }
 
       function createSimultaneousDeck() {
-        const deck = [];
-        const used = new Set();
-        const addProblem = (fractionY, cancelVariable, useAddition = false) => {
-          for (let attempt = 0; attempt < 200; attempt += 1) {
-            const x = randomInt(-5, 8);
-            if (x === 0) continue;
-            const multiplier = 2;
-            let yNumerator;
-            let yDenominator;
-            let secondY;
-            if (fractionY) {
-              yDenominator = randomInt(2, 5);
-              yNumerator = randomInt(1, yDenominator - 1);
-              if (gcd(yNumerator, yDenominator) !== 1) continue;
-              secondY = yDenominator;
-            } else {
-              yDenominator = 1;
-              yNumerator = randomInt(1, 6);
-              secondY = randomInt(1, 4);
-            }
-            const yValue = yNumerator / yDenominator;
-            let firstX;
-            let firstY;
-            let secondX;
-            let operation;
-            let eliminationCoefficient;
-            let firstSolutionVariable;
-            if (cancelVariable === "x") {
-              firstX = 2;
-              secondX = 1;
-              firstY = multiplier * secondY + (fractionY ? yDenominator : randomInt(2, 4));
-              eliminationCoefficient = firstY - multiplier * secondY;
-              operation = "−";
-              firstSolutionVariable = "y";
-            } else {
-              if (fractionY) continue;
-              firstX = 3;
-              secondX = 1;
-              const baseY = secondY;
-              secondY = useAddition ? -baseY : baseY;
-              firstY = multiplier * baseY;
-              eliminationCoefficient = useAddition ? 5 : 1;
-              operation = useAddition ? "＋" : "−";
-              firstSolutionVariable = "x";
-            }
-            const secondConstant = secondX * x + secondY * yValue;
-            const firstConstant = firstX * x + firstY * yValue;
-            if (!Number.isInteger(secondConstant) || !Number.isInteger(firstConstant)) continue;
-            if (secondConstant === 0 || firstConstant === 0) continue;
-            const eliminationRhs = operation === "＋"
-              ? firstConstant + multiplier * secondConstant
-              : firstConstant - multiplier * secondConstant;
-            const expectedRhs = firstSolutionVariable === "y"
-              ? eliminationCoefficient * yValue
-              : eliminationCoefficient * x;
-            if (!Number.isInteger(eliminationRhs) || eliminationRhs === 0 || eliminationRhs !== expectedRhs) continue;
-            const key = [firstX, firstY, secondX, secondY, firstConstant, secondConstant, x, yNumerator, yDenominator].join(":");
-            if (used.has(key)) continue;
-            used.add(key);
-            return {
-              x,
-              yNumerator,
-              yDenominator,
-              firstX,
-              firstY,
-              secondY,
-              secondX,
-              firstConstant,
-              secondConstant,
-              multiplier,
-              eliminationCoefficient,
-              eliminationRhs,
-              fractionY,
-              operation,
-              firstSolutionVariable,
-              finalVariable: firstSolutionVariable === "x" ? "y" : "x",
-            };
-          }
-          return null;
+        const pick = items => items[randomInt(0, items.length - 1)];
+        const signed = value => randomInt(0, 1) ? value : -value;
+        const fraction = () => {
+          const denominator = randomInt(2, 5);
+          const numerator = pick(Array.from({ length: 9 }, (_, i) => i + 1).filter(n => gcd(n, denominator) === 1));
+          return { numerator: signed(numerator), denominator };
         };
-        const addZeroRhsProblem = () => {
-          for (let attempt = 0; attempt < 100; attempt += 1) {
-            const y = randomInt(1, 4);
-            // Keep ① ready to rearrange as x = -3y, then make ② use a
-            // different x coefficient. This prevents a direct subtraction
-            // from bypassing the intended substitution method.
-            const firstX = 1;
-            const yMultiplier = randomInt(1, 4);
-            const firstY = yMultiplier;
-            const secondX = randomInt(2, 4);
-            const secondY = secondX * yMultiplier + randomInt(1, 4);
-            const x = -yMultiplier * y;
-            const secondConstant = secondX * x + secondY * y;
-            if (!secondConstant) continue;
-            const key = ["zero", firstX, firstY, secondY, secondConstant, x, y].join(":");
-            if (used.has(key)) continue;
-            used.add(key);
-            return {
-              x,
-              yNumerator: y,
-              yDenominator: 1,
-              firstX,
-              firstY,
-              secondX,
-              secondY,
-              firstConstant: 0,
-              secondConstant,
-              zeroRhs: true,
-              zeroCoefficient: -yMultiplier,
-              eliminationCoefficient: secondY - secondX * yMultiplier,
-              eliminationRhs: secondConstant,
-              firstSolutionVariable: "y",
-              finalVariable: "x",
-            };
+        const swapVariables = item => ({ ...item,
+          x: item.yNumerator / item.yDenominator, xNumerator: item.yNumerator, xDenominator: item.yDenominator,
+          yNumerator: item.xNumerator, yDenominator: item.xDenominator,
+          firstX: item.firstY, firstY: item.firstX, secondX: item.secondY, secondY: item.secondX,
+          firstSolutionVariable: "x", finalVariable: "y",
+        });
+        const multipliers = shuffle([2, 3, 4, 5]);
+        const paired = () => pick([[2, 3], [3, 4], [2, 5], [3, 5]]);
+        const elimination = (fractionCount, addition, firstMultiplier, multiplier, swap) => {
+          const x = fractionCount === 2 ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
+          const y = fractionCount ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
+          // Coefficients include each solution's denominator, so constants and
+          // the post-substitution right-hand side stay integral.
+          const candidates = [];
+          for (let b1 = 1; b1 <= 5; b1 += 1) {
+            for (let b2 = -4; b2 <= 4; b2 += 1) {
+              if (!b2) continue;
+              const sign = addition ? 1 : -1;
+              const remaining = firstMultiplier * b1 + sign * multiplier * b2;
+              const firstConstant = multiplier * x.numerator + b1 * y.numerator;
+              const secondConstant = -sign * firstMultiplier * x.numerator + b2 * y.numerator;
+              const eliminationRhs = remaining * y.numerator;
+              if (Math.abs(remaining * y.denominator) < 2 || Math.abs(remaining * y.denominator) > 40) continue;
+              if (!firstConstant || !secondConstant || Math.abs(eliminationRhs) > 99) continue;
+              if (Math.abs(firstConstant * firstMultiplier) > 199 || Math.abs(secondConstant * multiplier) > 199) continue;
+              candidates.push({
+                x: x.numerator / x.denominator, xNumerator: x.numerator, xDenominator: x.denominator,
+                yNumerator: y.numerator, yDenominator: y.denominator,
+                firstX: multiplier * x.denominator, firstY: b1 * y.denominator,
+                secondX: -sign * firstMultiplier * x.denominator, secondY: b2 * y.denominator,
+                firstConstant, secondConstant, firstMultiplier, multiplier,
+                operation: addition ? "＋" : "−", eliminationCoefficient: remaining * y.denominator,
+                eliminationRhs, firstSolutionVariable: "y", finalVariable: "x",
+              });
+            }
           }
-          return null;
+          const item = pick(candidates);
+          return swap ? swapVariables(item) : item;
         };
-        while (deck.length < 3) {
-          const problem = deck.length === 2
-            ? addZeroRhsProblem()
-            : addProblem(false, deck.length === 1 ? "y" : "x", deck.length === 1);
-          if (problem) deck.push(problem);
-        }
-        while (deck.length < SIMULTANEOUS_TARGET) {
-          const problem = addProblem(true, "x");
-          if (problem) deck.push(problem);
-        }
-        return deck;
+        const y = signed(randomInt(1, 4));
+        const coefficient = randomInt(2, 4);
+        const secondX = randomInt(2, 4);
+        const remaining = randomInt(2, 4);
+        const zero = {
+          x: -coefficient * y, xNumerator: -coefficient * y, xDenominator: 1,
+          yNumerator: y, yDenominator: 1, firstX: 1, firstY: coefficient,
+          secondX, secondY: secondX * coefficient + remaining,
+          firstConstant: 0, secondConstant: remaining * y,
+          zeroRhs: true, zeroCoefficient: -coefficient, eliminationCoefficient: remaining,
+          eliminationRhs: remaining * y, firstSolutionVariable: "y", finalVariable: "x",
+        };
+        const [firstMultiplier, multiplier] = paired();
+        const [lastFirst, lastSecond] = paired();
+        const swap = Boolean(randomInt(0, 1));
+        return [
+          elimination(0, false, 1, multipliers[0], swap),
+          elimination(0, true, 1, multipliers[1], !swap),
+          randomInt(0, 1) ? swapVariables(zero) : zero,
+          elimination(1, false, 1, multipliers[2], !swap),
+          elimination(1, true, firstMultiplier, multiplier, swap),
+          elimination(2, Boolean(randomInt(0, 1)), lastFirst, lastSecond, !swap),
+        ];
       }
 
       function createPreschoolDeck() {
@@ -6251,19 +6232,36 @@
       function simultaneousFirstSolution() {
         if (!simultaneousProblem) return { numerator: 0, denominator: 1 };
         return simultaneousProblem.firstSolutionVariable === "x"
-          ? { numerator: simultaneousProblem.x, denominator: 1 }
+          ? { numerator: simultaneousProblem.xNumerator ?? simultaneousProblem.x, denominator: simultaneousProblem.xDenominator || 1 }
+          : { numerator: simultaneousProblem.yNumerator, denominator: simultaneousProblem.yDenominator };
+      }
+
+      function simultaneousFinalSolution() {
+        if (!simultaneousProblem) return { numerator: 0, denominator: 1 };
+        return simultaneousProblem.finalVariable === "x"
+          ? { numerator: simultaneousProblem.xNumerator ?? simultaneousProblem.x, denominator: simultaneousProblem.xDenominator || 1 }
           : { numerator: simultaneousProblem.yNumerator, denominator: simultaneousProblem.yDenominator };
       }
 
       function simultaneousFinalValue() {
-        if (!simultaneousProblem) return 0;
-        return simultaneousProblem.finalVariable === "x"
-          ? simultaneousProblem.x
-          : simultaneousProblem.yNumerator;
+        return simultaneousFinalSolution().numerator;
+      }
+
+      function simultaneousFinalCoefficient() {
+        return simultaneousProblem.finalVariable === "x" ? simultaneousProblem.secondX : simultaneousProblem.secondY;
+      }
+
+      function simultaneousNeedsFinalMiddle() {
+        return !simultaneousProblem.zeroRhs && simultaneousFinalCoefficient() !== 1;
       }
 
       function systemExpected(field) {
         if (!simultaneousProblem) return "";
+        const firstMultiplier = simultaneousProblem.firstMultiplier || 1;
+        if (field === "firstMultiplier") return String(firstMultiplier);
+        if (field === "firstScaledX") return String(firstMultiplier * simultaneousProblem.firstX);
+        if (field === "firstScaledY") return String(Math.abs(firstMultiplier * simultaneousProblem.firstY));
+        if (field === "firstScaledRhs") return String(firstMultiplier * simultaneousProblem.firstConstant);
         if (field === "multiplier") return String(simultaneousProblem.multiplier);
         if (field === "scaledX") return String(simultaneousProblem.multiplier * simultaneousProblem.secondX);
         if (field === "scaledY") return String(Math.abs(simultaneousProblem.multiplier * simultaneousProblem.secondY));
@@ -6279,6 +6277,10 @@
         if (field === "substituteNumerator") return String(first.numerator);
         if (field === "substituteDenominator") return String(first.denominator);
         if (field === "x") return String(simultaneousFinalValue());
+        const final = simultaneousFinalSolution();
+        if (field === "xNumerator") return String(final.numerator);
+        if (field === "xDenominator") return String(final.denominator);
+        if (field === "finalMiddle") return String(simultaneousFinalCoefficient() * final.numerator / final.denominator);
         return "";
       }
 
@@ -6287,6 +6289,7 @@
           if (simultaneousPhase === "zeroTransform") return ["zeroCoefficient"];
           if (simultaneousPhase === "zeroSubstitute") return ["coefficient", "rhs"];
         }
+        if (simultaneousPhase === "multiplyFirst") return ["firstMultiplier", "firstScaledX", "firstScaledY", "firstScaledRhs"];
         if (simultaneousPhase === "multiply") return ["multiplier", "scaledX", "scaledY", "scaledRhs"];
         if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
         if (simultaneousPhase === "solution") {
@@ -6295,45 +6298,55 @@
         if (simultaneousPhase === "substitute") {
           return simultaneousFirstSolution().denominator > 1 ? ["substituteDenominator", "substituteNumerator"] : ["substitute"];
         }
-        return ["x"];
+        if (simultaneousPhase === "finalMiddle") return ["finalMiddle"];
+        return simultaneousFinalSolution().denominator > 1 ? ["xDenominator", "xNumerator"] : ["x"];
       }
 
       function renderSystemEntry() {
         const showFraction = simultaneousFirstSolution().denominator > 1;
         const zeroRhs = Boolean(simultaneousProblem?.zeroRhs);
-        simultaneousMultiplyStep.hidden = zeroRhs;
+        simultaneousFirstMultiplyStep.hidden = zeroRhs || !(simultaneousProblem.firstMultiplier > 1);
+        simultaneousMultiplyStep.hidden = zeroRhs || simultaneousPhase === "multiplyFirst";
         // Keep completed transformations visible so the calculation can be read top to bottom.
         simultaneousZeroTransformStep.hidden = !zeroRhs;
         simultaneousZeroSubstitutionStep.hidden = !zeroRhs || simultaneousPhase === "zeroTransform";
         simultaneousEliminateStep.hidden = zeroRhs
           ? simultaneousPhase === "zeroTransform"
-          : simultaneousPhase === "multiply";
+          : ["multiplyFirst", "multiply"].includes(simultaneousPhase);
         simultaneousYInput.hidden = showFraction;
         simultaneousYFraction.hidden = !showFraction;
-        simultaneousYStep.hidden = !["solution", "substitute", "final"].includes(simultaneousPhase);
+        simultaneousYStep.hidden = !["solution", "substitute", "finalMiddle", "final"].includes(simultaneousPhase);
         simultaneousSubstituteInput.hidden = showFraction;
         simultaneousSubstituteFraction.hidden = !showFraction;
-        simultaneousSubstituteCaption.hidden = !["substitute", "final"].includes(simultaneousPhase);
-        simultaneousSubstituteStep.hidden = !["substitute", "final"].includes(simultaneousPhase);
+        simultaneousSubstituteCaption.hidden = !["substitute", "finalMiddle", "final"].includes(simultaneousPhase);
+        simultaneousSubstituteStep.hidden = !["substitute", "finalMiddle", "final"].includes(simultaneousPhase);
+        simultaneousFinalMiddleStep.hidden = !simultaneousNeedsFinalMiddle() || !["finalMiddle", "final"].includes(simultaneousPhase);
         simultaneousXStep.hidden = simultaneousPhase !== "final";
+        simultaneousXInput.hidden = simultaneousFinalSolution().denominator > 1;
+        simultaneousXFraction.hidden = !simultaneousXInput.hidden;
         Object.entries(simultaneousFields).forEach(([field, input]) => {
           const expected = systemExpected(field);
-          const slots = Math.min(3, Math.max(1, expected.length));
+          const slots = Math.max(1, expected.length);
           const value = Array.from(simultaneousValues[field] || "");
           input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] === "-" ? "−" : value[index] || "") + "</span>").join("");
           input.dataset.slots = String(slots);
           input.style.setProperty("--system-slots", String(slots));
           input.classList.toggle("active", field === simultaneousActiveField);
         });
+        simultaneousFields[simultaneousActiveField]?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
       }
 
       function renderSimultaneousProblem() {
         if (!simultaneousProblem) return;
         const item = simultaneousProblem;
-        simultaneousFirstEquation.innerHTML = "<span>" + (item.firstX === 1 ? "x" : item.firstX + "x") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
+        simultaneousFirstEquation.innerHTML = "<span>" + systemVariableTerm(item.firstX, "x").replace(/^\+ /, "").replace(/− /, "−") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
         const secondXText = item.secondX === 1 ? "x" : item.secondX === -1 ? "−x" : `${item.secondX}x`;
         simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
+        simultaneousFirstScaledYSign.textContent = item.firstY < 0 ? "−" : "+";
+        simultaneousScaledNumber.textContent = item.firstMultiplier > 1 ? "…④" : "…③";
+        simultaneousScaledXInput.setAttribute("aria-label", "②を何倍かしたxの係数");
+        simultaneousScaledYInput.setAttribute("aria-label", "②を何倍かしたyの係数");
         if (item.zeroRhs) {
           const variable = item.firstSolutionVariable;
           simultaneousZeroTransformLabel.textContent = `① → ${item.finalVariable} =`;
@@ -6345,10 +6358,12 @@
           const term = factor === 1 ? replaced : `${factor}×(${replaced})`;
           simultaneousZeroSubstitutionText.textContent = `${term} ${systemVariableTerm(remaining, variable)} = ${item.secondConstant}`;
         }
-        simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →" : "①" + item.operation + "③ →";
+        simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →"
+          : item.firstMultiplier > 1 ? "③" + item.operation + "④ →" : "①" + item.operation + "③ →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
+        simultaneousFinalMiddleLabel.textContent = systemVariableTerm(simultaneousFinalCoefficient(), item.finalVariable).replace(/^\+ /, "").replace(/− /, "−") + " =";
         simultaneousSubstituteCaptionText.textContent = "これを②に代入";
         if (item.zeroRhs) {
           const relation = systemVariableTerm(item.zeroCoefficient, item.firstSolutionVariable).replace(/^\+ /, "");
@@ -6358,18 +6373,17 @@
           const productPrefix = item.zeroCoefficient === -1 ? "−" : item.zeroCoefficient === 1 ? "" : `${coefficient}×`;
           simultaneousSubstitutePrefix.textContent = `${item.finalVariable} = ${productPrefix}${negativeValue ? "(" : ""}`;
           simultaneousSubstituteSuffix.textContent = negativeValue ? ")" : "";
-        } else if (item.firstSolutionVariable === "y") {
-          const factor = Math.abs(item.secondY);
-          const xTerm = item.secondX === 1 ? "x" : `${item.secondX}x`;
-          simultaneousSubstitutePrefix.textContent = xTerm + " " + (item.secondY < 0 ? "− " : "+ ") + (factor === 1 ? "" : factor + "×");
-          simultaneousSubstituteSuffix.textContent = " = " + item.secondConstant;
         } else {
-          simultaneousSubstitutePrefix.textContent = "";
-          simultaneousSubstituteSuffix.textContent = " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant;
+          const factor = item.firstSolutionVariable === "y" ? item.secondY : item.secondX;
+          const variableTerm = systemVariableTerm(simultaneousFinalCoefficient(), item.finalVariable).replace(/^\+ /, "").replace(/− /, "−");
+          const negativeValue = simultaneousFirstSolution().numerator < 0;
+          simultaneousSubstitutePrefix.textContent = variableTerm + (factor < 0 ? " − " : " + ")
+            + (Math.abs(factor) === 1 ? "" : Math.abs(factor) + "×") + (negativeValue ? "(" : "");
+          simultaneousSubstituteSuffix.textContent = (negativeValue ? ")" : "") + " = " + item.secondConstant;
         }
         simultaneousValues = {};
-        simultaneousPhase = item.zeroRhs ? "zeroTransform" : "multiply";
-        simultaneousActiveField = item.zeroRhs ? "zeroCoefficient" : "multiplier";
+        simultaneousPhase = item.zeroRhs ? "zeroTransform" : item.firstMultiplier > 1 ? "multiplyFirst" : "multiply";
+        simultaneousActiveField = systemCurrentFields()[0];
         renderSystemEntry();
       }
 
@@ -6427,6 +6441,12 @@
           renderSystemEntry();
           return;
         }
+        if (simultaneousPhase === "multiplyFirst") {
+          simultaneousPhase = "multiply";
+          simultaneousActiveField = "multiplier";
+          renderSystemEntry();
+          return;
+        }
         if (simultaneousPhase === "multiply") {
           simultaneousPhase = "eliminate";
           simultaneousActiveField = "coefficient";
@@ -6446,8 +6466,14 @@
           return;
         }
         if (simultaneousPhase === "substitute") {
+          simultaneousPhase = simultaneousNeedsFinalMiddle() ? "finalMiddle" : "final";
+          simultaneousActiveField = systemCurrentFields()[0];
+          renderSystemEntry();
+          return;
+        }
+        if (simultaneousPhase === "finalMiddle") {
           simultaneousPhase = "final";
-          simultaneousActiveField = "x";
+          simultaneousActiveField = systemCurrentFields()[0];
           renderSystemEntry();
           return;
         }
@@ -7960,10 +7986,13 @@
           : String(equationProblem?.answer || "");
         if (selectedApp === "simultaneous") {
           if (!simultaneousProblem) return "";
+          const x = (simultaneousProblem.xDenominator || 1) === 1
+            ? String(simultaneousProblem.xNumerator ?? simultaneousProblem.x)
+            : `${simultaneousProblem.xNumerator}/${simultaneousProblem.xDenominator}`;
           const y = simultaneousProblem.yDenominator === 1
             ? String(simultaneousProblem.yNumerator)
             : `${simultaneousProblem.yNumerator}/${simultaneousProblem.yDenominator}`;
-          return `x=${simultaneousProblem.x}, y=${y}`;
+          return `x=${x}, y=${y}`;
         }
         if (selectedApp === "doubleMultiplication") {
           return formatDecimalAnswer(doubleMultiplicationAnswer(), doubleDecimalPlaces());
