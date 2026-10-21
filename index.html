@@ -2700,6 +2700,9 @@
       .areaTerm > span { white-space: nowrap; }
       .areaEquals { text-align: center; }
       .areaRowBody { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+      .areaDerivation .areaRow { display: block; }
+      .areaDerivation .areaRowBody { flex-wrap: nowrap; }
+      .areaDerivation .areaRowBody > span { font-size: 24px; white-space: nowrap; }
       .areaFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 2px var(--digit-frame-height); align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: var(--digit-frame-width); line-height: 1; }
       .areaFraction i { height: 2px; width: 100%; background: var(--ink); }
       .areaExpression { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
@@ -2719,6 +2722,7 @@
         .areaHint { font-size: 22px; }
         .areaDimension .areaUnit { font-size: 14px; }
         .areaRowBody { gap: 8px; }
+        .areaDerivation .areaRowBody > span { font-size: 32px; }
       }
     </style>
   </head>
@@ -5119,7 +5123,6 @@
         const baseProblem = pick(integerTriangles);
         deck.push(question("triangleBase", "triangle", "base", baseProblem, baseProblem.base, [
           row([inputFraction("surface", baseProblem.surface), "× 2", operator("divide", "÷"), inputFraction("height", baseProblem.height)], false),
-          row(product([baseProblem.surface, areaFraction(2), areaFraction(baseProblem.height.d, baseProblem.height.n)])),
           result(baseProblem.base, "cm"),
         ], ["X ×", fixed(baseProblem.height), "÷ 2 =", fixed(baseProblem.surface)]));
 
@@ -5127,7 +5130,7 @@
         const { base, surface } = heightProblem;
         deck.push(question("triangleHeight", "triangle", "height", heightProblem, heightProblem.height, [
           row([number("surface", surface.n), "× 2", operator("divide", "÷"), inputFraction("base", base)], false),
-          row(product([surface, areaFraction(2), areaFraction(base.d, base.n)])), result(heightProblem.height, "cm"),
+          result(heightProblem.height, "cm"),
         ], [fixed(base), "× X ÷ 2 =", fixed(surface)]));
 
         const trapezoids = [];
@@ -5154,17 +5157,15 @@
               numerator: { type: "expression", parts: [number("top", item.top), "+", number("base", item.base)] },
               denominator: "2",
             }, operator("multiply", "×"), number("height", item.height)], false),
-            row([{ type: "fraction", numerator: number("sum", sum), denominator: "2" }, `× ${item.height}`]),
             result(measures.surface, "cm²")];
           } else if (unknown === "height") {
             hint = [`${sum} ÷ 2 × X = ${item.surface}`];
             steps = [row([number("surface", item.surface), operator("divide", "÷"), "(", number("sum", sum), "÷ 2 )"], false),
               row([String(item.surface), "÷", number("halfSum", sum / 2)]), result(measures.height, "cm")];
           } else {
-            steps = [row([`( x + ${item.base} ) × ${item.height} ÷ 2 = ${item.surface}`], false),
-              row([`( x + ${item.base} ) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
+            steps = [row([`(x + ${item.base}) ÷ 2 × ${item.height} = ${item.surface}`], false),
+              row([`(x + ${item.base}) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
               row([`x + ${item.base} =`, number("sum", sum)], false),
-              row(["x =", number("total", sum), "−", number("base", item.base)], false),
               row(["x =", number("answer", item.top), "cm"], false)];
           }
           deck.push(question(`trapezoid${unknown === "surface" ? "Area" : unknown === "height" ? "Height" : "Top"}`,
@@ -5173,8 +5174,14 @@
         return deck;
       }
 
+      function areaDigitOrder(part) {
+        const indices = Array.from(part.value, (_, index) => index);
+        if (!part.onesFirst) return indices;
+        return indices.length > 2 ? [...indices.slice(2).reverse(), ...indices.slice(0, 2)] : indices.reverse();
+      }
+
       function areaExpected(part) {
-        return part.onesFirst ? Array.from(part.value).reverse().join("") : part.value;
+        return areaDigitOrder(part).map(index => part.value[index]).join("");
       }
 
       function renderAreaPart(part) {
@@ -5206,8 +5213,9 @@
         }
         element.className = "areaInput";
         element.setAttribute("aria-label", `${part.value.length}桁の数値入力`);
+        const entryOrder = areaDigitOrder(part);
         for (let index = 0; index < part.value.length; index += 1) {
-          const position = part.onesFirst ? part.value.length - index - 1 : index;
+          const position = entryOrder.indexOf(index);
           const digit = document.createElement("span");
           digit.className = "answerBox areaDigit";
           digit.textContent = value[position] || "";
@@ -5257,6 +5265,7 @@
         areaSteps.replaceChildren();
         const chain = areaProblem.kind !== "trapezoidTop";
         areaSteps.classList.toggle("areaChain", chain);
+        areaSteps.classList.toggle("areaDerivation", !chain);
         let priorComplete = true;
         for (const [index, step] of areaProblem.steps.entries()) {
           if (!chain && !priorComplete) break;
@@ -5286,7 +5295,7 @@
             row.append(body);
           } else {
             step.parts.forEach(part => body.append(renderAreaPart(part)));
-            row.append(equals, body);
+            row.append(body);
           }
           areaSteps.append(row);
           priorComplete = priorComplete && areaPartFields(step.parts).every(part => areaValues[part.field] === areaExpected(part));
