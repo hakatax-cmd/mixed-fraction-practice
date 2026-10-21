@@ -2702,6 +2702,7 @@
       .areaRowBody { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
       .areaFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 2px var(--digit-frame-height); align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: var(--digit-frame-width); line-height: 1; }
       .areaFraction i { height: 2px; width: 100%; background: var(--ink); }
+      .areaExpression { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
       .areaInput { display: inline-flex; gap: 2px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; line-height: 1; flex: 0 0 auto; }
       .areaDigit { position: relative; flex: 0 0 auto; }
       .areaOperator { display: grid; place-items: center; width: 1.15em; height: 1.15em; margin-inline: 4px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: white; color: inherit; font: inherit; flex: 0 0 auto; }
@@ -4742,11 +4743,11 @@
       }
 
       function createFishingDeck() {
-        const input = (field, value, onesFirst = false) => {
+        const input = (field, value, order = "forward") => {
           const displayValue = String(value);
-          const digits = Array.from(displayValue).filter((character) => character !== ".");
-          const entryValue = (onesFirst ? digits.reverse() : digits).join("");
-          return { type: "input", field, value: displayValue, entryValue, onesFirst };
+          const part = { type: "input", field, value: displayValue, entryMode: order === true ? "reverse" : order };
+          part.entryValue = fishingDigitOrder(part).map(index => displayValue[index]).join("");
+          return part;
         };
         const operator = (field, value) => ({ type: "operator", field, value });
         const fraction = (numerator, denominator) => ({ type: "staticFraction", numerator: String(numerator), denominator: String(denominator) });
@@ -4756,9 +4757,9 @@
           denominator: input(denominator, denominatorValue),
         });
         const question = (fact, text, fields, steps, answerText) => ({ fact, text, fields, steps, answerText });
+        const ozCount = 2 + Math.floor(Math.random() * 8);
         const ozMultiplication = [
-          question("1 oz は 28 g です。", "2 oz は何 g？", ["ozTwoBase", "ozTwoOperator", "ozTwoCount", "ozTwo"], [[input("ozTwoBase", 28), operator("ozTwoOperator", "×"), input("ozTwoCount", 2), " = ", input("ozTwo", 56, true), " g"]], "56 g"),
-          question("1 oz は 28 g です。", "3 oz は何 g？", ["ozThreeBase", "ozThreeOperator", "ozThreeCount", "ozThree"], [[input("ozThreeBase", 28), operator("ozThreeOperator", "×"), input("ozThreeCount", 3), " = ", input("ozThree", 84, true), " g"]], "84 g"),
+          question("1 oz は 28 g です。", `${ozCount} oz は何 g？`, ["ozIntegerBase", "ozIntegerOperator", "ozIntegerCount", "ozInteger"], [[input("ozIntegerBase", 28), operator("ozIntegerOperator", "×"), input("ozIntegerCount", ozCount), " = ", input("ozInteger", 28 * ozCount, "writtenProduct"), " g"]], `${28 * ozCount} g`),
           question("1 oz は 28 g です。", "3/4 oz は何 g？", ["ozThreeQuartersBase", "ozThreeQuartersMultiply", "ozThreeQuartersDenominator", "ozThreeQuartersNumerator", "ozThreeQuarters"], [[input("ozThreeQuartersBase", 28), operator("ozThreeQuartersMultiply", "×"), fractionInput("ozThreeQuartersNumerator", 3, "ozThreeQuartersDenominator", 4), " = ", input("ozThreeQuarters", 21), " g"]], "21 g"),
           question("1 oz は 28 g です。", "5/4 oz は何 g？", ["ozFiveQuartersBase", "ozFiveQuartersMultiply", "ozFiveQuartersDenominator", "ozFiveQuartersNumerator", "ozFiveQuarters"], [[input("ozFiveQuartersBase", 28), operator("ozFiveQuartersMultiply", "×"), fractionInput("ozFiveQuartersNumerator", 5, "ozFiveQuartersDenominator", 4), " = ", input("ozFiveQuarters", 35), " g"]], "35 g"),
         ];
@@ -4768,7 +4769,7 @@
         ];
         const go = [
           question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
-          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", true), " g"]], "26.25 g"),
+          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", "writtenProduct"), " g"]], "26.25 g"),
           question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
           { ...question("1号は 3.75 g です。", "15 g は何号？",
             ["goFourWeight", "goFourOperator", "goFourUnit", "goFourDivisorDenominator", "goFourDivisorNumerator", "goFour"],
@@ -4805,10 +4806,21 @@
             ], "7 feet 6 inch"),
         ];
         return [
-          ozMultiplication[1], ozDivision[0], ozMultiplication[2], ozDivision[1],
+          ozMultiplication[0], ozDivision[0], ozMultiplication[1], ozDivision[1],
           go[0], go[1], go[2], go[3],
           ...feetOnly, ...inchOnly, ...mixedLength,
         ];
+      }
+
+      function fishingDigitOrder(part) {
+        const indices = Array.from(part.value)
+          .map((character, index) => character === "." ? -1 : index)
+          .filter(index => index >= 0);
+        if (part.entryMode === "writtenProduct") {
+          // Finish the lower columns first, then enter the leading two-digit subtotal left to right.
+          return indices.length > 2 ? [...indices.slice(2).reverse(), ...indices.slice(0, 2)] : indices.reverse();
+        }
+        return part.entryMode === "reverse" ? indices.reverse() : indices;
       }
 
       function renderFishingPart(part) {
@@ -4849,13 +4861,7 @@
         button.className = "fishingInput";
         button.dataset.fishingField = part.field;
         const characters = Array.from(part.value);
-        const digitIndices = characters
-          .map((character, index) => ({ character, index }))
-          .filter(({ character }) => character !== ".")
-          .map(({ index }) => index);
-        const entryOrder = part.onesFirst
-          ? [...digitIndices].reverse()
-          : digitIndices;
+        const entryOrder = fishingDigitOrder(part);
         const activeIndex = fishingActiveField === part.field ? entryOrder[value.length] ?? -1 : -1;
         characters.forEach((character, index) => {
           const digit = document.createElement("span");
@@ -5025,6 +5031,7 @@
         return parts.flatMap(part => {
           if (part?.type === "input" || part?.type === "operator") return [part];
           if (part?.type === "fraction") return areaPartFields([part.denominator, part.numerator]);
+          if (part?.type === "expression") return areaPartFields(part.parts);
           return [];
         });
       }
@@ -5101,31 +5108,26 @@
           result(triangle.surface, "cm²"),
         ]));
 
-        const baseProblems = [];
-        for (let base = 2; base <= 9; base += 1) {
-          for (const height of fractions) {
-            const surface = areaFraction(base * height.n, 2 * height.d);
-            const measures = { base: areaFraction(base), height, surface };
-            if (surface.n <= 9 && surface.d <= 9 && surface.d > 1 &&
-                surface.n !== 2 * surface.d && !areaSurfaceMatchesSide(measures)) baseProblems.push(measures);
+        const integerTriangles = [];
+        for (let base = 3; base <= 9; base += 1) {
+          for (let height = 3; height <= 9; height += 1) {
+            const surface = areaFraction(base * height, 2);
+            const measures = { base: areaFraction(base), height: areaFraction(height), surface };
+            if (surface.d === 1 && surface.n !== 2 && !areaSurfaceMatchesSide(measures)) integerTriangles.push(measures);
           }
         }
-        const baseProblem = pick(baseProblems);
+        const baseProblem = pick(integerTriangles);
         deck.push(question("triangleBase", "triangle", "base", baseProblem, baseProblem.base, [
           row([inputFraction("surface", baseProblem.surface), "× 2", operator("divide", "÷"), inputFraction("height", baseProblem.height)], false),
           row(product([baseProblem.surface, areaFraction(2), areaFraction(baseProblem.height.d, baseProblem.height.n)])),
           result(baseProblem.base, "cm"),
         ], ["X ×", fixed(baseProblem.height), "÷ 2 =", fixed(baseProblem.surface)]));
 
-        const surface = areaFraction(randomInt(3, 9));
-        const base = pick(fractions.filter(value => {
-          const height = areaFraction(surface.n * 2 * value.d, value.n);
-          return height.d > 1 && height.n <= 81 && !areaSurfaceMatchesSide({ base: value, height, surface });
-        }));
-        const fractionalHeight = areaFraction(surface.n * 2 * base.d, base.n);
-        deck.push(question("triangleHeight", "triangle", "height", { base, height: fractionalHeight, surface }, fractionalHeight, [
+        const heightProblem = pick(integerTriangles.filter(item => item !== baseProblem));
+        const { base, surface } = heightProblem;
+        deck.push(question("triangleHeight", "triangle", "height", heightProblem, heightProblem.height, [
           row([number("surface", surface.n), "× 2", operator("divide", "÷"), inputFraction("base", base)], false),
-          row(product([surface, areaFraction(2), areaFraction(base.d, base.n)])), result(fractionalHeight, "cm"),
+          row(product([surface, areaFraction(2), areaFraction(base.d, base.n)])), result(heightProblem.height, "cm"),
         ], [fixed(base), "× X ÷ 2 =", fixed(surface)]));
 
         const trapezoids = [];
@@ -5147,9 +5149,13 @@
           const measures = Object.fromEntries(Object.entries(item).map(([key, value]) => [key, areaFraction(value)]));
           let steps, hint = [];
           if (unknown === "surface") {
-            steps = [row(["(", number("top", item.top), operator("add", "+"), number("base", item.base), ")",
-              operator("multiply", "×"), number("height", item.height), operator("divide", "÷"), number("half", 2)], false),
-            row([number("sum", sum), `× ${item.height} ÷ 2`]), result(measures.surface, "cm²")];
+            steps = [row([{
+              type: "fraction",
+              numerator: { type: "expression", parts: [number("top", item.top), "+", number("base", item.base)] },
+              denominator: "2",
+            }, operator("multiply", "×"), number("height", item.height)], false),
+            row([{ type: "fraction", numerator: number("sum", sum), denominator: "2" }, `× ${item.height}`]),
+            result(measures.surface, "cm²")];
           } else if (unknown === "height") {
             hint = [`${sum} ÷ 2 × X = ${item.surface}`];
             steps = [row([number("surface", item.surface), operator("divide", "÷"), "(", number("sum", sum), "÷ 2 )"], false),
@@ -5174,6 +5180,11 @@
       function renderAreaPart(part) {
         const element = document.createElement(typeof part === "object" && ["input", "operator"].includes(part.type) ? "button" : "span");
         if (typeof part === "string") { element.textContent = part; return element; }
+        if (part.type === "expression") {
+          element.className = "areaExpression";
+          part.parts.forEach(value => element.append(renderAreaPart(value)));
+          return element;
+        }
         if (part.type === "fraction" || part.type === "staticFraction") {
           element.className = "areaFraction";
           const numerator = part.type === "fraction" ? part.numerator : String(part.n);
@@ -6248,7 +6259,7 @@
         if (field === "scaledX") return String(simultaneousProblem.multiplier * simultaneousProblem.secondX);
         if (field === "scaledY") return String(Math.abs(simultaneousProblem.multiplier * simultaneousProblem.secondY));
         if (field === "scaledRhs") return String(simultaneousProblem.multiplier * simultaneousProblem.secondConstant);
-        if (field === "zeroCoefficient") return String(simultaneousProblem.zeroCoefficient);
+        if (field === "zeroCoefficient") return simultaneousProblem.zeroCoefficient === -1 ? "-" : String(simultaneousProblem.zeroCoefficient);
         if (field === "coefficient") return String(simultaneousProblem.eliminationCoefficient);
         if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
         const first = simultaneousFirstSolution();
@@ -6300,7 +6311,7 @@
           const expected = systemExpected(field);
           const slots = Math.min(3, Math.max(1, expected.length));
           const value = Array.from(simultaneousValues[field] || "");
-          input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] || "") + "</span>").join("");
+          input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] === "-" ? "−" : value[index] || "") + "</span>").join("");
           input.dataset.slots = String(slots);
           input.style.setProperty("--system-slots", String(slots));
           input.classList.toggle("active", field === simultaneousActiveField);
@@ -6318,11 +6329,11 @@
           const variable = item.firstSolutionVariable;
           simultaneousZeroTransformLabel.textContent = `① → ${item.finalVariable} =`;
           simultaneousZeroTransformVariable.textContent = variable;
-          simultaneousZeroCoefficientInput.setAttribute("aria-label", `${item.finalVariable}を${variable}で表したときの係数`);
-          const replaced = item.zeroCoefficient === -1 ? `−${variable}` : `(${item.zeroCoefficient})${variable}`;
+          simultaneousZeroCoefficientInput.setAttribute("aria-label", `${item.finalVariable}を${variable}で表したときの${item.zeroCoefficient === -1 ? "符号" : "係数"}`);
+          const replaced = systemVariableTerm(item.zeroCoefficient, variable).replace(/^\+ /, "").replace(/− /, "−");
           const factor = item.finalVariable === "x" ? item.secondX : item.secondY;
           const remaining = item.finalVariable === "x" ? item.secondY : item.secondX;
-          const term = factor === 1 ? replaced : `${factor}×${replaced}`;
+          const term = factor === 1 ? replaced : `${factor}×(${replaced})`;
           simultaneousZeroSubstitutionText.textContent = `${term} ${systemVariableTerm(remaining, variable)} = ${item.secondConstant}`;
         }
         simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →" : "①" + item.operation + "③ →";
@@ -6335,7 +6346,8 @@
           simultaneousSubstituteCaptionText.textContent = `①で変形した ${item.finalVariable} = ${relation} に代入`;
           const negativeValue = simultaneousFirstSolution().numerator < 0;
           const coefficient = String(item.zeroCoefficient).replace("-", "−");
-          simultaneousSubstitutePrefix.textContent = `${item.finalVariable} = ${coefficient}×${negativeValue ? "(" : ""}`;
+          const productPrefix = item.zeroCoefficient === -1 ? "−" : item.zeroCoefficient === 1 ? "" : `${coefficient}×`;
+          simultaneousSubstitutePrefix.textContent = `${item.finalVariable} = ${productPrefix}${negativeValue ? "(" : ""}`;
           simultaneousSubstituteSuffix.textContent = negativeValue ? ")" : "";
         } else if (item.firstSolutionVariable === "y") {
           const factor = Math.abs(item.secondY);
