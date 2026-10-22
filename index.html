@@ -2669,6 +2669,14 @@
         }
       }
       #chooseArea { background: #edf8f4; }
+      #chooseMentalDivision { background: #eef5ff; }
+      #mentalDivisionProblemLine { display: grid; justify-items: center; align-content: start; min-width: 0; min-height: 0; padding-top: 32px; }
+      .mentalDivisionWork { display: grid; grid-template-columns: 1em .3em repeat(4, 1em); grid-template-rows: repeat(2, 1.2em); row-gap: .18em; align-items: center; justify-items: center; font-size: 44px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
+      .mentalDivisionWork .answerBox { font: inherit; width: var(--digit-frame-width); height: var(--digit-frame-height); }
+      .mentalDivisionDigit { display: grid; place-items: center; width: 1em; height: 1.2em; }
+      .mentalDivisionBracket { grid-column: 3 / 7; grid-row: 2; width: 100%; height: 100%; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); border-bottom-left-radius: 10px; pointer-events: none; }
+      @media (min-width: 400px) { .mentalDivisionWork { font-size: 48px; } }
+      @media (min-width: 700px) and (min-height: 700px) { .mentalDivisionWork { font-size: 64px; } #mentalDivisionProblemLine { padding-top: 48px; } }
       #areaProblemLine {
         --area-number-size: 36px;
         font-size: var(--area-number-size);
@@ -2708,6 +2716,9 @@
       .areaDerivation .areaRow { display: block; }
       .areaDerivation .areaRowBody { flex-wrap: nowrap; }
       .areaDerivation .areaRowBody > span { font-size: 24px; white-space: nowrap; }
+      .areaCalculation .areaRow:first-child { display: block; }
+      .areaCalculation .areaRowBody { flex-wrap: nowrap; }
+      .areaCalculation .areaRowBody > span { font-size: 24px; white-space: nowrap; }
       .areaFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 2px var(--digit-frame-height); align-items: center; justify-items: center; vertical-align: middle; flex: 0 0 auto; min-width: var(--digit-frame-width); line-height: 1; }
       .areaFraction i { height: 2px; width: 100%; background: var(--ink); }
       .areaExpression { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
@@ -2728,6 +2739,7 @@
         .areaDimension .areaUnit { font-size: 14px; }
         .areaRowBody { gap: 8px; }
         .areaDerivation .areaRowBody > span { font-size: 32px; }
+        .areaCalculation .areaRowBody > span { font-size: 32px; }
       }
     </style>
   </head>
@@ -2759,6 +2771,7 @@
                   <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
                   <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
                   <button class="menuButton" id="chooseArea" type="button">長方形・三角形<br />台形の面積</button>
+                  <button class="menuButton" id="chooseMentalDivision" type="button">4桁÷1桁の<br />暗算</button>
                 </div>
               </section>
               <div class="menuGraduationDivider" role="separator" aria-label="卒業したもの"><span>&#21330;&#26989;&#12375;&#12383;&#12514;&#12398;</span></div>
@@ -2810,9 +2823,9 @@
         </section>
 
         <section class="cover" id="divisionCover" hidden>
-          <h1>&#22235;&#12369;&#12383;&divide;&#20108;&#12369;&#12383;</h1>
-          <p class="coverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
-          <p class="coverGoal">5&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <h1 id="divisionCoverTitle">&#22235;&#12369;&#12383;&divide;&#20108;&#12369;&#12383;</h1>
+          <p class="coverPrompt" id="divisionCoverPrompt">&#31558;&#31639;&#12391;&#12392;&#12371;&#12358;</p>
+          <p class="coverGoal" id="divisionCoverGoal">5&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="divisionStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -3521,6 +3534,19 @@
               </span>
             </div>
           </div>
+          <div id="mentalDivisionProblemLine" hidden>
+            <div class="mentalDivisionWork" aria-label="4桁÷1桁の筆算">
+              <button id="mentalDivisionHundredsInput" class="answerBox" type="button" data-value="" aria-label="商の百の位" style="grid-column: 4; grid-row: 1;"></button>
+              <button id="mentalDivisionTensInput" class="answerBox" type="button" data-value="" aria-label="商の十の位" style="grid-column: 5; grid-row: 1;"></button>
+              <button id="mentalDivisionOnesInput" class="answerBox" type="button" data-value="" aria-label="商の一の位" style="grid-column: 6; grid-row: 1;"></button>
+              <span id="mentalDivisionDivisor" class="mentalDivisionDigit" style="grid-column: 1; grid-row: 2;"></span>
+              <span class="mentalDivisionBracket" aria-hidden="true"></span>
+              <span id="mentalDivisionD1" class="mentalDivisionDigit" style="grid-column: 3; grid-row: 2;"></span>
+              <span id="mentalDivisionD2" class="mentalDivisionDigit" style="grid-column: 4; grid-row: 2;"></span>
+              <span id="mentalDivisionD3" class="mentalDivisionDigit" style="grid-column: 5; grid-row: 2;"></span>
+              <span id="mentalDivisionD4" class="mentalDivisionDigit" style="grid-column: 6; grid-row: 2;"></span>
+            </div>
+          </div>
           <div class="divisionProblemLine" id="divisionProblemLine" hidden>
             <div class="divisionWork">
               <button id="divisionQTensInput" class="answerBox divisionAnswer active" aria-label="&#21830;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" style="grid-column: 5; grid-row: 1;"></button>
@@ -3678,6 +3704,9 @@
         "doubleTotalOnes", "doubleTotalTens", "doubleTotalHundreds", "doubleTotalThousands",
       ];
       const DIVISION_TARGET = 5;
+      const MENTAL_DIVISION_TARGET = 7;
+      const MENTAL_DIVISION_SLOTS = ["mentalDivisionHundreds", "mentalDivisionTens", "mentalDivisionOnes"];
+      const MENTAL_DIVISION_BEST_KEY = "mentalDivisionBestTimeMs";
       const FRACTION_CALCULATION_TARGET = 12;
       const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
       const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
@@ -3732,6 +3761,7 @@
         SUBTRACTION_BEST_KEY,
         DOUBLE_MULTIPLICATION_BEST_KEY,
         DIVISION_BEST_KEY,
+        MENTAL_DIVISION_BEST_KEY,
         FRACTION_CALCULATION_BEST_KEY,
         FRACTION_ADD_SUBTRACT_BEST_KEY,
         GROUPING_BEST_KEY,
@@ -3758,6 +3788,7 @@
         subtraction: "\u56db\u6841\u306e\u5f15\u304d\u7b97",
         doubleMultiplication: "\u4e8c\u3051\u305f\u00d7\u4e8c\u3051\u305f",
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
+        mentalDivision: "4桁÷1桁の暗算",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
@@ -3788,6 +3819,7 @@
         "equation",
         "simultaneous",
         "area",
+        "mentalDivision",
       ];
       const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
 
@@ -3900,6 +3932,9 @@
       let selectedDoubleDecimalPosition = null;
 
       const inputs = {
+        mentalDivisionHundreds: document.querySelector("#mentalDivisionHundredsInput"),
+        mentalDivisionTens: document.querySelector("#mentalDivisionTensInput"),
+        mentalDivisionOnes: document.querySelector("#mentalDivisionOnesInput"),
         whole: document.querySelector("#wholeInput"),
         rest: document.querySelector("#restInput"),
         improperNumeratorTens: document.querySelector("#improperNumeratorTensInput"),
@@ -4203,6 +4238,13 @@
       const longMultiplicationCover = document.querySelector("#longMultiplicationCover");
       const doubleMultiplicationCover = document.querySelector("#doubleMultiplicationCover");
       const divisionCover = document.querySelector("#divisionCover");
+      const divisionCoverTitle = document.querySelector("#divisionCoverTitle");
+      const divisionCoverPrompt = document.querySelector("#divisionCoverPrompt");
+      const divisionCoverGoal = document.querySelector("#divisionCoverGoal");
+      const chooseMentalDivision = document.querySelector("#chooseMentalDivision");
+      const mentalDivisionProblemLine = document.querySelector("#mentalDivisionProblemLine");
+      const mentalDivisionDivisor = document.querySelector("#mentalDivisionDivisor");
+      const mentalDivisionDigits = [1, 2, 3, 4].map(index => document.querySelector(`#mentalDivisionD${index}`));
       const fractionCalculationCover = document.querySelector("#fractionCalculationCover");
       const fractionAddSubtractCover = document.querySelector("#fractionAddSubtractCover");
       const groupingCover = document.querySelector("#groupingCover");
@@ -5178,7 +5220,7 @@
           for (let base = top + 1; base <= 10; base += 1) {
             for (let height = 2; height <= 10; height += 1) {
               const surface = (top + base) * height / 2;
-              if (Number.isInteger(surface) && ![top, base, height].includes(surface)) {
+              if (Number.isInteger(surface) && ![top, base, height, top + base].includes(surface)) {
                 trapezoids.push({ top, base, height, surface });
               }
             }
@@ -5186,7 +5228,9 @@
         }
         const used = new Set();
         for (const unknown of ["surface", "height", "top"]) {
-          const item = pick(trapezoids.filter(value => !used.has(JSON.stringify(value)) && (unknown !== "height" || (value.top + value.base) % 2 === 0)));
+          const item = pick(trapezoids.filter(value => !used.has(JSON.stringify(value))
+            && (unknown !== "height" || (value.top + value.base) % 2 === 0)
+            && (unknown !== "top" || (value.top + value.base <= 9 && value.height <= 9))));
           used.add(JSON.stringify(item));
           const sum = item.top + item.base;
           const measures = Object.fromEntries(Object.entries(item).map(([key, value]) => [key, areaFraction(value)]));
@@ -5203,7 +5247,7 @@
             steps = [row([number("surface", item.surface), operator("divide", "÷"), "(", number("sum", sum), "÷ 2 )"], false),
               row([String(item.surface), "÷", number("halfSum", sum / 2)]), result(measures.height, "cm")];
           } else {
-            steps = [row([`(x + ${item.base}) ÷ 2 × ${item.height} = ${item.surface}`], false),
+            steps = [row([{ type: "fraction", numerator: `x + ${item.base}`, denominator: "2" }, `× ${item.height} = ${item.surface}`], false),
               row([`(x + ${item.base}) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
               row([`x + ${item.base} =`, number("sum", sum)], false),
               row(["x =", number("answer", item.top), "cm"], false)];
@@ -5303,9 +5347,10 @@
       function renderAreaEntry(scroll = false) {
         if (!areaProblem) return;
         areaSteps.replaceChildren();
-        const chain = areaProblem.kind !== "trapezoidTop";
+        const chain = !["trapezoidTop", "trapezoidHeight"].includes(areaProblem.kind);
         areaSteps.classList.toggle("areaChain", chain);
-        areaSteps.classList.toggle("areaDerivation", !chain);
+        areaSteps.classList.toggle("areaDerivation", areaProblem.kind === "trapezoidTop");
+        areaSteps.classList.toggle("areaCalculation", areaProblem.kind === "trapezoidHeight");
         let priorComplete = true;
         for (const [index, step] of areaProblem.steps.entries()) {
           if (!chain && !priorComplete) break;
@@ -5335,6 +5380,7 @@
             row.append(body);
           } else {
             step.parts.forEach(part => body.append(renderAreaPart(part)));
+            if (step.equals) row.append(equals);
             row.append(body);
           }
           areaSteps.append(row);
@@ -6035,6 +6081,9 @@
 
       function setEquationActive(field) {
         if (selectedApp !== "equation" || isAnswerLocked || isFinished || !equationCurrentFields().includes(field)) return;
+        const fields = equationCurrentFields();
+        const incomplete = fields.findIndex(value => (equationValues[value] || "") !== equationExpected(value));
+        if (incomplete >= 0 && fields.indexOf(field) > incomplete) return;
         equationActiveField = field;
         renderEquationEntry();
       }
@@ -6042,7 +6091,7 @@
       function resetEquationEntry() {
         equationValues = {};
         equationPhase = equationProblem?.kind === "fraction" ? "work" : "middle";
-        equationActiveField = equationProblem?.kind === "fraction" ? "middleFirst" : "middle";
+        equationActiveField = equationCurrentFields()[0];
         renderEquationEntry();
       }
 
@@ -6150,28 +6199,6 @@
         const next = current + nextValue;
         if (next.length > expected.length) return;
         equationValues[field] = next;
-        // Integer equations use a strict, local transition path. This covers
-        // both a single middle box and the two boxes in 4 = 2x, so a completed
-        // correct box cannot leave the child on a finished field.
-        if (equationProblem?.kind !== "fraction" && next === expected) {
-          const fields = equationCurrentFields();
-          const fieldIndex = fields.indexOf(field);
-          if (equationPhase === "middle" && fieldIndex >= 0 && fieldIndex < fields.length - 1) {
-            equationActiveField = fields[fieldIndex + 1];
-            renderEquationEntry();
-            return;
-          }
-          if (equationPhase === "middle") {
-            equationPhase = "final";
-            equationActiveField = "final";
-            renderEquationEntry();
-            return;
-          }
-          if (equationPhase === "final") {
-            completeEquationProblem();
-            return;
-          }
-        }
         renderEquationEntry();
         if (next.length === expected.length) equationFinishField();
       }
@@ -7087,6 +7114,26 @@
         return { divisor: 68, dividend: 4382, quotient: 64, remainder: 30 };
       }
 
+      function createMentalDivisionDeck() {
+        return shuffle([2, 3, 4, 5, 6, 7, 8, 9]).slice(0, MENTAL_DIVISION_TARGET).map(divisor => {
+          const candidates = [];
+          for (let quotient = 100; quotient <= 999; quotient += 1) {
+            const dividend = divisor * quotient;
+            // The first two quotient digits must both carry a remainder forward.
+            if (dividend < 1000 || Math.floor(dividend / 100) % divisor === 0 || Math.floor(dividend / 10) % divisor === 0) continue;
+            candidates.push({ divisor, dividend, quotient });
+          }
+          return candidates[randomInt(0, candidates.length - 1)];
+        });
+      }
+
+      function renderMentalDivisionProblem() {
+        mentalDivisionDivisor.textContent = divisionProblem.divisor;
+        mentalDivisionDigits.forEach((element, index) => {
+          element.textContent = String(divisionProblem.dividend)[index];
+        });
+      }
+
       function createDivisionDeck() {
         const deck = [];
         const used = new Set();
@@ -7366,7 +7413,9 @@
         return [
           { phase: "increaseExpression", fields: ["increaseCurrent", "increaseOperator", "increaseBase"] },
           { phase: "increaseRaw", fields: ["increaseRawDenominator", "increaseRawNumerator"] },
-          { phase: "increaseReduced", fields: ["increaseReducedDenominator", "increaseReducedNumerator"] },
+          ...(item.denominator > 1
+            ? [{ phase: "increaseReduced", fields: ["increaseReducedDenominator", "increaseReducedNumerator"] }]
+            : []),
           ...(item.numerator > item.denominator && item.numerator % item.denominator !== 0
             ? [{ phase: "increaseMixed", fields: ["increaseMixedWhole", "increaseMixedDenominator", "increaseMixedNumerator"] }]
             : []),
@@ -7728,10 +7777,13 @@
 
       function renderRatioDiagram() {
         if (!ratioVisual || !ratioProblem) return;
-        if (ratioIsSpecial()) {
+        if (ratioIsSpecial() || ratioProblem.type === "rate") {
+          // SVG does not reflect the HTML .hidden property; set the attribute.
+          ratioVisual.setAttribute("hidden", "");
           ratioVisual.replaceChildren();
           return;
         }
+        ratioVisual.removeAttribute("hidden");
         const x = 44;
         const y = 70;
         const width = 472;
@@ -7739,17 +7791,11 @@
         const partWidth = width * ratioProblem.rate.percent / 100;
         const wholeLabel = ratioProblem.type === "original" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.base}${ratioProblem.unit}`;
         const partLabel = ratioProblem.type === "compare" ? "\uff1f" + ratioProblem.unit : `${ratioProblem.part}${ratioProblem.unit}`;
-        const finalRateFields = ["finalOnes"];
-        const rateSolved = ratioProblem.type === "rate" && finalRateFields.every((field) => (ratioValues[field] || "") === ratioExpected(field));
-        const solvedRateLabel = rateSolved
-          ? groupingLabel(x + partWidth / 2, 22, `${ratioProblem.answer}\u5272`, "#2563eb")
-          : "";
         ratioVisual.innerHTML = '<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '" rx="8" fill="#f5f7fa" stroke="#16202a" stroke-width="3"></rect>' +
           '<rect x="' + x + '" y="' + y + '" width="' + partWidth + '" height="' + height + '" rx="8" fill="#dcecff" stroke="#2563eb" stroke-width="3"></rect>' +
           '<line x1="' + (x + partWidth) + '" y1="' + y + '" x2="' + (x + partWidth) + '" y2="' + (y + height) + '" stroke="#2563eb" stroke-width="3"></line>' +
           ratioDimension(x, partWidth, y, partLabel, true) +
-          ratioDimension(x, width, y + height, wholeLabel) +
-          solvedRateLabel;
+          ratioDimension(x, width, y + height, wholeLabel);
         ratioVisual.setAttribute("aria-label", `${wholeLabel}\u306e\u3046\u3061${partLabel}\u306e\u5272\u5408\u3092\u793a\u3059\u56f3`);
       }
 
@@ -7899,11 +7945,13 @@
       }
 
       function isTimedProblemApp() {
+        if (selectedApp === "mentalDivision") return true;
         if (selectedApp === "area") return true;
         return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "fishing" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
+        if (selectedApp === "mentalDivision") return divisionIndex;
         if (selectedApp === "area") return areaIndex;
         if (selectedApp === "basicDivision") return basicDivisionIndex;
         if (selectedApp === "improperFraction") return improperFractionIndex;
@@ -7923,6 +7971,7 @@
       }
 
       function currentTimedLength() {
+        if (selectedApp === "mentalDivision") return divisionDeck.length || MENTAL_DIVISION_TARGET;
         if (selectedApp === "area") return areaDeck.length || AREA_TARGET;
         if (selectedApp === "basicDivision") return basicDivisionDeck.length;
         if (selectedApp === "improperFraction") return improperFractionDeck.length || IMPROPER_FRACTION_TARGET;
@@ -7946,6 +7995,7 @@
       }
 
       function currentTimedAnswer() {
+        if (selectedApp === "mentalDivision") return divisionProblem ? divisionProblem.quotient : 0;
         if (selectedApp === "area") return areaProblem ? areaProblem.answer.n / areaProblem.answer.d : 0;
         if (selectedApp === "basicDivision") return basicDivisionAnswer();
         if (selectedApp === "improperFraction") return improperFractionAnswer();
@@ -7965,6 +8015,7 @@
       }
 
       function currentTimedAnswerText() {
+        if (selectedApp === "mentalDivision") return String(currentTimedAnswer());
         if (selectedApp === "area") return areaProblem?.answerText || "";
         if (selectedApp === "fraction") {
           const answer = solve();
@@ -8001,6 +8052,7 @@
       }
 
       function activeSlotOrder() {
+        if (selectedApp === "mentalDivision") return MENTAL_DIVISION_SLOTS;
         if (selectedApp === "area") return [];
         if (selectedApp === "multiplication") return MULTIPLICATION_SLOTS;
         if (selectedApp === "basicDivision") return BASIC_DIVISION_SLOTS;
@@ -8058,6 +8110,7 @@
       }
 
       function expected(slot) {
+        if (selectedApp === "mentalDivision") return String(divisionProblem?.quotient || "")[MENTAL_DIVISION_SLOTS.indexOf(slot)] || "";
         if (selectedApp === "multiplication") {
           const answer = String(multiplicationAnswer());
           return {
@@ -8189,6 +8242,7 @@
       }
 
       function bestKeyForApp(app = selectedApp) {
+        if (app === "mentalDivision") return MENTAL_DIVISION_BEST_KEY;
         if (app === "basicDivision") return BASIC_DIVISION_BEST_KEY;
         if (app === "improperFraction") return IMPROPER_FRACTION_BEST_KEY;
         if (app === "division") return DIVISION_BEST_KEY;
@@ -9057,6 +9111,7 @@
 
       const menuButtons = {
         area: chooseArea,
+        mentalDivision: chooseMentalDivision,
         multiplication: chooseMultiplication,
         basicDivision: chooseBasicDivision,
         fraction: chooseFraction,
@@ -9706,10 +9761,10 @@
           });
           return;
         }
-        if (selectedApp === "division") {
+        if (selectedApp === "division" || selectedApp === "mentalDivision") {
           mistakes.push({
             problem: `${divisionProblem.dividend}\u00f7${divisionProblem.divisor}`,
-            answer: divisionAnswerText(),
+            answer: currentTimedAnswerText(),
           });
           return;
         }
@@ -9903,7 +9958,7 @@
             return;
           }
           doubleMultiplicationProblem = doubleMultiplicationDeck[doubleMultiplicationIndex];
-        } else if (selectedApp === "division") {
+        } else if (selectedApp === "division" || selectedApp === "mentalDivision") {
           if (keepChallenge) divisionIndex += 1;
           if (divisionIndex >= divisionDeck.length) {
             finalTime = elapsedTime();
@@ -10117,7 +10172,7 @@
           subtractionCover.hidden = false;
         } else if (selectedApp === "doubleMultiplication") {
           doubleMultiplicationCover.hidden = false;
-        } else if (selectedApp === "division") {
+        } else if (selectedApp === "division" || selectedApp === "mentalDivision") {
           divisionCover.hidden = false;
         } else if (selectedApp === "fractionCalculation") {
           fractionCalculationCover.hidden = false;
@@ -10285,9 +10340,9 @@
       }
 
       function startDivisionChallenge() {
-        selectedApp = "division";
+        selectedApp = selectedApp === "mentalDivision" ? "mentalDivision" : "division";
         hasStarted = true;
-        challengeView.classList.add("divisionMode");
+        challengeView.classList.toggle("divisionMode", selectedApp === "division");
         appMenu.hidden = true;
         cover.hidden = true;
         multiplicationCover.hidden = true;
@@ -10299,7 +10354,7 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        divisionDeck = createDivisionDeck();
+        divisionDeck = selectedApp === "mentalDivision" ? createMentalDivisionDeck() : createDivisionDeck();
         divisionIndex = 0;
         divisionProblem = divisionDeck[0];
         resetChallenge();
@@ -10681,8 +10736,15 @@
         resetInputs(true);
       }
 
-      function showDivisionCover() {
-        selectedApp = "division";
+      function showMentalDivisionCover() {
+        showDivisionCover("mentalDivision");
+      }
+
+      function showDivisionCover(app = "division") {
+        selectedApp = app === "mentalDivision" ? "mentalDivision" : "division";
+        divisionCoverTitle.textContent = APP_LABELS[selectedApp];
+        divisionCoverPrompt.textContent = selectedApp === "mentalDivision" ? "暗算でとこう" : "筆算でとこう";
+        divisionCoverGoal.innerHTML = `${selectedApp === "mentalDivision" ? MENTAL_DIVISION_TARGET : DIVISION_TARGET}問<br>タイムアタック`;
         challengeView.classList.remove("divisionMode");
         appMenu.hidden = true;
         cover.hidden = true;
@@ -10944,6 +11006,7 @@
       }
 
       function renderProblem() {
+        mentalDivisionProblemLine.hidden = selectedApp !== "mentalDivision";
         areaProblemLine.hidden = selectedApp !== "area";
         challengeView.classList.toggle("areaMode", selectedApp === "area");
         if (selectedApp !== "area") {
@@ -11020,6 +11083,8 @@
           divisionDividendDigits.forEach((digit, index) => {
             digit.textContent = dividendDigits[index];
           });
+        } else if (selectedApp === "mentalDivision") {
+          renderMentalDivisionProblem();
         } else if (selectedApp === "fractionCalculation") {
           const sign = fractionCalculationProblem.operator === "multiply" ? "\u00d7" : "\u00f7";
           fractionCalculationQuestion.innerHTML = `${fraction(fractionCalculationProblem.first.numerator, fractionCalculationProblem.first.denominator)}<span class="fractionCalcOperator">${sign}</span>${fraction(fractionCalculationProblem.second.numerator, fractionCalculationProblem.second.denominator)}`;
@@ -11420,6 +11485,7 @@
       chooseSpeed.addEventListener("click", showSpeedCover);
       chooseFishing.addEventListener("click", showFishingCover);
       chooseArea.addEventListener("click", showAreaCover);
+      chooseMentalDivision.addEventListener("click", showMentalDivisionCover);
       areaStartButton.addEventListener("click", startAreaChallenge);
       choosePreschool.addEventListener("click", showPreschoolCover);
       chooseEquation.addEventListener("click", showEquationCover);
