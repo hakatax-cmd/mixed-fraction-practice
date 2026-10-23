@@ -1070,6 +1070,7 @@
       .simultaneousEquation, .simultaneousStep { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(7px, 1.2vmin, 12px); line-height: 1.05; }
       .simultaneousNumber { color: var(--muted); font-size: .72em; }
       .simultaneousSpacer { height: clamp(4px, 1vmin, 12px); }
+      .simultaneousPlan { margin: 0; font-size: 14px; line-height: 1.25; color: var(--muted); font-weight: 600; }
       .simultaneousCaption { color: var(--muted); font-size: .66em; }
       .simultaneousInput { --system-gap: clamp(3px, .55vmin, 6px); display: inline-grid; grid-template-columns: repeat(var(--system-slots, 1), var(--digit-frame-width)); gap: var(--system-gap); width: var(--digit-frame-width); height: var(--digit-frame-height); padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; overflow: visible; }
       .simultaneousInput[data-slots="2"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--system-gap)); }
@@ -3425,7 +3426,8 @@
                 <div class="simultaneousEquation" id="simultaneousSecondEquation"></div>
               </div>
             </div>
-            <div class="simultaneousSpacer"></div>
+            <div class="simultaneousSpacer" id="simultaneousSpacer"></div>
+            <p class="simultaneousPlan" id="simultaneousPlan" hidden></p>
             <div class="simultaneousStep" id="simultaneousFirstMultiplyStep" hidden>
               <span class="simultaneousCaption">①×</span><button class="simultaneousInput" id="simultaneousFirstMultiplierInput" data-system-field="firstMultiplier" type="button" aria-label="①にかける数"></button><span class="simultaneousCaption">→</span>
               <button class="simultaneousInput" id="simultaneousFirstScaledXInput" data-system-field="firstScaledX" type="button" aria-label="①を何倍かしたxの係数"></button><span>x</span><span id="simultaneousFirstScaledYSign">+</span>
@@ -4124,6 +4126,8 @@
       const equationDirectFractionSecond = document.querySelector("#equationDirectFractionSecond");
       const simultaneousProblemLine = document.querySelector("#simultaneousProblemLine");
       const simultaneousFirstEquation = document.querySelector("#simultaneousFirstEquation");
+      const simultaneousPlan = document.querySelector("#simultaneousPlan");
+      const simultaneousSpacer = document.querySelector("#simultaneousSpacer");
       const simultaneousSecondEquation = document.querySelector("#simultaneousSecondEquation");
       const simultaneousMultiplyStep = document.querySelector("#simultaneousMultiplyStep");
       const simultaneousFirstMultiplyStep = document.querySelector("#simultaneousFirstMultiplyStep");
@@ -5129,6 +5133,42 @@
         });
       }
 
+      function areaProductOrders(parts) {
+        const factors = parts.filter(part => part?.type === "input" || part?.type === "fraction");
+        const fields = factors.map(factor => areaPartFields([factor]));
+        const orders = [];
+        const visit = (indices, values) => {
+          const position = indices.length;
+          if (position === factors.length) { orders.push(values); return; }
+          factors.forEach((factor, index) => {
+            if (indices.includes(index) || factor.type !== factors[position].type) return;
+            if (fields[position].length !== fields[index].length || fields[position].some((field, i) =>
+              field.type !== fields[index][i].type || field.value.length !== fields[index][i].value.length)) return;
+            const next = { ...values };
+            fields[position].forEach((field, i) => { next[field.field] = fields[index][i].value; });
+            visit([...indices, index], next);
+          });
+        };
+        visit([], {});
+        return orders.length > 1 ? orders : [];
+      }
+
+      function applyAreaProductOrder(order) {
+        areaProblem.fields.forEach(part => {
+          if (Object.hasOwn(order, part.field)) part.value = order[part.field];
+        });
+      }
+
+      function acceptAreaProductOrder(field, next) {
+        const orders = areaProblem.productOrders;
+        if (!orders?.length || !Object.hasOwn(orders[0], field)) return;
+        // Preserve entered prefixes while resolving ambiguous factor orders.
+        const values = { ...areaValues, [field]: next };
+        const order = orders.find(candidate => Object.entries(candidate).every(([key, expected]) =>
+          expected.startsWith(values[key] || "")));
+        if (order) applyAreaProductOrder(order);
+      }
+
       function createAreaDeck() {
         const pick = items => items[randomInt(0, items.length - 1)];
         const number = (field, value, onesFirst = false) => ({ type: "input", field, value: String(value), onesFirst });
@@ -5144,6 +5184,7 @@
           const shapeName = { rectangle: "長方形", triangle: "直角三角形", trapezoid: "台形" }[shape];
           return { kind, shape, unknown, measures, answer, unit, text: `${shapeName}の${label}を求めよ。`,
             answerText: `${areaFractionText(answer)} ${unit}`, steps, hint,
+            productOrders: ["rectangleArea", "triangleArea"].includes(kind) ? areaProductOrders(steps[0].parts) : [],
             fields: steps.flatMap(step => areaPartFields(step.parts)) };
         };
         const result = (answer, unit, onesFirst = false) => row([
@@ -5400,6 +5441,7 @@
         areaValues = {};
         areaActiveField = areaProblem?.fields[0]?.field || "";
         if (!areaProblem) return;
+        if (areaProblem.productOrders?.length) applyAreaProductOrder(areaProblem.productOrders[0]);
         areaQuestion.textContent = areaProblem.text;
         renderAreaDiagram();
         areaHint.replaceChildren();
@@ -5443,9 +5485,10 @@
         if (selectedApp !== "area" || isAnswerLocked || isFinished || !areaProblem) return;
         const part = areaProblem.fields.find(item => item.field === areaActiveField);
         if (!part || !(part.type === "operator" ? /^[×÷+]$/.test(value) : /^\d$/.test(value))) return;
-        const expected = areaExpected(part);
         const stored = areaValues[part.field] || "";
-        const next = (stored.length >= expected.length ? "" : stored) + value;
+        const next = (stored.length >= part.value.length ? "" : stored) + value;
+        acceptAreaProductOrder(part.field, next);
+        const expected = areaExpected(part);
         if (!expected.startsWith(next)) {
           showWrongConfirmation(`area:${part.field}:${next}`, () => renderAreaEntry());
           return;
@@ -5679,35 +5722,47 @@
         const multipliers = shuffle([2, 3, 4, 5]);
         const paired = () => pick([[2, 3], [3, 4], [2, 5], [3, 5]]);
         const elimination = (fractionCount, addition, firstMultiplier, multiplier, swap) => {
-          const x = fractionCount === 2 ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
-          const y = fractionCount ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
-          // Coefficients include each solution's denominator, so constants and
-          // the post-substitution right-hand side stay integral.
-          const candidates = [];
-          for (let b1 = 1; b1 <= 5; b1 += 1) {
-            for (let b2 = -4; b2 <= 4; b2 += 1) {
-              if (!b2) continue;
-              const sign = addition ? 1 : -1;
-              const remaining = firstMultiplier * b1 + sign * multiplier * b2;
-              const firstConstant = multiplier * x.numerator + b1 * y.numerator;
-              const secondConstant = -sign * firstMultiplier * x.numerator + b2 * y.numerator;
-              const eliminationRhs = remaining * y.numerator;
-              if (Math.abs(remaining * y.denominator) < 2 || Math.abs(remaining * y.denominator) > 40) continue;
-              if (!firstConstant || !secondConstant || Math.abs(eliminationRhs) > 99) continue;
-              if (Math.abs(firstConstant * firstMultiplier) > 199 || Math.abs(secondConstant * multiplier) > 199) continue;
-              candidates.push({
-                x: x.numerator / x.denominator, xNumerator: x.numerator, xDenominator: x.denominator,
-                yNumerator: y.numerator, yDenominator: y.denominator,
-                firstX: multiplier * x.denominator, firstY: b1 * y.denominator,
-                secondX: -sign * firstMultiplier * x.denominator, secondY: b2 * y.denominator,
-                firstConstant, secondConstant, firstMultiplier, multiplier,
-                operation: addition ? "＋" : "−", eliminationCoefficient: remaining * y.denominator,
-                eliminationRhs, firstSolutionVariable: "y", finalVariable: "x",
-              });
+          for (let attempt = 0; attempt < 100; attempt += 1) {
+            const x = fractionCount === 2 ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
+            const y = fractionCount ? fraction() : { numerator: signed(randomInt(1, 6)), denominator: 1 };
+            if (attempt === 99) {
+              x.numerator = 1; x.denominator = fractionCount === 2 ? 2 : 1;
+              y.numerator = 1; y.denominator = fractionCount ? 3 : 1;
             }
+            // Coefficients include each solution's denominator, so constants and
+            // the post-substitution right-hand side stay integral.
+            const candidates = [];
+            for (let b1 = 1; b1 <= 5; b1 += 1) {
+              for (let b2 = -4; b2 <= 4; b2 += 1) {
+                if (!b2) continue;
+                // Both-equation exercises must need two multipliers for either variable.
+                if (firstMultiplier > 1 && (b1 % Math.abs(b2) === 0 || Math.abs(b2) % b1 === 0)) continue;
+                const sign = addition ? 1 : -1;
+                const remaining = firstMultiplier * b1 + sign * multiplier * b2;
+                const firstConstant = multiplier * x.numerator + b1 * y.numerator;
+                const secondConstant = -sign * firstMultiplier * x.numerator + b2 * y.numerator;
+                const eliminationRhs = remaining * y.numerator;
+                if (Math.abs(remaining * y.denominator) < 2 || Math.abs(remaining * y.denominator) > 40) continue;
+                if (!firstConstant || !secondConstant || Math.abs(eliminationRhs) > 99) continue;
+                if (Math.abs(firstConstant * firstMultiplier) > 199 || Math.abs(secondConstant * multiplier) > 199) continue;
+                candidates.push({
+                  x: x.numerator / x.denominator, xNumerator: x.numerator, xDenominator: x.denominator,
+                  yNumerator: y.numerator, yDenominator: y.denominator,
+                  firstX: multiplier * x.denominator, firstY: b1 * y.denominator,
+                  secondX: -sign * firstMultiplier * x.denominator, secondY: b2 * y.denominator,
+                  firstConstant, secondConstant, firstMultiplier, multiplier,
+                  operation: addition ? "＋" : "−", reverseElimination: !addition && remaining < 0,
+                  eliminationCoefficient: (!addition && remaining < 0 ? -remaining : remaining) * y.denominator,
+                  eliminationRhs: !addition && remaining < 0 ? -eliminationRhs : eliminationRhs,
+                  firstSolutionVariable: "y", finalVariable: "x",
+                });
+              }
+            }
+            if (!candidates.length) continue;
+            const item = pick(candidates);
+            return swap ? swapVariables(item) : item;
           }
-          const item = pick(candidates);
-          return swap ? swapVariables(item) : item;
+          throw new Error("No valid simultaneous-equation coefficients");
         };
         const y = signed(randomInt(1, 4));
         const coefficient = randomInt(2, 4);
@@ -6366,6 +6421,10 @@
       function renderSimultaneousProblem() {
         if (!simultaneousProblem) return;
         const item = simultaneousProblem;
+        const showPlan = !item.zeroRhs && item.firstMultiplier > 1;
+        simultaneousPlan.hidden = !showPlan;
+        simultaneousSpacer.hidden = showPlan;
+        simultaneousPlan.textContent = showPlan ? `まず、${item.finalVariable}を消します。` : "";
         simultaneousFirstEquation.innerHTML = "<span>" + systemVariableTerm(item.firstX, "x").replace(/^\+ /, "").replace(/− /, "−") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
         const secondXText = item.secondX === 1 ? "x" : item.secondX === -1 ? "−x" : `${item.secondX}x`;
         simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
@@ -6385,8 +6444,9 @@
           const term = factor === 1 ? replaced : `${factor}×(${replaced})`;
           simultaneousZeroSubstitutionText.textContent = `${term} ${systemVariableTerm(remaining, variable)} = ${item.secondConstant}`;
         }
-        simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →"
-          : item.firstMultiplier > 1 ? "③" + item.operation + "④ →" : "①" + item.operation + "③ →";
+        const equationNumbers = item.firstMultiplier > 1 ? ["③", "④"] : ["①", "③"];
+        if (item.reverseElimination) equationNumbers.reverse();
+        simultaneousEliminateText.textContent = item.zeroRhs ? "整理 →" : equationNumbers.join(item.operation) + " →";
         simultaneousEliminateVariable.textContent = item.firstSolutionVariable + " =";
         simultaneousSolvedLabel.textContent = item.firstSolutionVariable + " =";
         simultaneousFinalLabel.textContent = item.finalVariable + " =";
@@ -9138,6 +9198,7 @@
       let menuGesture = null;
       let menuLongPressTimer = null;
       let menuSuppressClick = false;
+      let menuForwardingTap = false;
       let menuClickTimer = null;
       let menuLayoutCache = null;
       let menuRenderedColumns = 0;
@@ -9315,6 +9376,8 @@
         } else if (gesture.tile && performance.now() - gesture.startedAt >= 500) {
           // Releasing an unfinished hold must not launch the exercise.
           suppressMenuClick();
+        } else if (commit && gesture.tile) {
+          return gesture.tile;
         }
       }
 
@@ -9336,16 +9399,19 @@
           lastMotionAt: now, lastMotionX: event.clientX, velocity: 0,
           moved: interrupted, swiping: interrupted, transferred: false,
         };
+        // Own the gesture from the start, including presses on child buttons.
+        // A short tap is forwarded explicitly because capture retargets native clicks.
+        menuPagerViewport.setPointerCapture(event.pointerId);
+        event.preventDefault();
         if (interrupted) {
           suppressMenuClick();
-          menuPagerViewport.setPointerCapture(event.pointerId);
         } else if (tile) {
           tile.classList.add("menuHolding");
           menuLongPressTimer = window.setTimeout(completeMenuLongPress, 2200);
         }
       });
 
-      menuPagerViewport.addEventListener("pointermove", (event) => {
+      function updateMenuGesture(event) {
         const gesture = menuGesture;
         if (!gesture || gesture.pointerId !== event.pointerId) return;
         gesture.lastX = event.clientX;
@@ -9358,30 +9424,42 @@
         const dy = gesture.lastY - gesture.y;
         const now = performance.now();
         const elapsed = now - gesture.lastMotionAt;
-        if (elapsed > 0) gesture.velocity = (gesture.lastX - gesture.lastMotionX) / elapsed;
-        gesture.lastMotionAt = now;
-        gesture.lastMotionX = gesture.lastX;
-        if (Math.hypot(dx, dy) > 14) {
-          if (!menuPagerViewport.hasPointerCapture(event.pointerId)) menuPagerViewport.setPointerCapture(event.pointerId);
+        if (gesture.lastX !== gesture.lastMotionX) {
+          if (elapsed > 0) gesture.velocity = (gesture.lastX - gesture.lastMotionX) / elapsed;
+          gesture.lastMotionAt = now;
+          gesture.lastMotionX = gesture.lastX;
+        }
+        const horizontal = Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy);
+        if (horizontal || Math.hypot(dx, dy) > 14) {
           event.preventDefault();
           if (!gesture.moved) {
             gesture.moved = true;
-            gesture.swiping = Math.abs(dx) > Math.abs(dy);
             clearMenuLongPress();
           }
         }
+        // Initial vertical drift must not permanently lock out horizontal paging.
+        if (horizontal) gesture.swiping = true;
         if (gesture.swiping) {
           const offset = Math.max(gesture.minOffset, Math.min(0, gesture.startOffset + dx));
           menuPager.style.transition = "none";
           menuPager.style.transform = `translate3d(${offset}px, 0, 0)`;
         }
-      });
+      }
 
+      menuPagerViewport.addEventListener("pointermove", updateMenuGesture);
       menuPagerViewport.addEventListener("pointerup", (event) => {
         if (!menuGesture || menuGesture.pointerId !== event.pointerId) return;
-        menuGesture.lastX = event.clientX;
-        menuGesture.lastY = event.clientY;
-        finishMenuGesture(true);
+        updateMenuGesture(event);
+        const tappedTile = finishMenuGesture(true);
+        if (tappedTile) {
+          menuForwardingTap = true;
+          try {
+            tappedTile.click();
+          } finally {
+            menuForwardingTap = false;
+            suppressMenuClick();
+          }
+        }
       });
       menuPagerViewport.addEventListener("pointercancel", (event) => {
         if (menuGesture?.pointerId === event.pointerId) finishMenuGesture(false);
@@ -9400,6 +9478,7 @@
       menuPagerViewport.addEventListener("dragstart", (event) => event.preventDefault());
       menuPagerViewport.addEventListener("wheel", (event) => event.preventDefault(), { passive: false });
       menuPagerViewport.addEventListener("click", (event) => {
+        if (menuForwardingTap) return;
         if (!menuSuppressClick && !menuGesture?.transferred) return;
         event.preventDefault();
         event.stopPropagation();
