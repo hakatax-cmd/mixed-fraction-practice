@@ -3689,7 +3689,8 @@
       const WRONG_CONFIRM_MS = 1500;
       const OPERATOR_PENALTY_MS = 50000;
       const OPERATOR_PENALTY_REACTION_MS = 900;
-      const DIVISION_WRONG_IDLE_MS = 30000;
+      const DIVISION_WRONG_DELAY_MS = 20000;
+      const DOUBLE_MULTIPLICATION_WRONG_IDLE_MS = 30000;
       const FRACTION_SLOTS = ["whole", "rest"];
       const IMPROPER_FRACTION_TARGET = 12;
       const IMPROPER_FRACTION_SLOTS = ["improperNumeratorTens", "improperNumeratorOnes"];
@@ -3919,6 +3920,7 @@
       let transitionTimer = null;
       let confirmationTimer = null;
       let divisionWrongTimer = null;
+      const divisionWrongSince = new Map();
       let bestConfettiTimer = null;
       let clearAnswerConfirmTimer = null;
       let clearAnswerPressedAt = 0;
@@ -4871,30 +4873,59 @@
             ], "4号"), alignedConversion: true },
         ];
         const lengthFact = "1 feet は 30 cm です。　1 inch は 2.5 cm です。　1 feet は 12 inch です。";
+        const usedLengths = new Set(fishingDeck.slice(8).map(item => item.lengthKey));
+        const chooseLength = (candidates) => {
+          const available = candidates.filter(item => !usedLengths.has(item.key));
+          const chosen = available[Math.floor(Math.random() * available.length)];
+          usedLengths.add(chosen.key);
+          return chosen;
+        };
+        const lengthQuestion = (text, steps, answerText, lengthKey) => ({
+          ...question(lengthFact, text,
+            steps.flat().filter(part => part.type === "input" || part.type === "operator").map(part => part.field),
+            steps, answerText),
+          lengthKey,
+        });
+        const footCount = chooseLength(Array.from({ length: 8 }, (_, i) => ({ count: i + 2, key: `feet:${i + 2}` })));
+        const inchCount = chooseLength(Array.from({ length: 10 }, (_, i) => ({ count: i + 2, key: `inch:${i + 2}` })));
         const feetOnly = [
-          question(lengthFact, "4 feet は何 cm？", ["footFourUnit", "footFourOperator", "footFourCount", "footFour"], [[input("footFourUnit", 30), operator("footFourOperator", "×"), input("footFourCount", 4), " = ", input("footFour", 120), " cm"]], "120 cm"),
+          lengthQuestion(`${footCount.count} feet は何 cm？`,
+            [[input("footUnit", 30), operator("footOperator", "×"), input("footCount", footCount.count),
+              " = ", input("footResult", 30 * footCount.count), " cm"]],
+            `${30 * footCount.count} cm`, footCount.key),
         ];
         const inchOnly = [
-          question(lengthFact, "4 inch は何 cm？", ["inchFourUnit", "inchFourOperator", "inchFourCount", "inchFour"], [[input("inchFourUnit", "2.5"), operator("inchFourOperator", "×"), input("inchFourCount", 4), " = ", input("inchFour", 10, true), " cm"]], "10 cm"),
+          lengthQuestion(`${inchCount.count} inch は何 cm？`,
+            [[input("inchUnit", "2.5"), operator("inchOperator", "×"), input("inchCount", inchCount.count),
+              " = ", input("inchResult", 2.5 * inchCount.count, true), " cm"]],
+            `${2.5 * inchCount.count} cm`, inchCount.key),
         ];
-        const mixedLength = [
-          question(lengthFact, "4 feet 4 inch は何 cm？", ["feetFourFourFootUnit", "feetFourFourFootMultiply", "feetFourFourFootCount", "feetFourFourFootResult", "feetFourFourInchUnit", "feetFourFourInchMultiply", "feetFourFourInchCount", "feetFourFourInchResult", "feetFourFourFirstResult", "feetFourFourPlus", "feetFourFourSecondResult", "feetFourFour"], [[input("feetFourFourFootUnit", 30), operator("feetFourFourFootMultiply", "×"), input("feetFourFourFootCount", 4), " = ", input("feetFourFourFootResult", 120)], [input("feetFourFourInchUnit", "2.5"), operator("feetFourFourInchMultiply", "×"), input("feetFourFourInchCount", 4), " = ", input("feetFourFourInchResult", 10, true)], [input("feetFourFourFirstResult", 120), operator("feetFourFourPlus", "+"), input("feetFourFourSecondResult", 10), " = ", input("feetFourFour", 130), " cm"]], "130 cm"),
-          question(lengthFact, "280 cm は何 feet 何 inch？", ["cm280Length", "cm280Divide", "cm280FootUnit", "cm280Feet", "cm280Remainder", "cm280InchDivide", "cm280InchUnit", "cm280Inch", "cm280AnswerFeet", "cm280AnswerInch"], [[input("cm280Length", 280), operator("cm280Divide", "÷"), input("cm280FootUnit", 30), " = ", input("cm280Feet", 9), " あまり ", input("cm280Remainder", 10)], ["10 ", operator("cm280InchDivide", "÷"), input("cm280InchUnit", "2.5"), " = ", input("cm280Inch", 4), " inch"], [input("cm280AnswerFeet", 9), "フィート", input("cm280AnswerInch", 4), "インチです。"]], "9 feet 4 inch"),
-          question(lengthFact, "7 feet 6 inch は何 cm？",
-            ["feetSevenSixFootUnit", "feetSevenSixFootMultiply", "feetSevenSixFootCount", "feetSevenSixFootResult", "feetSevenSixInchUnit", "feetSevenSixInchMultiply", "feetSevenSixInchCount", "feetSevenSixInchResult", "feetSevenSixFirstResult", "feetSevenSixPlus", "feetSevenSixSecondResult", "feetSevenSix"],
-            [
-              [input("feetSevenSixFootUnit", 30), operator("feetSevenSixFootMultiply", "×"), input("feetSevenSixFootCount", 7), " = ", input("feetSevenSixFootResult", 210)],
-              [input("feetSevenSixInchUnit", "2.5"), operator("feetSevenSixInchMultiply", "×"), input("feetSevenSixInchCount", 6), " = ", input("feetSevenSixInchResult", 15, true)],
-              [input("feetSevenSixFirstResult", 210), operator("feetSevenSixPlus", "+"), input("feetSevenSixSecondResult", 15), " = ", input("feetSevenSix", 225), " cm"],
-            ], "225 cm"),
-          question(lengthFact, "225 cm は何 feet 何 inch？",
-            ["cm225Length", "cm225Divide", "cm225FootUnit", "cm225Feet", "cm225Remainder", "cm225InchDivide", "cm225InchUnit", "cm225Inch", "cm225AnswerFeet", "cm225AnswerInch"],
-            [
-              [input("cm225Length", 225), operator("cm225Divide", "÷"), input("cm225FootUnit", 30), " = ", input("cm225Feet", 7), " あまり ", input("cm225Remainder", 15)],
-              ["15 ", operator("cm225InchDivide", "÷"), input("cm225InchUnit", "2.5"), " = ", input("cm225Inch", 6), " inch"],
-              [input("cm225AnswerFeet", 7), "フィート", input("cm225AnswerInch", 6), "インチです。"],
-            ], "7 feet 6 inch"),
-        ];
+        const mixedCandidates = Array.from({ length: 6 }, (_, f) =>
+          Array.from({ length: 11 }, (_, i) => ({ feet: f + 5, inches: i + 1, key: `mixed:${f + 5}:${i + 1}` }))).flat();
+        const mixedLength = Array.from({ length: 4 }, (_, index) => {
+          const { feet, inches, key } = chooseLength(mixedCandidates);
+          const footCm = feet * 30;
+          const inchCm = inches * 2.5;
+          const cm = footCm + inchCm;
+          const prefix = `length${index}`;
+          if (index % 2 === 0) {
+            return lengthQuestion(`${feet} feet ${inches} inch は何 cm？`, [
+              [input(prefix + "FootUnit", 30), operator(prefix + "FootMultiply", "×"),
+                input(prefix + "FootCount", feet), " = ", input(prefix + "FootResult", footCm)],
+              [input(prefix + "InchUnit", "2.5"), operator(prefix + "InchMultiply", "×"),
+                input(prefix + "InchCount", inches), " = ", input(prefix + "InchResult", inchCm, true)],
+              [input(prefix + "FirstResult", footCm), operator(prefix + "Plus", "+"),
+                input(prefix + "SecondResult", inchCm), " = ", input(prefix + "Result", cm), " cm"],
+            ], `${cm} cm`, key);
+          }
+          return lengthQuestion(`${cm} cm は何 feet 何 inch？`, [
+            [input(prefix + "Length", cm), operator(prefix + "Divide", "÷"), input(prefix + "FootUnit", 30),
+              " = ", input(prefix + "Feet", feet), " あまり ", input(prefix + "Remainder", inchCm)],
+            [`${inchCm} `, operator(prefix + "InchDivide", "÷"), input(prefix + "InchUnit", "2.5"),
+              " = ", input(prefix + "Inch", inches), " inch"],
+            [input(prefix + "AnswerFeet", feet), "フィート", input(prefix + "AnswerInch", inches), "インチです。"],
+          ], `${feet} feet ${inches} inch`, key);
+        });
         return [
           ozMultiplication[0], ozDivision[0], ozMultiplication[1], ozDivision[1],
           go[0], go[1], go[2], go[3],
@@ -5926,8 +5957,11 @@
 
       function clearSpeedExpression() {
         if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
-        speedValues = {};
-        speedActiveField = "left";
+        const incorrect = speedExpressionFields().filter(field => (speedValues[field] || "") !== speedExpected(field));
+        incorrect.forEach(field => {
+          if (!speedExpected(field).startsWith(speedValues[field] || "")) delete speedValues[field];
+        });
+        speedActiveField = incorrect[0] || activeSlotOrder()[0];
         renderSpeedEntry();
       }
 
@@ -5944,8 +5978,9 @@
 
       function speedFinishField(field) {
         const fields = speedExpressionFields();
-        if (field !== fields.at(-1)) {
-          setSpeedActive(fields[fields.indexOf(field) + 1]);
+        const pending = fields.find(name => (speedValues[name] || "") !== speedExpected(name));
+        if (pending && speedExpected(pending).startsWith(speedValues[pending] || "")) {
+          setSpeedActive(pending);
           return;
         }
         if (!speedExpressionIsCorrect()) {
@@ -5970,6 +6005,10 @@
         const current = speedValues[speedActiveField] || "";
         const next = operator ? value : current + value;
         if (next.length > expectedValue.length) return;
+        if (!operator && !expectedValue.startsWith(next)) {
+          showWrongConfirmation(`speed:${speedActiveField}:${next}`, renderSpeedEntry);
+          return;
+        }
         speedSetValue(speedActiveField, next);
         if (operator && next !== expectedValue) {
           showOperatorPenalty(clearSpeedOperator);
@@ -6151,8 +6190,10 @@
       }
 
       function clearEquationFields(fields = equationCurrentFields()) {
-        fields.forEach((field) => delete equationValues[field]);
-        equationActiveField = fields[0] || "middle";
+        fields.forEach((field) => {
+          if (!equationExpected(field).startsWith(equationValues[field] || "")) delete equationValues[field];
+        });
+        equationActiveField = fields.find(field => (equationValues[field] || "") !== equationExpected(field)) || fields[0] || "middle";
         renderEquationEntry();
       }
 
@@ -6197,9 +6238,12 @@
             showWrongConfirmation(equationSignature(fields), () => clearEquationFields(fields));
             return;
           }
-          equationActiveField = fields[fieldIndex + 1];
-          renderEquationEntry();
-          return;
+          const pending = fields.find(field => (equationValues[field] || "") !== equationExpected(field));
+          if (pending) {
+            equationActiveField = pending;
+            renderEquationEntry();
+            return;
+          }
         }
         if (!equationIsCorrect(fields)) {
           showWrongConfirmation(equationSignature(fields), () => clearEquationFields(fields));
@@ -6253,6 +6297,10 @@
         if (!/^\d$/.test(nextValue) && nextValue !== "-") return;
         const next = current + nextValue;
         if (next.length > expected.length) return;
+        if (!expected.startsWith(next)) {
+          showWrongConfirmation(`equation:${field}:${next}`, renderEquationEntry);
+          return;
+        }
         equationValues[field] = next;
         renderEquationEntry();
         if (next.length === expected.length) equationFinishField();
@@ -6481,8 +6529,10 @@
       }
 
       function clearSimultaneousFields(fields = systemCurrentFields()) {
-        fields.forEach((field) => delete simultaneousValues[field]);
-        simultaneousActiveField = fields[0] || "multiplier";
+        fields.forEach((field) => {
+          if (!systemExpected(field).startsWith(simultaneousValues[field] || "")) delete simultaneousValues[field];
+        });
+        simultaneousActiveField = fields.find(field => (simultaneousValues[field] || "") !== systemExpected(field)) || fields[0] || "multiplier";
         renderSystemEntry();
       }
 
@@ -6514,9 +6564,12 @@
             showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
             return;
           }
-          simultaneousActiveField = fields[index + 1];
-          renderSystemEntry();
-          return;
+          const pending = fields.find(field => (simultaneousValues[field] || "") !== systemExpected(field));
+          if (pending) {
+            simultaneousActiveField = pending;
+            renderSystemEntry();
+            return;
+          }
         }
         if (fields.some((field) => (simultaneousValues[field] || "") !== systemExpected(field))) {
           showWrongConfirmation("simultaneous:" + simultaneousPhase, () => clearSimultaneousFields(fields));
@@ -6577,6 +6630,10 @@
         if (!/^\d$/.test(next) && next !== "-") return;
         const result = current + next;
         if (result.length > expected.length) return;
+        if (!expected.startsWith(result)) {
+          showWrongConfirmation(`simultaneous:${field}:${result}`, renderSystemEntry);
+          return;
+        }
         simultaneousValues[field] = result;
         renderSystemEntry();
         if (result.length === expected.length) finishSimultaneousField();
@@ -8616,7 +8673,9 @@
       function nextSlot(slot) {
         const slots = activeSlotOrder();
         const index = slots.indexOf(slot);
-        if (index < slots.length - 1) setActive(slots[index + 1]);
+        const incomplete = name => getAnswerValue(name) !== expected(name);
+        const next = slots.slice(index + 1).find(incomplete) || slots.find(incomplete);
+        if (next) setActive(next);
       }
 
       function getAnswerValue(slot) {
@@ -8751,6 +8810,10 @@
         // Decimal separators are printed already and never consume a keypress.
         if (!isOperator && wanted[next.length] === ".") next += ".";
         if (next.length > wanted.length) return;
+        if (!isOperator && wanted.length > 1 && !wanted.startsWith(next)) {
+          showWrongConfirmation(`ratio:${field}:${next}`, renderRatioEntry);
+          return;
+        }
         ratioSetValue(field, next);
         if (isOperator && next !== wanted) {
           showOperatorPenalty(() => clearRatioFields([field]));
@@ -8872,20 +8935,6 @@
         });
       }
 
-      function clearsAllOnWrongApp() {
-        return selectedApp === "multiplication"
-          || selectedApp === "basicDivision"
-          || selectedApp === "fraction"
-          || selectedApp === "improperFraction"
-          || selectedApp === "longMultiplication"
-          || selectedApp === "subtraction"
-          || selectedApp === "fractionCalculation"
-          || selectedApp === "fractionAddSubtract"
-          || selectedApp === "grouping"
-          || selectedApp === "speed"
-          || selectedApp === "preschool";
-      }
-
       function hasSecondChanceWrongFlow() {
         return selectedApp === "multiplication"
           || selectedApp === "basicDivision"
@@ -8918,11 +8967,12 @@
         return `${selectedApp}:${values}:${decimal}`;
       }
 
-      function clearDivisionWrongTimer() {
+      function clearDivisionWrongTimer(resetHistory = true) {
         if (divisionWrongTimer) clearTimeout(divisionWrongTimer);
         divisionWrongTimer = null;
         pendingDivisionWrongSlot = "";
         pendingDivisionWrongSignature = "";
+        if (resetHistory) divisionWrongSince.clear();
       }
 
       function clearSlotAnswer(slot) {
@@ -8943,41 +8993,24 @@
         setActive(slots[start]);
       }
 
-      function clearActiveAnswers() {
-        activeSlotOrder().forEach((slot) => {
+      function clearIncorrectAnswers() {
+        const wrong = wrongAnswerSlots();
+        wrong.forEach(slot => {
           inputs[slot].classList.remove("correction");
           setAnswerValue(slot, "");
         });
-        if (selectedApp === "doubleMultiplication") resetDoubleDecimalChoice();
-        setActive(activeSlotOrder()[0]);
+        if (selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0
+          && selectedDoubleDecimalPosition !== expectedDoubleDecimalPosition()) resetDoubleDecimalChoice();
+        const first = wrong[0] || activeSlotOrder().find(slot => getAnswerValue(slot) !== expected(slot));
+        if (first) setActive(first);
         updateDoubleDecimalChoices();
       }
 
       function wrongAnswerSlots() {
         return activeSlotOrder().filter((slot) => {
           const value = getAnswerValue(slot);
-          return value.length > 0 && value !== expected(slot);
+          return value.length > 0 && !expected(slot).startsWith(value);
         });
-      }
-
-      function removeLastAnswerStep() {
-        const needsDecimalPoint = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
-        if (needsDecimalPoint && selectedDoubleDecimalPosition !== null) {
-          selectedDoubleDecimalPosition = null;
-          updateDoubleDecimalChoices();
-          return;
-        }
-
-        const slots = activeSlotOrder();
-        for (let index = slots.length - 1; index >= 0; index -= 1) {
-          const slot = slots[index];
-          const current = getAnswerValue(slot);
-          if (!current) continue;
-          setAnswerValue(slot, current.slice(0, -1));
-          setActive(slot);
-          break;
-        }
-        if (selectedApp === "doubleMultiplication") updateDoubleDecimalChoices();
       }
 
       function clearConfirmationMessage() {
@@ -8995,7 +9028,7 @@
         nextMistakeButton.hidden = false;
       }
 
-      function showWrongConfirmation(signature, cleanup = removeLastAnswerStep) {
+      function showWrongConfirmation(signature, cleanup = clearIncorrectAnswers) {
         pendingWrongSignature = signature;
         if (confirmationTimer) clearTimeout(confirmationTimer);
         clearDivisionWrongTimer();
@@ -9025,7 +9058,7 @@
           pendingWrongSignature = "";
           setLocked(false);
           clearConfirmationMessage();
-          clearActiveAnswers();
+          clearIncorrectAnswers();
         }, WRONG_CONFIRM_MS);
       }
 
@@ -9048,6 +9081,16 @@
       function showDelayedWrongCorrection(wrongSlot) {
         if (confirmationTimer) clearTimeout(confirmationTimer);
         clearDivisionWrongTimer();
+        if (selectedApp === "division") {
+          clearDivisionAnswersFrom(wrongSlot);
+          feedback.textContent = "ここから入力し直してください";
+          feedback.classList.add("confirming", "delayedWrongWarning");
+          confirmationTimer = window.setTimeout(() => {
+            confirmationTimer = null;
+            clearConfirmationMessage();
+          }, 1000);
+          return;
+        }
         wrongAnswerSlots().forEach((slot) => inputs[slot].classList.add("correction"));
         setLocked(true);
         gameArea.classList.add("secondChanceWarningVisible");
@@ -9057,7 +9100,7 @@
           confirmationTimer = null;
           setLocked(false);
           clearConfirmationMessage();
-          clearDivisionAnswersFrom(wrongSlot);
+          clearIncorrectAnswers();
           watchDelayedWrongAnswer();
         }, 1000);
       }
@@ -9069,10 +9112,35 @@
           return;
         }
 
-        const wrongSlot = wrongAnswerSlots()[0] || "";
+        const wrongSlots = wrongAnswerSlots();
+        const wrongSlot = wrongSlots[0] || "";
         if (!wrongSlot) {
           activeSlotOrder().forEach((slot) => inputs[slot].classList.remove("correction"));
           clearDivisionWrongTimer();
+          return;
+        }
+
+        if (selectedApp === "division") {
+          const now = Date.now();
+          for (const slot of divisionWrongSince.keys()) {
+            if (!wrongSlots.includes(slot)) divisionWrongSince.delete(slot);
+          }
+          wrongSlots.forEach(slot => {
+            if (!divisionWrongSince.has(slot)) divisionWrongSince.set(slot, now);
+          });
+          // Subsequent input never postpones an existing error's deadline.
+          const deadline = Math.min(...divisionWrongSince.values()) + DIVISION_WRONG_DELAY_MS;
+          clearDivisionWrongTimer(false);
+          divisionWrongTimer = window.setTimeout(() => {
+            divisionWrongTimer = null;
+            if (selectedApp !== "division" || isAnswerLocked || isFinished) {
+              clearDivisionWrongTimer();
+              return;
+            }
+            const firstWrong = wrongAnswerSlots()[0];
+            if (firstWrong) showDelayedWrongCorrection(firstWrong);
+            else clearDivisionWrongTimer();
+          }, Math.max(0, deadline - now));
           return;
         }
 
@@ -9090,7 +9158,7 @@
             return;
           }
           showDelayedWrongCorrection(stillWrongSlot);
-        }, DIVISION_WRONG_IDLE_MS);
+        }, DOUBLE_MULTIPLICATION_WRONG_IDLE_MS);
       }
 
       function setSlotValue(slot, rawValue) {
@@ -9100,6 +9168,10 @@
         const value = selectedApp === "division" && digits.length > digitLimit
           ? digits.slice(-digitLimit)
           : digits.slice(0, digitLimit);
+        if (digitLimit > 1 && !expected(slot).startsWith(value)) {
+          showWrongConfirmation(`${selectedApp}:${slot}:${value}`, () => setActive(slot));
+          return;
+        }
         if (value && selectedApp === "fraction") setModeLocked(true);
         setAnswerValue(slot, value);
         if (value === expected(slot)) inputs[slot].classList.remove("correction");
@@ -9487,6 +9559,7 @@
       function showCoverScreen() {
         stopBestConfetti();
         clearPreschoolReviewCountdown();
+        clearDivisionWrongTimer();
         if (transitionTimer) {
           clearTimeout(transitionTimer);
           transitionTimer = null;
@@ -9635,7 +9708,7 @@
       function checkState() {
         if (isAnswerLocked || isFinished) return;
         const slots = activeSlotOrder();
-        const complete = slots.every((slot) => getAnswerValue(slot).length > 0);
+        const complete = slots.every((slot) => getAnswerValue(slot).length === expected(slot).length);
         if (!complete) return;
 
         const needsDecimalPoint = selectedApp === "doubleMultiplication" && doubleDecimalPlaces() > 0;
@@ -9650,7 +9723,7 @@
 
         if (selectedApp === "fractionAddSubtract" && fractionAddSubtractNeedsWork() && fractionAddSubtractAdditionStage !== "answer") {
           if (!correct) {
-            showWrongConfirmation(answerSignature(), clearActiveAnswers);
+            showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
             return;
           }
           fractionAddSubtractAdditionStage = "answer";
@@ -9668,7 +9741,10 @@
             }
 
             if (selectedApp === "preschool" && !preschoolReviewActive) {
-              preschoolReviewDeck.push({ ...preschoolProblem });
+              if (!preschoolReviewDeck.some(item => item.type === preschoolProblem.type
+                && item.first === preschoolProblem.first && item.second === preschoolProblem.second)) {
+                preschoolReviewDeck.push({ ...preschoolProblem });
+              }
             }
             mistakeCount += 1;
             updateProgress();
@@ -9676,29 +9752,22 @@
             showReaction(false);
             schedule(() => {
               hideReaction();
-              nextProblem(true);
+              setLocked(false);
+              clearIncorrectAnswers();
             }, 1000);
             return;
           }
 
           if (selectedApp === "division" || selectedApp === "doubleMultiplication") {
+            if (selectedApp === "doubleMultiplication" && correctDigits && !correctDecimal) {
+              showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
+              return;
+            }
             watchDelayedWrongAnswer();
             return;
           }
 
-          if (clearsAllOnWrongApp()) {
-            showWrongConfirmation(answerSignature(), clearActiveAnswers);
-            return;
-          }
-
-          const wrongSlot = wrongAnswerSlots()[0];
-          showWrongConfirmation(answerSignature(), () => {
-            if (wrongSlot) {
-              clearSlotAnswer(wrongSlot);
-              return;
-            }
-            removeLastAnswerStep();
-          });
+          showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
           return;
         }
 
