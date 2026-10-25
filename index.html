@@ -864,6 +864,14 @@
         justify-items: center;
         gap: clamp(16px, 3vmin, 28px);
         min-height: 0;
+        min-width: 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        scroll-padding: 12px;
         padding: clamp(24px, 4vmin, 46px) clamp(14px, 4vmin, 42px);
         font-size: clamp(1.9rem, 6vmin, 3.7rem);
         font-weight: 900;
@@ -928,6 +936,7 @@
         height: var(--digit-frame-height);
       }
       .fishingFact { margin: 0; color: var(--muted); font-size: clamp(1.05rem, 3.3vmin, 1.7rem); }
+      .practiceCard:has(#challengeView.fishingMode:not([hidden])) { touch-action: pan-y; }
       .fishingQuestion { margin: 0; text-align: center; line-height: 1.35; }
       .fishingSteps { display: grid; justify-items: start; gap: clamp(13px, 2.5vmin, 22px); width: min(100%, 650px); }
       .fishingStep { display: inline-flex; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1.2vmin, 12px); line-height: 1.1; }
@@ -949,6 +958,20 @@
       .fishingFraction .fishingInput { min-height: 1.35em; }
       .fishingFraction .fishingDigit { width: 1.1em; height: 1.35em; }
       .fishingFraction .fishingDecimal { height: 1.35em; }
+      #chooseFactors { background: #eef5ff; }
+      .factorsMode #fishingProblemLine { font-size: 32px; padding: 16px 10px; gap: 16px; }
+      .factorsMode .fishingQuestion { font-size: 26px; }
+      .factorsMode .fishingSteps { gap: 20px; }
+      .factorsMode .fishingStep { width: 100%; column-gap: 6px; row-gap: 10px; }
+      .factorLabel { flex-basis: 100%; font-size: 18px; line-height: 1.4; }
+      .factorPower { display: inline-grid; grid-template-columns: auto auto; align-items: end; gap: 2px; padding-top: 4px; }
+      .factorExponent { font-size: 20px; margin-bottom: 22px; }
+      .factorExponent .fishingDigit { width: 1.1em; height: 1.5em; }
+      .factorCountTerm, .factorResult { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+      @media (min-width: 700px) and (min-height: 700px) {
+        .factorsMode #fishingProblemLine { font-size: 40px; }
+        .factorsMode .factorExponent { font-size: 26px; margin-bottom: 28px; }
+      }
       #preschoolProblemLine {
         display: grid;
         min-height: 100%;
@@ -2772,6 +2795,7 @@
                   <button class="menuButton" id="chooseSimultaneous" type="button">&#20108;&#20803;&#19968;&#27425;<br />&#26041;&#31243;&#24335;</button>
                   <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
                   <button class="menuButton" id="chooseArea" type="button">長方形・三角形<br />台形の面積</button>
+                  <button class="menuButton" id="chooseFactors" type="button">約数・倍数</button>
                   <button class="menuButton" id="chooseMentalDivision" type="button">4桁÷1桁の<br />暗算</button>
                 </div>
               </section>
@@ -2872,9 +2896,9 @@
         </section>
 
         <section class="cover" id="fishingCover" hidden>
-          <h1>&#37347;&#12426;&#12398;&#21839;&#38988;</h1>
-          <p class="coverPrompt">&#21336;&#20301;&#12392;&#20013;&#36884;&#24335;&#12391;&#12392;&#12367;&#12424;</p>
-          <p class="coverGoal">14&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
+          <h1 id="fishingCoverTitle">&#37347;&#12426;&#12398;&#21839;&#38988;</h1>
+          <p class="coverPrompt" id="fishingCoverPrompt">&#21336;&#20301;&#12392;&#20013;&#36884;&#24335;&#12391;&#12392;&#12367;&#12424;</p>
+          <p class="coverGoal" id="fishingCoverGoal">14&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="fishingStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -3728,6 +3752,8 @@
       const SPEED_SLOTS = ["speedAnswerHundreds", "speedAnswerTens", "speedAnswerOnes"];
       const SPEED_BEST_KEY = "speedBestTimeMs";
       const FISHING_TARGET = 14;
+      const FACTORS_TARGET = 6;
+      const FACTORS_BEST_KEY = "factorsBestTimeMs";
       const AREA_TARGET = 8;
       const AREA_BEST_KEY = "areaBestTimeMs";
       const FISHING_BEST_KEY = "fishingBestTimeMs";
@@ -3771,6 +3797,7 @@
         RATIO_BEST_KEY,
         SPEED_BEST_KEY,
         FISHING_BEST_KEY,
+        FACTORS_BEST_KEY,
         AREA_BEST_KEY,
         EQUATION_BEST_KEY,
         SIMULTANEOUS_BEST_KEY,
@@ -3799,6 +3826,7 @@
         speed: "\u901f\u3055",
         fishing: "\u91e3\u308a\u306e\u554f\u984c",
         area: "長方形・三角形・台形の面積",
+        factors: "約数・倍数",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
         equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
         simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
@@ -3823,6 +3851,7 @@
         "simultaneous",
         "area",
         "mentalDivision",
+        "factors",
       ];
       const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
 
@@ -4274,6 +4303,10 @@
       const chooseRatio = document.querySelector("#chooseRatio");
       const chooseSpeed = document.querySelector("#chooseSpeed");
       const chooseFishing = document.querySelector("#chooseFishing");
+      const chooseFactors = document.querySelector("#chooseFactors");
+      const fishingCoverTitle = document.querySelector("#fishingCoverTitle");
+      const fishingCoverPrompt = document.querySelector("#fishingCoverPrompt");
+      const fishingCoverGoal = document.querySelector("#fishingCoverGoal");
       const choosePreschool = document.querySelector("#choosePreschool");
       const chooseEquation = document.querySelector("#chooseEquation");
       const chooseSimultaneous = document.querySelector("#chooseSimultaneous");
@@ -4834,6 +4867,96 @@
         return deck;
       }
 
+      function primeFactorPowers(value) {
+        const factors = [];
+        let remaining = value;
+        for (let prime = 2; prime * prime <= remaining; prime += 1) {
+          if (remaining % prime !== 0) continue;
+          let exponent = 0;
+          while (remaining % prime === 0) {
+            remaining /= prime;
+            exponent += 1;
+          }
+          factors.push({ prime, exponent });
+        }
+        if (remaining > 1) factors.push({ prime: remaining, exponent: 1 });
+        return factors;
+      }
+
+      function createFactorsDeck() {
+        const input = (field, value) => ({ type: "input", field, value: String(value), entryValue: String(value) });
+        const label = text => ({ type: "label", text });
+        const result = (field, value, unit = "") => ({ type: "result", answer: input(field, value), unit });
+        const powers = (prefix, factors) => factors.flatMap(({ prime, exponent }, index) => [
+          ...(index ? [" × "] : []),
+          { type: "power", base: input(prefix + index + "Base", prime), exponent: input(prefix + index + "Exponent", exponent) },
+        ]);
+        const makeQuestion = (text, steps, metadata, answerText) => ({
+          fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "素因数分解と公倍数・公約数",
+          text, steps, ...metadata, answerText,
+          fields: steps.flatMap(step => step.flatMap(part => fishingPartInputs(part).map(item => item.field))),
+        });
+        const pool = [];
+        for (let number = 12; number <= 210; number += 1) {
+          const factors = primeFactorPowers(number);
+          if (factors.length < 2 || factors.length > 3 || factors.at(-1).prime > 7
+            || factors.some(factor => factor.exponent > 4)) continue;
+          pool.push({ number, factors });
+        }
+        const pick = items => items[Math.floor(Math.random() * items.length)];
+        const used = new Set();
+        const countQuestions = [0, 1, 2].map(index => {
+          const candidates = pool.filter(item => !used.has(item.number)
+            && (index === 2 ? item.factors.length === 3 : item.factors.length === 2 && item.number <= (index ? 144 : 72))
+            && (index !== 1 || item.factors.some(factor => factor.exponent >= 2)));
+          const { number, factors } = pick(candidates);
+          used.add(number);
+          const count = factors.reduce((total, factor) => total * (factor.exponent + 1), 1);
+          const countExpression = factors.flatMap((factor, i) => [
+            ...(i ? [" × "] : []), { type: "countFactor", exponent: input("countExponent" + i, factor.exponent) },
+          ]);
+          return makeQuestion(`${number} の約数は何個？`, [
+            [`${number} = `, ...powers("number", factors)],
+            [label("約数の個数"), ...countExpression, result("countAnswer", count, "個")],
+          ], { kind: "count", numbers: [number], factorizations: [factors], divisorCount: count }, `${count}個`);
+        });
+        const pairs = [];
+        for (let i = 0; i < pool.length; i += 1) {
+          const first = pool[i];
+          for (const second of pool.slice(i + 1)) {
+            if (second.number > 144) continue;
+            const primes = [...new Set([...first.factors, ...second.factors].map(factor => factor.prime))].sort((a, b) => a - b);
+            if (primes.length > 3) continue;
+            const common = [], multiple = [];
+            for (const prime of primes) {
+              const a = first.factors.find(factor => factor.prime === prime)?.exponent || 0;
+              const b = second.factors.find(factor => factor.prime === prime)?.exponent || 0;
+              multiple.push({ prime, exponent: Math.max(a, b) });
+              if (a && b) common.push({ prime, exponent: Math.min(a, b) });
+            }
+            const evaluate = factors => factors.reduce((total, factor) => total * factor.prime ** factor.exponent, 1);
+            const lcm = evaluate(multiple), gcdValue = evaluate(common);
+            if (gcdValue === 1 || gcdValue === first.number || gcdValue === second.number || lcm > 420) continue;
+            pairs.push({ first, second, multiple, common, lcm, gcdValue, key: `${first.number}:${second.number}` });
+          }
+        }
+        const usedPairs = new Set();
+        const pairQuestions = [0, 1, 2].map(index => {
+          const item = pick(pairs.filter(pair => !usedPairs.has(pair.key)
+            && pair.multiple.length === (index ? 3 : 2)));
+          usedPairs.add(item.key);
+          const { first, second, multiple, common, lcm, gcdValue } = item;
+          return makeQuestion(`${first.number} と ${second.number}`, [
+            [`${first.number} = `, ...powers("first", first.factors)],
+            [`${second.number} = `, ...powers("second", second.factors)],
+            [label("最小公倍数"), ...powers("lcm", multiple), result("lcmAnswer", lcm)],
+            [label("最大公約数"), ...powers("gcd", common), result("gcdAnswer", gcdValue)],
+          ], { kind: "pair", numbers: [first.number, second.number], factorizations: [first.factors, second.factors],
+            lcm, gcdValue }, `最小公倍数 ${lcm}、最大公約数 ${gcdValue}`);
+        });
+        return [...countQuestions, ...pairQuestions];
+      }
+
       function createFishingDeck() {
         const input = (field, value, order = "forward") => {
           const displayValue = String(value);
@@ -4859,10 +4982,31 @@
           question("1 oz は 28 g です。", "14 g は何 oz？", ["ozHalfPart", "ozHalfOperator", "ozHalfBase", "ozHalfRawDen", "ozHalfRawNum", "ozHalfDen", "ozHalfNum"], [[input("ozHalfPart", 14), operator("ozHalfOperator", "÷"), input("ozHalfBase", 28), " = ", fractionInput("ozHalfRawNum", 14, "ozHalfRawDen", 28)], ["= ", fractionInput("ozHalfNum", 1, "ozHalfDen", 2), " oz"]], "1/2 oz"),
           question("1 oz は 28 g です。", "21 g は何 oz？", ["ozThreeQuartersPart", "ozThreeQuartersOperator", "ozThreeQuartersBase", "ozThreeQuartersRawDen", "ozThreeQuartersRawNum", "ozThreeQuartersDen", "ozThreeQuartersNum"], [[input("ozThreeQuartersPart", 21), operator("ozThreeQuartersOperator", "÷"), input("ozThreeQuartersBase", 28), " = ", fractionInput("ozThreeQuartersRawNum", 21, "ozThreeQuartersRawDen", 28)], ["= ", fractionInput("ozThreeQuartersNum", 3, "ozThreeQuartersDen", 4), " oz"]], "3/4 oz"),
         ];
+        const mixedGoWhole = Math.random() < 0.5 ? 1 : 2;
+        const mixedGoNumerator = mixedGoWhole * 2 + 1;
+        const mixedGoProduct = 15 * mixedGoNumerator;
         const go = [
-          question("1号は 3.75 g です。", "10号は何 g？", ["goTenUnit", "goTenOperator", "goTenCount", "goTen"], [[input("goTenUnit", "3.75"), operator("goTenOperator", "×"), input("goTenCount", 10), " = ", input("goTen", "37.5"), " g"]], "37.5 g"),
-          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", "writtenProduct"), " g"]], "26.25 g"),
           question("1号は 3.75 g です。", "8号は何 g？", ["goEightMixedWhole", "goEightMixedDenominator", "goEightMixedNumerator", "goEightImproperDenominator", "goEightImproperNumerator", "goEightMultiply", "goEightCount", "goEightResult"], [["3.75 = ", input("goEightMixedWhole", 3), fractionInput("goEightMixedNumerator", 3, "goEightMixedDenominator", 4), " = ", fractionInput("goEightImproperNumerator", 15, "goEightImproperDenominator", 4)], [fraction(15, 4), operator("goEightMultiply", "×"), input("goEightCount", 8), " = ", input("goEightResult", 30, true), " g"]], "30 g"),
+          question("1号は 3.75 g です。", "7号は何 g？", ["goSevenUnit", "goSevenOperator", "goSevenCount", "goSeven"], [[input("goSevenUnit", "3.75"), operator("goSevenOperator", "×"), input("goSevenCount", 7), " = ", input("goSeven", "26.25", "writtenProduct"), " g"]], "26.25 g"),
+          { ...question("1号は 3.75 g です。", `${mixedGoWhole}.5号は何 g？`,
+            ["goMixedUnitWhole", "goMixedUnitDen", "goMixedUnitNum", "goMixedMultiply",
+              "goMixedCountWhole", "goMixedCountDen", "goMixedCountNum",
+              "goMixedUnitImproperDen", "goMixedUnitImproperNum", "goMixedImproperMultiply",
+              "goMixedCountImproperDen", "goMixedCountImproperNum",
+              "goMixedProductDen", "goMixedProductNum", "goMixedAnswerWhole",
+              "goMixedAnswerDen", "goMixedAnswerNum", "goMixedDecimal"],
+            [
+              [input("goMixedUnitWhole", 3), fractionInput("goMixedUnitNum", 3, "goMixedUnitDen", 4),
+                operator("goMixedMultiply", "×"), input("goMixedCountWhole", mixedGoWhole),
+                fractionInput("goMixedCountNum", 1, "goMixedCountDen", 2)],
+              ["=", fractionInput("goMixedUnitImproperNum", 15, "goMixedUnitImproperDen", 4),
+                operator("goMixedImproperMultiply", "×"),
+                fractionInput("goMixedCountImproperNum", mixedGoNumerator, "goMixedCountImproperDen", 2)],
+              ["=", fractionInput("goMixedProductNum", mixedGoProduct, "goMixedProductDen", 8)],
+              ["=", input("goMixedAnswerWhole", Math.floor(mixedGoProduct / 8)),
+                fractionInput("goMixedAnswerNum", mixedGoProduct % 8, "goMixedAnswerDen", 8)],
+              ["=", input("goMixedDecimal", mixedGoProduct / 8), " g"],
+            ], `${mixedGoProduct / 8} g`), alignedConversion: true },
           { ...question("1号は 3.75 g です。", "15 g は何号？",
             ["goFourWeight", "goFourOperator", "goFourUnit", "goFourDivisorDenominator", "goFourDivisorNumerator", "goFour"],
             [
@@ -4933,6 +5077,15 @@
         ];
       }
 
+      function fishingPartInputs(part) {
+        if (typeof part !== "object" || !part) return [];
+        if (part.type === "fraction") return [part.denominator, part.numerator];
+        if (part.type === "power") return [part.base, part.exponent];
+        if (part.type === "countFactor") return [part.exponent];
+        if (part.type === "result") return [part.answer];
+        return part.type === "input" || part.type === "operator" ? [part] : [];
+      }
+
       function fishingDigitOrder(part) {
         const indices = Array.from(part.value)
           .map((character, index) => character === "." ? -1 : index)
@@ -4949,6 +5102,26 @@
           const text = document.createElement("span");
           text.textContent = part;
           return text;
+        }
+        if (["label", "power", "countFactor", "result"].includes(part.type)) {
+          const group = document.createElement("span");
+          if (part.type === "label") {
+            group.className = "factorLabel";
+            group.textContent = part.text;
+          } else if (part.type === "power") {
+            group.className = "factorPower";
+            const exponent = document.createElement("span");
+            exponent.className = "factorExponent";
+            exponent.append(renderFishingPart(part.exponent));
+            group.append(renderFishingPart(part.base), exponent);
+          } else if (part.type === "countFactor") {
+            group.className = "factorCountTerm";
+            group.append(renderFishingPart("("), renderFishingPart(part.exponent), renderFishingPart("+1)"));
+          } else {
+            group.className = "factorResult";
+            group.append(renderFishingPart("="), renderFishingPart(part.answer), renderFishingPart(part.unit));
+          }
+          return group;
         }
         if (part.type === "fraction") {
           const fractionPart = document.createElement("span");
@@ -5021,32 +5194,25 @@
             parts.forEach((part) => row.append(renderFishingPart(part)));
           }
           fishingSteps.append(row);
-          parts.forEach((part) => {
-            if (part?.type === "input" || part?.type === "operator") completedFields.add(part.field);
-            if (part?.type === "fraction") {
-              completedFields.add(part.numerator.field);
-              completedFields.add(part.denominator.field);
-            }
-          });
+          parts.flatMap(fishingPartInputs).forEach(part => completedFields.add(part.field));
+        });
+        requestAnimationFrame(() => {
+          fishingSteps.querySelector?.(`[data-fishing-field="${fishingActiveField}"]`)?.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "instant" });
         });
       }
 
       function fishingExpected(field) {
         for (const step of fishingProblem?.steps || []) {
           for (const part of step) {
-            if (typeof part !== "object") continue;
-            if ((part.type === "input" || part.type === "operator") && part.field === field) return part.entryValue || part.value;
-            if (part.type === "fraction") {
-              if (part.numerator.field === field) return part.numerator.value;
-              if (part.denominator.field === field) return part.denominator.value;
-            }
+            const input = fishingPartInputs(part).find(item => item.field === field);
+            if (input) return input.entryValue || input.value;
           }
         }
         return "";
       }
 
       function setFishingActive(field) {
-        if (selectedApp !== "fishing" || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
         const firstIncomplete = fishingProblem.fields.find((candidate) => fishingValues[candidate] !== fishingExpected(candidate));
         if (firstIncomplete && fishingProblem.fields.indexOf(field) > fishingProblem.fields.indexOf(firstIncomplete)) return;
         fishingActiveField = field;
@@ -5057,6 +5223,7 @@
 
       function clearFishingFields() {
         fishingValues = {};
+        fishingSteps.parentElement?.scrollTo?.({ top: 0, left: 0, behavior: "instant" });
         fishingActiveField = fishingProblem?.fields[0] || "";
         const expected = fishingExpected(fishingActiveField);
         keypad.classList.toggle("operatorChoice", /^[×÷+]$/.test(expected));
@@ -5087,7 +5254,7 @@
       }
 
       function fishingReceive(value) {
-        if (selectedApp !== "fishing" || isAnswerLocked || isFinished || !fishingActiveField) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished || !fishingActiveField) return;
         const expectedValue = fishingExpected(fishingActiveField);
         const expectsOperator = /^[×÷+]$/.test(expectedValue);
         if (expectsOperator) {
@@ -5116,7 +5283,7 @@
       }
 
       function fishingBackspace() {
-        if (selectedApp !== "fishing" || isAnswerLocked || isFinished) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished) return;
         const value = fishingValues[fishingActiveField] || "";
         if (value) {
           fishingValues[fishingActiveField] = value.slice(0, -1);
@@ -5766,6 +5933,8 @@
             for (let b1 = 1; b1 <= 5; b1 += 1) {
               for (let b2 = -4; b2 <= 4; b2 += 1) {
                 if (!b2) continue;
+                // Neither variable may cancel in the original, unscaled equations.
+                if (b1 === Math.abs(b2)) continue;
                 // Both-equation exercises must need two multipliers for either variable.
                 if (firstMultiplier > 1 && (b1 % Math.abs(b2) === 0 || Math.abs(b2) % b1 === 0)) continue;
                 const sign = addition ? 1 : -1;
@@ -8064,7 +8233,7 @@
       function isTimedProblemApp() {
         if (selectedApp === "mentalDivision") return true;
         if (selectedApp === "area") return true;
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || selectedApp === "fishing" || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || (selectedApp === "fishing" || selectedApp === "factors") || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -8078,7 +8247,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
-        if (selectedApp === "fishing") return fishingIndex;
+        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingIndex;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "equation") return equationIndex;
         if (selectedApp === "simultaneous") return simultaneousIndex;
@@ -8088,6 +8257,7 @@
       }
 
       function currentTimedLength() {
+        if (selectedApp === "factors") return fishingDeck.length || FACTORS_TARGET;
         if (selectedApp === "mentalDivision") return divisionDeck.length || MENTAL_DIVISION_TARGET;
         if (selectedApp === "area") return areaDeck.length || AREA_TARGET;
         if (selectedApp === "basicDivision") return basicDivisionDeck.length;
@@ -8098,7 +8268,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
-        if (selectedApp === "fishing") return fishingDeck.length || FISHING_TARGET;
+        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingDeck.length || FISHING_TARGET;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
         if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
@@ -8122,7 +8292,7 @@
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
         if (selectedApp === "speed") return speedAnswer();
-        if (selectedApp === "fishing") return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
+        if ((selectedApp === "fishing" || selectedApp === "factors")) return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
         if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "equation") return equationProblem?.kind === "fraction" ? equationProblem.answer.numerator : equationProblem?.answer || 0;
         if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
@@ -8146,7 +8316,7 @@
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
-        if (selectedApp === "fishing") return fishingProblem?.answerText || "";
+        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingProblem?.answerText || "";
         if (selectedApp === "preschool") return String(currentTimedAnswer());
         if (selectedApp === "subtraction") return formattedSubtractionAnswer();
         if (selectedApp === "equation") return equationProblem?.kind === "fraction"
@@ -8359,6 +8529,7 @@
       }
 
       function bestKeyForApp(app = selectedApp) {
+        if (app === "factors") return FACTORS_BEST_KEY;
         if (app === "mentalDivision") return MENTAL_DIVISION_BEST_KEY;
         if (app === "basicDivision") return BASIC_DIVISION_BEST_KEY;
         if (app === "improperFraction") return IMPROPER_FRACTION_BEST_KEY;
@@ -9208,6 +9379,11 @@
           resetAreaEntry();
           return;
         }
+        if (selectedApp === "fishing" || selectedApp === "factors") {
+          setLocked(false);
+          clearFishingFields();
+          return;
+        }
         if (selectedApp === "ratio") {
           setLocked(false);
           resetRatioEntry();
@@ -9258,6 +9434,7 @@
         ratio: chooseRatio,
         speed: chooseSpeed,
         fishing: chooseFishing,
+        factors: chooseFactors,
         preschool: choosePreschool,
         equation: chooseEquation,
         simultaneous: chooseSimultaneous,
@@ -10173,7 +10350,7 @@
               finishRound(); return;
             }
             areaProblem = areaDeck[areaIndex];
-          } else if (selectedApp === "fishing") {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors")) {
             if (keepChallenge) fishingIndex += 1;
             if (fishingIndex >= fishingDeck.length) {
               finalTime = elapsedTime();
@@ -10301,6 +10478,10 @@
       }
 
       function restartRound() {
+        if (selectedApp === "fishing" || selectedApp === "factors") {
+          startedAt = null; isFinished = false; setLocked(false);
+          showFishingCover(selectedApp); return;
+        }
         if (selectedApp === "area") {
           startedAt = null; isFinished = false; setLocked(false);
           showAreaCover(); return;
@@ -10642,7 +10823,7 @@
       }
 
       function startFishingChallenge() {
-        selectedApp = "fishing";
+        selectedApp = selectedApp === "factors" ? "factors" : "fishing";
         hasStarted = true;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
@@ -10665,7 +10846,7 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        fishingDeck = createFishingDeck();
+        fishingDeck = selectedApp === "factors" ? createFactorsDeck() : createFishingDeck();
         fishingIndex = 0;
         fishingProblem = fishingDeck[0];
         resetChallenge();
@@ -11015,8 +11196,15 @@
         resetInputs(true);
       }
 
-      function showFishingCover() {
-        selectedApp = "fishing";
+      function showFactorsCover() {
+        showFishingCover("factors");
+      }
+
+      function showFishingCover(app = "fishing") {
+        selectedApp = app === "factors" ? "factors" : "fishing";
+        fishingCoverTitle.textContent = APP_LABELS[selectedApp];
+        fishingCoverPrompt.textContent = selectedApp === "factors" ? "素因数分解・約数・公倍数・公約数" : "単位と途中式でとくよ";
+        fishingCoverGoal.innerHTML = `${selectedApp === "factors" ? FACTORS_TARGET : FISHING_TARGET}問<br>タイムアタック`;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
         cover.hidden = true;
@@ -11176,14 +11364,15 @@
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
         speedProblemLine.hidden = selectedApp !== "speed";
-        fishingProblemLine.hidden = selectedApp !== "fishing";
+        fishingProblemLine.hidden = (selectedApp !== "fishing" && selectedApp !== "factors");
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         equationProblemLine.hidden = selectedApp !== "equation";
         simultaneousProblemLine.hidden = selectedApp !== "simultaneous";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
-        challengeView.classList.toggle("fishingMode", selectedApp === "fishing" || selectedApp === "area");
+        challengeView.classList.toggle("fishingMode", (selectedApp === "fishing" || selectedApp === "factors") || selectedApp === "area");
+        challengeView.classList.toggle("factorsMode", selectedApp === "factors");
         challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -11253,7 +11442,7 @@
             renderSpeedProblem();
           } else if (selectedApp === "area") {
             resetAreaEntry();
-          } else if (selectedApp === "fishing") {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors")) {
             fishingValues = {};
             fishingActiveField = fishingProblem?.fields[0] || "";
             setFishingActive(fishingActiveField);
@@ -11347,7 +11536,7 @@
           speedBackspace();
           return;
         }
-        if (selectedApp === "fishing") {
+        if ((selectedApp === "fishing" || selectedApp === "factors")) {
           fishingBackspace();
           return;
         }
@@ -11392,7 +11581,7 @@
             resetInputs();
             return;
           }
-          if (selectedApp === "fishing") {
+          if ((selectedApp === "fishing" || selectedApp === "factors")) {
             clearFishingFields();
             return;
           }
@@ -11446,7 +11635,7 @@
             return;
           }
         }
-        if (selectedApp === "fishing" && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
+        if ((selectedApp === "fishing" || selectedApp === "factors") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
           event.preventDefault();
           fishingReceive(event.key);
           return;
@@ -11504,7 +11693,7 @@
             speedReceive(button.dataset.digit);
             return;
           }
-          if (selectedApp === "fishing") {
+          if ((selectedApp === "fishing" || selectedApp === "factors")) {
             fishingReceive(button.dataset.digit);
             return;
           }
@@ -11543,6 +11732,7 @@
       fishingSteps.addEventListener("pointerdown", (event) => {
         const input = event.target.closest("[data-fishing-field]");
         if (!input) return;
+        if (event.pointerType === "touch") return;
         event.preventDefault();
         setFishingActive(input.dataset.fishingField);
       });
@@ -11584,24 +11774,24 @@
         if (selectedApp === "area") areaReceive("×");
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
-        if (selectedApp === "fishing") fishingReceive("\u00d7");
+        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("\u00d7");
         if (selectedApp === "equation") equationReceive("\u00d7");
       });
       bindFastPress(document.querySelector("#ratioDivideKey"), () => {
         if (selectedApp === "area") areaReceive("÷");
         if (selectedApp === "ratio") ratioReceive("\u00f7");
         if (selectedApp === "speed") speedReceive("\u00f7");
-        if (selectedApp === "fishing") fishingReceive("\u00f7");
+        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("\u00f7");
         if (selectedApp === "equation") equationReceive("\u00f7");
       });
       bindFastPress(document.querySelector("#ratioPlusKey"), () => {
         if (selectedApp === "area") areaReceive("+");
-        if (selectedApp === "fishing") fishingReceive("+");
+        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("+");
         if (selectedApp === "equation") equationReceive("+");
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
-        if (selectedApp === "fishing") fishingReceive(".");
+        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive(".");
         if (selectedApp === "equation") equationReceive("\u2212");
         if (selectedApp === "simultaneous") simultaneousReceive("\u2212");
       });
@@ -11632,6 +11822,7 @@
       chooseRatio.addEventListener("click", showRatioCover);
       chooseSpeed.addEventListener("click", showSpeedCover);
       chooseFishing.addEventListener("click", showFishingCover);
+      chooseFactors.addEventListener("click", showFactorsCover);
       chooseArea.addEventListener("click", showAreaCover);
       chooseMentalDivision.addEventListener("click", showMentalDivisionCover);
       areaStartButton.addEventListener("click", startAreaChallenge);
