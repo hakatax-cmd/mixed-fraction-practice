@@ -1090,6 +1090,17 @@
         #equationProblemLine.fractionEquation .equationOperatorInput { width: 36px; height: 36px; font-size: 2.1rem; }
         #equationProblemLine.fractionEquation .equationOperatorStatic { width: 36px; height: 36px; font-size: 2.1rem; }
       }
+      #equationProblemLine.fractionEquation { --equation-fraction-cell-width: clamp(42px, 7.8vmin, 60px); }
+      #equationProblemLine.fractionEquation .equationResultFraction { justify-items: center; }
+      #equationProblemLine.fractionEquation .equationResultFraction i { width: 100%; }
+      #equationProblemLine.fractionEquation .equationWorkFraction { width: max-content; }
+      #equationProblemLine.fractionEquation .equationWorkNumerator { display: flex; }
+      #equationProblemLine.fractionEquation .equationResultFraction .equationFreeInput,
+      #equationProblemLine.fractionEquation .equationWorkNumerator .equationFreeInput {
+        width: calc(var(--equation-fraction-cell-width) * var(--equation-slots, 1));
+        flex: 0 0 auto; padding: 0;
+      }
+      #equationProblemLine.fractionEquation .fractionMiddleLine.hasMiddleSimplification { flex-wrap: wrap; }
 
       #simultaneousProblemLine { display: grid; align-content: start; justify-items: start; gap: clamp(10px, 1.8vmin, 18px); width: 100%; padding: clamp(22px, 4vmin, 40px) clamp(20px, 7vmin, 72px) clamp(14px, 3vmin, 30px); font-size: clamp(1.65rem, 4.7vmin, 2.65rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       .simultaneousSystem { display: grid; grid-template-columns: auto 1fr; column-gap: clamp(8px, 1.5vmin, 16px); align-items: stretch; }
@@ -3430,7 +3441,7 @@
                 <i></i>
                 <button class="equationFreeInput" id="equationMultiplyLeftDenominatorInput" data-equation-field="multiplyLeftDenominator" type="button" aria-label="掛け算の左の分母"></button>
               </span>
-              <button class="equationOperatorInput" id="equationMultiplyOperatorInput" data-equation-field="multiplyOperator" type="button" aria-label="掛け算の記号">&#9675;</button>
+              <span class="equationOperatorStatic" aria-label="掛け算">&times;</span>
               <span class="equationResultFraction" id="equationMultiplyRight">
                 <button class="equationFreeInput" id="equationMultiplyRightNumeratorInput" data-equation-field="multiplyRightNumerator" type="button" aria-label="逆数の分子"></button>
                 <i></i>
@@ -4162,7 +4173,6 @@
       const equationMultiplyRight = document.querySelector("#equationMultiplyRight");
       const equationMultiplyLeftNumeratorInput = document.querySelector("#equationMultiplyLeftNumeratorInput");
       const equationMultiplyLeftDenominatorInput = document.querySelector("#equationMultiplyLeftDenominatorInput");
-      const equationMultiplyOperatorInput = document.querySelector("#equationMultiplyOperatorInput");
       const equationMultiplyRightNumeratorInput = document.querySelector("#equationMultiplyRightNumeratorInput");
       const equationMultiplyRightDenominatorInput = document.querySelector("#equationMultiplyRightDenominatorInput");
       const equationFractionSimplifyLine = document.querySelector("#equationFractionSimplifyLine");
@@ -4245,7 +4255,6 @@
         fractionRightDenominator: equationFractionRightDenominatorInput,
         multiplyLeftNumerator: equationMultiplyLeftNumeratorInput,
         multiplyLeftDenominator: equationMultiplyLeftDenominatorInput,
-        multiplyOperator: equationMultiplyOperatorInput,
         multiplyRightNumerator: equationMultiplyRightNumeratorInput,
         multiplyRightDenominator: equationMultiplyRightDenominatorInput,
         fractionFinalNumerator: equationFractionFinalNumeratorInput,
@@ -5764,6 +5773,45 @@
           used.add(item.key);
           return item;
         }
+        if (kind === "fraction") {
+          const terms = [];
+          const coefficients = [];
+          for (let denominator = 2; denominator <= 9; denominator += 1) {
+            for (let numerator = 1; numerator <= 9; numerator += 1) {
+              if (gcd(numerator, denominator) !== 1) continue;
+              terms.push({ numerator, denominator });
+              if (numerator < denominator) coefficients.push({ numerator, denominator });
+            }
+          }
+          const pairs = [];
+          for (const total of terms) {
+            for (const constant of terms) {
+              if (constant.numerator >= constant.denominator || total.denominator === constant.denominator) continue;
+              const smaller = Math.min(total.denominator, constant.denominator);
+              const larger = Math.max(total.denominator, constant.denominator);
+              if (useProductDenominator ? gcd(smaller, larger) !== 1 : larger % smaller !== 0) continue;
+              if (useProductDenominator && smaller * larger > 36) continue;
+              if (sourceOperator === "+" && total.numerator * constant.denominator <= constant.numerator * total.denominator) continue;
+              const key = `fraction:${sourceOperator}:${total.numerator}/${total.denominator}:${constant.numerator}/${constant.denominator}`;
+              if (!used.has(key)) pairs.push({ total, constant, key });
+            }
+          }
+          const availableCoefficients = coefficients.filter(coefficient => {
+            const key = `${coefficient.numerator}/${coefficient.denominator}`;
+            return fractionCoefficientKey ? key === fractionCoefficientKey : !used.has(`fractionCoefficient:${key}`);
+          });
+          for (const pair of shuffle(pairs)) {
+            for (const coefficient of shuffle(availableCoefficients)) {
+              const item = buildFractionEquation(coefficient, pair.total, pair.constant, sourceOperator, useProductDenominator);
+              if (item.workResultNumerator > 99 || item.workFirst > 99 || item.workSecond > 99) continue;
+              if (item.rawAnswer.numerator > 99 || item.rawAnswer.denominator > 99 || item.answer.denominator === 1) continue;
+              used.add(pair.key);
+              used.add(`fractionCoefficient:${coefficient.numerator}/${coefficient.denominator}`);
+              return item;
+            }
+          }
+          throw new Error("No valid fraction-equation combination");
+        }
         const divisionPairs = [
           [6, 16], [8, 12], [4, 18], [3, 24], [7, 12], [9, 12],
         ];
@@ -5774,76 +5822,6 @@
           if (kind === "division") {
             [coefficient, answer] = divisionPairs[randomInt(0, divisionPairs.length - 1)];
             middle = coefficient * answer;
-          } else if (kind === "fraction") {
-            const choices = shuffle([
-              // Use several coefficient, denominator, and numerator combinations so the
-              // fraction questions do not collapse into the same four calculations.
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 2, denominator: 7 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 6, denominator: 7 } },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 5, denominator: 8 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 15, denominator: 8 }, directFractionWork: true },
-              { coefficient: { numerator: 1, denominator: 3 }, middle: { numerator: 3, denominator: 5 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 9, denominator: 5 } },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 19, denominator: 15 }, constant: { numerator: 3, denominator: 5 }, answer: { numerator: 38, denominator: 15 }, directFractionWork: true },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 3, denominator: 4 } },
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 7, denominator: 9 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 14, denominator: 9 }, directFractionWork: true },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 5, denominator: 4 }, directFractionWork: true },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 2, denominator: 5 }, answer: { numerator: 9, denominator: 14 } },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 4, denominator: 9 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 2, denominator: 3 } },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 5 }, answer: { numerator: 10, denominator: 9 }, directFractionWork: true },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 8, denominator: 15 } },
-              { coefficient: { numerator: 4, denominator: 5 }, middle: { numerator: 3, denominator: 7 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 15, denominator: 28 }, directFractionWork: true },
-              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 2, denominator: 5 }, constant: { numerator: 1, denominator: 7 }, answer: { numerator: 14, denominator: 25 } },
-              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 3, denominator: 8 }, constant: { numerator: 2, denominator: 3 }, answer: { numerator: 21, denominator: 40 }, directFractionWork: true },
-              { coefficient: { numerator: 5, denominator: 7 }, middle: { numerator: 5, denominator: 9 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 9 } },
-              // These are reserved for multiplying the displayed denominators.
-              { coefficient: { numerator: 1, denominator: 2 }, middle: { numerator: 5, denominator: 6 }, constant: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 3 }, productDenominator: true, directFractionWork: true },
-              { coefficient: { numerator: 2, denominator: 3 }, middle: { numerator: 3, denominator: 4 }, constant: { numerator: 1, denominator: 2 }, answer: { numerator: 9, denominator: 8 }, productDenominator: true, directFractionWork: true },
-              { coefficient: { numerator: 3, denominator: 4 }, middle: { numerator: 7, denominator: 8 }, constant: { numerator: 1, denominator: 4 }, answer: { numerator: 7, denominator: 6 }, productDenominator: true, directFractionWork: true },
-            ]).filter((choice) => {
-              const matchesCoefficient = !fractionCoefficientKey || `${choice.coefficient.numerator}/${choice.coefficient.denominator}` === fractionCoefficientKey;
-              const staysPositive = sourceOperator === "+" || choice.middle.numerator * choice.constant.denominator > choice.constant.numerator * choice.middle.denominator;
-              return matchesCoefficient && staysPositive && Boolean(choice.productDenominator) === useProductDenominator;
-            });
-            const item = choices.find((choice) => !used.has(`fraction:${sourceOperator}:${choice.coefficient.numerator}/${choice.coefficient.denominator}:${choice.middle.numerator}/${choice.middle.denominator}:${choice.constant.numerator}/${choice.constant.denominator}`));
-            if (!item) continue;
-            const total = reduceEquationFraction({
-              numerator: item.middle.numerator * item.constant.denominator
-                + (sourceOperator === "+" ? 1 : -1) * item.constant.numerator * item.middle.denominator,
-              denominator: item.middle.denominator * item.constant.denominator,
-            });
-            if (total.numerator < 1) continue;
-            // The child works with the displayed total and constant, not the hidden middle value.
-            const commonDenominator = useProductDenominator
-              ? total.denominator * item.constant.denominator
-              : total.denominator * item.constant.denominator / gcd(total.denominator, item.constant.denominator);
-            const totalNumerator = total.numerator * (commonDenominator / total.denominator);
-            const constantNumerator = item.constant.numerator * (commonDenominator / item.constant.denominator);
-            const middleNumerator = sourceOperator === "+"
-              ? totalNumerator - constantNumerator
-              : totalNumerator + constantNumerator;
-            const workTerms = [totalNumerator, constantNumerator];
-            if (workTerms.some((term) => term > 99)) continue;
-            const key = `fraction:${sourceOperator}:${item.coefficient.numerator}/${item.coefficient.denominator}:${item.middle.numerator}/${item.middle.denominator}:${item.constant.numerator}/${item.constant.denominator}`;
-            used.add(key);
-            return {
-              kind,
-              ...item,
-              total,
-              sourceOperator,
-              workOperator: sourceOperator === "+" ? "-" : "+",
-              commonDenominator,
-              workFirst: totalNumerator,
-              workSecond: constantNumerator,
-              workResultNumerator: middleNumerator,
-              directFractionWork: Boolean(item.directFractionWork),
-              useProductDenominator,
-              rawAnswer: {
-                numerator: item.middle.numerator * item.coefficient.denominator,
-                denominator: item.middle.denominator * item.coefficient.numerator,
-              },
-              requiresSimplification: gcd(
-                item.middle.numerator * item.coefficient.denominator,
-                item.middle.denominator * item.coefficient.numerator,
-              ) > 1,
-            };
           } else if (kind === "bothSides") {
             const differenceMagnitude = Math.random() < 0.5 ? 2 : 3;
             let coefficientDifference;
@@ -5898,13 +5876,27 @@
           used.add(key);
           return item;
         }
-        return kind === "fraction"
-          ? { kind, coefficient: { numerator: 2, denominator: 5 }, middle: { numerator: 6, denominator: 35 }, constant: { numerator: 1, denominator: 5 }, total: { numerator: 13, denominator: 35 }, answer: { numerator: 3, denominator: 7 }, sourceOperator: "+", workOperator: "-", commonDenominator: 35, workFirst: 13, workSecond: 7, workResultNumerator: 6, rawAnswer: { numerator: 30, denominator: 70 }, requiresSimplification: true }
-          : kind === "bothSides"
+        return kind === "bothSides"
             ? allowNegative
               ? { kind, coefficient: 1, middle: -2, answer: -2, leftCoefficient: 3, leftConstant: 6, rightCoefficient: 2, rightConstant: 4 }
               : { kind, coefficient: -1, middle: -2, answer: 2, leftCoefficient: 2, leftConstant: 6, rightCoefficient: 3, rightConstant: 4 }
           : { kind, coefficient: negativeCoefficient ? -6 : 6, constant: 4, total: sourceOperator === "+" ? 100 : 92, middle: 96, answer: negativeCoefficient ? -16 : 16, sourceOperator };
+      }
+
+      function buildFractionEquation(coefficient, total, constant, sourceOperator, useProductDenominator = false) {
+        // Always work from the displayed, reduced denominators.
+        const commonDivisor = gcd(total.denominator, constant.denominator);
+        const commonDenominator = total.denominator * constant.denominator / commonDivisor;
+        const workFirst = total.numerator * (commonDenominator / total.denominator);
+        const workSecond = constant.numerator * (commonDenominator / constant.denominator);
+        const workResultNumerator = workFirst + (sourceOperator === "+" ? -workSecond : workSecond);
+        const middle = reduceEquationFraction({ numerator: workResultNumerator, denominator: commonDenominator });
+        const rawAnswer = { numerator: middle.numerator * coefficient.denominator, denominator: middle.denominator * coefficient.numerator };
+        return { kind: "fraction", coefficient, total, constant, sourceOperator, middle, rawAnswer,
+          answer: reduceEquationFraction(rawAnswer), workOperator: sourceOperator === "+" ? "-" : "+",
+          commonDenominator, workFirst, workSecond, workResultNumerator, directFractionWork: true,
+          useProductDenominator: useProductDenominator && commonDivisor === 1,
+          requiresSimplification: gcd(rawAnswer.numerator, rawAnswer.denominator) > 1 };
       }
 
       function createEquationDeck() {
@@ -6304,7 +6296,6 @@
         if (field === "denominator") return String(equationProblem.answer.denominator);
         if (field === "multiplyLeftDenominator") return String(equationProblem.middle.denominator);
         if (field === "multiplyLeftNumerator") return String(equationProblem.middle.numerator);
-        if (field === "multiplyOperator") return "\u00d7";
         if (field === "multiplyRightDenominator") return String(equationProblem.coefficient.numerator);
         if (field === "multiplyRightNumerator") return String(equationProblem.coefficient.denominator);
         if (field === "fractionLeftDenominator") return String(equationProblem.middle.denominator);
@@ -6325,7 +6316,7 @@
           if (equationPhase === "result") return ["middleNumerator"];
           if (equationPhase === "middleSimplify") return ["middleSimplifiedDenominator", "middleSimplifiedNumerator"];
           if (equationPhase === "expression") return ["fractionLeftDenominator", "fractionLeftNumerator", "fractionRightDenominator", "fractionRightNumerator"];
-          if (equationPhase === "multiply") return ["multiplyLeftDenominator", "multiplyLeftNumerator", "multiplyOperator", "multiplyRightDenominator", "multiplyRightNumerator"];
+          if (equationPhase === "multiply") return ["multiplyLeftDenominator", "multiplyLeftNumerator", "multiplyRightDenominator", "multiplyRightNumerator"];
           if (equationPhase === "raw") return ["fractionFinalDenominator", "fractionFinalNumerator"];
           if (equationPhase === "simplify") return ["simplifiedDenominator", "simplifiedNumerator"];
           return [];
@@ -6371,7 +6362,7 @@
         equationFinalInput.hidden = isFraction || equationProblem?.kind === "integerFraction";
         equationFractionInput.hidden = equationProblem?.kind !== "integerFraction";
         Object.entries(equationFields).forEach(([field, input]) => {
-          const isOperator = field === "middleOperator" || field === "fractionOperator" || field === "multiplyOperator";
+          const isOperator = field === "middleOperator" || field === "fractionOperator";
           if (isOperator) {
             input.textContent = field === "fractionOperator" ? "\u00f7" : (equationValues[field] || "\u25cb");
             input.classList.toggle("active", field === equationActiveField && field !== "fractionOperator");
