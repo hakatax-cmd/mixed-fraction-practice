@@ -968,6 +968,7 @@
       .factorExponent { font-size: 20px; margin-bottom: 22px; }
       .factorExponent .fishingDigit { width: 1.1em; height: 1.5em; }
       .factorCountTerm, .factorResult { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+      .factorProduct { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
       @media (min-width: 700px) and (min-height: 700px) {
         .factorsMode #fishingProblemLine { font-size: 40px; }
         .factorsMode .factorExponent { font-size: 26px; margin-bottom: 28px; }
@@ -4915,6 +4916,15 @@
         return factors;
       }
 
+      function factorProductPairs(number) {
+        const pairs = [];
+        for (let first = 2; first <= 9; first += 1) {
+          if (number % first === 0 && number / first >= 2) pairs.push([first, number / first]);
+        }
+        const singleDigits = pairs.filter(([, second]) => second <= 9);
+        return singleDigits.length ? singleDigits : pairs;
+      }
+
       function createFactorsDeck() {
         const input = (field, value) => ({ type: "input", field, value: String(value), entryValue: String(value) });
         const label = text => ({ type: "label", text });
@@ -4923,15 +4933,23 @@
           ...(index ? [" × "] : []),
           { type: "power", base: input(prefix + index + "Base", prime), exponent: input(prefix + index + "Exponent", exponent) },
         ]);
+        const factorSteps = (number, prefix, factors) => {
+          const pairs = factorProductPairs(number);
+          return [
+            [`${number} = `, { type: "factorProduct", pairs,
+              left: input(prefix + "SplitLeft", pairs[0][0]), right: input(prefix + "SplitRight", pairs[0][1]) }],
+            [`${number} = `, ...powers(prefix, factors)],
+          ];
+        };
         const makeQuestion = (text, steps, metadata, answerText) => ({
           fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "素因数分解と公倍数・公約数",
           text, steps, ...metadata, answerText,
           fields: steps.flatMap(step => step.flatMap(part => fishingPartInputs(part).map(item => item.field))),
         });
         const pool = [];
-        for (let number = 12; number <= 210; number += 1) {
+        for (let number = 12; number <= 99; number += 1) {
           const factors = primeFactorPowers(number);
-          if (factors.length < 2 || factors.length > 3 || factors.at(-1).prime > 7
+          if (factors.length < 2 || factors.length > 3 || factors.at(-1).prime > 13
             || factors.some(factor => factor.exponent > 4)) continue;
           pool.push({ number, factors });
         }
@@ -4939,7 +4957,8 @@
         const used = new Set();
         const countQuestions = [0, 1, 2].map(index => {
           const candidates = pool.filter(item => !used.has(item.number)
-            && (index === 2 ? item.factors.length === 3 : item.factors.length === 2 && item.number <= (index ? 144 : 72))
+            && (index === 2 ? item.factors.length === 3 : item.factors.length === 2)
+            && (index !== 0 || item.number <= 72 && factorProductPairs(item.number)[0][1] <= 9)
             && (index !== 1 || item.factors.some(factor => factor.exponent >= 2)));
           const { number, factors } = pick(candidates);
           used.add(number);
@@ -4948,7 +4967,7 @@
             ...(i ? [" × "] : []), { type: "countFactor", exponent: input("countExponent" + i, factor.exponent) },
           ]);
           return makeQuestion(`${number} の約数は何個？`, [
-            [`${number} = `, ...powers("number", factors)],
+            ...factorSteps(number, "number", factors),
             [label("約数の個数"), ...countExpression, result("countAnswer", count, "個")],
           ], { kind: "count", numbers: [number], factorizations: [factors], divisorCount: count }, `${count}個`);
         });
@@ -4956,7 +4975,6 @@
         for (let i = 0; i < pool.length; i += 1) {
           const first = pool[i];
           for (const second of pool.slice(i + 1)) {
-            if (second.number > 144) continue;
             const primes = [...new Set([...first.factors, ...second.factors].map(factor => factor.prime))].sort((a, b) => a - b);
             if (primes.length > 3) continue;
             const common = [], multiple = [];
@@ -4979,8 +4997,8 @@
           usedPairs.add(item.key);
           const { first, second, multiple, common, lcm, gcdValue } = item;
           return makeQuestion(`${first.number} と ${second.number}`, [
-            [`${first.number} = `, ...powers("first", first.factors)],
-            [`${second.number} = `, ...powers("second", second.factors)],
+            ...factorSteps(first.number, "first", first.factors),
+            ...factorSteps(second.number, "second", second.factors),
             [label("最小公倍数"), ...powers("lcm", multiple), result("lcmAnswer", lcm)],
             [label("最大公約数"), ...powers("gcd", common), result("gcdAnswer", gcdValue)],
           ], { kind: "pair", numbers: [first.number, second.number], factorizations: [first.factors, second.factors],
@@ -5108,6 +5126,7 @@
         if (typeof part !== "object" || !part) return [];
         if (part.type === "fraction") return [part.denominator, part.numerator];
         if (part.type === "power") return [part.base, part.exponent];
+        if (part.type === "factorProduct") return [part.left, part.right];
         if (part.type === "countFactor") return [part.exponent];
         if (part.type === "result") return [part.answer];
         return part.type === "input" || part.type === "operator" ? [part] : [];
@@ -5130,7 +5149,7 @@
           text.textContent = part;
           return text;
         }
-        if (["label", "power", "countFactor", "result"].includes(part.type)) {
+        if (["label", "power", "countFactor", "result", "factorProduct"].includes(part.type)) {
           const group = document.createElement("span");
           if (part.type === "label") {
             group.className = "factorLabel";
@@ -5141,6 +5160,9 @@
             exponent.className = "factorExponent";
             exponent.append(renderFishingPart(part.exponent));
             group.append(renderFishingPart(part.base), exponent);
+          } else if (part.type === "factorProduct") {
+            group.className = "factorProduct";
+            group.append(renderFishingPart(part.left), renderFishingPart("×"), renderFishingPart(part.right));
           } else if (part.type === "countFactor") {
             group.className = "factorCountTerm";
             group.append(renderFishingPart("("), renderFishingPart(part.exponent), renderFishingPart("+1)"));
@@ -5228,14 +5250,25 @@
         });
       }
 
-      function fishingExpected(field) {
+      function fishingInputOptions(field) {
         for (const step of fishingProblem?.steps || []) {
           for (const part of step) {
+            if (part.type === "factorProduct") {
+              if (part.left.field === field) return [...new Set(part.pairs.map(([left]) => String(left)))];
+              if (part.right.field === field) return part.pairs
+                .filter(([left]) => String(left).startsWith(fishingValues[part.left.field] || ""))
+                .map(([, right]) => String(right));
+            }
             const input = fishingPartInputs(part).find(item => item.field === field);
-            if (input) return input.entryValue || input.value;
+            if (input) return [input.entryValue || input.value];
           }
         }
-        return "";
+        return [];
+      }
+
+      function fishingExpected(field) {
+        const options = fishingInputOptions(field);
+        return options.find(value => value.startsWith(fishingValues[field] || "")) || options[0] || "";
       }
 
       function setFishingActive(field) {
@@ -5290,20 +5323,28 @@
           return;
         }
         const next = (fishingValues[fishingActiveField] || "") + value;
-        if (!expectedValue.startsWith(next)) {
+        if (!fishingInputOptions(fishingActiveField).some(option => option.startsWith(next))) {
           const field = fishingActiveField;
           // The rejected character was not stored; preserve every accepted digit.
           showWrongConfirmation(`fishing:${field}:${next}`, () => setFishingActive(field));
           return;
         }
         fishingValues[fishingActiveField] = next;
-        if (next !== expectedValue) {
+        // Changing the first factor may invalidate only the suffix of its partner.
+        for (const part of fishingProblem.steps.flat()) {
+          if (part.type !== "factorProduct" || part.left.field !== fishingActiveField) continue;
+          const options = fishingInputOptions(part.right.field);
+          let partner = fishingValues[part.right.field] || "";
+          while (partner && !options.some(option => option.startsWith(partner))) partner = partner.slice(0, -1);
+          if (fishingValues[part.right.field] !== undefined) fishingValues[part.right.field] = partner;
+        }
+        if (next !== fishingExpected(fishingActiveField)) {
           renderFishingProblem();
           return;
         }
-        const currentIndex = fishingProblem.fields.indexOf(fishingActiveField);
-        if (currentIndex < fishingProblem.fields.length - 1) {
-          setFishingActive(fishingProblem.fields[currentIndex + 1]);
+        const pending = fishingProblem.fields.find(field => fishingValues[field] !== fishingExpected(field));
+        if (pending) {
+          setFishingActive(pending);
           return;
         }
         completeFishingProblem();
