@@ -5554,8 +5554,11 @@
             steps = [row([number("surface", item.surface), operator("divide", "÷"), "(", number("sum", sum), "÷ 2 )"], false),
               row([String(item.surface), "÷", number("halfSum", sum / 2)]), result(measures.height, "cm")];
           } else {
+            const divideHeightFirst = item.surface % item.height === 0;
             steps = [row([{ type: "fraction", numerator: `x + ${item.base}`, denominator: "2" }, `× ${item.height} = ${item.surface}`], false),
-              row([`(x + ${item.base}) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
+              divideHeightFirst
+                ? row([{ type: "fraction", numerator: `x + ${item.base}`, denominator: "2" }, "=", number("halfSum", item.surface / item.height)], false)
+                : row([`(x + ${item.base}) × ${item.height} =`, number("doubleArea", item.surface * 2)], false),
               row([`x + ${item.base} =`, number("sum", sum)], false),
               row(["x =", number("answer", item.top), "cm"], false)];
           }
