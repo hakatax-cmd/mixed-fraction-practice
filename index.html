@@ -4973,15 +4973,16 @@
           ];
         };
         const makeQuestion = (text, steps, metadata, answerText) => ({
-          fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "素因数分解と公倍数・公約数",
+          fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "素因数分解と公約数・公倍数",
           text, steps, ...metadata, answerText,
           fields: steps.flatMap(step => step.flatMap(part => fishingPartInputs(part).map(item => item.field))),
         });
         const pool = [];
         for (let number = 12; number <= 99; number += 1) {
           const factors = primeFactorPowers(number);
-          if (factors.length < 2 || factors.length > 3 || factors.at(-1).prime > 13
-            || factors.some(factor => factor.exponent > 4)) continue;
+          const factorCount = factors.reduce((total, factor) => total + factor.exponent, 0);
+          if (factors.length < 2 || factors.length > 3 || factors.at(-1).prime > 7
+            || factorCount < 4 || factors.some(factor => factor.exponent > 5)) continue;
           pool.push({ number, factors });
         }
         const pick = items => items[Math.floor(Math.random() * items.length)];
@@ -5030,10 +5031,10 @@
           return makeQuestion(`${first.number} と ${second.number}`, [
             ...factorSteps(first.number, "first", first.factors),
             ...factorSteps(second.number, "second", second.factors),
-            [label("最小公倍数"), ...powers("lcm", multiple), result("lcmAnswer", lcm)],
             [label("最大公約数"), ...powers("gcd", common), result("gcdAnswer", gcdValue)],
+            [label("最小公倍数"), ...powers("lcm", multiple), result("lcmAnswer", lcm)],
           ], { kind: "pair", numbers: [first.number, second.number], factorizations: [first.factors, second.factors],
-            lcm, gcdValue }, `最小公倍数 ${lcm}、最大公約数 ${gcdValue}`);
+            lcm, gcdValue }, `最大公約数 ${gcdValue}、最小公倍数 ${lcm}`);
         });
         return [...countQuestions, ...pairQuestions];
       }
@@ -11397,7 +11398,7 @@
       function showFishingCover(app = "fishing") {
         selectedApp = app === "factors" ? "factors" : "fishing";
         fishingCoverTitle.textContent = APP_LABELS[selectedApp];
-        fishingCoverPrompt.textContent = selectedApp === "factors" ? "素因数分解・約数・公倍数・公約数" : "単位と途中式でとくよ";
+        fishingCoverPrompt.textContent = selectedApp === "factors" ? "素因数分解・約数・公約数・公倍数" : "単位と途中式でとくよ";
         fishingCoverGoal.innerHTML = `${selectedApp === "factors" ? FACTORS_TARGET : FISHING_TARGET}問<br>タイムアタック`;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
