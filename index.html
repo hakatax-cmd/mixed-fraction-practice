@@ -1039,6 +1039,11 @@
 
       #equationProblemLine { display: grid; grid-template-rows: auto auto auto auto auto; justify-items: start; align-content: start; gap: clamp(14px, 2.6vmin, 24px); padding: clamp(54px, 8.5vmin, 86px) clamp(20px, 7vmin, 88px) clamp(42px, 7vmin, 70px); font-size: clamp(2rem, 6.3vmin, 4rem); font-weight: 900; font-variant-numeric: tabular-nums; }
       #equationProblemLine:not(.fractionEquation) { --digit-frame-width: 1.05em; --digit-frame-height: 1.575em; }
+      :is(#equationProblemLine, #simultaneousProblemLine) .mathVariable {
+        font-family: "Times New Roman", "Cambria Math", serif;
+        font-size: 1em; font-style: italic; font-weight: 700; line-height: inherit;
+      }
+      :is(#equationProblemLine, #simultaneousProblemLine) .mathTimes { font-style: normal; padding-inline: .08em; }
       #equationProblemLine { height: 100%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; scroll-padding: 12px; }
       .practiceCard:has(#challengeView.equationMode:not([hidden])) { touch-action: pan-y; }
       #equationFractionInput { grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); justify-items: center; }
@@ -3411,7 +3416,7 @@
               <span class="equals">=</span>
               <button class="equationFreeInput active" id="equationMiddleInput" data-equation-field="middle" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;&#21491;&#36794;"></button>
               <button class="equationFreeInput" id="equationMiddleCoefficientInput" data-equation-field="middleCoefficient" type="button" aria-label="&#31227;&#38917;&#24460;&#12398;x&#12398;&#20418;&#25968;" hidden></button>
-              <span id="equationMiddleCoefficientX" hidden>x</span>
+              <span id="equationMiddleCoefficientX" hidden><var class="mathVariable">x</var></span>
               <span class="equationWorkFraction" id="equationMiddleFractionInput" hidden>
                 <span class="equationWorkNumerator">
                   <button class="equationFreeInput" id="equationMiddleFirstInput" data-equation-field="middleFirst" type="button" aria-label="&#36890;&#20998;&#24460;&#12398;&#19968;&#12388;&#30446;&#12398;&#25968;"></button>
@@ -3435,7 +3440,7 @@
               </span>
             </div>
             <div class="equationLine" id="equationFinalLine" hidden>
-              <span>x</span>
+              <span><var class="mathVariable">x</var></span>
               <span class="equals">=</span>
               <button class="equationFreeInput" id="equationFinalInput" data-equation-field="final" type="button" aria-label="x&#12398;&#20516;"></button>
               <span class="equationResultFraction" id="equationFractionInput" hidden>
@@ -3445,7 +3450,7 @@
               </span>
             </div>
             <div class="equationLine" id="equationFractionFinalLine" hidden>
-              <span>x</span>
+              <span><var class="mathVariable">x</var></span>
               <span class="equals">=</span>
               <span class="equationResultFraction">
                 <button class="equationFreeInput" id="equationFractionLeftNumeratorInput" data-equation-field="fractionLeftNumerator" type="button" aria-label="&#21046;&#31639;&#24335;&#12398;&#24038;&#12398;&#20998;&#23376;"></button>
@@ -3460,7 +3465,7 @@
               </span>
             </div>
             <div class="equationLine" id="equationFractionMultiplyLine" hidden>
-              <span>x</span>
+              <span><var class="mathVariable">x</var></span>
               <span class="equals">=</span>
               <span class="equationResultFraction" id="equationMultiplyLeft">
                 <button class="equationFreeInput" id="equationMultiplyLeftNumeratorInput" data-equation-field="multiplyLeftNumerator" type="button" aria-label="掛け算の左の分子"></button>
@@ -3483,7 +3488,7 @@
               </span>
             </div>
             <div class="equationLine" id="equationFractionSimplifyLine" hidden>
-              <span>x</span>
+              <span><var class="mathVariable">x</var></span>
               <span class="equals">=</span>
               <span class="equationResultFraction">
                 <button class="equationFreeInput" id="equationFractionSimplifiedNumeratorInput" data-equation-field="simplifiedNumerator" type="button" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#23376;"></button>
@@ -3504,13 +3509,13 @@
             <p class="simultaneousPlan" id="simultaneousPlan" hidden></p>
             <div class="simultaneousStep" id="simultaneousFirstMultiplyStep" hidden>
               <span class="simultaneousCaption">①×</span><button class="simultaneousInput" id="simultaneousFirstMultiplierInput" data-system-field="firstMultiplier" type="button" aria-label="①にかける数"></button><span class="simultaneousCaption">→</span>
-              <button class="simultaneousInput" id="simultaneousFirstScaledXInput" data-system-field="firstScaledX" type="button" aria-label="①を何倍かしたxの係数"></button><span>x</span><span id="simultaneousFirstScaledYSign">+</span>
-              <button class="simultaneousInput" id="simultaneousFirstScaledYInput" data-system-field="firstScaledY" type="button" aria-label="①を何倍かしたyの係数"></button><span>y =</span>
+              <button class="simultaneousInput" id="simultaneousFirstScaledXInput" data-system-field="firstScaledX" type="button" aria-label="①を何倍かしたxの係数"></button><span><var class="mathVariable">x</var></span><span id="simultaneousFirstScaledYSign">+</span>
+              <button class="simultaneousInput" id="simultaneousFirstScaledYInput" data-system-field="firstScaledY" type="button" aria-label="①を何倍かしたyの係数"></button><span><var class="mathVariable">y</var> =</span>
               <button class="simultaneousInput" id="simultaneousFirstScaledRhsInput" data-system-field="firstScaledRhs" type="button" aria-label="①を何倍かした右辺"></button><span class="simultaneousNumber">…③</span>
             </div>
             <div class="simultaneousStep" id="simultaneousMultiplyStep">
-              <span class="simultaneousCaption">&#9313;&times;</span><button class="simultaneousInput active" id="simultaneousMultiplierInput" data-system-field="multiplier" type="button" aria-label="&#9313;&#12395;&#12363;&#12369;&#12427;&#25968;"></button><span class="simultaneousCaption">&#8594;</span><button class="simultaneousInput" id="simultaneousScaledXInput" data-system-field="scaledX" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;x&#12398;&#20418;&#25968;"></button><span>x</span><span id="simultaneousScaledYSign">+</span>
-              <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span>y =</span>
+              <span class="simultaneousCaption">&#9313;&times;</span><button class="simultaneousInput active" id="simultaneousMultiplierInput" data-system-field="multiplier" type="button" aria-label="&#9313;&#12395;&#12363;&#12369;&#12427;&#25968;"></button><span class="simultaneousCaption">&#8594;</span><button class="simultaneousInput" id="simultaneousScaledXInput" data-system-field="scaledX" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;x&#12398;&#20418;&#25968;"></button><span><var class="mathVariable">x</var></span><span id="simultaneousScaledYSign">+</span>
+              <button class="simultaneousInput active" id="simultaneousScaledYInput" data-system-field="scaledY" type="button" aria-label="&#9313;&#12434;2&#20517;&#12375;&#12383;y&#12398;&#20418;&#25968;"></button><span><var class="mathVariable">y</var> =</span>
               <button class="simultaneousInput" id="simultaneousScaledRhsInput" data-system-field="scaledRhs" type="button" aria-label="②を何倍かした右辺"></button><span class="simultaneousNumber" id="simultaneousScaledNumber">…③</span>
             </div>
             <div class="simultaneousStep" id="simultaneousZeroTransformStep" hidden>
@@ -6595,15 +6600,21 @@
         if (index > 0) setEquationActive(fields[index - 1]);
       }
 
+      function mathTextHtml(text) {
+        return String(text).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character])
+          .replace(/[xy]/g, variable => `<var class="mathVariable">${variable}</var>`)
+          .replace(/×/g, '<span class="mathTimes">×</span>');
+      }
+
       function renderEquationProblem() {
         if (!equationProblem) return;
         equationProblemLine.classList.toggle("fractionEquation", equationProblem.kind === "fraction");
         equationMiddleLine.classList.toggle("coefficientOnRight", Boolean(equationProblem.coefficientOnRight));
         if (equationProblem.kind === "fraction") {
           const fractionHtml = (value) => `<span>${value.numerator}</span><i></i><span>${value.denominator}</span>`;
-          equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
-          equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
-          equationDirectFractionLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span>x`;
+          equationBase.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span><var class="mathVariable">x</var> ${equationProblem.sourceOperator} <span class="equationStaticFraction">${fractionHtml(equationProblem.constant)}</span> = <span class="equationStaticFraction">${fractionHtml(equationProblem.total)}</span>`;
+          equationMiddleLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span><var class="mathVariable">x</var>`;
+          equationDirectFractionLeft.innerHTML = `<span class="equationStaticFraction">${fractionHtml(equationProblem.coefficient)}</span><var class="mathVariable">x</var>`;
           equationDirectFractionFirst.innerHTML = fractionHtml(equationProblem.total);
           equationDirectFractionOperator.textContent = equationProblem.workOperator;
           equationDirectFractionSecond.innerHTML = fractionHtml(equationProblem.constant);
@@ -6615,6 +6626,10 @@
         } else {
           equationBase.textContent = `${equationProblem.coefficient}x ${equationProblem.sourceOperator} ${equationProblem.constant} = ${equationProblem.total}`;
           equationMiddleLeft.textContent = `${equationProblem.coefficient}x`;
+        }
+        if (equationProblem.kind !== "fraction") {
+          equationBase.innerHTML = mathTextHtml(equationBase.textContent);
+          equationMiddleLeft.innerHTML = mathTextHtml(equationMiddleLeft.textContent);
         }
         resetEquationEntry();
       }
@@ -6743,9 +6758,9 @@
         simultaneousPlan.hidden = !showPlan;
         simultaneousSpacer.hidden = showPlan;
         simultaneousPlan.textContent = showPlan ? `まず、${item.finalVariable}を消します。` : "";
-        simultaneousFirstEquation.innerHTML = "<span>" + systemVariableTerm(item.firstX, "x").replace(/^\+ /, "").replace(/− /, "−") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant + '</span><span class="simultaneousNumber">…①</span>';
+        simultaneousFirstEquation.innerHTML = "<span>" + mathTextHtml(systemVariableTerm(item.firstX, "x").replace(/^\+ /, "").replace(/− /, "−") + " " + systemVariableTerm(item.firstY, "y") + " = " + item.firstConstant) + '</span><span class="simultaneousNumber">…①</span>';
         const secondXText = item.secondX === 1 ? "x" : item.secondX === -1 ? "−x" : `${item.secondX}x`;
-        simultaneousSecondEquation.innerHTML = "<span>" + secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant + '</span><span class="simultaneousNumber">…②</span>';
+        simultaneousSecondEquation.innerHTML = "<span>" + mathTextHtml(secondXText + " " + systemVariableTerm(item.secondY, "y") + " = " + item.secondConstant) + '</span><span class="simultaneousNumber">…②</span>';
         simultaneousScaledYSign.textContent = item.secondY < 0 ? "−" : "+";
         simultaneousFirstScaledYSign.textContent = item.firstY < 0 ? "−" : "+";
         simultaneousScaledNumber.textContent = item.firstMultiplier > 1 ? "…④" : "…③";
@@ -6786,6 +6801,11 @@
             + (Math.abs(factor) === 1 ? "" : Math.abs(factor) + "×") + (negativeValue ? "(" : "");
           simultaneousSubstituteSuffix.textContent = (negativeValue ? ")" : "") + " = " + item.secondConstant;
         }
+        [simultaneousPlan, simultaneousZeroTransformLabel, simultaneousZeroTransformVariable, simultaneousZeroSubstitutionText,
+          simultaneousEliminateVariable, simultaneousSolvedLabel, simultaneousFinalLabel, simultaneousFinalMiddleLabel,
+          simultaneousSubstituteCaptionText, simultaneousSubstitutePrefix].forEach(element => {
+          element.innerHTML = mathTextHtml(element.textContent);
+        });
         simultaneousValues = {};
         simultaneousPhase = item.zeroRhs ? "zeroTransform" : item.firstMultiplier > 1 ? "multiplyFirst" : "multiply";
         simultaneousActiveField = systemCurrentFields()[0];
