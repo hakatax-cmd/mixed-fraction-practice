@@ -310,6 +310,28 @@
         to { transform: scaleX(1); }
       }
       .menuPageDots { display: none; }
+      .dailyCompleteOverlay {
+        position: absolute; inset: 0; z-index: 4;
+        display: grid; place-items: center;
+        background: transparent;
+        pointer-events: none; user-select: none;
+      }
+      .dailyCompleteOverlay * { pointer-events: none; }
+      .dailyCompleteSeal {
+        display: grid; place-content: center; justify-items: center; gap: 8px;
+        width: 88%; max-width: 760px; height: 84%; padding: 10px;
+        box-sizing: border-box;
+        border: solid currentColor; border-width: 6px 5px 7px 5px;
+        border-radius: 48% 52% 45% 55% / 53% 46% 54% 47%;
+        color: #c73532; background: transparent; opacity: .7;
+        font-family: "Yu Kyokasho", "Hiragino Maru Gothic ProN", sans-serif;
+        font-size: 40px; font-weight: 800; line-height: 1.4;
+        transform: rotate(-2deg);
+      }
+      .dailyCompleteSeal span { white-space: nowrap; }
+      @media (min-width: 700px) and (min-height: 700px) {
+        .dailyCompleteSeal { font-size: 64px; border-width: 8px 6px 9px 7px; }
+      }
       #chooseMultiplication, #chooseFraction, #chooseLongMultiplication, #chooseFractionAddSubtract { background: #eef8f2; }
       #chooseBasicDivision, #chooseImproperFraction, #chooseDoubleMultiplication, #chooseDivision { background: #eef5ff; }
       #chooseFractionCalculation, #chooseGrouping, #chooseRatio, #choosePreschool { background: #fff6df; }
@@ -2856,6 +2878,9 @@
             <span class="menuPageDot isActive" id="activeMenuDot"></span>
             <span class="menuPageDot" id="graduatedMenuDot"></span>
           </div>
+          <div class="dailyCompleteOverlay" id="dailyCompleteOverlay" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <div class="dailyCompleteSeal"><span>本日は</span><span>すべて終了</span></div>
+          </div>
           <div class="recordActions">
             <button class="recordMenuButton recordViewButton" id="viewRecordsButton" type="button">&#35352;&#37682;&#12434;&#35211;&#12427;</button>
             <button class="recordMenuButton clearRecordsButton" id="clearRecordsButton" type="button">&#35352;&#37682;&#12434;&#20840;&#37096;&#28040;&#12377;</button>
@@ -4331,6 +4356,7 @@
       const feedback = document.querySelector("#feedback");
       const practiceCard = document.querySelector(".practiceCard");
       const appMenu = document.querySelector("#appMenu");
+      const dailyCompleteOverlay = document.querySelector("#dailyCompleteOverlay");
       const multiplicationCover = document.querySelector("#multiplicationCover");
       const basicDivisionCover = document.querySelector("#basicDivisionCover");
       const improperFractionCover = document.querySelector("#improperFractionCover");
@@ -9579,12 +9605,14 @@
       function readDailyCompletions() {
         const today = localDateKey(new Date());
         const apps = new Set(dailyCompletionCache?.date === today ? dailyCompletionCache.apps : []);
+        let allCompleted = dailyCompletionCache?.date === today && dailyCompletionCache.allCompleted === true;
         let stored = "";
         try {
           stored = localStorage.getItem(DAILY_COMPLETION_KEY) || "";
           const parsed = JSON.parse(stored || "null");
           if (parsed?.date === today && Array.isArray(parsed.apps)) {
             parsed.apps.filter(app => APP_ORDER.includes(app)).forEach(app => apps.add(app));
+            allCompleted = allCompleted || parsed.allCompleted === true;
           }
         } catch {
           // Keep today's marks available in memory if browser storage is blocked.
@@ -9592,7 +9620,7 @@
         APP_ORDER.forEach(app => {
           if (readPlayRecords(app).some(isTodayRecord)) apps.add(app);
         });
-        dailyCompletionCache = { date: today, apps: APP_ORDER.filter(app => apps.has(app)) };
+        dailyCompletionCache = { date: today, apps: APP_ORDER.filter(app => apps.has(app)), allCompleted };
         try {
           const value = JSON.stringify(dailyCompletionCache);
           if (stored !== value) localStorage.setItem(DAILY_COMPLETION_KEY, value);
@@ -9613,7 +9641,14 @@
       }
 
       function refreshMenuCompletionBadges() {
-        const completed = new Set(readDailyCompletions().apps);
+        const state = readDailyCompletions();
+        const completed = new Set(state.apps);
+        const active = readMenuLayout().active;
+        if (!state.allCompleted && active.length > 0 && active.every(app => completed.has(app))) {
+          state.allCompleted = true;
+          try { localStorage.setItem(DAILY_COMPLETION_KEY, JSON.stringify(state)); } catch {}
+        }
+        dailyCompleteOverlay.hidden = !state.allCompleted;
         Object.entries(menuButtons).forEach(([app, button]) => {
           const label = APP_LABELS[app] || app;
           if (completed.has(app)) {
@@ -9634,7 +9669,7 @@
       function markAppCompletedToday(app = selectedApp, completedAt = clearedAt) {
         if (!isFinished || !APP_ORDER.includes(app) || localDateKey(completedAt) !== localDateKey(new Date())) return;
         const state = readDailyCompletions();
-        dailyCompletionCache = { date: state.date, apps: [...new Set([...state.apps, app])] };
+        dailyCompletionCache = { ...state, apps: [...new Set([...state.apps, app])] };
         try { localStorage.setItem(DAILY_COMPLETION_KEY, JSON.stringify(dailyCompletionCache)); } catch {}
         refreshMenuCompletionBadges();
       }
