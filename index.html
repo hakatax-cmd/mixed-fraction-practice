@@ -420,12 +420,30 @@
       #choosePowers { background: #eef8ee; }
       .powersStartActions { display: grid; gap: 14px; justify-items: stretch; width: min(100%, 360px); }
       .powersStartActions .startButton { width: 100%; min-height: 62px; font-size: 20px; }
-      #powersProblemLine { grid-template-columns: max-content max-content max-content; justify-content: center; gap: 10px; font-size: 40px; }
-      #powersQuestion { white-space: nowrap; font-variant-numeric: tabular-nums; }
-      #powersQuestion sup { font-size: 0.55em; line-height: 0; vertical-align: super; }
-      .powersAnswer { display: flex; gap: 4px; min-width: calc(var(--digit-frame-width) * 4 + 12px); }
-      @media (min-width: 400px) { #powersProblemLine { font-size: 48px; } }
-      @media (min-width: 700px) and (min-height: 700px) { #powersProblemLine { font-size: 64px; } }
+      #powersProblemLine { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0; font-size: 64px; }
+      #powersProblemLine[data-powers-size="medium"] { font-size: 52px; }
+      #powersProblemLine[data-powers-size="compact"] { font-size: 40px; }
+      .powersEquation { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 80%; max-width: 100%; padding-block: 0.65em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      #powersQuestion { display: inline-flex; align-items: baseline; white-space: nowrap; }
+      #powersQuestion sup { display: inline-flex; position: relative; top: -0.6em; margin-left: 3px; font-size: 0.7em; line-height: 1; vertical-align: baseline; }
+      #powersProblemLine.logarithm #powersExponent { font-size: 0.8em; }
+      #powersExponent .answerBox { border-width: 3px; }
+      .powersAnswer { display: inline-flex; align-items: center; gap: 4px; }
+      @media (min-width: 350px) {
+        #powersProblemLine[data-powers-size="medium"] { font-size: 56px; }
+        #powersProblemLine[data-powers-size="compact"] { font-size: 44px; }
+      }
+      @media (min-width: 375px) { #powersProblemLine[data-powers-size="compact"] { font-size: 48px; } }
+      @media (min-width: 400px) {
+        #powersProblemLine { font-size: 72px; }
+        #powersProblemLine[data-powers-size="medium"] { font-size: 64px; }
+        #powersProblemLine[data-powers-size="compact"] { font-size: 50px; }
+      }
+      @media (min-width: 700px) and (min-height: 700px) {
+        #powersProblemLine { font-size: 112px; }
+        #powersProblemLine[data-powers-size="medium"] { font-size: 104px; }
+        #powersProblemLine[data-powers-size="compact"] { font-size: 88px; }
+      }
 
       #fractionCalculationProblemLine {
         --fraction-box-width: var(--digit-frame-width);
@@ -2935,8 +2953,9 @@
           <p class="coverGoal" id="multiplicationCoverGoal">32&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="multiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <div class="powersStartActions" id="powersStartActions" hidden>
-            <button class="startButton" id="powersOrderedStartButton" type="button">順番通りでスタート</button>
-            <button class="startButton" id="powersRandomStartButton" type="button">ランダムでスタート</button>
+            <button class="startButton" id="powersOrderedStartButton" type="button">指数モード順番通り</button>
+            <button class="startButton" id="powersRandomStartButton" type="button">指数モードランダム</button>
+            <button class="startButton" id="powersLogStartButton" type="button">対数モード</button>
           </div>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
         </section>
@@ -3122,14 +3141,17 @@
             </span>
           </div>
           <div class="problemLine" id="powersProblemLine" hidden>
-            <span id="powersQuestion"></span>
-            <span class="equals">=</span>
-            <span class="powersAnswer">
-              <button id="powersThousandsInput" class="answerBox" type="button" data-value="" aria-label="答えの千の位" hidden></button>
-              <button id="powersHundredsInput" class="answerBox" type="button" data-value="" aria-label="答えの百の位" hidden></button>
-              <button id="powersTensInput" class="answerBox" type="button" data-value="" aria-label="答えの十の位" hidden></button>
-              <button id="powersOnesInput" class="answerBox" type="button" data-value="" aria-label="答えの一の位"></button>
-            </span>
+            <div class="powersEquation" id="powersEquation">
+              <span id="powersQuestion"><span id="powersBase"></span><sup id="powersExponent"></sup></span>
+              <span class="equals">=</span>
+              <span class="powersAnswer" id="powersAnswerGroup">
+                <button id="powersThousandsInput" class="answerBox" type="button" data-value="" aria-label="答えの千の位" hidden></button>
+                <button id="powersHundredsInput" class="answerBox" type="button" data-value="" aria-label="答えの百の位" hidden></button>
+                <button id="powersTensInput" class="answerBox" type="button" data-value="" aria-label="答えの十の位" hidden></button>
+                <button id="powersOnesInput" class="answerBox" type="button" data-value="" aria-label="答えの一の位"></button>
+              </span>
+              <span id="powersResult" hidden></span>
+            </div>
           </div>
           <div class="problemLine" id="fractionCalculationProblemLine" hidden>
             <span class="fractionCalcQuestion" id="fractionCalculationQuestion"></span>
@@ -4041,6 +4063,7 @@
       let powersDeck = [];
       let powersIndex = 0;
       let powersProblem = null;
+      let powersLogarithm = false;
       let basicDivisionDeck = [];
       let basicDivisionIndex = 0;
       let basicDivisionProblem = null;
@@ -4238,12 +4261,18 @@
       const fractionCalculationQuestion = document.querySelector("#fractionCalculationQuestion");
       const powersProblemLine = document.querySelector("#powersProblemLine");
       const powersQuestion = document.querySelector("#powersQuestion");
+      const powersEquation = document.querySelector("#powersEquation");
+      const powersBase = document.querySelector("#powersBase");
+      const powersExponent = document.querySelector("#powersExponent");
+      const powersAnswerGroup = document.querySelector("#powersAnswerGroup");
+      const powersResult = document.querySelector("#powersResult");
       const multiplicationCoverTitle = document.querySelector("#multiplicationCoverTitle");
       const multiplicationCoverPrompt = document.querySelector("#multiplicationCoverPrompt");
       const multiplicationCoverGoal = document.querySelector("#multiplicationCoverGoal");
       const powersStartActions = document.querySelector("#powersStartActions");
       const powersOrderedStartButton = document.querySelector("#powersOrderedStartButton");
       const powersRandomStartButton = document.querySelector("#powersRandomStartButton");
+      const powersLogStartButton = document.querySelector("#powersLogStartButton");
       const fractionCalcWorkEquals = document.querySelector("#fractionCalcWorkEquals");
       const fractionCalcWork = document.querySelector("#fractionCalcWork");
       const fractionCalcWorkFirst = document.querySelector("#fractionCalcWorkFirst");
@@ -4714,10 +4743,26 @@
         return random ? shuffle(deck) : deck;
       }
 
+      function powersAnswer() {
+        if (!powersProblem) return 0;
+        return powersLogarithm ? powersProblem.exponent : powersProblem.answer;
+      }
+
       function renderPowersProblem() {
-        powersQuestion.innerHTML = `${powersProblem.base}<sup>${powersProblem.exponent}</sup>`;
-        powersQuestion.setAttribute("aria-label", `${powersProblem.base}の${powersProblem.exponent}乗`);
-        const visible = visibleDigitSlots(POWERS_SLOTS, powersProblem.answer);
+        powersProblemLine.classList.toggle("logarithm", powersLogarithm);
+        const digits = String(powersProblem.answer).length;
+        powersProblemLine.dataset.powersSize = digits >= 4 ? "compact" : digits === 3 ? "medium" : "large";
+        // Move the existing buttons before replacing the exponent's contents.
+        powersEquation.append(powersAnswerGroup);
+        powersBase.textContent = String(powersProblem.base);
+        powersExponent.textContent = powersLogarithm ? "" : String(powersProblem.exponent);
+        if (powersLogarithm) powersExponent.append(powersAnswerGroup);
+        powersResult.hidden = !powersLogarithm;
+        powersResult.textContent = powersLogarithm ? String(powersProblem.answer) : "";
+        powersQuestion.setAttribute("aria-label", powersLogarithm
+          ? `${powersProblem.base}の何乗が${powersProblem.answer}か`
+          : `${powersProblem.base}の${powersProblem.exponent}乗`);
+        const visible = visibleDigitSlots(POWERS_SLOTS, powersAnswer());
         POWERS_SLOTS.forEach(slot => { inputs[slot].hidden = !visible.includes(slot); });
       }
 
@@ -8641,7 +8686,7 @@
       }
 
       function currentTimedAnswer() {
-        if (selectedApp === "powers") return powersProblem?.answer || 0;
+        if (selectedApp === "powers") return powersAnswer();
         if (selectedApp === "mentalDivision") return divisionProblem ? divisionProblem.quotient : 0;
         if (selectedApp === "area") return areaProblem ? areaProblem.answer.n / areaProblem.answer.d : 0;
         if (selectedApp === "basicDivision") return basicDivisionAnswer();
@@ -10497,7 +10542,7 @@
 
       function recordMistake() {
         if (selectedApp === "powers") {
-          mistakes.push({ problem: `${powersProblem.base}の${powersProblem.exponent}乗`, answer: String(powersProblem.answer) });
+          mistakes.push({ problem: powersLogarithm ? `${powersProblem.base}の何乗が${powersProblem.answer}か` : `${powersProblem.base}の${powersProblem.exponent}乗`, answer: String(powersAnswer()) });
           return;
         }
         if (selectedApp === "area") {
@@ -11027,8 +11072,9 @@
         resetInputs(true);
       }
 
-      function startPowersChallenge(random = false) {
+      function startPowersChallenge(random = false, logarithm = false) {
         selectedApp = "powers";
+        powersLogarithm = logarithm;
         hasStarted = true;
         appMenu.hidden = true;
         cover.hidden = true;
@@ -11036,7 +11082,7 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        powersDeck = createPowersDeck(random);
+        powersDeck = createPowersDeck(random || logarithm);
         powersIndex = 0;
         powersProblem = powersDeck[0];
         resetChallenge();
@@ -11465,7 +11511,7 @@
         selectedApp = app === "powers" ? "powers" : "multiplication";
         const powers = selectedApp === "powers";
         multiplicationCoverTitle.textContent = powers ? "乗数" : "九九れんしゅう";
-        multiplicationCoverPrompt.textContent = powers ? "2・3・5・7の累乗" : "全種類をシャッフル";
+        multiplicationCoverPrompt.textContent = powers ? "2・3・5・7の指数・対数" : "全種類をシャッフル";
         multiplicationCoverGoal.innerHTML = `${powers ? POWERS_TARGET : 32}問<br>タイムアタック`;
         multiplicationStartButton.hidden = powers;
         powersStartActions.hidden = !powers;
@@ -12328,6 +12374,7 @@
       choosePowers.addEventListener("click", showPowersCover);
       powersOrderedStartButton.addEventListener("click", () => startPowersChallenge(false));
       powersRandomStartButton.addEventListener("click", () => startPowersChallenge(true));
+      powersLogStartButton.addEventListener("click", () => startPowersChallenge(true, true));
       chooseArea.addEventListener("click", showAreaCover);
       chooseMentalDivision.addEventListener("click", showMentalDivisionCover);
       areaStartButton.addEventListener("click", startAreaChallenge);
