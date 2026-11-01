@@ -427,12 +427,17 @@
         font-size: clamp(3rem, 7.6vmin, 5.1rem);
       }
 
-      #fractionCalculationProblemLine.withReciprocal {
+      #fractionCalculationProblemLine.withReciprocal,
+      #fractionCalculationProblemLine.withReduction {
         grid-template-columns: auto max-content;
+        grid-auto-rows: max-content;
+        align-content: start;
+        overflow-y: auto;
         row-gap: clamp(8px, 1.2vmin, 16px);
         font-size: clamp(2rem, 6vmin, 4rem);
       }
-      #fractionCalculationProblemLine.withReciprocal .fractionCalcQuestion {
+      #fractionCalculationProblemLine.withReciprocal .fractionCalcQuestion,
+      #fractionCalculationProblemLine.withReduction .fractionCalcQuestion {
         grid-column: 1 / -1;
         grid-row: 1;
         justify-self: start;
@@ -443,8 +448,14 @@
         display: inline-flex; align-items: center;
         gap: clamp(10px, 2vmin, 20px);
       }
+      #fractionCalculationProblemLine.withReduction > .fractionCalcAnswerEquals { grid-column: 1; grid-row: 2; }
+      #fractionCalculationProblemLine.withReduction > .fractionCalcAnswer { grid-column: 2; grid-row: 2; }
       #fractionCalculationProblemLine.withReciprocal > .fractionCalcAnswerEquals { grid-column: 1; grid-row: 3; }
       #fractionCalculationProblemLine.withReciprocal > .fractionCalcAnswer { grid-column: 2; grid-row: 3; }
+      .fractionCalcReducedEquals { grid-column: 1; grid-row: 3; }
+      .fractionCalcReducedAnswer { grid-column: 2; grid-row: 3; justify-self: start; }
+      #fractionCalculationProblemLine.withReciprocal > .fractionCalcReducedEquals,
+      #fractionCalculationProblemLine.withReciprocal > .fractionCalcReducedAnswer { grid-row: 4; }
       #fractionCalculationProblemLine .answerFraction.integerResult { display: inline-flex; }
 
       #fractionAddSubtractProblemLine {
@@ -3125,6 +3136,18 @@
                 <button id="fractionCalcDenominatorOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#20998;&#27597;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
               </span>
             </span>
+            <span class="equals fractionCalcReducedEquals" id="fractionCalcReducedEquals" hidden>=</span>
+            <span class="answerFraction fractionCalcReducedAnswer" id="fractionCalcReducedAnswer" hidden>
+              <span class="answerDigits">
+                <button id="fractionCalcReducedNumeratorTensInput" class="answerBox" aria-label="約分した分子の十の位" data-value="" type="button" hidden></button>
+                <button id="fractionCalcReducedNumeratorOnesInput" class="answerBox" aria-label="約分した分子の一の位" data-value="" type="button"></button>
+              </span>
+              <i id="fractionCalcReducedBar"></i>
+              <span class="answerDigits" id="fractionCalcReducedDenominatorRow">
+                <button id="fractionCalcReducedDenominatorTensInput" class="answerBox" aria-label="約分した分母の十の位" data-value="" type="button" hidden></button>
+                <button id="fractionCalcReducedDenominatorOnesInput" class="answerBox" aria-label="約分した分母の一の位" data-value="" type="button"></button>
+              </span>
+            </span>
           </div>
           <div class="problemLine" id="fractionAddSubtractProblemLine" hidden>
             <div class="fractionAddSubtractStack">
@@ -3851,7 +3874,9 @@
       const FRACTION_CALCULATION_TARGET = 12;
       const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
       const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
-      const FRACTION_CALC_WORK_SLOTS = ["fractionCalcWorkFirstDenominator", "fractionCalcWorkFirstNumerator", "fractionCalcWorkSecondDenominator", "fractionCalcWorkSecondNumerator"];
+      const FRACTION_CALC_WORK_SLOTS = ["fractionCalcWorkFirstDenominator", "fractionCalcWorkSecondDenominator", "fractionCalcWorkFirstNumerator", "fractionCalcWorkSecondNumerator"];
+      const FRACTION_CALC_REDUCED_NUMERATOR_SLOTS = ["fractionCalcReducedNumeratorTens", "fractionCalcReducedNumeratorOnes"];
+      const FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS = ["fractionCalcReducedDenominatorTens", "fractionCalcReducedDenominatorOnes"];
       const FRACTION_ADD_SUBTRACT_TARGET = 12;
       const FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS = ["fractionAddSubtractPrimaryNumeratorTens", "fractionAddSubtractPrimaryNumeratorOnes"];
       const FRACTION_ADD_SUBTRACT_PRIMARY_DENOMINATOR_SLOTS = ["fractionAddSubtractPrimaryDenominatorTens", "fractionAddSubtractPrimaryDenominatorOnes"];
@@ -4117,6 +4142,10 @@
         fractionCalcWorkFirstDenominator: document.querySelector("#fractionCalcWorkFirstDenominatorInput"),
         fractionCalcWorkSecondNumerator: document.querySelector("#fractionCalcWorkSecondNumeratorInput"),
         fractionCalcWorkSecondDenominator: document.querySelector("#fractionCalcWorkSecondDenominatorInput"),
+        fractionCalcReducedNumeratorTens: document.querySelector("#fractionCalcReducedNumeratorTensInput"),
+        fractionCalcReducedNumeratorOnes: document.querySelector("#fractionCalcReducedNumeratorOnesInput"),
+        fractionCalcReducedDenominatorTens: document.querySelector("#fractionCalcReducedDenominatorTensInput"),
+        fractionCalcReducedDenominatorOnes: document.querySelector("#fractionCalcReducedDenominatorOnesInput"),
         fractionAddSubtractPrimaryNumeratorTens: document.querySelector("#fractionAddSubtractPrimaryNumeratorTensInput"),
         fractionAddSubtractPrimaryNumeratorOnes: document.querySelector("#fractionAddSubtractPrimaryNumeratorOnesInput"),
         fractionAddSubtractPrimaryDenominatorTens: document.querySelector("#fractionAddSubtractPrimaryDenominatorTensInput"),
@@ -4178,6 +4207,10 @@
       const fractionCalcAnswer = document.querySelector("#fractionCalcAnswer");
       const fractionCalcAnswerBar = document.querySelector("#fractionCalcAnswerBar");
       const fractionCalcAnswerDenominatorRow = document.querySelector("#fractionCalcAnswerDenominatorRow");
+      const fractionCalcReducedEquals = document.querySelector("#fractionCalcReducedEquals");
+      const fractionCalcReducedAnswer = document.querySelector("#fractionCalcReducedAnswer");
+      const fractionCalcReducedBar = document.querySelector("#fractionCalcReducedBar");
+      const fractionCalcReducedDenominatorRow = document.querySelector("#fractionCalcReducedDenominatorRow");
       const fractionAddSubtractQuestion = document.querySelector("#fractionAddSubtractQuestion");
       const fractionAddSubtractPrimaryEquals = document.querySelector("#fractionAddSubtractPrimaryEquals");
       const fractionAddSubtractPrimaryAnswer = document.querySelector("#fractionAddSubtractPrimaryAnswer");
@@ -4651,8 +4684,9 @@
           }
           for (let integer = 2; integer <= 9; integer += 1) {
             const whole = { numerator: integer, denominator: 1 };
-            if (kind === "multiplyRight") add(value, whole, "multiply");
-            if (kind === "multiplyLeft") add(whole, value, "multiply");
+            const coprime = gcd(integer, value.denominator) === 1;
+            if (kind === "multiplyRight" && coprime) add(value, whole, "multiply");
+            if (kind === "multiplyLeft" && coprime) add(whole, value, "multiply");
             if (kind === "divideExact" && value.numerator % integer === 0) add(value, whole, "divide");
             if (kind === "divideFraction" && value.numerator % integer !== 0) add(value, whole, "divide", true);
             if (kind === "divideInteger") add(whole, value, "divide", true);
@@ -7636,6 +7670,25 @@
         return item ? item.answer : { numerator: 0, denominator: 1 };
       }
 
+      function fractionCalculationUnreducedAnswer(item = fractionCalculationProblem) {
+        if (!item) return { numerator: 0, denominator: 1 };
+        const { first, second, operator } = item;
+        if (operator === "divide" && !item.needsReciprocal && second.denominator === 1
+          && first.numerator % second.numerator === 0) {
+          return { numerator: first.numerator / second.numerator, denominator: first.denominator };
+        }
+        return {
+          numerator: first.numerator * (operator === "multiply" ? second.numerator : second.denominator),
+          denominator: first.denominator * (operator === "multiply" ? second.denominator : second.numerator),
+        };
+      }
+
+      function fractionCalculationNeedsReduction() {
+        const raw = fractionCalculationUnreducedAnswer();
+        const reduced = fractionCalculationAnswer();
+        return raw.numerator !== reduced.numerator || raw.denominator !== reduced.denominator;
+      }
+
       function fractionCalculationAnswerText(item = fractionCalculationProblem) {
         const answer = fractionCalculationAnswer(item);
         return answer.denominator === 1 ? String(answer.numerator) : `${answer.numerator}/${answer.denominator}`;
@@ -8314,7 +8367,8 @@
       }
 
       function fractionCalculationExpected(slot) {
-        const answer = fractionCalculationAnswer();
+        const answer = fractionCalculationUnreducedAnswer();
+        const reduced = fractionCalculationAnswer();
         const item = fractionCalculationProblem;
         const expectedValues = new Map(item?.needsReciprocal ? [
           ["fractionCalcWorkFirstNumerator", String(item.first.numerator)],
@@ -8325,6 +8379,8 @@
         [
           [FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator],
           [FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator],
+          [FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS, reduced.denominator],
+          [FRACTION_CALC_REDUCED_NUMERATOR_SLOTS, reduced.numerator],
         ].forEach(([slots, value]) => {
           const digits = String(value);
           visibleDigitSlots(slots, value).forEach((digitSlot, index) => {
@@ -8342,10 +8398,17 @@
       function fractionCalculationSlotOrder() {
         const work = fractionCalculationWorkSlots();
         if (fractionCalculationStage === "work") return work;
-        const answer = fractionCalculationAnswer();
         return [...work,
-          ...(answer.denominator === 1 ? [] : visibleDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator)),
-          ...visibleDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator)];
+          ...fractionCalculationValueSlots(FRACTION_CALC_NUMERATOR_SLOTS, FRACTION_CALC_DENOMINATOR_SLOTS, fractionCalculationUnreducedAnswer()),
+          ...(fractionCalculationStage === "reduced"
+            ? fractionCalculationValueSlots(FRACTION_CALC_REDUCED_NUMERATOR_SLOTS, FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS, fractionCalculationAnswer()) : [])];
+      }
+
+      function fractionCalculationValueSlots(numeratorSlots, denominatorSlots, value) {
+        return [
+          ...(value.denominator === 1 ? [] : visibleDigitSlots(denominatorSlots, value.denominator)),
+          ...visibleDigitSlots(numeratorSlots, value.numerator),
+        ];
       }
 
       function resetFractionCalculationEntry() {
@@ -8363,11 +8426,15 @@
 
       function updateFractionCalculationSlots() {
         if (!fractionCalculationProblem) return;
-        const answer = fractionCalculationAnswer();
+        const answer = fractionCalculationUnreducedAnswer();
+        const reduced = fractionCalculationAnswer();
+        const needsReduction = fractionCalculationNeedsReduction();
         const work = fractionCalculationProblem.needsReciprocal;
-        const showAnswer = fractionCalculationStage === "answer";
+        const showAnswer = fractionCalculationStage !== "work";
+        const showReduced = fractionCalculationStage === "reduced";
         const firstIsInteger = fractionCalculationProblem.first.denominator === 1;
         fractionCalculationProblemLine.classList.toggle("withReciprocal", Boolean(work));
+        fractionCalculationProblemLine.classList.toggle("withReduction", needsReduction);
         fractionCalcWorkEquals.hidden = !work;
         fractionCalcWork.hidden = !work;
         fractionCalcWorkFirst.classList.toggle("integerResult", firstIsInteger);
@@ -8378,15 +8445,21 @@
         fractionCalcAnswer.classList.toggle("integerResult", answer.denominator === 1);
         fractionCalcAnswerBar.hidden = answer.denominator === 1;
         fractionCalcAnswerDenominatorRow.hidden = answer.denominator === 1;
-        const visible = new Set([
-          ...visibleDigitSlots(FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator),
-          ...(answer.denominator === 1 ? [] : visibleDigitSlots(FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator)),
-        ]);
+        const visible = new Set(fractionCalculationValueSlots(FRACTION_CALC_NUMERATOR_SLOTS, FRACTION_CALC_DENOMINATOR_SLOTS, answer));
         [...FRACTION_CALC_NUMERATOR_SLOTS, ...FRACTION_CALC_DENOMINATOR_SLOTS].forEach((slot) => {
           inputs[slot].hidden = !showAnswer || !visible.has(slot);
         });
         const workSlots = fractionCalculationWorkSlots();
         FRACTION_CALC_WORK_SLOTS.forEach(slot => { inputs[slot].hidden = !workSlots.includes(slot); });
+        fractionCalcReducedEquals.hidden = !showReduced;
+        fractionCalcReducedAnswer.hidden = !showReduced;
+        fractionCalcReducedAnswer.classList.toggle("integerResult", reduced.denominator === 1);
+        fractionCalcReducedBar.hidden = reduced.denominator === 1;
+        fractionCalcReducedDenominatorRow.hidden = reduced.denominator === 1;
+        const reducedSlots = fractionCalculationValueSlots(FRACTION_CALC_REDUCED_NUMERATOR_SLOTS, FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS, reduced);
+        [...FRACTION_CALC_REDUCED_NUMERATOR_SLOTS, ...FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS].forEach(slot => {
+          inputs[slot].hidden = !showReduced || !reducedSlots.includes(slot);
+        });
       }
 
       function fractionAddSubtractExpected(slot) {
@@ -9058,6 +9131,7 @@
           input.blur();
         });
         if (selectedApp === "speed") renderSpeedEntry();
+        if (selectedApp === "fractionCalculation") inputs[slot]?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
       }
 
       function nextSlot(slot) {
@@ -10199,12 +10273,13 @@
         const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
         const correct = correctDigits && correctDecimal;
 
-        if (selectedApp === "fractionCalculation" && fractionCalculationStage === "work") {
+        if (selectedApp === "fractionCalculation" && (fractionCalculationStage === "work"
+          || (fractionCalculationStage === "answer" && fractionCalculationNeedsReduction()))) {
           if (!correct) {
             showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
             return;
           }
-          fractionCalculationStage = "answer";
+          fractionCalculationStage = fractionCalculationStage === "work" ? "answer" : "reduced";
           updateFractionCalculationSlots();
           setActive(activeSlotOrder().find(slot => getAnswerValue(slot) !== expected(slot)));
           return;
