@@ -1234,6 +1234,8 @@
       .simultaneousFraction { justify-items: center; }
       .simultaneousFraction i { width: 100%; }
       .simultaneousFraction .simultaneousInput { height: 100%; }
+      .simultaneousFraction > .simultaneousInput:not(.fractionSign), .simultaneousFraction > i { grid-column: 2; }
+      .simultaneousFraction > .fractionSign { grid-area: 1 / 1 / 4 / 2; align-self: center; height: var(--digit-frame-height); margin-right: 4px; }
       #simultaneousProblemLine { height: 100%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; scroll-padding: 12px; }
       .practiceCard:has(#simultaneousProblemLine:not([hidden])) { touch-action: pan-y; }
       @media (max-width: 430px) {
@@ -2514,6 +2516,9 @@
       }
 
       .wrongReaction { display: grid; justify-items: center; gap: 12px; }
+      .reaction.reissue .big-cross { font-size: 0; }
+      .reaction.reissue .big-cross::before { content: "\2716"; font-size: 120px; }
+      .reaction.reissue .correctAnswer { font-size: 48px; }
       .correctAnswer { margin: 0; color: var(--coral); font-size: clamp(1.7rem, 6vw, 3.2rem); font-weight: 900; }
 
       .finishPanel {
@@ -3662,6 +3667,7 @@
               <span id="simultaneousSolvedLabel">y =</span>
               <button class="simultaneousInput" id="simultaneousYInput" data-system-field="y" type="button" aria-label="y&#12398;&#20516;"></button>
               <span class="simultaneousFraction" id="simultaneousYFraction" hidden>
+                <button class="simultaneousInput fractionSign" id="simultaneousYSignInput" data-system-field="ySign" type="button" aria-label="分数の符号" hidden></button>
                 <button class="simultaneousInput" id="simultaneousYNumeratorInput" data-system-field="yNumerator" type="button" aria-label="y&#12398;&#20998;&#23376;"></button><i></i>
                 <button class="simultaneousInput" id="simultaneousYDenominatorInput" data-system-field="yDenominator" type="button" aria-label="y&#12398;&#20998;&#27597;"></button>
               </span>
@@ -3671,6 +3677,7 @@
               <span id="simultaneousSubstitutePrefix"></span>
               <button class="simultaneousInput" id="simultaneousSubstituteInput" data-system-field="substitute" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20516;"></button>
               <span class="simultaneousFraction" id="simultaneousSubstituteFraction" hidden>
+                <button class="simultaneousInput fractionSign" id="simultaneousSubstituteSignInput" data-system-field="substituteSign" type="button" aria-label="分数の符号" hidden></button>
                 <button class="simultaneousInput" id="simultaneousSubstituteNumeratorInput" data-system-field="substituteNumerator" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20998;&#23376;"></button><i></i>
                 <button class="simultaneousInput" id="simultaneousSubstituteDenominatorInput" data-system-field="substituteDenominator" type="button" aria-label="&#20195;&#20837;&#12377;&#12427;&#20998;&#27597;"></button>
               </span>
@@ -3682,6 +3689,7 @@
             <div class="simultaneousStep" id="simultaneousXStep" hidden>
               <span id="simultaneousFinalLabel">x =</span><button class="simultaneousInput" id="simultaneousXInput" data-system-field="x" type="button" aria-label="最後の答え"></button>
               <span class="simultaneousFraction" id="simultaneousXFraction" hidden>
+                <button class="simultaneousInput fractionSign" id="simultaneousXSignInput" data-system-field="xSign" type="button" aria-label="分数の符号" hidden></button>
                 <button class="simultaneousInput" id="simultaneousXNumeratorInput" data-system-field="xNumerator" type="button" aria-label="最後の答えの分子"></button><i></i>
                 <button class="simultaneousInput" id="simultaneousXDenominatorInput" data-system-field="xDenominator" type="button" aria-label="最後の答えの分母"></button>
               </span>
@@ -4146,6 +4154,8 @@
       let modeLocked = false;
       let isFinished = false;
       let transitionTimer = null;
+      let reissueProblem = null;
+      const tileMistakes = new Map();
       let confirmationTimer = null;
       let divisionWrongTimer = null;
       const divisionWrongSince = new Map();
@@ -4431,6 +4441,7 @@
       const simultaneousYInput = document.querySelector("#simultaneousYInput");
       const simultaneousYFraction = document.querySelector("#simultaneousYFraction");
       const simultaneousYNumeratorInput = document.querySelector("#simultaneousYNumeratorInput");
+      const simultaneousYSignInput = document.querySelector("#simultaneousYSignInput");
       const simultaneousYDenominatorInput = document.querySelector("#simultaneousYDenominatorInput");
       const simultaneousSubstituteCaption = document.querySelector("#simultaneousSubstituteCaption");
       const simultaneousSubstituteCaptionText = document.querySelector("#simultaneousSubstituteCaptionText");
@@ -4440,12 +4451,14 @@
       const simultaneousSubstituteInput = document.querySelector("#simultaneousSubstituteInput");
       const simultaneousSubstituteFraction = document.querySelector("#simultaneousSubstituteFraction");
       const simultaneousSubstituteNumeratorInput = document.querySelector("#simultaneousSubstituteNumeratorInput");
+      const simultaneousSubstituteSignInput = document.querySelector("#simultaneousSubstituteSignInput");
       const simultaneousSubstituteDenominatorInput = document.querySelector("#simultaneousSubstituteDenominatorInput");
       const simultaneousXStep = document.querySelector("#simultaneousXStep");
       const simultaneousFinalLabel = document.querySelector("#simultaneousFinalLabel");
       const simultaneousXInput = document.querySelector("#simultaneousXInput");
       const simultaneousXFraction = document.querySelector("#simultaneousXFraction");
       const simultaneousXNumeratorInput = document.querySelector("#simultaneousXNumeratorInput");
+      const simultaneousXSignInput = document.querySelector("#simultaneousXSignInput");
       const simultaneousXDenominatorInput = document.querySelector("#simultaneousXDenominatorInput");
       const simultaneousFinalMiddleStep = document.querySelector("#simultaneousFinalMiddleStep");
       const simultaneousFinalMiddleLabel = document.querySelector("#simultaneousFinalMiddleLabel");
@@ -4490,12 +4503,15 @@
         rhs: simultaneousRhsInput,
         y: simultaneousYInput,
         yNumerator: simultaneousYNumeratorInput,
+        ySign: simultaneousYSignInput,
         yDenominator: simultaneousYDenominatorInput,
         substitute: simultaneousSubstituteInput,
         substituteNumerator: simultaneousSubstituteNumeratorInput,
+        substituteSign: simultaneousSubstituteSignInput,
         substituteDenominator: simultaneousSubstituteDenominatorInput,
         x: simultaneousXInput,
         xNumerator: simultaneousXNumeratorInput,
+        xSign: simultaneousXSignInput,
         xDenominator: simultaneousXDenominatorInput,
         finalMiddle: simultaneousFinalMiddleInput,
       };
@@ -6003,7 +6019,7 @@
         acceptAreaProductOrder(part.field, next);
         const expected = areaExpected(part);
         if (!expected.startsWith(next)) {
-          showWrongConfirmation(`area:${part.field}:${next}`, () => renderAreaEntry());
+          showWrongConfirmation(`area:${part.field}:${next}`, () => renderAreaEntry(), [[part.field, next.length - 1, part.type === "operator"]]);
           return;
         }
         areaValues[part.field] = next;
@@ -6490,12 +6506,12 @@
         const next = operator ? value : current + value;
         if (next.length > expectedValue.length) return;
         if (!operator && !expectedValue.startsWith(next)) {
-          showWrongConfirmation(`speed:${speedActiveField}:${next}`, renderSpeedEntry);
+          showWrongConfirmation(`speed:${speedActiveField}:${next}`, renderSpeedEntry, [[speedActiveField, current.length]]);
           return;
         }
         speedSetValue(speedActiveField, next);
         if (operator && next !== expectedValue) {
-          showOperatorPenalty(clearSpeedOperator);
+          showOperatorPenalty(clearSpeedOperator, "operator");
           return;
         }
         if (next.length === expectedValue.length) speedFinishField(speedActiveField);
@@ -6781,18 +6797,18 @@
           equationValues[field] = nextValue;
           renderEquationEntry();
           if (nextValue !== expected) {
-            showEquationOperatorWrong();
+            showEquationOperatorWrong(field);
             return;
           }
           equationFinishField();
           return;
         }
         if (nextValue === "-" && (current || !expected.startsWith("-"))) return;
-        if (!/^\d$/.test(nextValue) && nextValue !== "-") return;
+        if (!/^\d$/.test(nextValue) && nextValue !== "-" && !(nextValue === "+" && !current && expected.startsWith("-"))) return;
         const next = current + nextValue;
         if (next.length > expected.length) return;
         if (!expected.startsWith(next)) {
-          showWrongConfirmation(`equation:${field}:${next}`, renderEquationEntry);
+          showWrongConfirmation(`equation:${field}:${next}`, renderEquationEntry, [[field, current.length, !current && expected.startsWith("-")]]);
           return;
         }
         equationValues[field] = next;
@@ -6899,14 +6915,16 @@
         if (field === "rhs") return String(simultaneousProblem.eliminationRhs);
         const first = simultaneousFirstSolution();
         if (field === "y") return String(first.numerator);
-        if (field === "yNumerator") return String(first.numerator);
+        if (field === "ySign" || field === "substituteSign") return first.denominator > 1 && first.numerator < 0 ? "-" : "";
+        if (field === "yNumerator") return String(Math.abs(first.numerator));
         if (field === "yDenominator") return String(first.denominator);
         if (field === "substitute") return String(first.numerator);
-        if (field === "substituteNumerator") return String(first.numerator);
+        if (field === "substituteNumerator") return String(Math.abs(first.numerator));
         if (field === "substituteDenominator") return String(first.denominator);
         if (field === "x") return String(simultaneousFinalValue());
         const final = simultaneousFinalSolution();
-        if (field === "xNumerator") return String(final.numerator);
+        if (field === "xSign") return final.denominator > 1 && final.numerator < 0 ? "-" : "";
+        if (field === "xNumerator") return String(Math.abs(final.numerator));
         if (field === "xDenominator") return String(final.denominator);
         if (field === "finalMiddle") return String(simultaneousFinalCoefficient() * final.numerator / final.denominator);
         return "";
@@ -6921,13 +6939,13 @@
         if (simultaneousPhase === "multiply") return ["multiplier", "scaledX", "scaledY", "scaledRhs"];
         if (simultaneousPhase === "eliminate") return ["coefficient", "rhs"];
         if (simultaneousPhase === "solution") {
-          return simultaneousFirstSolution().denominator > 1 ? ["yDenominator", "yNumerator"] : ["y"];
+          return simultaneousFirstSolution().denominator > 1 ? [...(systemExpected("ySign") ? ["ySign"] : []), "yDenominator", "yNumerator"] : ["y"];
         }
         if (simultaneousPhase === "substitute") {
-          return simultaneousFirstSolution().denominator > 1 ? ["substituteDenominator", "substituteNumerator"] : ["substitute"];
+          return simultaneousFirstSolution().denominator > 1 ? [...(systemExpected("substituteSign") ? ["substituteSign"] : []), "substituteDenominator", "substituteNumerator"] : ["substitute"];
         }
         if (simultaneousPhase === "finalMiddle") return ["finalMiddle"];
-        return simultaneousFinalSolution().denominator > 1 ? ["xDenominator", "xNumerator"] : ["x"];
+        return simultaneousFinalSolution().denominator > 1 ? [...(systemExpected("xSign") ? ["xSign"] : []), "xDenominator", "xNumerator"] : ["x"];
       }
 
       function renderSystemEntry() {
@@ -6954,6 +6972,7 @@
         simultaneousXFraction.hidden = !simultaneousXInput.hidden;
         Object.entries(simultaneousFields).forEach(([field, input]) => {
           const expected = systemExpected(field);
+          if (field.endsWith("Sign")) input.hidden = !expected;
           const slots = Math.max(1, expected.length);
           const value = Array.from(simultaneousValues[field] || "");
           input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] === "-" ? "−" : value[index] || "") + "</span>").join("");
@@ -7130,11 +7149,11 @@
         const current = simultaneousValues[field] || "";
         const next = value === "\u2212" ? "-" : value;
         if (next === "-" && (current || !expected.startsWith("-"))) return;
-        if (!/^\d$/.test(next) && next !== "-") return;
+        if (!/^\d$/.test(next) && next !== "-" && !(next === "+" && !current && expected.startsWith("-"))) return;
         const result = current + next;
         if (result.length > expected.length) return;
         if (!expected.startsWith(result)) {
-          showWrongConfirmation(`simultaneous:${field}:${result}`, renderSystemEntry);
+          showWrongConfirmation(`simultaneous:${field}:${result}`, renderSystemEntry, [[field, current.length, !current && expected.startsWith("-")]]);
           return;
         }
         simultaneousValues[field] = result;
@@ -9313,6 +9332,11 @@
         completeRatioProblem();
       }
 
+      function ratioWrongTiles(fields) {
+        return fields.flatMap(field => Array.from(ratioValues[field] || "", (digit, position) =>
+          digit === ratioExpected(field)[position] ? null : [field, position]).filter(Boolean));
+      }
+
       function ratioFinishField(field) {
         if (ratioIsSpecial() || ratioProblem?.type === "rate") {
           const stage = ratioSpecialCurrentStage();
@@ -9320,7 +9344,7 @@
           const pending = stage.fields.find((name) => (ratioValues[name] || "").length < ratioExpected(name).length);
           if (!pending) {
             if (!stage.fields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
-              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(stage.fields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(stage.fields), ratioWrongTiles(stage.fields));
               return;
             }
             const stages = ratioSpecialStages();
@@ -9348,7 +9372,7 @@
             return;
           }
           if (!ratioExpressionIsCorrect()) {
-              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(expressionFields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(expressionFields), ratioWrongTiles(expressionFields));
             return;
           }
           ratioAdvance(expressionFields.at(-1));
@@ -9361,7 +9385,7 @@
             return;
           }
           if (!answerFields.every((name) => (ratioValues[name] || "") === ratioExpected(name))) {
-              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(answerFields));
+              showWrongConfirmation(ratioSignature(), () => clearIncorrectRatioFields(answerFields), ratioWrongTiles(answerFields));
             return;
           }
           completeRatioProblem();
@@ -9387,12 +9411,12 @@
         if (!isOperator && wanted[next.length] === ".") next += ".";
         if (next.length > wanted.length) return;
         if (!isOperator && wanted.length > 1 && !wanted.startsWith(next)) {
-          showWrongConfirmation(`ratio:${field}:${next}`, renderRatioEntry);
+          showWrongConfirmation(`ratio:${field}:${next}`, renderRatioEntry, [[field, current.length]]);
           return;
         }
         ratioSetValue(field, next);
         if (isOperator && next !== wanted) {
-          showOperatorPenalty(() => clearRatioFields([field]));
+          showOperatorPenalty(() => clearRatioFields([field]), field);
           return;
         }
         if (ratioProblem.type === "rate" && field === "decimalTenths" && next.length === wanted.length) {
@@ -9604,7 +9628,89 @@
         nextMistakeButton.hidden = false;
       }
 
-      function showWrongConfirmation(signature, cleanup = clearIncorrectAnswers) {
+      function tryReissue(errors) {
+        let deck, index, generate, sameType, replace;
+        switch (selectedApp) {
+          case "equation":
+            deck = equationDeck; index = equationIndex;
+            generate = createEquationDeck;
+            sameType = (a, b) => a.kind === b.kind && a.sourceOperator === b.sourceOperator
+              && a.coefficientOnRight === b.coefficientOnRight && a.useProductDenominator === b.useProductDenominator;
+            replace = item => { equationProblem = item; };
+            break;
+          case "simultaneous":
+            deck = simultaneousDeck; index = simultaneousIndex;
+            generate = createSimultaneousDeck;
+            sameType = (a, b) => a.operation === b.operation && a.firstSolutionVariable === b.firstSolutionVariable;
+            replace = item => { simultaneousProblem = item; };
+            break;
+          case "ratio":
+            deck = ratioDeck; index = ratioIndex;
+            generate = createRatioDeck;
+            sameType = (a, b) => a.type === b.type && a.rate?.inputStyle === b.rate?.inputStyle;
+            replace = item => { ratioProblem = item; };
+            break;
+          case "speed":
+            deck = speedDeck; index = speedIndex;
+            generate = () => ({ [index]: createSpeedProblem(deck[index].type, new Set()) });
+            replace = item => { speedProblem = item; };
+            break;
+          case "area":
+            deck = areaDeck; index = areaIndex;
+            generate = createAreaDeck;
+            sameType = (a, b) => a.steps.length === b.steps.length;
+            replace = item => { areaProblem = item; };
+            break;
+          default: return false;
+        }
+        const current = deck[index];
+        if (!current || !readMenuLayout().active.includes(selectedApp)) return false;
+        if (reissueProblem !== current) {
+          reissueProblem = current;
+          tileMistakes.clear();
+        }
+        let retry = false;
+        for (const [field, position, symbol = false] of errors) {
+          const key = JSON.stringify([field, position, symbol]);
+          const count = (tileMistakes.get(key) || 0) + 1;
+          tileMistakes.set(key, count);
+          if (count >= (symbol ? 2 : 3)) retry = true;
+        }
+        if (!retry) return false;
+        const used = new Set(deck.map(item => JSON.stringify(item)));
+        const mode = selectedApp;
+        let replacement, generated;
+        for (let attempt = 0; attempt < 32; attempt += 1) {
+          generated = generate();
+          const candidate = generated[index];
+          if (candidate && !used.has(JSON.stringify(candidate)) && (!sameType || sameType(current, candidate))
+            && (mode !== "ratio" || current.type !== "rate" || !used.has(JSON.stringify(generated[index + 1])))) {
+            replacement = candidate;
+            break;
+          }
+        }
+        if (!replacement) return false;
+        mistakeCount += 1;
+        updateProgress();
+        clearDivisionWrongTimer();
+        setLocked(true);
+        showReaction(false, false, "再出題");
+        reaction.classList.add("reissue");
+        schedule(() => {
+          if (selectedApp !== mode || deck[index] !== current) return;
+          hideReaction();
+          deck[index] = replacement;
+          if (mode === "ratio" && current.type === "rate") deck[index + 1] = generated[index + 1];
+          replace(replacement);
+          setLocked(false);
+          renderProblem();
+          resetInputs(true);
+        }, 900);
+        return true;
+      }
+
+      function showWrongConfirmation(signature, cleanup = clearIncorrectAnswers, errors = null) {
+        if (errors && tryReissue(errors)) return;
         pendingWrongSignature = signature;
         if (confirmationTimer) clearTimeout(confirmationTimer);
         clearDivisionWrongTimer();
@@ -9638,7 +9744,8 @@
         }, WRONG_CONFIRM_MS);
       }
 
-      function showEquationOperatorWrong() {
+      function showEquationOperatorWrong(field) {
+        if (field && tryReissue([[field, 0, true]])) return;
         pendingWrongSignature = equationSignature();
         if (confirmationTimer) clearTimeout(confirmationTimer);
         clearDivisionWrongTimer();
@@ -10314,11 +10421,13 @@
       }
 
       function hideReaction() {
+        reaction.classList.remove("reissue");
         reaction.classList.remove("show");
         reaction.classList.remove("wrong");
       }
 
-      function showOperatorPenalty(cleanup) {
+      function showOperatorPenalty(cleanup, field) {
+        if (field && tryReissue([[field, 0, true]])) return;
         const applyTimePenalty = selectedApp !== "ratio";
         if (applyTimePenalty) timePenaltyMs += OPERATOR_PENALTY_MS;
         updateProgress();
@@ -10444,7 +10553,8 @@
             return;
           }
 
-          showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
+          showWrongConfirmation(answerSignature(), clearIncorrectAnswers,
+            selectedApp === "speed" ? wrongAnswerSlots().map(slot => [slot, 0]) : null);
           return;
         }
 
@@ -12203,7 +12313,8 @@
           }
           if (event.key === "+") {
             event.preventDefault();
-            equationReceive("+");
+            if (selectedApp === "equation") equationReceive("+");
+            else simultaneousReceive("+");
             return;
           }
           if (event.key === "*" || event.key === "x" || event.key === "X") {
@@ -12336,6 +12447,7 @@
         if (selectedApp === "area") areaReceive("+");
         if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("+");
         if (selectedApp === "equation") equationReceive("+");
+        if (selectedApp === "simultaneous") simultaneousReceive("+");
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
