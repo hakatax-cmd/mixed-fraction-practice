@@ -1065,6 +1065,29 @@
       .fishingFraction .fishingDigit { width: 1.1em; height: 1.35em; }
       .fishingFraction .fishingDecimal { height: 1.35em; }
       #chooseFactors { background: #eef5ff; }
+      #chooseProportion { background: #f0f8ed; }
+      #challengeView.proportionMode #fishingProblemLine { padding: 14px 8px; gap: 14px; font-size: 32px; }
+      .proportionMode .fishingFact:empty { display: none; }
+      .proportionMode .fishingFact { font-size: 16px; }
+      .proportionMode .fishingQuestion { font-size: 22px; }
+      .proportionMode .fishingSteps { width: 100%; gap: 14px; justify-items: center; }
+      .proportionMode .fishingStep { flex-wrap: nowrap; gap: 5px; white-space: nowrap; }
+      .proportionMode .fishingInput { gap: 3px; }
+      .proportionMode .fishingDigit { width: 0.94em; height: 1.35em; }
+      .proportionMode .fishingInput { min-height: 1.35em; }
+      .proportionMode .mathVariable { font-family: "Times New Roman", "Cambria Math", serif; font-style: italic; font-weight: 700; }
+      #proportionDiagram { width: min(100%, 340px); }
+      #challengeView:not(.proportionMode) #proportionDiagram { display: none; }
+      #proportionDiagram svg { display: block; width: 100%; height: auto; }
+      #proportionDiagram text { fill: var(--ink); font: 700 22px sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      #proportionDiagram .proportionBlank { fill: white; stroke: var(--line); stroke-width: 2; }
+      @media (min-width: 700px) and (min-height: 700px) {
+        #challengeView.proportionMode #fishingProblemLine { padding: 22px 12px; font-size: 44px; gap: 20px; }
+        .proportionMode .fishingQuestion { font-size: 28px; }
+        .proportionMode .fishingFact { font-size: 20px; }
+        .proportionMode .fishingSteps { gap: 20px; }
+        #proportionDiagram { width: min(100%, 420px); }
+      }
       .factorsMode #fishingProblemLine { font-size: 32px; padding: 16px 10px; gap: 16px; }
       .factorsMode .fishingQuestion { font-size: 26px; }
       .factorsMode .fishingSteps { gap: 20px; }
@@ -2898,6 +2921,11 @@
         .areaDerivation .areaRowBody > span { font-size: 32px; }
         .areaCalculation .areaRowBody > span { font-size: 32px; }
       }
+      #challengeView.proportionMode .keypad { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+      #challengeView.proportionMode .ratioKey { display: none; }
+      #challengeView.proportionMode .keypad :is([data-key="1"], [data-key="2"], [data-key="3"], #backButton) { grid-row: 1; }
+      #challengeView.proportionMode .keypad :is([data-key="4"], [data-key="5"], [data-key="6"], #clearButton) { grid-row: 2; }
+      #challengeView.proportionMode .keypad :is([data-key="7"], [data-key="8"], [data-key="9"], [data-key="0"]) { grid-row: 3; }
     </style>
   </head>
   <body>
@@ -2929,6 +2957,7 @@
                   <button class="menuButton" id="chooseSubtraction" type="button">&#22235;&#26689;&#12398;<br />&#24341;&#12365;&#31639;</button>
                   <button class="menuButton" id="chooseArea" type="button">長方形・三角形<br />台形の面積</button>
                   <button class="menuButton" id="chooseFactors" type="button">約数・倍数</button>
+                  <button class="menuButton" id="chooseProportion" type="button">比</button>
                   <button class="menuButton" id="chooseMentalDivision" type="button">4桁÷1桁の<br />暗算</button>
                   <button class="menuButton" id="choosePowers" type="button">乗数</button>
                 </div>
@@ -3513,6 +3542,7 @@
             <p class="fishingFact" id="fishingFact"></p>
             <p class="fishingQuestion" id="fishingQuestion"></p>
             <div class="fishingSteps" id="fishingSteps"></div>
+            <div id="proportionDiagram" hidden></div>
           </div>
           <div id="areaProblemLine" hidden>
             <div class="areaOverview">
@@ -3952,6 +3982,8 @@
       const FISHING_TARGET = 10;
       const FACTORS_TARGET = 6;
       const FACTORS_BEST_KEY = "factorsBestTimeMs";
+      const PROPORTION_TARGET = 12;
+      const PROPORTION_BEST_KEY = "proportionBestTimeMs";
       const AREA_TARGET = 8;
       const AREA_BEST_KEY = "areaBestTimeMs";
       const FISHING_BEST_KEY = "fishingBestTimeMs";
@@ -3997,6 +4029,7 @@
         SPEED_BEST_KEY,
         FISHING_BEST_KEY,
         FACTORS_BEST_KEY,
+        PROPORTION_BEST_KEY,
         AREA_BEST_KEY,
         EQUATION_BEST_KEY,
         SIMULTANEOUS_BEST_KEY,
@@ -4027,6 +4060,7 @@
         fishing: "\u91e3\u308a\u306e\u554f\u984c",
         area: "長方形・三角形・台形の面積",
         factors: "約数・倍数",
+        proportion: "比",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
         equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
         simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
@@ -4053,6 +4087,7 @@
         "mentalDivision",
         "factors",
         "powers",
+        "proportion",
       ];
       const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
       const DAILY_COMPLETION_KEY = "mathPracticeDailyCompletionsV1";
@@ -4567,6 +4602,7 @@
       const chooseSpeed = document.querySelector("#chooseSpeed");
       const chooseFishing = document.querySelector("#chooseFishing");
       const chooseFactors = document.querySelector("#chooseFactors");
+      const chooseProportion = document.querySelector("#chooseProportion");
       const choosePowers = document.querySelector("#choosePowers");
       const fishingCoverTitle = document.querySelector("#fishingCoverTitle");
       const fishingCoverPrompt = document.querySelector("#fishingCoverPrompt");
@@ -4620,6 +4656,7 @@
       const ratioProblemLine = document.querySelector("#ratioProblemLine");
       const speedProblemLine = document.querySelector("#speedProblemLine");
       const fishingProblemLine = document.querySelector("#fishingProblemLine");
+      const proportionDiagram = document.querySelector("#proportionDiagram");
       const fishingFact = document.querySelector("#fishingFact");
       const fishingQuestion = document.querySelector("#fishingQuestion");
       const fishingSteps = document.querySelector("#fishingSteps");
@@ -5184,6 +5221,122 @@
         return singleDigits.length ? singleDigits : pairs;
       }
 
+      function createProportionDeck() {
+        const input = (field, value) => ({ type: "input", field, value: String(value), entryValue: String(value) });
+        const variable = { type: "variable", value: "x" };
+        const pool = [];
+        for (let first = 2; first <= 9; first += 1) {
+          for (let second = 2; second <= 9; second += 1) {
+            if (gcd(first, second) === 1 && Math.max(first, second) / Math.min(first, second) <= 2.5) {
+              pool.push([first, second]);
+            }
+          }
+        }
+        const used = new Set();
+        const usedRatios = new Set();
+        const pick = candidates => {
+          const available = candidates.filter(item => !used.has(JSON.stringify(item)));
+          const chosen = available[randomInt(0, available.length - 1)];
+          used.add(JSON.stringify(chosen));
+          return chosen;
+        };
+        const question = (text, steps, metadata, answerText) => {
+          usedRatios.add(JSON.stringify(metadata.values));
+          return { fact: "", text, steps, ...metadata, answerText,
+            fields: steps.flatMap(row => row.flatMap(part => fishingPartInputs(part).map(item => item.field))),
+          };
+        };
+        const simplify = shuffle([5, 6, 7, 8, 9]).slice(0, 4).map(factor => {
+          const [first, second] = pick(pool);
+          const values = [first * factor, second * factor, first, second];
+          return question("比を簡単にしよう。", [
+            [`${values[0]}：${values[1]} = `, input("simpleFirst", first), "：", input("simpleSecond", second)],
+          ], { kind: "simplify", values, factor, diagramFields: { 2: "simpleFirst", 3: "simpleSecond" } }, `${first}：${second}`);
+        });
+        const equivalent = Array.from({ length: 4 }, (_, index) => {
+          const candidates = pool.flatMap(([first, second]) => [2, 3, 4, 5].map(factor => [first, second, factor]));
+          const [first, second, factor] = pick(candidates.filter(([a, b, k]) =>
+            !usedRatios.has(JSON.stringify(index % 2 === 0 ? [a, b, a * k, b * k] : [a * k, b * k, a, b]))));
+          const values = index % 2 === 0 ? [first, second, first * factor, second * factor]
+            : [first * factor, second * factor, first, second];
+          const unknown = index < 2 ? 3 : 2;
+          const parts = values.flatMap((value, position) => [
+            ...(position ? [position === 2 ? "=" : "："] : []),
+            position === unknown ? input("equivalentAnswer", value) : String(value),
+          ]);
+          return question("□にあてはまる数は？", [parts], {
+            kind: "equivalent", values, factor, unknown, diagramFields: { [unknown]: "equivalentAnswer" },
+          }, String(values[unknown]));
+        });
+        const crossPool = [];
+        for (let a = 2; a <= 9; a += 1) {
+          for (let b = 2; b <= 9; b += 1) {
+            for (let c = 2; c <= 9; c += 1) {
+              const d = b * c / a;
+              if (gcd(a, b) > 1 && a !== b && c % a !== 0 && a % c !== 0
+                && Number.isInteger(d) && d >= 2 && d <= 18) {
+                crossPool.push([a, b, c, d]);
+              }
+            }
+          }
+        }
+        const cross = Array.from({ length: 4 }, () => {
+          const [a, b, c, d] = pick(crossPool.filter(values => !usedRatios.has(JSON.stringify(values))));
+          return question("x にあてはまる数は？", [
+            [`${a}：${b} = ${c}：`, variable],
+            [String(a), "×", variable, "=", { type: "factorProduct", pairs: [[b, c], [c, b]],
+              left: input("crossFirst", b), right: input("crossSecond", c) }],
+            [String(a), "×", variable, "=", input("crossProduct", b * c)],
+            [variable, "=", `${b * c} ÷ ${a}`, "=", input("crossAnswer", d)],
+          ], { kind: "cross", values: [a, b, c, d], fact: "外々の積 ＝ 内々の積" }, String(d));
+        });
+        return [...simplify, ...equivalent, ...cross];
+      }
+
+      function renderProportionDiagram() {
+        const item = fishingProblem;
+        proportionDiagram.hidden = !item || item.kind === "cross";
+        if (proportionDiagram.hidden) { proportionDiagram.innerHTML = ""; return; }
+        const [a, b, c, d] = item.values;
+        const secondIsLarger = c > a;
+        const big = secondIsLarger ? [c, d] : [a, b];
+        const ratio = big[1] / big[0];
+        const width = Math.min(230, 150 * ratio);
+        const height = width / ratio;
+        const left = 85 + (230 - width) / 2, top = 20;
+        const smallWidth = width * 0.48, smallHeight = height * 0.48;
+        const smallLeft = left + (width - smallWidth) / 2, smallTop = top + (height - smallHeight) / 2;
+        const smallIndices = secondIsLarger ? [0, 1] : [2, 3];
+        const bigIndices = secondIsLarger ? [2, 3] : [0, 1];
+        const label = (index, x, y) => {
+          const field = item.diagramFields[index];
+          const correct = !field || fishingValues[field] === String(item.values[index]);
+          return correct ? `<text x="${x}" y="${y}">${item.values[index]}</text>`
+            : `<rect class="proportionBlank" x="${x - 14}" y="${y - 17}" width="28" height="34"/>`;
+        };
+        const corners = [[0, 0], [1, 0], [1, 1], [0, 1]];
+        const guides = corners.map(([x, y]) => `<path d="M${left + width * x},${top + height * y} L${smallLeft + smallWidth * x},${smallTop + smallHeight * y}"/>`).join("");
+        proportionDiagram.innerHTML = `<svg viewBox="0 0 350 ${height + 75}" aria-hidden="true">
+          <rect x="${left}" y="${top}" width="${width}" height="${height}" fill="#edf6ff" stroke="#587a94" stroke-width="2"/>
+          <g fill="none" stroke="#cf7777" stroke-width="1.5" stroke-dasharray="5 5">${guides}</g>
+          <rect x="${smallLeft}" y="${smallTop}" width="${smallWidth}" height="${smallHeight}" fill="white" stroke="#587a94" stroke-width="2"/>
+          <g fill="none" stroke="#8a959d" stroke-width="1.5">
+            <path d="M${left - 10},${top} v${height} m-4,-${height} h8 m-8,${height} h8"/>
+            <path d="M${left},${top + height + 10} h${width} m-${width},-4 v8 m${width},-8 v8"/>
+          </g>
+          ${label(bigIndices[0], left - 40, top + height / 2 + 17)}
+          ${label(bigIndices[1], left + width / 2, top + height + 37)}
+          ${label(smallIndices[0], smallLeft - 23, smallTop + smallHeight / 2 - 12)}
+          ${label(smallIndices[1], smallLeft + smallWidth / 2, smallTop + smallHeight + 23)}
+        </svg>`;
+        const descriptions = item.values.map((value, index) => {
+          const field = item.diagramFields[index];
+          return field && fishingValues[field] !== String(value) ? "空欄" : String(value);
+        });
+        proportionDiagram.setAttribute("role", "img");
+        proportionDiagram.setAttribute("aria-label", `縦${descriptions[0]}、横${descriptions[1]}と、縦${descriptions[2]}、横${descriptions[3]}の相似な長方形`);
+      }
+
       function createFactorsDeck() {
         const input = (field, value) => ({ type: "input", field, value: String(value), entryValue: String(value) });
         const label = text => ({ type: "label", text });
@@ -5409,6 +5562,12 @@
           text.textContent = part;
           return text;
         }
+        if (part.type === "variable") {
+          const variable = document.createElement("var");
+          variable.className = "mathVariable";
+          variable.textContent = part.value;
+          return variable;
+        }
         if (["label", "power", "countFactor", "result", "factorProduct"].includes(part.type)) {
           const group = document.createElement("span");
           if (part.type === "label") {
@@ -5480,6 +5639,7 @@
 
       function renderFishingProblem() {
         if (!fishingProblem) return;
+        if (selectedApp === "proportion") renderProportionDiagram();
         fishingFact.textContent = fishingProblem.fact;
         fishingQuestion.textContent = fishingProblem.text;
         fishingSteps.replaceChildren();
@@ -5532,7 +5692,7 @@
       }
 
       function setFishingActive(field) {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
         const firstIncomplete = fishingProblem.fields.find((candidate) => fishingValues[candidate] !== fishingExpected(candidate));
         if (firstIncomplete && fishingProblem.fields.indexOf(field) > fishingProblem.fields.indexOf(firstIncomplete)) return;
         fishingActiveField = field;
@@ -5574,7 +5734,7 @@
       }
 
       function fishingReceive(value) {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished || !fishingActiveField) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished || !fishingActiveField) return;
         const expectedValue = fishingExpected(fishingActiveField);
         const expectsOperator = /^[×÷+]$/.test(expectedValue);
         if (expectsOperator) {
@@ -5611,7 +5771,7 @@
       }
 
       function fishingBackspace() {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors") || isAnswerLocked || isFinished) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished) return;
         const value = fishingValues[fishingActiveField] || "";
         if (value) {
           fishingValues[fishingActiveField] = value.slice(0, -1);
@@ -8654,7 +8814,7 @@
         if (selectedApp === "powers") return true;
         if (selectedApp === "mentalDivision") return true;
         if (selectedApp === "area") return true;
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || (selectedApp === "fishing" || selectedApp === "factors") || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -8669,7 +8829,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
-        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingIndex;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingIndex;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "equation") return equationIndex;
         if (selectedApp === "simultaneous") return simultaneousIndex;
@@ -8679,6 +8839,7 @@
       }
 
       function currentTimedLength() {
+        if (selectedApp === "proportion") return fishingDeck.length || PROPORTION_TARGET;
         if (selectedApp === "powers") return powersDeck.length || POWERS_TARGET;
         if (selectedApp === "factors") return fishingDeck.length || FACTORS_TARGET;
         if (selectedApp === "mentalDivision") return divisionDeck.length || MENTAL_DIVISION_TARGET;
@@ -8691,7 +8852,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
-        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingDeck.length || FISHING_TARGET;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingDeck.length || FISHING_TARGET;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
         if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
@@ -8716,7 +8877,7 @@
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
         if (selectedApp === "speed") return speedAnswer();
-        if ((selectedApp === "fishing" || selectedApp === "factors")) return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
         if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "equation") return ["fraction", "integerFraction"].includes(equationProblem?.kind) ? equationProblem.answer.numerator : equationProblem?.answer || 0;
         if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
@@ -8740,7 +8901,7 @@
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
-        if ((selectedApp === "fishing" || selectedApp === "factors")) return fishingProblem?.answerText || "";
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingProblem?.answerText || "";
         if (selectedApp === "preschool") return String(currentTimedAnswer());
         if (selectedApp === "subtraction") return formattedSubtractionAnswer();
         if (selectedApp === "equation") return ["fraction", "integerFraction"].includes(equationProblem?.kind)
@@ -8953,6 +9114,7 @@
       function bestKeyForApp(app = selectedApp) {
         if (app === "powers") return POWERS_BEST_KEY;
         if (app === "factors") return FACTORS_BEST_KEY;
+        if (app === "proportion") return PROPORTION_BEST_KEY;
         if (app === "mentalDivision") return MENTAL_DIVISION_BEST_KEY;
         if (app === "basicDivision") return BASIC_DIVISION_BEST_KEY;
         if (app === "improperFraction") return IMPROPER_FRACTION_BEST_KEY;
@@ -9891,7 +10053,7 @@
           resetAreaEntry();
           return;
         }
-        if (selectedApp === "fishing" || selectedApp === "factors") {
+        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") {
           setLocked(false);
           clearFishingFields();
           return;
@@ -9949,6 +10111,7 @@
         speed: chooseSpeed,
         fishing: chooseFishing,
         factors: chooseFactors,
+        proportion: chooseProportion,
         preschool: choosePreschool,
         equation: chooseEquation,
         simultaneous: chooseSimultaneous,
@@ -10975,7 +11138,7 @@
               finishRound(); return;
             }
             areaProblem = areaDeck[areaIndex];
-          } else if ((selectedApp === "fishing" || selectedApp === "factors")) {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
             if (keepChallenge) fishingIndex += 1;
             if (fishingIndex >= fishingDeck.length) {
               finalTime = elapsedTime();
@@ -11107,7 +11270,7 @@
           startedAt = null; isFinished = false; setLocked(false);
           showPowersCover(); return;
         }
-        if (selectedApp === "fishing" || selectedApp === "factors") {
+        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") {
           startedAt = null; isFinished = false; setLocked(false);
           showFishingCover(selectedApp); return;
         }
@@ -11470,7 +11633,7 @@
       }
 
       function startFishingChallenge() {
-        selectedApp = selectedApp === "factors" ? "factors" : "fishing";
+        selectedApp = ["factors", "proportion"].includes(selectedApp) ? selectedApp : "fishing";
         hasStarted = true;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
@@ -11493,7 +11656,8 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        fishingDeck = selectedApp === "factors" ? createFactorsDeck() : createFishingDeck();
+        fishingDeck = selectedApp === "proportion" ? createProportionDeck()
+          : selectedApp === "factors" ? createFactorsDeck() : createFishingDeck();
         fishingIndex = 0;
         fishingProblem = fishingDeck[0];
         resetChallenge();
@@ -11858,10 +12022,12 @@
       }
 
       function showFishingCover(app = "fishing") {
-        selectedApp = app === "factors" ? "factors" : "fishing";
+        selectedApp = ["factors", "proportion"].includes(app) ? app : "fishing";
         fishingCoverTitle.textContent = APP_LABELS[selectedApp];
-        fishingCoverPrompt.textContent = selectedApp === "factors" ? "素因数分解・約数・公約数・公倍数" : "単位と途中式でとくよ";
-        fishingCoverGoal.innerHTML = `${selectedApp === "factors" ? FACTORS_TARGET : FISHING_TARGET}問<br>タイムアタック`;
+        fishingCoverPrompt.textContent = selectedApp === "proportion" ? "比を簡単にする・比の計算"
+          : selectedApp === "factors" ? "素因数分解・約数・公約数・公倍数" : "単位と途中式でとくよ";
+        fishingCoverGoal.innerHTML = `${selectedApp === "proportion" ? PROPORTION_TARGET
+          : selectedApp === "factors" ? FACTORS_TARGET : FISHING_TARGET}問<br>タイムアタック`;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
         cover.hidden = true;
@@ -12022,15 +12188,16 @@
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
         speedProblemLine.hidden = selectedApp !== "speed";
-        fishingProblemLine.hidden = (selectedApp !== "fishing" && selectedApp !== "factors");
+        fishingProblemLine.hidden = (selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion");
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         equationProblemLine.hidden = selectedApp !== "equation";
         simultaneousProblemLine.hidden = selectedApp !== "simultaneous";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
-        challengeView.classList.toggle("fishingMode", (selectedApp === "fishing" || selectedApp === "factors") || selectedApp === "area");
+        challengeView.classList.toggle("fishingMode", (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") || selectedApp === "area");
         challengeView.classList.toggle("factorsMode", selectedApp === "factors");
+        challengeView.classList.toggle("proportionMode", selectedApp === "proportion");
         challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -12100,7 +12267,7 @@
             renderSpeedProblem();
           } else if (selectedApp === "area") {
             resetAreaEntry();
-          } else if ((selectedApp === "fishing" || selectedApp === "factors")) {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
             fishingValues = {};
             fishingActiveField = fishingProblem?.fields[0] || "";
             setFishingActive(fishingActiveField);
@@ -12194,7 +12361,7 @@
           speedBackspace();
           return;
         }
-        if ((selectedApp === "fishing" || selectedApp === "factors")) {
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
           fishingBackspace();
           return;
         }
@@ -12239,7 +12406,7 @@
             resetInputs();
             return;
           }
-          if ((selectedApp === "fishing" || selectedApp === "factors")) {
+          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
             clearFishingFields();
             return;
           }
@@ -12293,7 +12460,7 @@
             return;
           }
         }
-        if ((selectedApp === "fishing" || selectedApp === "factors") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
           event.preventDefault();
           fishingReceive(event.key);
           return;
@@ -12352,7 +12519,7 @@
             speedReceive(button.dataset.digit);
             return;
           }
-          if ((selectedApp === "fishing" || selectedApp === "factors")) {
+          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
             fishingReceive(button.dataset.digit);
             return;
           }
@@ -12433,25 +12600,25 @@
         if (selectedApp === "area") areaReceive("×");
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
-        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("\u00d7");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("\u00d7");
         if (selectedApp === "equation") equationReceive("\u00d7");
       });
       bindFastPress(document.querySelector("#ratioDivideKey"), () => {
         if (selectedApp === "area") areaReceive("÷");
         if (selectedApp === "ratio") ratioReceive("\u00f7");
         if (selectedApp === "speed") speedReceive("\u00f7");
-        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("\u00f7");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("\u00f7");
         if (selectedApp === "equation") equationReceive("\u00f7");
       });
       bindFastPress(document.querySelector("#ratioPlusKey"), () => {
         if (selectedApp === "area") areaReceive("+");
-        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive("+");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("+");
         if (selectedApp === "equation") equationReceive("+");
         if (selectedApp === "simultaneous") simultaneousReceive("+");
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
-        if ((selectedApp === "fishing" || selectedApp === "factors")) fishingReceive(".");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive(".");
         if (selectedApp === "equation") equationReceive("\u2212");
         if (selectedApp === "simultaneous") simultaneousReceive("\u2212");
       });
@@ -12483,6 +12650,7 @@
       chooseSpeed.addEventListener("click", showSpeedCover);
       chooseFishing.addEventListener("click", showFishingCover);
       chooseFactors.addEventListener("click", showFactorsCover);
+      chooseProportion.addEventListener("click", () => showFishingCover("proportion"));
       choosePowers.addEventListener("click", showPowersCover);
       powersOrderedStartButton.addEventListener("click", () => startPowersChallenge(false));
       powersRandomStartButton.addEventListener("click", () => startPowersChallenge(true));
