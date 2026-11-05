@@ -1081,6 +1081,14 @@
       #proportionDiagram svg { display: block; width: 100%; height: auto; }
       #proportionDiagram text { fill: var(--ink); font: 700 22px sans-serif; text-anchor: middle; dominant-baseline: middle; }
       #proportionDiagram .proportionBlank { fill: white; stroke: var(--line); stroke-width: 2; }
+      @media (max-width: 699px) {
+        .proportionMode .fishingFact { order: 0; }
+        .proportionMode #proportionDiagram { order: 1; width: min(100%, 360px); margin-bottom: 18px; }
+        .proportionMode .fishingQuestion { order: 2; font-size: 24px; }
+        .proportionMode .fishingSteps { order: 3; }
+        .proportionMode .fishingStep { font-size: 36px; }
+        .proportionMode .fishingInput { font-size: 32px; }
+      }
       @media (min-width: 700px) and (min-height: 700px) {
         #challengeView.proportionMode #fishingProblemLine { padding: 22px 12px; font-size: 44px; gap: 20px; }
         .proportionMode .fishingQuestion { font-size: 28px; }
@@ -5316,7 +5324,9 @@
         };
         const corners = [[0, 0], [1, 0], [1, 1], [0, 1]];
         const guides = corners.map(([x, y]) => `<path d="M${left + width * x},${top + height * y} L${smallLeft + smallWidth * x},${smallTop + smallHeight * y}"/>`).join("");
-        proportionDiagram.innerHTML = `<svg viewBox="0 0 350 ${height + 75}" aria-hidden="true">
+        const phone = typeof matchMedia === "function" && matchMedia("(max-width: 699px)").matches;
+        const viewBox = phone ? `20 0 310 ${height + 75}` : `0 0 350 ${height + 75}`;
+        proportionDiagram.innerHTML = `<svg viewBox="${viewBox}" aria-hidden="true">
           <rect x="${left}" y="${top}" width="${width}" height="${height}" fill="#edf6ff" stroke="#587a94" stroke-width="2"/>
           <g fill="none" stroke="#cf7777" stroke-width="1.5" stroke-dasharray="5 5">${guides}</g>
           <rect x="${smallLeft}" y="${smallTop}" width="${smallWidth}" height="${smallHeight}" fill="white" stroke="#587a94" stroke-width="2"/>
@@ -12730,6 +12740,7 @@
       window.addEventListener("resize", () => {
         if (!appMenu.hidden) resizeMenuLayout();
         if (selectedApp === "area" && !challengeView.hidden) fitAreaLayout();
+        if (selectedApp === "proportion" && !challengeView.hidden) renderProportionDiagram();
       });
       window.setInterval(updateProgress, 100);
       showCoverScreen();
