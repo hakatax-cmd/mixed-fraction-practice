@@ -5393,20 +5393,32 @@
       }
 
       function createTriangleRatioDeck() {
-        const candidates = [];
-        for (let first = 2; first <= 7; first += 1) {
-          for (let second = 2; first + second <= 9; second += 1) {
-            if (gcd(first, second) !== 1 || Math.max(first, second) > 2.5 * Math.min(first, second)) continue;
-            for (let unit = 2; unit <= 9; unit += 1) candidates.push({ parts: [first, second], unit });
+        const ratios = [];
+        for (let smaller = 1; smaller < 9; smaller += 1) {
+          for (let larger = smaller + 1; larger <= Math.min(9, 3.5 * smaller); larger += 1) {
+            if (gcd(smaller, larger) === 1) ratios.push([smaller, larger]);
           }
         }
         const input = (field, value) => ({ type: "input", field, value: String(value) });
-        const choices = shuffle(candidates);
+        const units = shuffle([2, 3, 4, 5, 6, 7, 8, 9, randomInt(2, 9)]);
+        const used = new Set();
         return ["wholeToPart", "partToOther", "partToWhole"].flatMap(kind => {
+          const usesWhole = kind !== "partToOther";
+          const pool = ratios.filter(([a, b]) => usesWhole ? a + b <= 9 : a + b > 9);
+          const fiveIndex = randomInt(0, 2);
           const firstSide = randomInt(0, 1);
-          return shuffle(["bottom", "left", "right"]).map((edge, index) => {
-            const { parts, unit } = choices.pop();
-            const side = (firstSide + index) % 2;
+          const edges = kind === "wholeToPart" ? ["bottom", ...shuffle(["left", "right"])] : shuffle(["bottom", "left", "right"]);
+          return edges.map((edge, index) => {
+            const choices = pool.filter(ratio => {
+              const hasFive = ratio.includes(5) || (usesWhole && ratio[0] + ratio[1] === 5);
+              return !used.has(ratio) && hasFive === (index === fiveIndex);
+            });
+            const ratio = choices[randomInt(0, choices.length - 1)];
+            used.add(ratio);
+            const parts = randomInt(0, 1) ? [...ratio].reverse() : ratio;
+            const unit = units.pop();
+            // Use the larger part in 1:n questions so neither calculation uses 1.
+            const side = parts.includes(1) ? 1 - parts.indexOf(1) : (firstSide + index) % 2;
             const counts = [...parts, parts[0] + parts[1]];
             const knownIndex = kind === "wholeToPart" ? 2 : side;
             const targetIndex = kind === "partToWhole" ? 2 : kind === "partToOther" ? 1 - side : side;
