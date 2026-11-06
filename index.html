@@ -429,6 +429,9 @@
       #powersProblemLine.logarithm #powersExponent { font-size: 0.8em; }
       #powersExponent .answerBox { border-width: 3px; }
       .powersAnswer { display: inline-flex; align-items: center; gap: 4px; }
+      .powersFraction { display: inline-grid; grid-template-rows: auto 4px auto; align-items: center; justify-items: center; gap: 4px; min-width: 1em; }
+      .powersFraction > i { width: 100%; height: 4px; background: var(--ink); }
+      .cover:has(#powersStartActions:not([hidden])) { gap: 12px; }
       @media (min-width: 350px) {
         #powersProblemLine[data-powers-size="medium"] { font-size: 56px; }
         #powersProblemLine[data-powers-size="compact"] { font-size: 44px; }
@@ -1097,9 +1100,12 @@
         #proportionDiagram { width: min(100%, 420px); }
       }
       .factorsMode #fishingProblemLine { font-size: 32px; padding: 16px 10px; gap: 16px; }
-      .factorsMode .fishingQuestion { font-size: 26px; }
+      .factorsMode .fishingQuestion { font-size: 26px; white-space: pre-line; }
+      .factorsMode .fishingFact:empty { display: none; }
       .factorsMode .fishingSteps { gap: 20px; }
       .factorsMode .fishingStep { width: 100%; column-gap: 6px; row-gap: 10px; }
+      .factorChain { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 6px; width: 100%; }
+      .factorsMode .factorChainTerm { flex: 0 0 auto; flex-wrap: nowrap; width: auto; column-gap: 4px; white-space: nowrap; }
       .factorLabel { flex-basis: 100%; font-size: 18px; line-height: 1.4; }
       .factorPower { display: inline-grid; grid-template-columns: auto auto; align-items: end; gap: 2px; padding-top: 4px; }
       .factorExponent { font-size: 20px; margin-bottom: 22px; }
@@ -1176,6 +1182,11 @@
       .equationFreeInput[data-slots="3"] { width: calc(var(--digit-frame-width) + var(--digit-frame-width) + var(--digit-frame-width)); }
       .equationFreeInput .equationDigit { display: grid; place-items: center; min-width: 0; height: 100%; line-height: 1; }
       .equationFreeInput .equationDigit + .equationDigit { border-left: 2px solid var(--line); }
+      .equationDigit.isMinus, .systemDigit.isMinus { position: relative; color: transparent; overflow: hidden; }
+      .equationDigit.isMinus::after, .systemDigit.isMinus::after {
+        content: ""; position: absolute; inset-inline: 18%; top: 50%; height: 3px;
+        transform: translateY(-50%); background: var(--ink);
+      }
       .equationFreeInput.active { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
       .equationWorkFraction, .equationResultFraction { display: inline-grid; grid-template-rows: clamp(52px, 9vmin, 76px) 4px clamp(52px, 9vmin, 76px); align-items: center; min-width: clamp(56px, 10vmin, 76px); vertical-align: middle; }
       .equationWorkFraction { min-width: clamp(176px, 31vmin, 240px); }
@@ -1260,13 +1271,13 @@
       .simultaneousInput[data-slots] { width: calc(var(--digit-frame-width) * var(--system-slots) + var(--system-gap) * (var(--system-slots) - 1)); }
       .simultaneousInput .systemDigit { display: grid; place-items: center; min-width: 0; height: 100%; border: 3px solid var(--line); border-radius: 6px; background: #fff; }
       .simultaneousInput.active .systemDigit { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37, 99, 235, .15); }
-      .simultaneousFraction { display: inline-grid; grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); min-width: var(--digit-frame-width); text-align: center; vertical-align: middle; }
+      .simultaneousFraction { display: inline-grid; grid-template-columns: auto max-content; grid-template-rows: var(--digit-frame-height) 4px var(--digit-frame-height); flex: 0 0 auto; min-width: var(--digit-frame-width); text-align: center; vertical-align: middle; }
       .simultaneousFraction i { display: block; height: 4px; background: var(--ink); }
       .simultaneousFraction { justify-items: center; }
       .simultaneousFraction i { width: 100%; }
       .simultaneousFraction .simultaneousInput { height: 100%; }
       .simultaneousFraction > .simultaneousInput:not(.fractionSign), .simultaneousFraction > i { grid-column: 2; }
-      .simultaneousFraction > .fractionSign { grid-area: 1 / 1 / 4 / 2; align-self: center; height: var(--digit-frame-height); margin-right: 4px; }
+      .simultaneousFraction > .fractionSign { grid-area: 1 / 1 / 4 / 2; align-self: center; height: var(--digit-frame-height); margin-inline-end: 8px; }
       #simultaneousProblemLine { height: 100%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; scroll-padding: 12px; }
       .practiceCard:has(#simultaneousProblemLine:not([hidden])) { touch-action: pan-y; }
       @media (max-width: 430px) {
@@ -2996,6 +3007,7 @@
           <button class="startButton" id="multiplicationStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <div class="powersStartActions" id="powersStartActions" hidden>
             <button class="startButton" id="powersOrderedStartButton" type="button">指数モード順番通り</button>
+            <button class="startButton" id="powersNegativeStartButton" type="button">マイナスモード（5問）</button>
             <button class="startButton" id="powersRandomStartButton" type="button">指数モードランダム</button>
             <button class="startButton" id="powersLogStartButton" type="button">対数モード</button>
           </div>
@@ -3191,6 +3203,9 @@
                 <button id="powersHundredsInput" class="answerBox" type="button" data-value="" aria-label="答えの百の位" hidden></button>
                 <button id="powersTensInput" class="answerBox" type="button" data-value="" aria-label="答えの十の位" hidden></button>
                 <button id="powersOnesInput" class="answerBox" type="button" data-value="" aria-label="答えの一の位"></button>
+              </span>
+              <span class="powersFraction" id="powersFraction" hidden>
+                <span>1</span><i></i><span id="powersFractionDenominator"></span>
               </span>
               <span id="powersResult" hidden></span>
             </div>
@@ -3967,6 +3982,7 @@
       const POWERS_TARGET = 22;
       const POWERS_SLOTS = ["powersThousands", "powersHundreds", "powersTens", "powersOnes"];
       const POWERS_BEST_KEY = "powersBestTimeMs";
+      const POWERS_NEGATIVE_BEST_KEY = "powersNegativeBestTimeMs";
       const FRACTION_CALCULATION_TARGET = 12;
       const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
       const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
@@ -4030,6 +4046,7 @@
         DIVISION_BEST_KEY,
         MENTAL_DIVISION_BEST_KEY,
         POWERS_BEST_KEY,
+        POWERS_NEGATIVE_BEST_KEY,
         FRACTION_CALCULATION_BEST_KEY,
         FRACTION_ADD_SUBTRACT_BEST_KEY,
         GROUPING_BEST_KEY,
@@ -4060,6 +4077,7 @@
         division: "\u56db\u3051\u305f\u00f7\u4e8c\u3051\u305f",
         mentalDivision: "4桁÷1桁の暗算",
         powers: "乗数",
+        powersNegative: "乗数（マイナス）",
         fractionCalculation: "\u5206\u6570\u306e\u639b\u3051\u7b97\u30fb\u5272\u308a\u7b97",
         fractionAddSubtract: "\u5206\u6570\u306e\u8db3\u3057\u7b97\u30fb\u5f15\u304d\u7b97",
         grouping: "\u639b\u3051\u7b97\u3092\u307e\u3068\u3081\u308b",
@@ -4317,6 +4335,8 @@
       const powersEquation = document.querySelector("#powersEquation");
       const powersBase = document.querySelector("#powersBase");
       const powersExponent = document.querySelector("#powersExponent");
+      const powersFraction = document.querySelector("#powersFraction");
+      const powersFractionDenominator = document.querySelector("#powersFractionDenominator");
       const powersAnswerGroup = document.querySelector("#powersAnswerGroup");
       const powersResult = document.querySelector("#powersResult");
       const multiplicationCoverTitle = document.querySelector("#multiplicationCoverTitle");
@@ -4324,6 +4344,7 @@
       const multiplicationCoverGoal = document.querySelector("#multiplicationCoverGoal");
       const powersStartActions = document.querySelector("#powersStartActions");
       const powersOrderedStartButton = document.querySelector("#powersOrderedStartButton");
+      const powersNegativeStartButton = document.querySelector("#powersNegativeStartButton");
       const powersRandomStartButton = document.querySelector("#powersRandomStartButton");
       const powersLogStartButton = document.querySelector("#powersLogStartButton");
       const fractionCalcWorkEquals = document.querySelector("#fractionCalcWorkEquals");
@@ -4798,7 +4819,10 @@
         return a;
       }
 
-      function createPowersDeck(random = false) {
+      function createPowersDeck(random = false, negative = false) {
+        if (negative) return [1, 0, -1, -2, -3].map(exponent => ({
+          base: 2, exponent, answer: 2 ** exponent, negativeMode: true,
+        }));
         const deck = [[2, 10], [3, 5], [5, 4], [7, 3]].flatMap(([base, maximum]) =>
           Array.from({ length: maximum }, (_, index) => ({ base, exponent: index + 1, answer: base ** (index + 1) })));
         return random ? shuffle(deck) : deck;
@@ -4806,18 +4830,23 @@
 
       function powersAnswer() {
         if (!powersProblem) return 0;
-        return powersLogarithm ? powersProblem.exponent : powersProblem.answer;
+        if (powersLogarithm) return powersProblem.exponent;
+        return powersProblem.exponent < 0 ? powersProblem.base ** -powersProblem.exponent : powersProblem.answer;
       }
 
       function renderPowersProblem() {
         powersProblemLine.classList.toggle("logarithm", powersLogarithm);
-        const digits = String(powersProblem.answer).length;
+        const reciprocal = !powersLogarithm && powersProblem.exponent < 0;
+        const digits = String(powersLogarithm ? powersProblem.answer : powersAnswer()).length;
         powersProblemLine.dataset.powersSize = digits >= 4 ? "compact" : digits === 3 ? "medium" : "large";
         // Move the existing buttons before replacing the exponent's contents.
         powersEquation.append(powersAnswerGroup);
         powersBase.textContent = String(powersProblem.base);
-        powersExponent.textContent = powersLogarithm ? "" : String(powersProblem.exponent);
+        powersExponent.textContent = powersLogarithm ? "" : String(powersProblem.exponent).replace("-", "−");
         if (powersLogarithm) powersExponent.append(powersAnswerGroup);
+        powersFraction.hidden = !reciprocal;
+        if (reciprocal) powersFractionDenominator.append(powersAnswerGroup);
+        powersAnswerGroup.setAttribute("aria-label", reciprocal ? "分母" : powersLogarithm ? "指数" : "答え");
         powersResult.hidden = !powersLogarithm;
         powersResult.textContent = powersLogarithm ? String(powersProblem.answer) : "";
         powersQuestion.setAttribute("aria-label", powersLogarithm
@@ -5290,11 +5319,12 @@
         }
         const cross = Array.from({ length: 4 }, () => {
           const [a, b, c, d] = pick(crossPool.filter(values => !usedRatios.has(JSON.stringify(values))));
+          const term = { ...variable, coefficient: a };
           return question("x にあてはまる数は？", [
             [`${a}：${b} = ${c}：`, variable],
-            [String(a), "×", variable, "=", { type: "factorProduct", pairs: [[b, c], [c, b]],
+            [term, "=", { type: "factorProduct", pairs: [[b, c], [c, b]],
               left: input("crossFirst", b), right: input("crossSecond", c) }],
-            [String(a), "×", variable, "=", input("crossProduct", b * c)],
+            [term, "=", input("crossProduct", b * c)],
             [variable, "=", `${b * c} ÷ ${a}`, "=", input("crossAnswer", d)],
           ], { kind: "cross", values: [a, b, c, d], fact: "外々の積 ＝ 内々の積" }, String(d));
         });
@@ -5358,13 +5388,13 @@
         const factorSteps = (number, prefix, factors) => {
           const pairs = factorProductPairs(number);
           return [
-            [`${number} = `, { type: "factorProduct", pairs,
+            [`${number} =`, { type: "factorProduct", pairs,
               left: input(prefix + "SplitLeft", pairs[0][0]), right: input(prefix + "SplitRight", pairs[0][1]) }],
-            [`${number} = `, ...powers(prefix, factors)],
+            ["=", ...powers(prefix, factors)],
           ];
         };
         const makeQuestion = (text, steps, metadata, answerText) => ({
-          fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "素因数分解と公約数・公倍数",
+          fact: metadata.kind === "count" ? "素因数分解と約数の個数" : "",
           text, steps, ...metadata, answerText,
           fields: steps.flatMap(step => step.flatMap(part => fishingPartInputs(part).map(item => item.field))),
         });
@@ -5377,23 +5407,6 @@
           pool.push({ number, factors });
         }
         const pick = items => items[Math.floor(Math.random() * items.length)];
-        const used = new Set();
-        const countQuestions = [0, 1, 2].map(index => {
-          const candidates = pool.filter(item => !used.has(item.number)
-            && (index === 2 ? item.factors.length === 3 : item.factors.length === 2)
-            && (index !== 0 || item.number <= 72 && factorProductPairs(item.number)[0][1] <= 9)
-            && (index !== 1 || item.factors.some(factor => factor.exponent >= 2)));
-          const { number, factors } = pick(candidates);
-          used.add(number);
-          const count = factors.reduce((total, factor) => total * (factor.exponent + 1), 1);
-          const countExpression = factors.flatMap((factor, i) => [
-            ...(i ? [" × "] : []), { type: "countFactor", exponent: input("countExponent" + i, factor.exponent) },
-          ]);
-          return makeQuestion(`${number} の約数は何個？`, [
-            ...factorSteps(number, "number", factors),
-            [label("約数の個数"), ...countExpression, result("countAnswer", count, "個")],
-          ], { kind: "count", numbers: [number], factorizations: [factors], divisorCount: count }, `${count}個`);
-        });
         const pairs = [];
         for (let i = 0; i < pool.length; i += 1) {
           const first = pool[i];
@@ -5410,16 +5423,43 @@
             const evaluate = factors => factors.reduce((total, factor) => total * factor.prime ** factor.exponent, 1);
             const lcm = evaluate(multiple), gcdValue = evaluate(common);
             if (gcdValue === 1 || gcdValue === first.number || gcdValue === second.number || lcm > 420) continue;
-            pairs.push({ first, second, multiple, common, lcm, gcdValue, key: `${first.number}:${second.number}` });
+            pairs.push({ first, second, multiple, common, lcm, gcdValue });
           }
         }
-        const usedPairs = new Set();
-        const pairQuestions = [0, 1, 2].map(index => {
-          const item = pick(pairs.filter(pair => !usedPairs.has(pair.key)
-            && pair.multiple.length === (index ? 3 : 2)));
-          usedPairs.add(item.key);
+        const easyCount = item => item.factors.length === 2 && item.number <= 72 && factorProductPairs(item.number)[0][1] <= 9;
+        const threePrimePairs = pairs.filter(pair => pair.multiple.length === 3);
+        const pairPlans = [];
+        for (const first of pairs.filter(pair => pair.multiple.length === 2)) {
+          for (const second of threePrimePairs) {
+            for (const third of threePrimePairs) {
+              const plan = [first, second, third];
+              if (new Set(plan.map(pair => pair.gcdValue)).size < 3 || new Set(plan.map(pair => pair.lcm)).size < 3) continue;
+              const numbers = new Set(plan.flatMap(pair => [pair.first.number, pair.second.number]));
+              if (numbers.size < 6) continue;
+              const available = pool.filter(item => !numbers.has(item.number));
+              if (!available.some(easyCount) || available.filter(item => item.factors.length === 2).length < 2
+                || !available.some(item => item.factors.length === 3)) continue;
+              pairPlans.push({ plan, numbers });
+            }
+          }
+        }
+        const { plan, numbers: used } = pick(pairPlans);
+        const countQuestions = [0, 1, 2].map(index => {
+          const { number, factors } = pick(pool.filter(item => !used.has(item.number)
+            && (index === 0 ? easyCount(item) : item.factors.length === (index === 2 ? 3 : 2))));
+          used.add(number);
+          const count = factors.reduce((total, factor) => total * (factor.exponent + 1), 1);
+          const countExpression = factors.flatMap((factor, i) => [
+            ...(i ? [" × "] : []), { type: "countFactor", exponent: input("countExponent" + i, factor.exponent) },
+          ]);
+          return makeQuestion(`${number} の約数は何個？`, [
+            ...factorSteps(number, "number", factors),
+            [label("約数の個数"), ...countExpression, result("countAnswer", count, "個")],
+          ], { kind: "count", numbers: [number], factorizations: [factors], divisorCount: count }, `${count}個`);
+        });
+        const pairQuestions = plan.map(item => {
           const { first, second, multiple, common, lcm, gcdValue } = item;
-          return makeQuestion(`${first.number} と ${second.number}`, [
+          return makeQuestion(`${first.number}と${second.number}の最大公約数と最小公倍数を求めよ。\nまず素因数分解する。`, [
             ...factorSteps(first.number, "first", first.factors),
             ...factorSteps(second.number, "second", second.factors),
             [label("最大公約数"), ...powers("gcd", common), result("gcdAnswer", gcdValue)],
@@ -5576,7 +5616,10 @@
           const variable = document.createElement("var");
           variable.className = "mathVariable";
           variable.textContent = part.value;
-          return variable;
+          if (!part.coefficient) return variable;
+          const term = document.createElement("span");
+          term.append(renderFishingPart(String(part.coefficient)), variable);
+          return term;
         }
         if (["label", "power", "countFactor", "result", "factorProduct"].includes(part.type)) {
           const group = document.createElement("span");
@@ -5655,6 +5698,7 @@
         fishingSteps.replaceChildren();
         fishingSteps.classList.toggle("fishingConversionSteps", Boolean(fishingProblem.alignedConversion));
         const completedFields = new Set();
+        let factorChain = null;
         fishingProblem.steps.forEach((parts, stepIndex) => {
           const priorComplete = [...completedFields].every((field) => fishingValues[field] === fishingExpected(field));
           if (stepIndex > 0 && !priorComplete) return;
@@ -5672,7 +5716,19 @@
           } else {
             parts.forEach((part) => row.append(renderFishingPart(part)));
           }
-          fishingSteps.append(row);
+          if (selectedApp === "factors" && parts[1]?.type === "factorProduct") {
+            factorChain = document.createElement("div");
+            factorChain.className = "factorChain";
+            fishingSteps.append(factorChain);
+          } else if (parts[0] !== "=") {
+            factorChain = null;
+          }
+          if (factorChain) {
+            row.className += " factorChainTerm";
+            factorChain.append(row);
+          } else {
+            fishingSteps.append(row);
+          }
           parts.flatMap(fishingPartInputs).forEach(part => completedFields.add(part.field));
         });
         requestAnimationFrame(() => {
@@ -6279,6 +6335,7 @@
               const item = buildFractionEquation(coefficient, pair.total, pair.constant, sourceOperator, useProductDenominator);
               if (item.workResultNumerator > 99 || item.workFirst > 99 || item.workSecond > 99) continue;
               if (item.rawAnswer.numerator > 99 || item.rawAnswer.denominator > 99 || item.answer.denominator === 1) continue;
+              if (gcd(item.rawAnswer.numerator, item.rawAnswer.denominator) > 9) continue;
               used.add(pair.key);
               used.add(`fractionCoefficient:${coefficient.numerator}/${coefficient.denominator}`);
               return item;
@@ -6443,7 +6500,7 @@
                 const firstConstant = multiplier * x.numerator + b1 * y.numerator;
                 const secondConstant = -sign * firstMultiplier * x.numerator + b2 * y.numerator;
                 const eliminationRhs = remaining * y.numerator;
-                if (Math.abs(remaining * y.denominator) < 2 || Math.abs(remaining * y.denominator) > 40) continue;
+                if (Math.abs(remaining) > 9 || Math.abs(remaining * y.denominator) < 2 || Math.abs(remaining * y.denominator) > 40) continue;
                 if (!firstConstant || !secondConstant || Math.abs(eliminationRhs) > 99) continue;
                 if (Math.abs(firstConstant * firstMultiplier) > 199 || Math.abs(secondConstant * multiplier) > 199) continue;
                 candidates.push({
@@ -6844,7 +6901,9 @@
           }
           const slots = Math.min(3, Math.max(1, equationExpected(field).length));
           const value = Array.from(equationValues[field] || "");
-          input.innerHTML = Array.from({ length: slots }, (_, index) => `<span class="equationDigit">${value[index] || ""}</span>`).join("");
+          input.innerHTML = Array.from({ length: slots }, (_, index) => value[index] === "-"
+            ? '<span class="equationDigit isMinus">−</span>'
+            : `<span class="equationDigit">${value[index] || ""}</span>`).join("");
           input.dataset.slots = String(slots);
           input.style.setProperty("--equation-slots", String(slots));
           input.classList.toggle("active", field === equationActiveField);
@@ -7145,7 +7204,9 @@
           if (field.endsWith("Sign")) input.hidden = !expected;
           const slots = Math.max(1, expected.length);
           const value = Array.from(simultaneousValues[field] || "");
-          input.innerHTML = Array.from({ length: slots }, (_, index) => '<span class="systemDigit">' + (value[index] === "-" ? "−" : value[index] || "") + "</span>").join("");
+          input.innerHTML = Array.from({ length: slots }, (_, index) => value[index] === "-"
+            ? '<span class="systemDigit isMinus">−</span>'
+            : `<span class="systemDigit">${value[index] || ""}</span>`).join("");
           input.dataset.slots = String(slots);
           input.style.setProperty("--system-slots", String(slots));
           input.classList.toggle("active", field === simultaneousActiveField);
@@ -8897,6 +8958,7 @@
       }
 
       function currentTimedAnswerText() {
+        if (selectedApp === "powers" && !powersLogarithm && powersProblem?.exponent < 0) return `1/${powersAnswer()}`;
         if (selectedApp === "mentalDivision") return String(currentTimedAnswer());
         if (selectedApp === "area") return areaProblem?.answerText || "";
         if (selectedApp === "fraction") {
@@ -9106,6 +9168,7 @@
       }
 
       function currentAppLabel() {
+        if (selectedApp === "powers" && powersProblem?.negativeMode) return appLabel("powersNegative");
         return appLabel(selectedApp);
       }
 
@@ -9121,7 +9184,12 @@
         saveBest(MULTIPLICATION_BEST_KEY, time);
       }
 
-      function bestKeyForApp(app = selectedApp) {
+      function currentRecordApp() {
+        return selectedApp === "powers" && powersProblem?.negativeMode ? "powersNegative" : selectedApp;
+      }
+
+      function bestKeyForApp(app = currentRecordApp()) {
+        if (app === "powersNegative") return POWERS_NEGATIVE_BEST_KEY;
         if (app === "powers") return POWERS_BEST_KEY;
         if (app === "factors") return FACTORS_BEST_KEY;
         if (app === "proportion") return PROPORTION_BEST_KEY;
@@ -9239,12 +9307,12 @@
         }, 650);
       }
 
-      function recordKey(app = selectedApp) {
+      function recordKey(app = currentRecordApp()) {
         if (app === "longMultiplication") return `${PLAY_RECORD_PREFIX}longMultiplicationV3`;
         return `${PLAY_RECORD_PREFIX}${app}`;
       }
 
-      function readPlayRecords(app = selectedApp) {
+      function readPlayRecords(app = currentRecordApp()) {
         try {
           const parsed = JSON.parse(localStorage.getItem(recordKey(app)) || "[]");
           if (!Array.isArray(parsed)) return [];
@@ -9260,7 +9328,7 @@
         }
       }
 
-      function savePlayRecords(records, app = selectedApp) {
+      function savePlayRecords(records, app = currentRecordApp()) {
         try {
           localStorage.setItem(recordKey(app), JSON.stringify(records));
           return true;
@@ -9305,7 +9373,7 @@
         return localDateKey(playedAt) === localDateKey(new Date());
       }
 
-      function recordsWithLegacyBest(records, app = selectedApp) {
+      function recordsWithLegacyBest(records, app = currentRecordApp()) {
         const legacyBest = readBest(bestKeyForApp(app));
         if (!legacyBest || records.some((record) => record.time === legacyBest)) return records;
         return sortedPlayRecords([
@@ -10825,7 +10893,7 @@
 
       function recordMistake() {
         if (selectedApp === "powers") {
-          mistakes.push({ problem: powersLogarithm ? `${powersProblem.base}の何乗が${powersProblem.answer}か` : `${powersProblem.base}の${powersProblem.exponent}乗`, answer: String(powersAnswer()) });
+          mistakes.push({ problem: powersLogarithm ? `${powersProblem.base}の何乗が${powersProblem.answer}か` : `${powersProblem.base}の${powersProblem.exponent}乗`, answer: currentTimedAnswerText() });
           return;
         }
         if (selectedApp === "area") {
@@ -10934,7 +11002,8 @@
 
       function renderAllRecords() {
         allRecordsList.replaceChildren();
-        orderedAppsForRecords().forEach((app) => {
+        orderedAppsForRecords().flatMap(app => app === "powers" && readPlayRecords("powersNegative").length
+          ? [app, "powersNegative"] : [app]).forEach((app) => {
           const block = document.createElement("section");
           block.className = "recordsAppBlock";
 
@@ -11355,7 +11424,7 @@
         resetInputs(true);
       }
 
-      function startPowersChallenge(random = false, logarithm = false) {
+      function startPowersChallenge(random = false, logarithm = false, negative = false) {
         selectedApp = "powers";
         powersLogarithm = logarithm;
         hasStarted = true;
@@ -11365,7 +11434,7 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        powersDeck = createPowersDeck(random || logarithm);
+        powersDeck = createPowersDeck(random || logarithm, negative && !logarithm);
         powersIndex = 0;
         powersProblem = powersDeck[0];
         resetChallenge();
@@ -12663,6 +12732,7 @@
       chooseProportion.addEventListener("click", () => showFishingCover("proportion"));
       choosePowers.addEventListener("click", showPowersCover);
       powersOrderedStartButton.addEventListener("click", () => startPowersChallenge(false));
+      powersNegativeStartButton.addEventListener("click", () => startPowersChallenge(false, false, true));
       powersRandomStartButton.addEventListener("click", () => startPowersChallenge(true));
       powersLogStartButton.addEventListener("click", () => startPowersChallenge(true, true));
       chooseArea.addEventListener("click", showAreaCover);
