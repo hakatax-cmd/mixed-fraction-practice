@@ -1069,6 +1069,7 @@
       .fishingFraction .fishingDecimal { height: 1.35em; }
       #chooseFactors { background: #eef5ff; }
       #chooseProportion { background: #f0f8ed; }
+      #chooseTriangleRatio { background: #edf8f4; }
       #challengeView.proportionMode #fishingProblemLine { padding: 14px 8px; gap: 14px; font-size: 32px; }
       .proportionMode .fishingFact:empty { display: none; }
       .proportionMode .fishingFact { font-size: 16px; }
@@ -1099,6 +1100,13 @@
         .proportionMode .fishingSteps { gap: 20px; }
         #proportionDiagram { width: min(100%, 420px); }
       }
+      .triangleRatioMode #proportionDiagram { order: 1; margin-bottom: 8px; }
+      .triangleRatioMode .fishingQuestion { order: 2; }
+      .triangleRatioMode .fishingSteps { order: 3; }
+      .triangleRatioMode .fishingStep > span:last-child { font-size: .6em; }
+      #proportionDiagram .triangleRatioAreaLabel { font-size: 24px; }
+      #proportionDiagram .triangleRatioAreaUnit { font-size: 13px; }
+      #proportionDiagram .triangleRatioWholeLabel { font-size: 17px; }
       .factorsMode #fishingProblemLine { font-size: 32px; padding: 16px 10px; gap: 16px; }
       .factorsMode .fishingQuestion { font-size: 26px; white-space: pre-line; }
       .factorsMode .fishingFact:empty { display: none; }
@@ -2977,6 +2985,7 @@
                   <button class="menuButton" id="chooseArea" type="button">長方形・三角形<br />台形の面積</button>
                   <button class="menuButton" id="chooseFactors" type="button">約数・倍数</button>
                   <button class="menuButton" id="chooseProportion" type="button">比</button>
+                  <button class="menuButton" id="chooseTriangleRatio" type="button">三角形の<br />面積と比</button>
                   <button class="menuButton" id="chooseMentalDivision" type="button">4桁÷1桁の<br />暗算</button>
                   <button class="menuButton" id="choosePowers" type="button">乗数</button>
                 </div>
@@ -4008,6 +4017,8 @@
       const FACTORS_BEST_KEY = "factorsBestTimeMs";
       const PROPORTION_TARGET = 12;
       const PROPORTION_BEST_KEY = "proportionBestTimeMs";
+      const TRIANGLE_RATIO_TARGET = 9;
+      const TRIANGLE_RATIO_BEST_KEY = "triangleRatioBestTimeMs";
       const AREA_TARGET = 8;
       const AREA_BEST_KEY = "areaBestTimeMs";
       const FISHING_BEST_KEY = "fishingBestTimeMs";
@@ -4055,6 +4066,7 @@
         FISHING_BEST_KEY,
         FACTORS_BEST_KEY,
         PROPORTION_BEST_KEY,
+        TRIANGLE_RATIO_BEST_KEY,
         AREA_BEST_KEY,
         EQUATION_BEST_KEY,
         SIMULTANEOUS_BEST_KEY,
@@ -4087,6 +4099,7 @@
         area: "長方形・三角形・台形の面積",
         factors: "約数・倍数",
         proportion: "比",
+        triangleRatio: "三角形の面積と比",
         preschool: "\u304a\u524d\u306f\u5e74\u5c11\u306a\u306e\u304b\u3088\u3002",
         equation: "\u4e00\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
         simultaneous: "\u4e8c\u5143\u4e00\u6b21\u65b9\u7a0b\u5f0f",
@@ -4114,6 +4127,7 @@
         "factors",
         "powers",
         "proportion",
+        "triangleRatio",
       ];
       const MENU_LAYOUT_KEY = "mathPracticeMenuLayoutV3";
       const DAILY_COMPLETION_KEY = "mathPracticeDailyCompletionsV1";
@@ -4632,6 +4646,7 @@
       const chooseFishing = document.querySelector("#chooseFishing");
       const chooseFactors = document.querySelector("#chooseFactors");
       const chooseProportion = document.querySelector("#chooseProportion");
+      const chooseTriangleRatio = document.querySelector("#chooseTriangleRatio");
       const choosePowers = document.querySelector("#choosePowers");
       const fishingCoverTitle = document.querySelector("#fishingCoverTitle");
       const fishingCoverPrompt = document.querySelector("#fishingCoverPrompt");
@@ -5377,6 +5392,97 @@
         proportionDiagram.setAttribute("aria-label", `縦${descriptions[0]}、横${descriptions[1]}と、縦${descriptions[2]}、横${descriptions[3]}の相似な長方形`);
       }
 
+      function createTriangleRatioDeck() {
+        const candidates = [];
+        for (let first = 2; first <= 7; first += 1) {
+          for (let second = 2; first + second <= 9; second += 1) {
+            if (gcd(first, second) !== 1 || Math.max(first, second) > 2.5 * Math.min(first, second)) continue;
+            for (let unit = 2; unit <= 9; unit += 1) candidates.push({ parts: [first, second], unit });
+          }
+        }
+        const input = (field, value) => ({ type: "input", field, value: String(value) });
+        const choices = shuffle(candidates);
+        return ["wholeToPart", "partToOther", "partToWhole"].flatMap(kind => {
+          const firstSide = randomInt(0, 1);
+          return shuffle(["bottom", "left", "right"]).map((edge, index) => {
+            const { parts, unit } = choices.pop();
+            const side = (firstSide + index) % 2;
+            const counts = [...parts, parts[0] + parts[1]];
+            const knownIndex = kind === "wholeToPart" ? 2 : side;
+            const targetIndex = kind === "partToWhole" ? 2 : kind === "partToOther" ? 1 - side : side;
+            const knownArea = counts[knownIndex] * unit;
+            const targetArea = counts[targetIndex] * unit;
+            const fraction = { type: "fraction", numerator: input("ratioNumerator", counts[targetIndex]),
+              denominator: input("ratioDenominator", counts[knownIndex]) };
+            const steps = [[String(knownArea), "×", fraction, "=", input("areaAnswer", targetArea), "cm²"]];
+            return { kind, edge, parts, unit, knownIndex, targetIndex, knownArea, targetArea, fact: "",
+              text: targetIndex === 2 ? "三角形全体の面積を求めよ。" : "青い三角形の面積を求めよ。",
+              steps, fields: steps[0].flatMap(part => fishingPartInputs(part).map(item => item.field)),
+              answerText: `${targetArea} cm²`,
+            };
+          });
+        });
+      }
+
+      function renderTriangleRatioDiagram() {
+        const item = fishingProblem;
+        if (!item) return;
+        const a = [46, 190], b = [153, 39], c = [312, 190];
+        const [start, end, vertex] = item.edge === "left" ? [a, b, c]
+          : item.edge === "right" ? [b, c, a] : [a, c, b];
+        const distance = (p, q) => Math.hypot(q[0] - p[0], q[1] - p[1]);
+        const between = (p, q, fraction) => p.map((value, i) => value + (q[i] - value) * fraction);
+        const [first, second] = item.parts;
+        const split = between(start, end, first / (first + second));
+        const pieces = [[start, split, vertex], [split, end, vertex]];
+        const length = distance(start, end);
+        const normal = [(start[1] - end[1]) / length, (end[0] - start[0]) / length];
+        if (normal[0] * (vertex[0] - start[0]) + normal[1] * (vertex[1] - start[1]) > 0) {
+          normal[0] *= -1; normal[1] *= -1;
+        }
+        const offset = (point, amount) => point.map((value, i) => value + normal[i] * amount);
+        const polygon = points => points.map(point => point.join(",")).join(" ");
+        const path = (p, q) => `M${p.join(",")} L${q.join(",")}`;
+        const text = (point, value, className = "", size = 0) =>
+          `<text x="${point[0]}" y="${point[1]}" class="${className}"${size ? ` style="font-size:${size}px"` : ""}>${value}</text>`;
+        const fills = pieces.map((points, index) => {
+          const fill = item.targetIndex === 2 || index === item.targetIndex ? "#dcecff"
+            : index === item.knownIndex ? "#e8f4ef" : "#f2f5f7";
+          return `<polygon points="${polygon(points)}" fill="${fill}"/>`;
+        }).join("");
+        let knownLabel;
+        if (item.knownIndex === 2) {
+          knownLabel = text([180, 15], `全体 ${item.knownArea} cm²`, "triangleRatioWholeLabel");
+        } else {
+          // The incenter keeps the area label inside even the narrower piece.
+          const [p, q, r] = pieces[item.knownIndex];
+          const weights = [distance(q, r), distance(p, r), distance(p, q)];
+          const perimeter = weights.reduce((sum, value) => sum + value, 0);
+          const center = p.map((value, i) => (value * weights[0] + q[i] * weights[1] + r[i] * weights[2]) / perimeter);
+          const radius = Math.abs((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])) / perimeter;
+          const digits = Math.min(24, Math.floor(radius * .9));
+          const unit = Math.min(13, Math.floor(radius * .55));
+          knownLabel = text([center[0], center[1] - unit / 2 - 1], item.knownArea, "triangleRatioAreaLabel", digits)
+            + text([center[0], center[1] + digits / 2 + 1], "cm²", "triangleRatioAreaUnit", unit);
+        }
+        const ticks = [start, split, end].map(point => path(offset(point, 7), offset(point, 17))).join(" ");
+        proportionDiagram.hidden = false;
+        proportionDiagram.innerHTML = `<svg viewBox="0 0 360 235" aria-hidden="true">
+          ${fills}
+          <polygon points="${polygon([a, b, c])}" fill="none" stroke="#344f61" stroke-width="2.5"/>
+          <path d="${path(vertex, split)}" fill="none" stroke="#344f61" stroke-width="2"/>
+          <path d="${path(offset(start, 12), offset(end, 12))} ${ticks}" fill="none" stroke="#647784" stroke-width="1.5"/>
+          ${text(offset(between(start, split, .5), 29), first)}
+          ${text(offset(between(split, end, .5), 29), second)}
+          ${knownLabel}
+        </svg>`;
+        const [edgeName, firstName, secondName] = item.edge === "left" ? ["左の辺", "下側", "上側"]
+          : item.edge === "right" ? ["右の辺", "上側", "下側"] : ["下の辺", "左側", "右側"];
+        const names = [firstName, secondName, "全体"];
+        proportionDiagram.setAttribute("role", "img");
+        proportionDiagram.setAttribute("aria-label", `${edgeName}を${first}対${second}に分けた三角形。${names[item.knownIndex]}の面積は${item.knownArea}平方センチメートル。${names[item.targetIndex]}の面積を求める。`);
+      }
+
       function createFactorsDeck() {
         const input = (field, value) => ({ type: "input", field, value: String(value), entryValue: String(value) });
         const label = text => ({ type: "label", text });
@@ -5675,6 +5781,9 @@
         button.type = "button";
         button.className = "fishingInput";
         button.dataset.fishingField = part.field;
+        if (selectedApp === "triangleRatio") {
+          button.setAttribute("aria-label", { ratioDenominator: "分母", ratioNumerator: "分子", areaAnswer: "面積" }[part.field]);
+        }
         const characters = Array.from(part.value);
         const entryOrder = fishingDigitOrder(part);
         const activeIndex = fishingActiveField === part.field ? entryOrder[value.length] ?? -1 : -1;
@@ -5693,6 +5802,7 @@
       function renderFishingProblem() {
         if (!fishingProblem) return;
         if (selectedApp === "proportion") renderProportionDiagram();
+        if (selectedApp === "triangleRatio") renderTriangleRatioDiagram();
         fishingFact.textContent = fishingProblem.fact;
         fishingQuestion.textContent = fishingProblem.text;
         fishingSteps.replaceChildren();
@@ -5758,7 +5868,7 @@
       }
 
       function setFishingActive(field) {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion" && selectedApp !== "triangleRatio") || isAnswerLocked || isFinished || !fishingProblem?.fields.includes(field)) return;
         const firstIncomplete = fishingProblem.fields.find((candidate) => fishingValues[candidate] !== fishingExpected(candidate));
         if (firstIncomplete && fishingProblem.fields.indexOf(field) > fishingProblem.fields.indexOf(firstIncomplete)) return;
         fishingActiveField = field;
@@ -5800,7 +5910,7 @@
       }
 
       function fishingReceive(value) {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished || !fishingActiveField) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion" && selectedApp !== "triangleRatio") || isAnswerLocked || isFinished || !fishingActiveField) return;
         const expectedValue = fishingExpected(fishingActiveField);
         const expectsOperator = /^[×÷+]$/.test(expectedValue);
         if (expectsOperator) {
@@ -5837,7 +5947,7 @@
       }
 
       function fishingBackspace() {
-        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion") || isAnswerLocked || isFinished) return;
+        if ((selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion" && selectedApp !== "triangleRatio") || isAnswerLocked || isFinished) return;
         const value = fishingValues[fishingActiveField] || "";
         if (value) {
           fishingValues[fishingActiveField] = value.slice(0, -1);
@@ -8885,7 +8995,7 @@
         if (selectedApp === "powers") return true;
         if (selectedApp === "mentalDivision") return true;
         if (selectedApp === "area") return true;
-        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
+        return selectedApp === "multiplication" || selectedApp === "basicDivision" || selectedApp === "improperFraction" || selectedApp === "longMultiplication" || selectedApp === "subtraction" || selectedApp === "doubleMultiplication" || selectedApp === "division" || selectedApp === "fractionCalculation" || selectedApp === "fractionAddSubtract" || selectedApp === "grouping" || selectedApp === "ratio" || selectedApp === "speed" || (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") || selectedApp === "preschool" || selectedApp === "equation" || selectedApp === "simultaneous";
       }
 
       function currentTimedIndex() {
@@ -8900,7 +9010,7 @@
         if (selectedApp === "grouping") return groupingIndex;
         if (selectedApp === "ratio") return ratioIndex;
         if (selectedApp === "speed") return speedIndex;
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingIndex;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) return fishingIndex;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewIndex : preschoolIndex;
         if (selectedApp === "equation") return equationIndex;
         if (selectedApp === "simultaneous") return simultaneousIndex;
@@ -8910,6 +9020,7 @@
       }
 
       function currentTimedLength() {
+        if (selectedApp === "triangleRatio") return fishingDeck.length || TRIANGLE_RATIO_TARGET;
         if (selectedApp === "proportion") return fishingDeck.length || PROPORTION_TARGET;
         if (selectedApp === "powers") return powersDeck.length || POWERS_TARGET;
         if (selectedApp === "factors") return fishingDeck.length || FACTORS_TARGET;
@@ -8923,7 +9034,7 @@
         if (selectedApp === "grouping") return groupingDeck.length || GROUPING_TARGET;
         if (selectedApp === "ratio") return ratioDeck.length || RATIO_TARGET;
         if (selectedApp === "speed") return speedDeck.length || SPEED_TARGET;
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingDeck.length || FISHING_TARGET;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) return fishingDeck.length || FISHING_TARGET;
         if (selectedApp === "preschool") return preschoolReviewActive ? preschoolReviewDeck.length : preschoolDeck.length;
         if (selectedApp === "equation") return equationDeck.length || EQUATION_TARGET;
         if (selectedApp === "simultaneous") return simultaneousDeck.length || SIMULTANEOUS_TARGET;
@@ -8948,7 +9059,7 @@
         if (selectedApp === "grouping") return groupingProblem ? groupingProblem.answer : 0;
         if (selectedApp === "ratio") return ratioProblem ? ratioProblem.answer : 0;
         if (selectedApp === "speed") return speedAnswer();
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) return Number(fishingExpected(fishingProblem?.fields.at(-1))) || 0;
         if (selectedApp === "preschool") return preschoolProblem ? preschoolProblem.answer : 0;
         if (selectedApp === "equation") return ["fraction", "integerFraction"].includes(equationProblem?.kind) ? equationProblem.answer.numerator : equationProblem?.answer || 0;
         if (selectedApp === "simultaneous") return simultaneousProblem?.x || 0;
@@ -8973,7 +9084,7 @@
         if (selectedApp === "grouping") return groupingAnswerText();
         if (selectedApp === "ratio") return ratioAnswerText();
         if (selectedApp === "speed") return speedAnswerText();
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) return fishingProblem?.answerText || "";
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) return fishingProblem?.answerText || "";
         if (selectedApp === "preschool") return String(currentTimedAnswer());
         if (selectedApp === "subtraction") return formattedSubtractionAnswer();
         if (selectedApp === "equation") return ["fraction", "integerFraction"].includes(equationProblem?.kind)
@@ -9193,6 +9304,7 @@
         if (app === "powers") return POWERS_BEST_KEY;
         if (app === "factors") return FACTORS_BEST_KEY;
         if (app === "proportion") return PROPORTION_BEST_KEY;
+        if (app === "triangleRatio") return TRIANGLE_RATIO_BEST_KEY;
         if (app === "mentalDivision") return MENTAL_DIVISION_BEST_KEY;
         if (app === "basicDivision") return BASIC_DIVISION_BEST_KEY;
         if (app === "improperFraction") return IMPROPER_FRACTION_BEST_KEY;
@@ -10131,7 +10243,7 @@
           resetAreaEntry();
           return;
         }
-        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") {
+        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") {
           setLocked(false);
           clearFishingFields();
           return;
@@ -10190,6 +10302,7 @@
         fishing: chooseFishing,
         factors: chooseFactors,
         proportion: chooseProportion,
+        triangleRatio: chooseTriangleRatio,
         preschool: choosePreschool,
         equation: chooseEquation,
         simultaneous: chooseSimultaneous,
@@ -11217,7 +11330,7 @@
               finishRound(); return;
             }
             areaProblem = areaDeck[areaIndex];
-          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) {
             if (keepChallenge) fishingIndex += 1;
             if (fishingIndex >= fishingDeck.length) {
               finalTime = elapsedTime();
@@ -11349,7 +11462,7 @@
           startedAt = null; isFinished = false; setLocked(false);
           showPowersCover(); return;
         }
-        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") {
+        if (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") {
           startedAt = null; isFinished = false; setLocked(false);
           showFishingCover(selectedApp); return;
         }
@@ -11712,7 +11825,7 @@
       }
 
       function startFishingChallenge() {
-        selectedApp = ["factors", "proportion"].includes(selectedApp) ? selectedApp : "fishing";
+        selectedApp = ["factors", "proportion", "triangleRatio"].includes(selectedApp) ? selectedApp : "fishing";
         hasStarted = true;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
@@ -11735,7 +11848,8 @@
         challengeView.hidden = false;
         gameArea.hidden = false;
         finishPanel.hidden = true;
-        fishingDeck = selectedApp === "proportion" ? createProportionDeck()
+        fishingDeck = selectedApp === "triangleRatio" ? createTriangleRatioDeck()
+          : selectedApp === "proportion" ? createProportionDeck()
           : selectedApp === "factors" ? createFactorsDeck() : createFishingDeck();
         fishingIndex = 0;
         fishingProblem = fishingDeck[0];
@@ -12101,11 +12215,14 @@
       }
 
       function showFishingCover(app = "fishing") {
-        selectedApp = ["factors", "proportion"].includes(app) ? app : "fishing";
+        selectedApp = ["factors", "proportion", "triangleRatio"].includes(app) ? app : "fishing";
+        fishingProblem = null;
         fishingCoverTitle.textContent = APP_LABELS[selectedApp];
-        fishingCoverPrompt.textContent = selectedApp === "proportion" ? "比を簡単にする・比の計算"
+        fishingCoverPrompt.textContent = selectedApp === "triangleRatio" ? "辺の比から面積を求める"
+          : selectedApp === "proportion" ? "比を簡単にする・比の計算"
           : selectedApp === "factors" ? "素因数分解・約数・公約数・公倍数" : "単位と途中式でとくよ";
-        fishingCoverGoal.innerHTML = `${selectedApp === "proportion" ? PROPORTION_TARGET
+        fishingCoverGoal.innerHTML = `${selectedApp === "triangleRatio" ? TRIANGLE_RATIO_TARGET
+          : selectedApp === "proportion" ? PROPORTION_TARGET
           : selectedApp === "factors" ? FACTORS_TARGET : FISHING_TARGET}問<br>タイムアタック`;
         challengeView.classList.remove("divisionMode", "ratioMode", "speedMode");
         appMenu.hidden = true;
@@ -12267,16 +12384,17 @@
         groupingProblemLine.hidden = selectedApp !== "grouping";
         ratioProblemLine.hidden = selectedApp !== "ratio";
         speedProblemLine.hidden = selectedApp !== "speed";
-        fishingProblemLine.hidden = (selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion");
+        fishingProblemLine.hidden = (selectedApp !== "fishing" && selectedApp !== "factors" && selectedApp !== "proportion" && selectedApp !== "triangleRatio");
         preschoolProblemLine.hidden = selectedApp !== "preschool";
         equationProblemLine.hidden = selectedApp !== "equation";
         simultaneousProblemLine.hidden = selectedApp !== "simultaneous";
         challengeView.classList.toggle("divisionMode", selectedApp === "division");
         challengeView.classList.toggle("ratioMode", selectedApp === "ratio");
         challengeView.classList.toggle("speedMode", selectedApp === "speed");
-        challengeView.classList.toggle("fishingMode", (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") || selectedApp === "area");
+        challengeView.classList.toggle("fishingMode", (selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") || selectedApp === "area");
         challengeView.classList.toggle("factorsMode", selectedApp === "factors");
-        challengeView.classList.toggle("proportionMode", selectedApp === "proportion");
+        challengeView.classList.toggle("proportionMode", selectedApp === "proportion" || selectedApp === "triangleRatio");
+        challengeView.classList.toggle("triangleRatioMode", selectedApp === "triangleRatio");
         challengeView.classList.toggle("equationMode", selectedApp === "equation" || selectedApp === "simultaneous");
         fractionGoal.hidden = false;
         fractionGoal.classList.toggle("placeholder", selectedApp !== "fraction");
@@ -12346,7 +12464,7 @@
             renderSpeedProblem();
           } else if (selectedApp === "area") {
             resetAreaEntry();
-          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
+          } else if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) {
             fishingValues = {};
             fishingActiveField = fishingProblem?.fields[0] || "";
             setFishingActive(fishingActiveField);
@@ -12440,7 +12558,7 @@
           speedBackspace();
           return;
         }
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) {
           fishingBackspace();
           return;
         }
@@ -12485,7 +12603,7 @@
             resetInputs();
             return;
           }
-          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
+          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) {
             clearFishingFields();
             return;
           }
@@ -12539,7 +12657,7 @@
             return;
           }
         }
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
           event.preventDefault();
           fishingReceive(event.key);
           return;
@@ -12598,7 +12716,7 @@
             speedReceive(button.dataset.digit);
             return;
           }
-          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) {
+          if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) {
             fishingReceive(button.dataset.digit);
             return;
           }
@@ -12679,25 +12797,25 @@
         if (selectedApp === "area") areaReceive("×");
         if (selectedApp === "ratio") ratioReceive("\u00d7");
         if (selectedApp === "speed") speedReceive("\u00d7");
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("\u00d7");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) fishingReceive("\u00d7");
         if (selectedApp === "equation") equationReceive("\u00d7");
       });
       bindFastPress(document.querySelector("#ratioDivideKey"), () => {
         if (selectedApp === "area") areaReceive("÷");
         if (selectedApp === "ratio") ratioReceive("\u00f7");
         if (selectedApp === "speed") speedReceive("\u00f7");
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("\u00f7");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) fishingReceive("\u00f7");
         if (selectedApp === "equation") equationReceive("\u00f7");
       });
       bindFastPress(document.querySelector("#ratioPlusKey"), () => {
         if (selectedApp === "area") areaReceive("+");
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive("+");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) fishingReceive("+");
         if (selectedApp === "equation") equationReceive("+");
         if (selectedApp === "simultaneous") simultaneousReceive("+");
       });
       bindFastPress(document.querySelector("#ratioDotKey"), () => {
         if (selectedApp === "ratio") ratioReceive(".");
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion")) fishingReceive(".");
+        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio")) fishingReceive(".");
         if (selectedApp === "equation") equationReceive("\u2212");
         if (selectedApp === "simultaneous") simultaneousReceive("\u2212");
       });
@@ -12730,6 +12848,7 @@
       chooseFishing.addEventListener("click", showFishingCover);
       chooseFactors.addEventListener("click", showFactorsCover);
       chooseProportion.addEventListener("click", () => showFishingCover("proportion"));
+      chooseTriangleRatio.addEventListener("click", () => showFishingCover("triangleRatio"));
       choosePowers.addEventListener("click", showPowersCover);
       powersOrderedStartButton.addEventListener("click", () => startPowersChallenge(false));
       powersNegativeStartButton.addEventListener("click", () => startPowersChallenge(false, false, true));
