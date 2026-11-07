@@ -10326,6 +10326,8 @@
       });
 
       let menuPageIndex = 0;
+      const MENU_GROUP_LABELS = { active: "学習中のもの", graduated: "卒業したもの", retired: "廃盤" };
+      const MENU_GROUPS = Object.keys(MENU_GROUP_LABELS);
       let menuKeyboardTile = null;
       let menuGesture = null;
       let menuLongPressTimer = null;
@@ -10418,19 +10420,18 @@
       }
 
       function defaultMenuLayout() {
-        return { active: [...APP_ORDER], graduated: [] };
+        return { active: [...APP_ORDER], graduated: [], retired: [] };
       }
 
       function normalizeMenuLayout(layout) {
         const used = new Set();
         const sanitize = (items) => (Array.isArray(items) ? items : [])
           .filter((app) => APP_ORDER.includes(app) && !used.has(app) && used.add(app));
-        const active = sanitize(layout?.active);
-        const graduated = sanitize(layout?.graduated);
+        const normalized = Object.fromEntries(MENU_GROUPS.map(group => [group, sanitize(layout?.[group])]));
         APP_ORDER.forEach((app) => {
-          if (!used.has(app)) active.push(app);
+          if (!used.has(app)) normalized.active.push(app);
         });
-        return { active, graduated };
+        return normalized;
       }
 
       function readMenuLayout() {
@@ -10452,14 +10453,16 @@
       }
 
       function buildMenuPages(layout, columns, capacity) {
-        return ["active", "graduated"].flatMap((group) =>
-          Array.from({ length: Math.max(1, Math.ceil(layout[group].length / capacity)) }, (_, pageIndex) => ({
+        return MENU_GROUPS.flatMap((group) => {
+          const apps = layout[group] || [];
+          return Array.from({ length: Math.max(1, Math.ceil(apps.length / capacity)) }, (_, pageIndex) => ({
             group,
             slots: Array.from({ length: capacity }, (_, index) => {
               const groupIndex = pageIndex * capacity + index;
-              return { group, index: Math.min(groupIndex, layout[group].length), app: layout[group][groupIndex] || "" };
+              return { group, index: Math.min(groupIndex, apps.length), app: apps[groupIndex] || "" };
             }),
-          })));
+          }));
+        });
       }
 
       function menuPages() {
@@ -10506,7 +10509,7 @@
         pages.forEach((model) => {
           const page = document.createElement("section");
           page.className = "menuPage";
-          page.dataset.menuTitle = model.group === "active" ? "学習中のもの" : "卒業したもの";
+          page.dataset.menuTitle = MENU_GROUP_LABELS[model.group];
           page.setAttribute("aria-label", page.dataset.menuTitle);
           model.slots.forEach(({ group, index: groupIndex, app }) => {
             const slot = document.createElement("div");
@@ -10590,7 +10593,7 @@
 
       function orderedAppsForRecords() {
         const layout = readMenuLayout();
-        return [...layout.active, ...layout.graduated];
+        return MENU_GROUPS.flatMap(group => layout[group]);
       }
 
       function clearMenuLongPress() {
@@ -10610,17 +10613,19 @@
       function completeMenuLongPress() {
         const gesture = menuGesture;
         if (!gesture?.tile || gesture.moved || gesture.transferred) return;
+        const layout = readMenuLayout();
+        const sourceIndex = MENU_GROUPS.findIndex(group => layout[group].includes(gesture.app));
+        if (sourceIndex < 0) return;
+        const source = MENU_GROUPS[sourceIndex];
+        const destination = MENU_GROUPS[(sourceIndex + 1) % MENU_GROUPS.length];
         clearMenuLongPress();
         gesture.transferred = true;
         // Capture on the stable viewport before moving the pressed button.
         menuPagerViewport.setPointerCapture(gesture.pointerId);
         suppressMenuClick();
-        const layout = readMenuLayout();
         const previousPages = buildMenuPages(layout, menuColumns(), menuSlotCount());
         const visibleGroup = previousPages[menuPageIndex].group;
         const groupPageIndex = previousPages.slice(0, menuPageIndex).filter((page) => page.group === visibleGroup).length;
-        const source = layout.active.includes(gesture.app) ? "active" : "graduated";
-        const destination = source === "active" ? "graduated" : "active";
         layout[source] = layout[source].filter((app) => app !== gesture.app);
         layout[destination].push(gesture.app);
         saveMenuLayout(layout);
