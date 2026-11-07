@@ -12637,7 +12637,7 @@
           clearAnswer();
           return;
         }
-        const key = ({ "*": "×", x: "×", X: "×", "/": "÷", "-": "−", _: "−" })[event.key] || event.key;
+        const key = ({ "*": "×", x: "×", q: "×", "/": "÷", w: "÷", t: "+", "-": "−", _: "−" })[event.key.toLowerCase()] || event.key;
         const digit = /^\d$/.test(key);
         if (!digit && !/^[×÷+−.]$/.test(key)) return;
         let receive;
