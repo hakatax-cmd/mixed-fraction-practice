@@ -2818,25 +2818,22 @@
         }
       }
 
-      @media (min-width: 700px) and (min-height: 700px) and (pointer: coarse) and (orientation: landscape) {
-        .appShell { visibility: hidden; }
+      @media (min-width: 700px) and (min-height: 601px) and (any-pointer: coarse) and (orientation: landscape) {
+        .appShell .practiceCard { width: 100%; height: 100%; }
+        #keypad { display: none; }
 
-        body::before {
-          content: "\7e26\5411\304d\3067\4f7f\3063\3066\304f\3060\3055\3044\3002";
-          position: fixed;
-          inset: 0;
-          display: grid;
-          place-items: center;
-          padding: 24px;
-          background: #fff;
-          color: var(--ink);
-          font-size: clamp(2rem, 5vw, 3.5rem);
-          font-weight: 900;
-          line-height: 1.35;
-          text-align: center;
-          visibility: visible;
-          z-index: 1000;
+        #gameArea, #challengeView.divisionMode #gameArea {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr) clamp(24px, 3vmin, 34px);
         }
+
+        #gameArea.secondChanceWarningVisible,
+        #challengeView.divisionMode #gameArea.secondChanceWarningVisible {
+          grid-template-rows: minmax(0, 1fr) clamp(84px, 11vmin, 116px);
+        }
+
+        #challengeView.divisionMode .divisionProblemLine { grid-row: 1; }
+        #challengeView.divisionMode .feedback { grid-column: 1; }
       }
 
       @supports (height: 100svh) {
@@ -12627,94 +12624,42 @@
         }
       }
 
-      document.addEventListener("keydown", (event) => {
-        if (!hasStarted || isAnswerLocked || isFinished) return;
-        if (selectedApp === "area") {
-          if (event.key === "Backspace" || event.key === "Delete") { event.preventDefault(); areaBackspace(); return; }
-          const key = ({ "*": "×", "x": "×", "X": "×", "/": "÷" })[event.key] || event.key;
-          if (/^[\d×÷+]$/.test(key)) { event.preventDefault(); areaReceive(key); }
-          return;
-        }
-        if (selectedApp === "ratio") {
-          if (/^\d$/.test(event.key) || event.key === ".") {
-            event.preventDefault();
-            ratioReceive(event.key);
-            return;
-          }
-          if (event.key === "*" || event.key === "x" || event.key === "X") {
-            event.preventDefault();
-            ratioReceive("\u00d7");
-            return;
-          }
-          if (event.key === "/") {
-            event.preventDefault();
-            ratioReceive("\u00f7");
-            return;
-          }
-        }
-        if (selectedApp === "speed") {
-          if (/^\d$/.test(event.key)) {
-            event.preventDefault();
-            speedReceive(event.key);
-            return;
-          }
-          if (event.key === "*" || event.key === "x" || event.key === "X") {
-            event.preventDefault();
-            speedReceive("\u00d7");
-            return;
-          }
-          if (event.key === "/") {
-            event.preventDefault();
-            speedReceive("\u00f7");
-            return;
-          }
-        }
-        if ((selectedApp === "fishing" || selectedApp === "factors" || selectedApp === "proportion" || selectedApp === "triangleRatio") && (/^\d$/.test(event.key) || event.key === "." || /^[×÷+]$/.test(event.key))) {
-          event.preventDefault();
-          fishingReceive(event.key);
-          return;
-        }
-        if (selectedApp === "equation" || selectedApp === "simultaneous") {
-          if (/^\d$/.test(event.key)) {
-            event.preventDefault();
-            if (selectedApp === "equation") equationReceive(event.key);
-            else simultaneousReceive(event.key);
-            return;
-          }
-          if (event.key === "-" || event.key === "_") {
-            event.preventDefault();
-            if (selectedApp === "equation") equationReceive("\u2212");
-            else simultaneousReceive("\u2212");
-            return;
-          }
-          if (event.key === "+") {
-            event.preventDefault();
-            if (selectedApp === "equation") equationReceive("+");
-            else simultaneousReceive("+");
-            return;
-          }
-          if (event.key === "*" || event.key === "x" || event.key === "X") {
-            event.preventDefault();
-            equationReceive("\u00d7");
-            return;
-          }
-          if (event.key === "/") {
-            event.preventDefault();
-            equationReceive("\u00f7");
-            return;
-          }
-        }
-        if (/^\d$/.test(event.key)) {
-          event.preventDefault();
-          resetClearAnswerConfirm();
-          setSlotValue(activeSlot, getAnswerValue(activeSlot) + event.key);
-          return;
-        }
+      function handlePracticeKeydown(event) {
+        if (!hasStarted || isAnswerLocked || isFinished || event.defaultPrevented || event.isComposing
+          || event.altKey || event.ctrlKey || event.metaKey) return;
         if (event.key === "Backspace" || event.key === "Delete") {
           event.preventDefault();
           backspaceAnswer();
+          return;
         }
-      });
+        if (event.key === "Escape") {
+          event.preventDefault();
+          clearAnswer();
+          return;
+        }
+        const key = ({ "*": "×", x: "×", X: "×", "/": "÷", "-": "−", _: "−" })[event.key] || event.key;
+        const digit = /^\d$/.test(key);
+        if (!digit && !/^[×÷+−.]$/.test(key)) return;
+        let receive;
+        switch (selectedApp) {
+          case "area": receive = areaReceive; break;
+          case "ratio": receive = ratioReceive; break;
+          case "speed": receive = speedReceive; break;
+          case "equation": receive = equationReceive; break;
+          case "simultaneous": receive = simultaneousReceive; break;
+          case "fishing":
+          case "factors":
+          case "proportion":
+          case "triangleRatio": receive = fishingReceive; break;
+        }
+        if (!receive && !digit) return;
+        event.preventDefault();
+        resetClearAnswerConfirm();
+        if (receive) receive(key);
+        else setSlotValue(activeSlot, getAnswerValue(activeSlot) + key);
+      }
+
+      document.addEventListener("keydown", handlePracticeKeydown);
 
       document.querySelectorAll("[data-digit]").forEach((button) => {
         bindFastPress(button, () => {
