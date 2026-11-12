@@ -551,15 +551,14 @@
         align-items: center;
         justify-content: flex-end;
       }
-      #fractionAddSubtractPrimaryEquals { grid-row: 2; }
+      #fractionAddSubtractPrimaryEquals { grid-row: 3; }
       .fractionAddSubtractAnswer {
         grid-column: 2;
-        grid-row: 2;
+        grid-row: 3;
         display: inline-flex;
         align-items: center;
         justify-self: start;
       }
-      .fractionAddSubtractWorkSpacer,
       .fractionAddSubtractReducedSpacer { display: none !important; }
       .fractionAddSubtractWorkEquals { grid-column: 1; grid-row: 2; }
       .fractionAddSubtractWork {
@@ -584,19 +583,15 @@
       .fractionAddSubtractWork .answerDigits { display: inline-flex; gap: clamp(4px, 0.8vmin, 8px); }
       .fractionAddSubtractWorkFraction i { display: block; height: 5px; background: var(--ink); }
       .fractionAddSubtractWorkDenominator { justify-self: center; }
-      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryEquals,
-      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractPrimaryAnswer { grid-row: 3; }
       .fractionAddSubtractDenominatorCell {
         display: grid;
         min-height: var(--fraction-box-height);
         place-items: center;
       }
-      #fractionAddSubtractReducedEquals { grid-column: 1; grid-row: 3; }
-      #fractionAddSubtractReducedAnswer { grid-column: 2; grid-row: 3; }
+      #fractionAddSubtractReducedEquals { grid-column: 1; grid-row: 4; }
+      #fractionAddSubtractReducedAnswer { grid-column: 2; grid-row: 4; }
       .fractionAddSubtractMinus { margin-right: clamp(4px, 0.8vmin, 8px); }
 
-      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedEquals,
-      .fractionAddSubtractStack.hasAdditionWork #fractionAddSubtractReducedAnswer { grid-row: 4; }
 
       #fractionAddSubtractProblemLine .fraction,
       #fractionAddSubtractProblemLine .answerFraction {
@@ -3269,19 +3264,18 @@
             <div class="fractionAddSubtractStack">
               <span class="fractionAddSubtractQuestion" id="fractionAddSubtractQuestion"></span>
               <span class="fractionAddSubtractEquals" id="fractionAddSubtractPrimaryEquals">=</span>
-              <span class="fractionAddSubtractWorkSpacer" id="fractionAddSubtractWorkSpacer" hidden></span>
-              <span class="fractionAddSubtractEquals fractionAddSubtractWorkEquals" id="fractionAddSubtractWorkEquals" hidden>=</span>
-              <span class="fractionAddSubtractWork" id="fractionAddSubtractWork" hidden>
+              <span class="fractionAddSubtractEquals fractionAddSubtractWorkEquals" id="fractionAddSubtractWorkEquals">=</span>
+              <span class="fractionAddSubtractWork" id="fractionAddSubtractWork">
                 <span class="fractionAddSubtractWorkFraction">
                   <span class="fractionAddSubtractWorkNumerator">
                     <span class="answerDigits">
-                      <button id="fractionAddSubtractWorkFirstTensInput" class="answerBox" aria-label="分子の足し算、左の十の位" data-value="" type="button"></button>
-                      <button id="fractionAddSubtractWorkFirstOnesInput" class="answerBox" aria-label="分子の足し算、左の一の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkFirstTensInput" class="answerBox" aria-label="左の分子の十の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkFirstOnesInput" class="answerBox" aria-label="左の分子の一の位" data-value="" type="button"></button>
                     </span>
-                    <span class="fractionAddSubtractOperator">+</span>
+                    <span class="fractionAddSubtractOperator" id="fractionAddSubtractWorkOperator">+</span>
                     <span class="answerDigits">
-                      <button id="fractionAddSubtractWorkSecondTensInput" class="answerBox" aria-label="分子の足し算、右の十の位" data-value="" type="button"></button>
-                      <button id="fractionAddSubtractWorkSecondOnesInput" class="answerBox" aria-label="分子の足し算、右の一の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkSecondTensInput" class="answerBox" aria-label="右の分子の十の位" data-value="" type="button"></button>
+                      <button id="fractionAddSubtractWorkSecondOnesInput" class="answerBox" aria-label="右の分子の一の位" data-value="" type="button"></button>
                     </span>
                   </span>
                   <i></i>
@@ -4174,7 +4168,7 @@
       let fractionAddSubtractDeck = [];
       let fractionAddSubtractIndex = 0;
       let fractionAddSubtractProblem = null;
-      let fractionAddSubtractAdditionStage = "answer";
+      let fractionAddSubtractStage = "work";
       let groupingDeck = [];
       let groupingIndex = 0;
       let groupingProblem = null;
@@ -4385,10 +4379,7 @@
       const fractionAddSubtractPrimaryAnswer = document.querySelector("#fractionAddSubtractPrimaryAnswer");
       const fractionAddSubtractPrimaryMinus = document.querySelector("#fractionAddSubtractPrimaryMinus");
       const fractionAddSubtractPrimaryDenominator = document.querySelector("#fractionAddSubtractPrimaryDenominator");
-      const fractionAddSubtractStack = document.querySelector(".fractionAddSubtractStack");
-      const fractionAddSubtractWorkSpacer = document.querySelector("#fractionAddSubtractWorkSpacer");
-      const fractionAddSubtractWorkEquals = document.querySelector("#fractionAddSubtractWorkEquals");
-      const fractionAddSubtractWork = document.querySelector("#fractionAddSubtractWork");
+      const fractionAddSubtractWorkOperator = document.querySelector("#fractionAddSubtractWorkOperator");
       const fractionAddSubtractReducedSpacer = document.querySelector("#fractionAddSubtractReducedSpacer");
       const fractionAddSubtractReducedEquals = document.querySelector("#fractionAddSubtractReducedEquals");
       const fractionAddSubtractReducedAnswer = document.querySelector("#fractionAddSubtractReducedAnswer");
@@ -8216,16 +8207,12 @@
       }
 
       function fractionAddSubtractWorkTerms(item = fractionAddSubtractProblem) {
-        if (!item || item.operator !== "add") return { first: 0, second: 0 };
+        if (!item) return { first: 0, second: 0 };
         const denominator = item.answer.denominator;
         return {
           first: item.first.numerator * (denominator / item.first.denominator),
           second: item.second.numerator * (denominator / item.second.denominator),
         };
-      }
-
-      function fractionAddSubtractNeedsWork(item = fractionAddSubtractProblem) {
-        return item?.operator === "add";
       }
 
       function fractionAddSubtractProblemText(item = fractionAddSubtractProblem) {
@@ -8983,12 +8970,10 @@
           });
         };
         addDigits(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator);
-        if (fractionAddSubtractNeedsWork()) {
-          const terms = fractionAddSubtractWorkTerms();
-          addDigits(FRACTION_ADD_SUBTRACT_WORK_DENOMINATOR_SLOTS, answer.denominator);
-          addDigits(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first);
-          addDigits(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second);
-        }
+        const terms = fractionAddSubtractWorkTerms();
+        addDigits(FRACTION_ADD_SUBTRACT_WORK_DENOMINATOR_SLOTS, answer.denominator);
+        addDigits(FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, terms.first);
+        addDigits(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second);
         if (fractionAddSubtractProblem.reduced) {
           addDigits(FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS, fractionAddSubtractProblem.reduced.numerator);
           if (fractionAddSubtractProblem.reduced.denominator !== 1) {
@@ -8999,7 +8984,7 @@
       }
 
       function resetFractionAddSubtractEntry() {
-        fractionAddSubtractAdditionStage = fractionAddSubtractNeedsWork() ? "work" : "answer";
+        fractionAddSubtractStage = "work";
         fractionAddSubtractProblemLine.scrollTop = 0;
         updateFractionAddSubtractSlots();
       }
@@ -9008,7 +8993,6 @@
         if (!fractionAddSubtractProblem) return;
         const answer = fractionAddSubtractAnswer();
         const addition = fractionAddSubtractProblem.operator === "add";
-        const needsWork = fractionAddSubtractNeedsWork();
         const terms = fractionAddSubtractWorkTerms();
         const visible = new Set(visibleDigitSlots(FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS, answer.numerator));
         FRACTION_ADD_SUBTRACT_PRIMARY_NUMERATOR_SLOTS.forEach((slot) => {
@@ -9020,18 +9004,15 @@
           ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second),
         ]);
         [...FRACTION_ADD_SUBTRACT_WORK_DENOMINATOR_SLOTS, ...FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS, ...FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS].forEach((slot) => {
-          inputs[slot].hidden = !needsWork || !workVisible.has(slot);
+          inputs[slot].hidden = !workVisible.has(slot);
         });
-        fractionAddSubtractStack.classList.toggle("hasAdditionWork", needsWork);
-        fractionAddSubtractWorkSpacer.hidden = !needsWork;
-        fractionAddSubtractWorkEquals.hidden = !needsWork;
-        fractionAddSubtractWork.hidden = !needsWork;
+        fractionAddSubtractWorkOperator.textContent = addition ? "+" : "−";
         fractionAddSubtractPrimaryMinus.hidden = addition || !fractionAddSubtractProblem.negative;
         fractionAddSubtractPrimaryDenominator.textContent = answer.denominator;
-        const showPrimaryAnswer = !needsWork || fractionAddSubtractAdditionStage !== "work";
+        const showPrimaryAnswer = fractionAddSubtractStage !== "work";
         fractionAddSubtractPrimaryEquals.hidden = !showPrimaryAnswer;
         fractionAddSubtractPrimaryAnswer.hidden = !showPrimaryAnswer;
-        const showReduced = Boolean(fractionAddSubtractProblem.reduced) && fractionAddSubtractAdditionStage === "reduced";
+        const showReduced = Boolean(fractionAddSubtractProblem.reduced) && fractionAddSubtractStage === "reduced";
         const reducedIsInteger = showReduced && fractionAddSubtractProblem.reduced.denominator === 1;
         fractionAddSubtractReducedSpacer.hidden = !showReduced;
         fractionAddSubtractReducedEquals.hidden = !showReduced;
@@ -9170,7 +9151,7 @@
         }
         if (selectedApp === "fractionAddSubtract") {
           const answer = fractionAddSubtractAnswer();
-          if (fractionAddSubtractAdditionStage === "work") {
+          if (fractionAddSubtractStage === "work") {
             const terms = fractionAddSubtractWorkTerms();
             return [
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_DENOMINATOR_SLOTS, answer.denominator),
@@ -9178,7 +9159,7 @@
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS, terms.second),
             ];
           }
-          if (fractionAddSubtractAdditionStage === "reduced") {
+          if (fractionAddSubtractStage === "reduced") {
             const reduced = fractionAddSubtractProblem.reduced;
             return [
               ...(reduced.denominator === 1 ? [] : ["fractionAddSubtractReducedDenominator"]),
@@ -10984,13 +10965,13 @@
           return;
         }
 
-        if (selectedApp === "fractionAddSubtract" && (fractionAddSubtractAdditionStage === "work"
-          || (fractionAddSubtractAdditionStage === "answer" && fractionAddSubtractProblem.reduced))) {
+        if (selectedApp === "fractionAddSubtract" && (fractionAddSubtractStage === "work"
+          || (fractionAddSubtractStage === "answer" && fractionAddSubtractProblem.reduced))) {
           if (!correct) {
             showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
             return;
           }
-          fractionAddSubtractAdditionStage = fractionAddSubtractAdditionStage === "work" ? "answer" : "reduced";
+          fractionAddSubtractStage = fractionAddSubtractStage === "work" ? "answer" : "reduced";
           updateFractionAddSubtractSlots();
           setActive(activeSlotOrder()[0]);
           return;
