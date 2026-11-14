@@ -514,27 +514,40 @@
       .practiceCard:has(#fractionAddSubtractProblemLine:not([hidden])) { touch-action: pan-y; }
 
       .fractionAddSubtractStack {
+        --work-fraction-width: clamp(260px, 48vmin, 410px);
+        --equals-column-gap: clamp(8px, 1.8vw, 20px);
         display: grid;
         grid-column: 1;
-        grid-template-columns: 1.05em minmax(0, max-content);
+        grid-template-columns: 1.05em minmax(0, 1fr);
         grid-template-rows: repeat(4, auto);
-        column-gap: clamp(8px, 1.8vw, 20px);
+        column-gap: var(--equals-column-gap);
         row-gap: clamp(8px, 1.4vmin, 16px);
         align-items: center;
         justify-items: center;
         justify-self: center;
-        width: fit-content;
-        max-width: 100%;
+        width: min(100%, calc(1.05em + var(--equals-column-gap) + var(--work-fraction-width)));
         min-width: 0;
         font-variant-numeric: tabular-nums;
       }
 
-      .fractionAddSubtractQuestion {
+      .fractionAddSubtractPrompt {
         grid-column: 2;
         grid-row: 1;
+        justify-self: start;
+        min-width: 0;
+      }
+
+      .fractionAddSubtractLcmHint {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.3;
+      }
+
+      .fractionAddSubtractQuestion {
         display: inline-flex;
         align-items: center;
-        justify-self: start;
         gap: clamp(8px, 1.8vw, 18px);
       }
 
@@ -564,14 +577,15 @@
       .fractionAddSubtractWork {
         grid-column: 2;
         grid-row: 2;
-        display: inline-grid;
+        display: grid;
         align-items: center;
-        justify-self: start;
+        justify-self: stretch;
+        min-width: 0;
       }
       .fractionAddSubtractWorkFraction {
-        display: inline-grid;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: var(--fraction-box-height) 5px var(--fraction-box-height);
-        min-width: min(100%, clamp(260px, 48vmin, 410px));
         align-items: center;
       }
       .fractionAddSubtractWorkNumerator {
@@ -581,7 +595,7 @@
         gap: clamp(7px, 1.2vmin, 12px);
       }
       .fractionAddSubtractWork .answerDigits { display: inline-flex; gap: clamp(4px, 0.8vmin, 8px); }
-      .fractionAddSubtractWorkFraction i { display: block; height: 5px; background: var(--ink); }
+      .fractionAddSubtractWorkFraction > i { display: block; width: 100%; height: 5px; background: var(--ink); }
       .fractionAddSubtractWorkDenominator { justify-self: center; }
       .fractionAddSubtractDenominatorCell {
         display: grid;
@@ -623,7 +637,7 @@
       }
 
       #fractionAddSubtractReducedAnswer.integerResult .answerFraction i,
-      #fractionAddSubtractReducedAnswer.integerResult #fractionAddSubtractReducedDenominatorInput {
+      #fractionAddSubtractReducedAnswer.integerResult .fractionAddSubtractReducedDenominator {
         display: none;
       }
 
@@ -3262,7 +3276,10 @@
           </div>
           <div class="problemLine" id="fractionAddSubtractProblemLine" hidden>
             <div class="fractionAddSubtractStack">
-              <span class="fractionAddSubtractQuestion" id="fractionAddSubtractQuestion"></span>
+              <div class="fractionAddSubtractPrompt">
+                <span class="fractionAddSubtractLcmHint" id="fractionAddSubtractLcmHint" hidden>分母は最小公倍数にせよ</span>
+                <span class="fractionAddSubtractQuestion" id="fractionAddSubtractQuestion"></span>
+              </div>
               <span class="fractionAddSubtractEquals" id="fractionAddSubtractPrimaryEquals">=</span>
               <span class="fractionAddSubtractEquals fractionAddSubtractWorkEquals" id="fractionAddSubtractWorkEquals">=</span>
               <span class="fractionAddSubtractWork" id="fractionAddSubtractWork">
@@ -3308,7 +3325,10 @@
                     <button id="fractionAddSubtractReducedNumeratorInput" class="answerBox" aria-label="約分後の分子の一の位" data-value="" type="button"></button>
                   </span>
                   <i></i>
-                  <button id="fractionAddSubtractReducedDenominatorInput" class="answerBox" aria-label="&#32004;&#20998;&#24460;&#12398;&#20998;&#27597;" data-value="" type="button"></button>
+                  <span class="answerDigits fractionAddSubtractReducedDenominator">
+                    <button id="fractionAddSubtractReducedDenominatorTensInput" class="answerBox" aria-label="約分後の分母の十の位" data-value="" type="button" hidden></button>
+                    <button id="fractionAddSubtractReducedDenominatorInput" class="answerBox" aria-label="約分後の分母の一の位" data-value="" type="button"></button>
+                  </span>
                 </span>
               </span>
             </div>
@@ -4003,6 +4023,7 @@
       const FRACTION_ADD_SUBTRACT_WORK_FIRST_SLOTS = ["fractionAddSubtractWorkFirstTens", "fractionAddSubtractWorkFirstOnes"];
       const FRACTION_ADD_SUBTRACT_WORK_SECOND_SLOTS = ["fractionAddSubtractWorkSecondTens", "fractionAddSubtractWorkSecondOnes"];
       const FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS = ["fractionAddSubtractReducedNumeratorTens", "fractionAddSubtractReducedNumerator"];
+      const FRACTION_ADD_SUBTRACT_REDUCED_DENOMINATOR_SLOTS = ["fractionAddSubtractReducedDenominatorTens", "fractionAddSubtractReducedDenominator"];
       const GROUPING_TARGET = 10;
       const GROUPING_MIDDLE_SLOTS = ["groupingMiddleHundreds", "groupingMiddleTens", "groupingMiddleOnes"];
       const GROUPING_FINAL_SLOTS = ["groupingFinalThousands", "groupingFinalHundreds", "groupingFinalTens", "groupingFinalOnes"];
@@ -4301,6 +4322,7 @@
         fractionAddSubtractWorkSecondOnes: document.querySelector("#fractionAddSubtractWorkSecondOnesInput"),
         fractionAddSubtractReducedNumeratorTens: document.querySelector("#fractionAddSubtractReducedNumeratorTensInput"),
         fractionAddSubtractReducedNumerator: document.querySelector("#fractionAddSubtractReducedNumeratorInput"),
+        fractionAddSubtractReducedDenominatorTens: document.querySelector("#fractionAddSubtractReducedDenominatorTensInput"),
         fractionAddSubtractReducedDenominator: document.querySelector("#fractionAddSubtractReducedDenominatorInput"),
         groupingMiddleHundreds: document.querySelector("#groupingMiddleHundredsInput"),
         groupingMiddleTens: document.querySelector("#groupingMiddleTensInput"),
@@ -4375,6 +4397,7 @@
       const fractionCalcReducedBar = document.querySelector("#fractionCalcReducedBar");
       const fractionCalcReducedDenominatorRow = document.querySelector("#fractionCalcReducedDenominatorRow");
       const fractionAddSubtractQuestion = document.querySelector("#fractionAddSubtractQuestion");
+      const fractionAddSubtractLcmHint = document.querySelector("#fractionAddSubtractLcmHint");
       const fractionAddSubtractPrimaryEquals = document.querySelector("#fractionAddSubtractPrimaryEquals");
       const fractionAddSubtractPrimaryAnswer = document.querySelector("#fractionAddSubtractPrimaryAnswer");
       const fractionAddSubtractPrimaryMinus = document.querySelector("#fractionAddSubtractPrimaryMinus");
@@ -4920,74 +4943,27 @@
         return [...deck, ...tail.map(pick)];
       }
 
-      function createFractionAddSubtractProblem(operator, used, subtractNegative = true) {
+      function createFractionAddSubtractProblem(operator, used) {
         for (let attempt = 0; attempt < 1200; attempt += 1) {
-          let item;
-          if (operator === "subtract") {
-            const denominator = randomInt(3, 9);
-            const leftNumerator = randomInt(1, 9);
-            let rightNumerator;
-            let rawNumerator;
-            if (subtractNegative) {
-              const minimumDifference = Math.max(1, 10 - leftNumerator);
-              rawNumerator = randomInt(minimumDifference, 9);
-              rightNumerator = leftNumerator + rawNumerator;
-              if (gcd(leftNumerator, denominator) !== 1) continue;
-              if (gcd(rightNumerator, denominator) !== 1) continue;
-              if (gcd(rawNumerator, denominator) !== 1) continue;
-              item = {
-                operator,
-                first: { numerator: leftNumerator, denominator },
-                second: { numerator: rightNumerator, denominator },
-                answer: { numerator: rawNumerator, denominator },
-                reduced: null,
-                negative: true,
-                requiresCommonDenominator: false,
-              };
-            } else {
-              const firstDenominator = randomInt(2, 9);
-              const secondDenominator = randomInt(2, 9);
-              if (gcd(firstDenominator, secondDenominator) !== 1) continue;
-              const firstNumerator = randomInt(1, firstDenominator - 1);
-              const secondNumerator = randomInt(1, secondDenominator - 1);
-              if (gcd(firstNumerator, firstDenominator) !== 1) continue;
-              if (gcd(secondNumerator, secondDenominator) !== 1) continue;
-              const commonFirst = firstNumerator * secondDenominator;
-              const commonSecond = secondNumerator * firstDenominator;
-              rawNumerator = commonFirst - commonSecond;
-              if (rawNumerator < 1 || rawNumerator >= 100) continue;
-              const commonDenominator = firstDenominator * secondDenominator;
-              if (gcd(rawNumerator, commonDenominator) !== 1) continue;
-              item = {
-                operator,
-                first: { numerator: firstNumerator, denominator: firstDenominator },
-                second: { numerator: secondNumerator, denominator: secondDenominator },
-                answer: { numerator: rawNumerator, denominator: commonDenominator },
-                reduced: null,
-                negative: false,
-                requiresCommonDenominator: true,
-              };
-            }
-          } else {
-            const firstDenominator = randomInt(2, 9);
-            const secondDenominator = randomInt(2, 9);
-            if (gcd(firstDenominator, secondDenominator) !== 1) continue;
-            const firstNumerator = randomInt(1, firstDenominator - 1);
-            const secondNumerator = randomInt(1, secondDenominator - 1);
-            if (gcd(firstNumerator, firstDenominator) !== 1) continue;
-            if (gcd(secondNumerator, secondDenominator) !== 1) continue;
-            const numerator = firstNumerator * secondDenominator + secondNumerator * firstDenominator;
-            const denominator = firstDenominator * secondDenominator;
-            if (numerator >= 100) continue;
-            if (gcd(numerator, denominator) !== 1) continue;
-            item = {
-              operator,
-              first: { numerator: firstNumerator, denominator: firstDenominator },
-              second: { numerator: secondNumerator, denominator: secondDenominator },
-              answer: { numerator, denominator },
-              reduced: null,
-            };
-          }
+          const firstDenominator = randomInt(2, 9);
+          const secondDenominator = randomInt(2, 9);
+          if (gcd(firstDenominator, secondDenominator) !== 1) continue;
+          const firstNumerator = randomInt(1, firstDenominator - 1);
+          const secondNumerator = randomInt(1, secondDenominator - 1);
+          if (gcd(firstNumerator, firstDenominator) !== 1) continue;
+          if (gcd(secondNumerator, secondDenominator) !== 1) continue;
+          const first = firstNumerator * secondDenominator;
+          const second = secondNumerator * firstDenominator;
+          const numerator = operator === "add" ? first + second : first - second;
+          const denominator = firstDenominator * secondDenominator;
+          if (numerator < 1 || numerator >= 100 || gcd(numerator, denominator) !== 1) continue;
+          const item = {
+            operator,
+            first: { numerator: firstNumerator, denominator: firstDenominator },
+            second: { numerator: secondNumerator, denominator: secondDenominator },
+            answer: { numerator, denominator },
+            reduced: null,
+          };
 
           const key = fractionAddSubtractProblemText(item);
           if (used.has(key)) continue;
@@ -4996,13 +4972,11 @@
         }
 
         return operator === "subtract"
-          ? subtractNegative
-            ? { operator, first: { numerator: 4, denominator: 7 }, second: { numerator: 10, denominator: 7 }, answer: { numerator: 6, denominator: 7 }, reduced: null, negative: true, requiresCommonDenominator: false }
-            : { operator, first: { numerator: 3, denominator: 4 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 12 }, reduced: null, negative: false, requiresCommonDenominator: true }
+          ? { operator, first: { numerator: 3, denominator: 4 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 12 }, reduced: null }
           : { operator, first: { numerator: 1, denominator: 2 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 }, reduced: null };
       }
 
-      function createDivisibleFractionAddition(usedPairs, needsReduction) {
+      function createDivisibleFractionProblem(operator, usedPairs, needsReduction, negative = false) {
         const candidates = [];
         for (let small = 2; small <= 7; small += 1) {
           for (let large = small * 2; large <= 15; large += small) {
@@ -5012,20 +4986,58 @@
               if (gcd(a, small) !== 1) continue;
               for (let b = 1; b < large; b += 1) {
                 if (gcd(b, large) !== 1) continue;
-                const numerator = a * (large / small) + b;
+                const scaled = a * (large / small);
+                const numerator = operator === "add" ? scaled + b : Math.abs(scaled - b);
+                if (!numerator) continue;
                 const divisor = gcd(numerator, large);
                 if ((divisor > 1) !== needsReduction) continue;
-                candidates.push({ pair, operator: "add", first: { numerator: a, denominator: small },
-                  second: { numerator: b, denominator: large }, answer: { numerator, denominator: large },
-                  reduced: divisor > 1 ? { numerator: numerator / divisor, denominator: large / divisor } : null });
+                const smallTerm = { numerator: a, denominator: small };
+                const largeTerm = { numerator: b, denominator: large };
+                const smallFirst = operator === "add" || scaled > b;
+                candidates.push({ pair, operator, first: smallFirst ? smallTerm : largeTerm,
+                  second: smallFirst ? largeTerm : smallTerm, answer: { numerator, denominator: large },
+                  reduced: divisor > 1 ? { numerator: numerator / divisor, denominator: large / divisor } : null,
+                  negative });
               }
             }
           }
         }
         const { pair, ...item } = candidates[randomInt(0, candidates.length - 1)];
         usedPairs.add(pair);
-        if (Math.random() < 0.5) [item.first, item.second] = [item.second, item.first];
+        if (negative || (operator === "add" && Math.random() < 0.5)) {
+          [item.first, item.second] = [item.second, item.first];
+        }
         return item;
+      }
+
+      function createLcmFractionAddition(usedPairs) {
+        const pairs = [];
+        for (let small = 2; small < 12; small += 1) {
+          for (let large = small + 1; large <= 12; large += 1) {
+            const shared = gcd(small, large);
+            const denominator = small * large / shared;
+            if (shared === 1 || shared === small || denominator > 36) continue;
+            const key = small + ":" + large;
+            if (!usedPairs.has(key)) pairs.push({ small, large, denominator, key });
+          }
+        }
+        const { small, large, denominator, key } = pairs[randomInt(0, pairs.length - 1)];
+        usedPairs.add(key);
+        let a, b;
+        do { a = randomInt(1, small - 1); } while (gcd(a, small) !== 1);
+        do { b = randomInt(1, large - 1); } while (gcd(b, large) !== 1);
+        const numerator = a * (denominator / small) + b * (denominator / large);
+        const divisor = gcd(numerator, denominator);
+        const terms = [{ numerator: a, denominator: small }, { numerator: b, denominator: large }];
+        if (Math.random() < 0.5) terms.reverse();
+        return {
+          operator: "add",
+          first: terms[0],
+          second: terms[1],
+          answer: { numerator, denominator },
+          reduced: divisor > 1 ? { numerator: numerator / divisor, denominator: denominator / divisor } : null,
+          showLcmHint: true,
+        };
       }
 
       function createFractionAddSubtractDeck() {
@@ -5035,8 +5047,15 @@
         const reductionAtNine = Math.random() < 0.5;
         for (let index = 0; index < FRACTION_ADD_SUBTRACT_TARGET; index += 1) {
           const addition = index % 2 === 0;
-          if (addition && index >= 8) deck.push(createDivisibleFractionAddition(usedPairs, (index === 8) === reductionAtNine));
-          else deck.push(createFractionAddSubtractProblem(addition ? "add" : "subtract", used, index === 1 || index === 7));
+          if (addition && index >= 8) {
+            deck.push(createDivisibleFractionProblem("add", usedPairs, (index === 8) === reductionAtNine));
+          } else if (addition && index >= 4) {
+            deck.push(createLcmFractionAddition(usedPairs));
+          } else if (!addition && (index === 1 || index >= 7)) {
+            deck.push(createDivisibleFractionProblem("subtract", usedPairs, index === 9, index === 1 || index === 7));
+          } else {
+            deck.push(createFractionAddSubtractProblem(addition ? "add" : "subtract", used));
+          }
         }
         return deck;
       }
@@ -8977,7 +8996,7 @@
         if (fractionAddSubtractProblem.reduced) {
           addDigits(FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS, fractionAddSubtractProblem.reduced.numerator);
           if (fractionAddSubtractProblem.reduced.denominator !== 1) {
-            values.set("fractionAddSubtractReducedDenominator", String(fractionAddSubtractProblem.reduced.denominator));
+            addDigits(FRACTION_ADD_SUBTRACT_REDUCED_DENOMINATOR_SLOTS, fractionAddSubtractProblem.reduced.denominator);
           }
         }
         return values.get(slot) || "";
@@ -9019,7 +9038,10 @@
         fractionAddSubtractReducedAnswer.hidden = !showReduced;
         fractionAddSubtractReducedMinus.hidden = fractionAddSubtractPrimaryMinus.hidden;
         fractionAddSubtractReducedAnswer.classList.toggle("integerResult", reducedIsInteger);
-        inputs.fractionAddSubtractReducedDenominator.hidden = reducedIsInteger;
+        const reducedDenominatorSlots = visibleDigitSlots(FRACTION_ADD_SUBTRACT_REDUCED_DENOMINATOR_SLOTS, fractionAddSubtractProblem.reduced?.denominator ?? 1);
+        FRACTION_ADD_SUBTRACT_REDUCED_DENOMINATOR_SLOTS.forEach(slot => {
+          inputs[slot].hidden = reducedIsInteger || !reducedDenominatorSlots.includes(slot);
+        });
         const reducedNumeratorSlots = visibleDigitSlots(FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS, fractionAddSubtractProblem.reduced?.numerator ?? 0);
         FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS.forEach(slot => { inputs[slot].hidden = !reducedNumeratorSlots.includes(slot); });
       }
@@ -9162,7 +9184,7 @@
           if (fractionAddSubtractStage === "reduced") {
             const reduced = fractionAddSubtractProblem.reduced;
             return [
-              ...(reduced.denominator === 1 ? [] : ["fractionAddSubtractReducedDenominator"]),
+              ...(reduced.denominator === 1 ? [] : visibleDigitSlots(FRACTION_ADD_SUBTRACT_REDUCED_DENOMINATOR_SLOTS, reduced.denominator)),
               ...visibleDigitSlots(FRACTION_ADD_SUBTRACT_REDUCED_NUMERATOR_SLOTS, reduced.numerator),
             ];
           }
@@ -12557,6 +12579,7 @@
           renderFractionCalculationProblem();
         } else if (selectedApp === "fractionAddSubtract") {
           const sign = fractionAddSubtractProblem.operator === "add" ? "+" : "-";
+          fractionAddSubtractLcmHint.hidden = !fractionAddSubtractProblem.showLcmHint;
           fractionAddSubtractQuestion.innerHTML = `${fraction(fractionAddSubtractProblem.first.numerator, fractionAddSubtractProblem.first.denominator)}<span class="fractionAddSubtractOperator">${sign}</span>${fraction(fractionAddSubtractProblem.second.numerator, fractionAddSubtractProblem.second.denominator)}`;
           resetFractionAddSubtractEntry();
         } else if (selectedApp === "grouping") {
