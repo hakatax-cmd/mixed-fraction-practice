@@ -982,6 +982,44 @@
         line-height: 1;
       }
 
+      #speedProblemLine.speedConversionMode {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        overflow-y: auto;
+        touch-action: pan-y;
+        scroll-padding: 8px;
+        overscroll-behavior: contain;
+        padding: 12px 0;
+        gap: 14px;
+        align-content: start;
+      }
+      .practiceCard:has(#speedProblemLine.speedConversionMode:not([hidden])) { touch-action: pan-y; }
+      .speedConversionHint { margin: 0; font-size: 1rem; line-height: 1.4; color: var(--muted); text-align: center; }
+      .speedConversionSteps { width: min(100%, 680px); min-width: 0; display: grid; gap: 16px; }
+      .speedConversionRow { min-width: 0; }
+      .speedConversionLabel { margin: 0 0 6px; font-size: 1rem; line-height: 1.3; }
+      .speedConversionFormula { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 2rem; }
+      .speedConversionExpression, .speedConversionResult { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+      .speedConversionNumber { display: inline-flex; align-items: center; gap: 2px; }
+      .speedConversionDigit {
+        display: grid; place-items: center; flex: 0 0 auto; padding: 0;
+        width: 0.72em; height: 1.25em; border: 2px solid var(--line);
+        border-radius: 0; background: #fff; color: var(--ink); font: inherit; font-weight: 900;
+      }
+      .speedConversionDigit.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+      .speedConversionOperator { width: 1em; border: 0; margin-inline: 3px; }
+      .speedConversionUnit { font-size: 1rem; }
+      .speedConversionFormula .speedAnswer { gap: 4px; }
+      .speedConversionFormula .speedAnswerDigits { gap: 2px; }
+      .speedConversionFormula .speedAnswer .answerBox { width: 0.72em; height: 1.25em; border-width: 2px; }
+      .speedConversionFormula #speedAnswerUnit { font-size: 1rem; }
+      @media (min-width: 700px) {
+        .speedConversionFormula { font-size: 2.75rem; gap: 8px; }
+        .speedConversionSteps { gap: 22px; }
+      }
+
       #fishingProblemLine {
         display: grid;
         align-content: start;
@@ -3101,7 +3139,7 @@
 
         <section class="cover" id="speedCover" hidden>
           <h1>&#36895;&#12373;</h1>
-          <p class="coverPrompt">&#31186;&#36895;&#12391;&#12392;&#12367;&#12424;</p>
+          <p class="coverPrompt">距離・速さ・時間と、秒速・時速の換算</p>
           <p class="coverGoal">10&#21839;<br />&#12479;&#12452;&#12512;&#12450;&#12479;&#12483;&#12463;</p>
           <button class="startButton" id="speedStartButton" type="button">&#12473;&#12479;&#12540;&#12488;</button>
           <button class="backToMenuButton" data-back-menu type="button">&#12360;&#12425;&#12403;&#12394;&#12362;&#12377;</button>
@@ -3573,13 +3611,15 @@
           </div>
           <div id="speedProblemLine" hidden>
             <p class="speedQuestion" id="speedQuestion"></p>
+            <p class="speedConversionHint" id="speedConversionHint" hidden></p>
             <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 240" role="img"></svg>
-            <div class="speedFormula">
+            <div class="speedConversionSteps" id="speedConversionSteps" hidden></div>
+            <div class="speedFormula" id="speedBasicFormula">
               <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaLeft" data-speed-field="left" type="button" aria-label="&#24335;&#12398;&#24038;&#12398;&#25968;"></button><span id="speedFormulaLeftUnit"></span></span>
               <button class="speedOperatorInput" id="speedFormulaOperator" data-speed-field="operator" type="button" aria-label="&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
               <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaRight" data-speed-field="right" type="button" aria-label="&#24335;&#12398;&#21491;&#12398;&#25968;"></button><span id="speedFormulaRightUnit"></span></span>
               <span class="equals">=</span>
-              <span class="speedAnswer">
+              <span class="speedAnswer" id="speedAnswerGroup">
                 <span class="speedAnswerDigits">
                   <button id="speedAnswerHundredsInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#30334;&#12398;&#20301;" data-value="" type="button" hidden></button>
                   <button id="speedAnswerTensInput" class="answerBox" aria-label="&#31572;&#12360;&#12398;&#21313;&#12398;&#20301;" data-value="" type="button" hidden></button>
@@ -4443,6 +4483,10 @@
       const ratioFinalUnit = document.querySelector("#ratioFinalUnit");
       const ratioVisual = document.querySelector("#ratioVisual");
       const speedQuestion = document.querySelector("#speedQuestion");
+      const speedConversionHint = document.querySelector("#speedConversionHint");
+      const speedConversionSteps = document.querySelector("#speedConversionSteps");
+      const speedBasicFormula = document.querySelector("#speedBasicFormula");
+      const speedAnswerGroup = document.querySelector("#speedAnswerGroup");
       const speedFormulaLeft = document.querySelector("#speedFormulaLeft");
       const speedFormulaOperator = document.querySelector("#speedFormulaOperator");
       const speedFormulaRight = document.querySelector("#speedFormulaRight");
@@ -4976,7 +5020,7 @@
           : { operator, first: { numerator: 1, denominator: 2 }, second: { numerator: 1, denominator: 3 }, answer: { numerator: 5, denominator: 6 }, reduced: null };
       }
 
-      function createDivisibleFractionProblem(operator, usedPairs, needsReduction, negative = false) {
+      function createDivisibleFractionProblem(operator, usedPairs, needsReduction, negative = false, usedMultipliers = new Set()) {
         const candidates = [];
         for (let small = 2; small <= 7; small += 1) {
           for (let large = small * 2; large <= 15; large += small) {
@@ -5002,7 +5046,23 @@
             }
           }
         }
-        const { pair, ...item } = candidates[randomInt(0, candidates.length - 1)];
+        const byMultiplier = new Map();
+        for (const candidate of candidates) {
+          const small = Math.min(candidate.first.denominator, candidate.second.denominator);
+          const multiplier = candidate.answer.denominator / small;
+          if (!byMultiplier.has(multiplier)) byMultiplier.set(multiplier, new Map());
+          const pairs = byMultiplier.get(multiplier);
+          if (!pairs.has(candidate.pair)) pairs.set(candidate.pair, []);
+          pairs.get(candidate.pair).push(candidate);
+        }
+        const available = [...byMultiplier.keys()];
+        const unused = available.filter(multiplier => !usedMultipliers.has(multiplier));
+        const multipliers = unused.length ? unused : available;
+        const multiplier = multipliers[randomInt(0, multipliers.length - 1)];
+        usedMultipliers.add(multiplier);
+        const pairs = [...byMultiplier.get(multiplier).values()];
+        const problems = pairs[randomInt(0, pairs.length - 1)];
+        const { pair, ...item } = problems[randomInt(0, problems.length - 1)];
         usedPairs.add(pair);
         if (negative || (operator === "add" && Math.random() < 0.5)) {
           [item.first, item.second] = [item.second, item.first];
@@ -5044,11 +5104,12 @@
         const used = new Set();
         const deck = [];
         const usedPairs = new Set();
+        const additionMultipliers = new Set();
         const reductionAtNine = Math.random() < 0.5;
         for (let index = 0; index < FRACTION_ADD_SUBTRACT_TARGET; index += 1) {
           const addition = index % 2 === 0;
           if (addition && index >= 8) {
-            deck.push(createDivisibleFractionProblem("add", usedPairs, (index === 8) === reductionAtNine));
+            deck.push(createDivisibleFractionProblem("add", usedPairs, (index === 8) === reductionAtNine, false, additionMultipliers));
           } else if (addition && index >= 4) {
             deck.push(createLcmFractionAddition(usedPairs));
           } else if (!addition && (index === 1 || index >= 7)) {
@@ -5260,6 +5321,9 @@
       }
 
       function createSpeedProblem(type, used) {
+        if (type.startsWith("toKmh") || type.startsWith("toMps")) {
+          return { type, speed: [10, 15, 20, 30][randomInt(0, 3)] };
+        }
         for (let attempt = 0; attempt < 200; attempt += 1) {
           const speed = [10, 20, 30][randomInt(0, 2)];
           const seconds = randomInt(2, 9);
@@ -5276,9 +5340,9 @@
       function createSpeedDeck() {
         const used = new Set();
         const deck = [];
-        const remaining = { distance: 4, speed: 3, time: 3 };
+        const remaining = { distance: 2, speed: 2, time: 2 };
         let previousType = "";
-        while (deck.length < SPEED_TARGET) {
+        while (deck.length < 6) {
           const choices = Object.keys(remaining).filter((type) => remaining[type] > 0 && type !== previousType);
           // Balance remaining types so the final questions cannot strand the previous type.
           const mostRemaining = Math.max(...choices.map((type) => remaining[type]));
@@ -5288,6 +5352,10 @@
           remaining[type] -= 1;
           previousType = type;
         }
+        const speeds = shuffle([10, 15, 20, 30]);
+        ["toKmhSteps", "toKmhDirect", "toMpsSteps", "toMpsDirect"].forEach((type, index) => {
+          deck.push({ type, speed: speeds[index] });
+        });
         return deck;
       }
 
@@ -6777,19 +6845,107 @@
         }, 1000);
       }
 
+      function speedConversionRows(item = speedProblem) {
+        if (!item || (!item.type.startsWith("toKmh") && !item.type.startsWith("toMps"))) return [];
+        const speed = item.speed;
+        const kmh = speed * 36 / 10;
+        const minuteMetres = speed * 60;
+        const minuteKm = minuteMetres / 1000;
+        const hourMetres = speed * 3600;
+        const row = (label, left, operator, right, result, unit) =>
+          ({ label, left: String(left), operator, right: String(right), result: String(result), unit });
+        if (item.type === "toKmhSteps") return [
+          row("1分間に進む距離", speed, "×", 60, minuteMetres, "m"),
+          row("kmに直すと", minuteMetres, "÷", 1000, minuteKm, "km"),
+          row("1時間に進む距離", minuteKm, "×", 60, kmh, "km/時"),
+        ];
+        if (item.type === "toKmhDirect") return [
+          row("1時間は何秒？", 60, "×", 60, 3600, "秒"),
+          row("1時間に進む距離", speed, "×", 3600, hourMetres, "m"),
+          row("kmに直すと", hourMetres, "÷", 1000, kmh, "km/時"),
+        ];
+        if (item.type === "toMpsSteps") return [
+          row("1分間に進む距離", kmh, "÷", 60, minuteKm, "km"),
+          row("mに直すと", minuteKm, "×", 1000, minuteMetres, "m"),
+          row("1秒間に進む距離", minuteMetres, "÷", 60, speed, "m/秒"),
+        ];
+        return [
+          row("1時間は何秒？", 60, "×", 60, 3600, "秒"),
+          row("1時間に進む距離をmに直すと", kmh, "×", 1000, hourMetres, "m"),
+          row("1秒間に進む距離", hourMetres, "÷", 3600, speed, "m/秒"),
+        ];
+      }
+
+      function speedConversionInputs(item = speedProblem) {
+        const rows = speedConversionRows(item);
+        return rows.flatMap((row, index) =>
+          ["left", "operator", "right", ...(index === rows.length - 1 ? [] : ["result"])].flatMap(part =>
+            [...row[part]].flatMap((value, digit) => value === "." ? [] : [{
+              field: "conversion" + index + part + digit, value, operator: part === "operator", row: index,
+            }]),
+          ),
+        );
+      }
+
+      function speedVisibleConversionRows() {
+        const rows = speedConversionRows();
+        const fields = speedConversionInputs();
+        let visible = 1;
+        while (visible < rows.length && fields.filter(input => input.row === visible - 1)
+          .every(input => speedValues[input.field] === input.value)) visible += 1;
+        return rows.slice(0, visible);
+      }
+
+      function renderSpeedConversionEntry() {
+        const rows = speedConversionRows();
+        const visible = speedVisibleConversionRows();
+        speedConversionHint.textContent = speedProblem.type.endsWith("Direct") && visible.length > 1
+          ? "1時間は3600秒なので、1km＝1000mを使って求めよう。"
+          : "1分は60秒、1時間は60分、1kmは1000mです。";
+        const term = (value, row, part) => '<span class="speedConversionNumber">' + [...value].map((digit, index) => {
+          if (digit === ".") return '<span class="speedConversionPoint">.</span>';
+          const field = "conversion" + row + part + index;
+          const operator = part === "operator";
+          return '<button type="button" class="speedConversionDigit' + (operator ? ' speedConversionOperator' : '')
+            + (speedActiveField === field ? ' active' : '') + '" data-speed-field="' + field
+            + '" aria-label="' + (row + 1) + '行目 ' + (part === "left" ? "左の数" : part === "right" ? "右の数" : part === "result" ? "答え" : "演算記号")
+            + (operator ? '' : ' ' + (index + 1) + '桁目') + '"'
+            + (isAnswerLocked ? ' disabled' : '') + '>' + (speedValues[field] || (operator ? "○" : "")) + '</button>';
+        }).join("") + '</span>';
+        speedConversionSteps.innerHTML = visible.map((row, index) =>
+          '<div class="speedConversionRow"><p class="speedConversionLabel">' + row.label + '</p>'
+          + '<div class="speedConversionFormula"><span class="speedConversionExpression">' + term(row.left, index, "left")
+          + term(row.operator, index, "operator") + term(row.right, index, "right")
+          + '</span><span class="speedConversionResult"><span class="equals">=</span>' + (index === rows.length - 1 ? '<span data-speed-final></span>'
+            : term(row.result, index, "result") + '<span class="speedConversionUnit">' + row.unit + '</span>')
+          + '</span></div></div>',
+        ).join("");
+        const final = speedConversionSteps.querySelector("[data-speed-final]");
+        if (final) final.append(speedAnswerGroup);
+        SPEED_SLOTS.forEach(slot => inputs[slot].classList.toggle("active", slot === speedActiveField));
+        const active = speedConversionInputs().find(input => input.field === speedActiveField);
+        keypad.classList.toggle("operatorChoice", Boolean(active?.operator));
+      }
+
       function speedAnswer(item = speedProblem) {
         if (!item) return 0;
+        if (item.type.startsWith("toKmh")) return item.speed * 36 / 10;
+        if (item.type.startsWith("toMps")) return item.speed;
         if (item.type === "distance") return item.distance;
         if (item.type === "speed") return item.speed;
         return item.seconds;
       }
 
       function speedUnit(item = speedProblem) {
+        if (item?.type.startsWith("toKmh")) return "km/時";
+        if (item?.type.startsWith("toMps")) return "m/秒";
         return item && item.type === "speed" ? "m/\u79d2" : item && item.type === "distance" ? "m" : "\u79d2";
       }
 
       function speedProblemText(item = speedProblem) {
         if (!item) return "";
+        if (item.type.startsWith("toKmh")) return "秒速" + item.speed + "mは時速何km？";
+        if (item.type.startsWith("toMps")) return "時速" + (item.speed * 36 / 10) + "kmは秒速何m？";
         if (item.type === "distance") return `\u6bce\u79d2${item.speed}m\u3067${item.seconds}\u79d2\u9032\u3093\u3060\u5834\u5408\u3001\n\u4f55m\u9032\u3080\uff1f`;
         if (item.type === "speed") return `${item.distance}m\u3092${item.seconds}\u79d2\u3067\u9032\u3093\u3060\u5834\u5408\u3001\n\u6bce\u79d2\u4f55m\u9032\u3080\uff1f`;
         return `\u6bce\u79d2${item.speed}m\u3067\u9032\u3093\u3060\u5834\u5408\u3001\n${item.distance}m\u9032\u3080\u306e\u306b\u4f55\u79d2\u304b\u304b\u308b\uff1f`;
@@ -6801,6 +6957,7 @@
 
       function speedExpected(field, item = speedProblem) {
         if (!item) return "";
+        if (speedConversionRows(item).length) return speedConversionInputs(item).find(input => input.field === field)?.value || "";
         if (field === "operator") return item.type === "distance" ? "\u00d7" : "\u00f7";
         if (field === "left") return String(item.type === "distance" ? item.speed : item.distance);
         if (field === "right") return String(item.type === "time" ? item.speed : item.seconds);
@@ -6808,6 +6965,7 @@
       }
 
       function speedExpressionFields() {
+        if (speedConversionRows().length) return speedConversionInputs().map(input => input.field);
         return ["left", "operator", "right"];
       }
 
@@ -6820,6 +6978,13 @@
       }
 
       function renderSpeedEntry() {
+        if (speedConversionRows().length) {
+          renderSpeedConversionEntry();
+          const active = speedConversionSteps.querySelector('[data-speed-field="' + speedActiveField + '"]')
+            || (activeSlotOrder().includes(speedActiveField) ? inputs[speedActiveField] : null);
+          active?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+          return;
+        }
         Object.entries(speedFields).forEach(([field, input]) => {
           const value = speedValues[field] || "";
           input.textContent = value || (field === "operator" ? "\u25cb" : "");
@@ -6835,6 +7000,10 @@
         if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
         const answerSlots = activeSlotOrder();
         if (!speedExpressionFields().includes(field) && !answerSlots.includes(field)) return;
+        if (speedConversionRows().length && !answerSlots.includes(field)) {
+          const input = speedConversionInputs().find(input => input.field === field);
+          if (!input || input.row >= speedVisibleConversionRows().length || speedValues[field] === input.value) return;
+        }
         if (answerSlots.includes(field) && !speedExpressionIsCorrect()) return;
         speedActiveField = field;
         if (answerSlots.includes(field)) activeSlot = field;
@@ -6843,7 +7012,8 @@
 
       function resetSpeedEntry() {
         speedValues = {};
-        speedActiveField = "left";
+        speedProblemLine.scrollTop = 0;
+        speedActiveField = speedExpressionFields()[0];
         renderSpeedEntry();
       }
 
@@ -6863,8 +7033,9 @@
       }
 
       function clearSpeedOperator() {
-        delete speedValues.operator;
-        speedActiveField = "operator";
+        const field = speedConversionRows().length ? speedActiveField : "operator";
+        delete speedValues[field];
+        speedActiveField = field;
         renderSpeedEntry();
       }
 
@@ -6890,7 +7061,7 @@
           }
           return;
         }
-        const operator = speedActiveField === "operator";
+        const operator = speedActiveField === "operator" || speedConversionInputs().some(input => input.field === speedActiveField && input.operator);
         const allowed = operator ? value === "\u00d7" || value === "\u00f7" : /^\d$/.test(value);
         if (!allowed) return;
         const expectedValue = speedExpected(speedActiveField);
@@ -6903,7 +7074,7 @@
         }
         speedSetValue(speedActiveField, next);
         if (operator && next !== expectedValue) {
-          showOperatorPenalty(clearSpeedOperator, "operator");
+          showOperatorPenalty(clearSpeedOperator, speedActiveField);
           return;
         }
         if (next.length === expectedValue.length) speedFinishField(speedActiveField);
@@ -6911,6 +7082,11 @@
 
       function speedBackspace() {
         if (selectedApp !== "speed" || isAnswerLocked || isFinished) return;
+        if (speedConversionRows().length) {
+          delete speedValues[speedActiveField];
+          renderSpeedEntry();
+          return;
+        }
         const current = speedValues[speedActiveField] || "";
         if (current) {
           speedSetValue(speedActiveField, current.slice(0, -1));
@@ -6925,6 +7101,20 @@
         if (!speedProblem) return;
         const item = speedProblem;
         speedQuestion.textContent = speedProblemText(item);
+        const conversion = speedConversionRows(item).length > 0;
+        speedProblemLine.classList.toggle("speedConversionMode", conversion);
+        speedConversionHint.hidden = !conversion;
+        speedConversionSteps.hidden = !conversion;
+        speedBasicFormula.hidden = conversion;
+        speedVisual.hidden = conversion;
+        if (conversion) {
+          speedAnswerUnit.textContent = speedUnit(item);
+          const visible = new Set(visibleDigitSlots(SPEED_SLOTS, speedAnswer(item)));
+          SPEED_SLOTS.forEach(slot => { inputs[slot].hidden = !visible.has(slot); });
+          renderSpeedEntry();
+          return;
+        }
+        speedBasicFormula.append(speedAnswerGroup);
         if (item.type === "distance") {
           speedFormulaLeftUnit.textContent = "m/\u79d2";
           speedFormulaRightUnit.textContent = "\u79d2";
@@ -12847,6 +13037,17 @@
         input.addEventListener("click", () => {
           if (selectedApp === "speed") setSpeedActive(input.dataset.speedField);
         });
+      });
+
+      speedConversionSteps.addEventListener("pointerdown", (event) => {
+        const input = event.target.closest("[data-speed-field]");
+        if (!input || selectedApp !== "speed") return;
+        event.preventDefault();
+        setSpeedActive(input.dataset.speedField);
+      });
+      speedConversionSteps.addEventListener("click", (event) => {
+        const input = event.target.closest("[data-speed-field]");
+        if (input && selectedApp === "speed") setSpeedActive(input.dataset.speedField);
       });
 
       fishingSteps.addEventListener("pointerdown", (event) => {
