@@ -1763,7 +1763,8 @@
       .doubleVerticalProblem .topNumber,
       .doubleVerticalProblem .bottomNumber {
         grid-column: 2 / 6;
-        justify-self: end;
+        justify-self: stretch;
+        min-width: 0;
       }
 
       .doubleVerticalProblem .timesSign { grid-column: 1; justify-self: center; color: var(--muted); }
@@ -1876,13 +1877,26 @@
         background: var(--ink);
       }
 
-      .decimalNumber {
-        display: inline-flex;
-        align-items: baseline;
-        justify-content: end;
-        width: auto;
-        letter-spacing: 0;
+      .doubleVerticalProblem .decimalNumber {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(4, var(--double-cell));
+        column-gap: var(--double-gap);
         font-variant-numeric: tabular-nums;
+      }
+      .doubleOperandDigit {
+        display: grid;
+        place-items: center;
+        height: var(--digit-frame-height);
+        line-height: 1;
+      }
+      .doubleOperandPoint {
+        position: absolute;
+        left: calc((var(--double-cell) + var(--double-gap)) * var(--decimal-boundary) - var(--double-gap) / 2);
+        bottom: 0.12em;
+        transform: translateX(-50%);
+        line-height: 1;
+        pointer-events: none;
       }
 
       .decimalPointChoice {
@@ -7887,7 +7901,6 @@
 
       function chooseDoubleDecimalPattern() {
         const patterns = [
-          [0, 0],
           [1, 0],
           [0, 1],
           [1, 1],
@@ -8010,6 +8023,7 @@
       function createDoubleMultiplicationDeck() {
         const deck = [];
         const used = new Set();
+        const usedDecimalPatterns = new Set();
         while (deck.length < DOUBLE_MULTIPLICATION_TARGET) {
           const top = randomInt(22, 99);
           if (hasDigitOne(top) || hasDigitZero(top) || hasSameTwoDigits(top)) continue;
@@ -8021,10 +8035,13 @@
           const secondPartial = top * tens;
           const answer = top * bottom;
           if (firstPartial < 100 || secondPartial < 100 || answer < 1000) continue;
-          const [topDecimals, bottomDecimals] = chooseDoubleDecimalPattern();
+          const [topDecimals, bottomDecimals] = deck.length < 6 ? [0, 0] : chooseDoubleDecimalPattern();
+          const decimalKey = topDecimals + ":" + bottomDecimals;
+          if (deck.length >= 6 && usedDecimalPatterns.has(decimalKey)) continue;
           const key = `${top}x${bottom}d${topDecimals}${bottomDecimals}`;
           if (used.has(key)) continue;
           used.add(key);
+          if (deck.length >= 6) usedDecimalPatterns.add(decimalKey);
           deck.push({ top, bottom, topDecimals, bottomDecimals });
         }
         return deck;
@@ -8273,12 +8290,16 @@
 
       function decimalNumberHtml(value, decimalPlaces) {
         const digits = String(value).padStart(2, "0");
-        const decimalText = decimalPlaces === 2
-          ? `0.${digits}`
-          : decimalPlaces === 1
-            ? `${digits[0]}.${digits[1]}`
-            : digits;
-        return `<span class="decimalNumber" data-decimals="${decimalPlaces}">${decimalText}</span>`;
+        const cells = (decimalPlaces === 2 ? "0" + digits : digits).padStart(4, " ");
+        const digitHtml = [...cells].map((digit, index) =>
+          '<span class="doubleOperandDigit" style="grid-column:' + (index + 1) + '">'
+          + (digit === " " ? "" : digit) + '</span>',
+        ).join("");
+        const point = decimalPlaces
+          ? '<span class="doubleOperandPoint" style="--decimal-boundary:' + (4 - decimalPlaces) + '">.</span>'
+          : "";
+        return '<span class="decimalNumber" data-decimals="' + decimalPlaces + '" aria-label="'
+          + formatDecimalAnswer(value, decimalPlaces) + '">' + digitHtml + point + '</span>';
       }
 
       function doubleMultiplicationPartials() {
