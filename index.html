@@ -995,11 +995,20 @@
 
       #speedProblemLine {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto auto auto;
         place-items: center;
         align-content: start;
         gap: clamp(5px, 1vmin, 10px);
-        padding: clamp(26px, 4.3vmin, 44px) 0 clamp(30px, 5vmin, 52px);
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        touch-action: pan-y;
+        scroll-padding: 8px;
+        padding: clamp(26px, 4.3vmin, 44px) 8px clamp(30px, 5vmin, 52px);
         font-size: clamp(1.8rem, 5.8vmin, 3.5rem);
         font-weight: 900;
         line-height: 1;
@@ -1014,18 +1023,23 @@
         touch-action: pan-y;
         scroll-padding: 8px;
         overscroll-behavior: contain;
-        padding: 12px 0;
+        padding: 12px 8px;
         gap: 14px;
         align-content: start;
       }
-      .practiceCard:has(#speedProblemLine.speedConversionMode:not([hidden])) { touch-action: pan-y; }
+      #speedProblemLine.speedConversionMode > .speedVisual { display: none !important; }
+      .practiceCard:has(#speedProblemLine:not([hidden])) { touch-action: pan-y; }
+      #speedProblemLine > .speedQuestion, .speedConversionHint {
+        width: 100%; min-width: 0; overflow-wrap: anywhere;
+      }
       .speedConversionHint { margin: 0; font-size: 1rem; line-height: 1.4; color: var(--muted); text-align: center; }
       .speedConversionSteps { width: min(100%, 680px); min-width: 0; display: grid; gap: 16px; }
       .speedConversionRow { min-width: 0; }
       .speedConversionLabel { margin: 0 0 6px; font-size: 1rem; line-height: 1.3; }
-      .speedConversionFormula { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 2rem; }
-      .speedConversionExpression, .speedConversionResult { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-      .speedConversionNumber { display: inline-flex; align-items: center; gap: 2px; }
+      .speedConversionFormula { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; width: 100%; font-size: 2rem; }
+      .speedConversionExpression { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; min-width: 0; max-width: 100%; }
+      .speedConversionOperation, .speedConversionResult { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: 0 0 auto; }
+      .speedConversionNumber { display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto; }
       .speedConversionDigit {
         display: grid; place-items: center; flex: 0 0 auto; padding: 0;
         width: 0.72em; height: 1.25em; border: 2px solid var(--line);
@@ -1227,7 +1241,9 @@
       .preschoolFormula .answerBox { width: var(--digit-frame-width); height: var(--digit-frame-height); }
 
       .speedQuestion { margin: 0; font-size: inherit; text-align: center; line-height: 1.35; white-space: pre-line; }
-      .speedFormula { display: inline-flex; align-items: center; justify-content: center; gap: clamp(5px, 1vmin, 10px); font-size: inherit; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .speedFormula { display: flex; flex-wrap: wrap; width: 100%; min-width: 0; align-items: center; justify-content: center; gap: 12px 8px; font-size: inherit; font-variant-numeric: tabular-nums; }
+      .speedBasicExpression { display: inline-flex; flex-wrap: wrap; min-width: 0; max-width: 100%; align-items: center; justify-content: center; gap: 6px; }
+      .speedBasicOperation, .speedBasicResult { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: 0 0 auto; }
       .speedFormula .equals { color: var(--muted); }
       .speedTerm { display: inline-flex; align-items: center; gap: clamp(3px, 0.7vmin, 7px); }
       .speedFreeInput { display: grid; place-items: center; min-width: clamp(58px, 11vmin, 96px); height: clamp(48px, 8.6vmin, 76px); padding: 0 8px; border: 3px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: inherit; font-weight: 900; font-variant-numeric: tabular-nums; }
@@ -3666,9 +3682,14 @@
             <svg class="speedVisual" id="speedVisual" viewBox="0 0 560 240" role="img"></svg>
             <div class="speedConversionSteps" id="speedConversionSteps" hidden></div>
             <div class="speedFormula" id="speedBasicFormula">
+              <span class="speedBasicExpression">
               <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaLeft" data-speed-field="left" type="button" aria-label="&#24335;&#12398;&#24038;&#12398;&#25968;"></button><span id="speedFormulaLeftUnit"></span></span>
+              <span class="speedBasicOperation">
               <button class="speedOperatorInput" id="speedFormulaOperator" data-speed-field="operator" type="button" aria-label="&#28436;&#31639;&#35352;&#21495;">&#9675;</button>
               <span class="speedTerm"><button class="speedFreeInput" id="speedFormulaRight" data-speed-field="right" type="button" aria-label="&#24335;&#12398;&#21491;&#12398;&#25968;"></button><span id="speedFormulaRightUnit"></span></span>
+              </span>
+              </span>
+              <span class="speedBasicResult" id="speedBasicResult">
               <span class="equals">=</span>
               <span class="speedAnswer" id="speedAnswerGroup">
                 <span class="speedAnswerDigits">
@@ -3677,6 +3698,7 @@
                   <button id="speedAnswerOnesInput" class="answerBox active" aria-label="&#31572;&#12360;&#12398;&#19968;&#12398;&#20301;" data-value="" type="button"></button>
                 </span>
                 <span id="speedAnswerUnit"></span>
+              </span>
               </span>
             </div>
           </div>
@@ -4545,6 +4567,7 @@
       const speedConversionHint = document.querySelector("#speedConversionHint");
       const speedConversionSteps = document.querySelector("#speedConversionSteps");
       const speedBasicFormula = document.querySelector("#speedBasicFormula");
+      const speedBasicResult = document.querySelector("#speedBasicResult");
       const speedAnswerGroup = document.querySelector("#speedAnswerGroup");
       const speedFormulaLeft = document.querySelector("#speedFormulaLeft");
       const speedFormulaOperator = document.querySelector("#speedFormulaOperator");
@@ -6984,7 +7007,7 @@
         speedConversionSteps.innerHTML = visible.map((row, index) =>
           '<div class="speedConversionRow"><p class="speedConversionLabel">' + row.label + '</p>'
           + '<div class="speedConversionFormula"><span class="speedConversionExpression">' + term(row.left, index, "left")
-          + term(row.operator, index, "operator") + term(row.right, index, "right")
+          + '<span class="speedConversionOperation">' + term(row.operator, index, "operator") + term(row.right, index, "right") + '</span>'
           + '</span><span class="speedConversionResult"><span class="equals">=</span>' + (index === rows.length - 1 ? '<span data-speed-final></span>'
             : term(row.result, index, "result") + '<span class="speedConversionUnit">' + row.unit + '</span>')
           + '</span></div></div>',
@@ -7177,13 +7200,15 @@
         speedBasicFormula.hidden = conversion;
         speedVisual.hidden = conversion;
         if (conversion) {
+          speedVisual.replaceChildren();
+          speedVisual.setAttribute("aria-label", "");
           speedAnswerUnit.textContent = speedUnit(item);
           const visible = new Set(visibleDigitSlots(SPEED_SLOTS, speedAnswer(item)));
           SPEED_SLOTS.forEach(slot => { inputs[slot].hidden = !visible.has(slot); });
           renderSpeedEntry();
           return;
         }
-        speedBasicFormula.append(speedAnswerGroup);
+        speedBasicResult.append(speedAnswerGroup);
         if (item.type === "distance") {
           speedFormulaLeftUnit.textContent = "m/\u79d2";
           speedFormulaRightUnit.textContent = "\u79d2";
