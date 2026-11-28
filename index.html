@@ -463,7 +463,8 @@
       }
 
       #fractionCalculationProblemLine.withReciprocal,
-      #fractionCalculationProblemLine.withReduction {
+      #fractionCalculationProblemLine.withReduction,
+      #fractionCalculationProblemLine.withMixed {
         grid-template-columns: auto max-content;
         grid-auto-rows: max-content;
         align-content: start;
@@ -472,7 +473,8 @@
         font-size: clamp(2rem, 6vmin, 4rem);
       }
       #fractionCalculationProblemLine.withReciprocal .fractionCalcQuestion,
-      #fractionCalculationProblemLine.withReduction .fractionCalcQuestion {
+      #fractionCalculationProblemLine.withReduction .fractionCalcQuestion,
+      #fractionCalculationProblemLine.withMixed .fractionCalcQuestion {
         grid-column: 1 / -1;
         grid-row: 1;
         justify-self: start;
@@ -491,6 +493,27 @@
       .fractionCalcReducedAnswer { grid-column: 2; grid-row: 3; justify-self: start; }
       #fractionCalculationProblemLine.withReciprocal > .fractionCalcReducedEquals,
       #fractionCalculationProblemLine.withReciprocal > .fractionCalcReducedAnswer { grid-row: 4; }
+      .fractionCalcImproperEquals { grid-column: 1; grid-row: 2; }
+      .fractionCalcImproper {
+        grid-column: 2; grid-row: 2;
+        display: inline-flex; align-items: center;
+        gap: clamp(10px, 2vmin, 20px);
+      }
+      .fractionCalcMixedNumber { display: inline-flex; align-items: center; gap: 5px; }
+      #fractionCalculationProblemLine.withMixed > .fractionCalcAnswerEquals { grid-column: 1; }
+      #fractionCalculationProblemLine.withMixed > .fractionCalcAnswer { grid-column: 2; }
+      #fractionCalculationProblemLine.withMixed > .fractionCalcAnswerEquals,
+      #fractionCalculationProblemLine.withMixed > .fractionCalcAnswer { grid-row: 3; }
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcWorkEquals,
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcWork { grid-row: 3; }
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcAnswerEquals,
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcAnswer { grid-row: 4; }
+      #fractionCalculationProblemLine.withMixed > .fractionCalcReducedEquals,
+      #fractionCalculationProblemLine.withMixed > .fractionCalcReducedAnswer { grid-row: 4; }
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcReducedEquals,
+      #fractionCalculationProblemLine.withMixed.withReciprocal > .fractionCalcReducedAnswer { grid-row: 5; }
+      #fractionCalculationProblemLine.withMixed { touch-action: pan-y; scroll-padding: 8px; }
+      .practiceCard:has(#fractionCalculationProblemLine.withMixed:not([hidden])) { touch-action: pan-y; }
       #fractionCalculationProblemLine .answerFraction.integerResult { display: inline-flex; }
 
       #fractionAddSubtractProblemLine {
@@ -3285,6 +3308,20 @@
           </div>
           <div class="problemLine" id="fractionCalculationProblemLine" hidden>
             <span class="fractionCalcQuestion" id="fractionCalculationQuestion"></span>
+            <span class="equals fractionCalcImproperEquals" id="fractionCalcImproperEquals" hidden>=</span>
+            <span class="fractionCalcImproper" id="fractionCalcImproper" hidden>
+              <span class="answerFraction">
+                <span class="answerDigits"><button id="fractionCalcImproperFirstNumeratorInput" class="answerBox" aria-label="仮分数に直した左の分子" data-value="" type="button"></button></span>
+                <i></i>
+                <span class="answerDigits"><button id="fractionCalcImproperFirstDenominatorInput" class="answerBox" aria-label="仮分数に直した左の分母" data-value="" type="button"></button></span>
+              </span>
+              <span class="fractionCalcOperator" id="fractionCalcImproperOperator">&times;</span>
+              <span class="answerFraction">
+                <span class="answerDigits"><button id="fractionCalcImproperSecondNumeratorInput" class="answerBox" aria-label="仮分数に直した右の分子" data-value="" type="button"></button></span>
+                <i></i>
+                <span class="answerDigits"><button id="fractionCalcImproperSecondDenominatorInput" class="answerBox" aria-label="仮分数に直した右の分母" data-value="" type="button"></button></span>
+              </span>
+            </span>
             <span class="equals fractionCalcWorkEquals" id="fractionCalcWorkEquals" hidden>=</span>
             <span class="fractionCalcWork" id="fractionCalcWork" hidden>
               <span class="answerFraction" id="fractionCalcWorkFirst">
@@ -4069,6 +4106,7 @@
       const FRACTION_CALC_NUMERATOR_SLOTS = ["fractionCalcNumeratorHundreds", "fractionCalcNumeratorTens", "fractionCalcNumeratorOnes"];
       const FRACTION_CALC_DENOMINATOR_SLOTS = ["fractionCalcDenominatorHundreds", "fractionCalcDenominatorTens", "fractionCalcDenominatorOnes"];
       const FRACTION_CALC_WORK_SLOTS = ["fractionCalcWorkFirstDenominator", "fractionCalcWorkFirstNumerator", "fractionCalcWorkSecondDenominator", "fractionCalcWorkSecondNumerator"];
+      const FRACTION_CALC_IMPROPER_SLOTS = ["fractionCalcImproperFirstDenominator", "fractionCalcImproperFirstNumerator", "fractionCalcImproperSecondDenominator", "fractionCalcImproperSecondNumerator"];
       const FRACTION_CALC_REDUCED_NUMERATOR_SLOTS = ["fractionCalcReducedNumeratorTens", "fractionCalcReducedNumeratorOnes"];
       const FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS = ["fractionCalcReducedDenominatorTens", "fractionCalcReducedDenominatorOnes"];
       const FRACTION_ADD_SUBTRACT_TARGET = 12;
@@ -4359,6 +4397,10 @@
         fractionCalcDenominatorTens: document.querySelector("#fractionCalcDenominatorTensInput"),
         fractionCalcDenominatorOnes: document.querySelector("#fractionCalcDenominatorOnesInput"),
         fractionCalcWorkFirstNumerator: document.querySelector("#fractionCalcWorkFirstNumeratorInput"),
+        fractionCalcImproperFirstNumerator: document.querySelector("#fractionCalcImproperFirstNumeratorInput"),
+        fractionCalcImproperFirstDenominator: document.querySelector("#fractionCalcImproperFirstDenominatorInput"),
+        fractionCalcImproperSecondNumerator: document.querySelector("#fractionCalcImproperSecondNumeratorInput"),
+        fractionCalcImproperSecondDenominator: document.querySelector("#fractionCalcImproperSecondDenominatorInput"),
         fractionCalcWorkFirstDenominator: document.querySelector("#fractionCalcWorkFirstDenominatorInput"),
         fractionCalcWorkSecondNumerator: document.querySelector("#fractionCalcWorkSecondNumeratorInput"),
         fractionCalcWorkSecondDenominator: document.querySelector("#fractionCalcWorkSecondDenominatorInput"),
@@ -4438,6 +4480,9 @@
       const powersRandomStartButton = document.querySelector("#powersRandomStartButton");
       const powersLogStartButton = document.querySelector("#powersLogStartButton");
       const fractionCalcWorkEquals = document.querySelector("#fractionCalcWorkEquals");
+      const fractionCalcImproperEquals = document.querySelector("#fractionCalcImproperEquals");
+      const fractionCalcImproper = document.querySelector("#fractionCalcImproper");
+      const fractionCalcImproperOperator = document.querySelector("#fractionCalcImproperOperator");
       const fractionCalcWork = document.querySelector("#fractionCalcWork");
       const fractionCalcWorkFirst = document.querySelector("#fractionCalcWorkFirst");
       const fractionCalcWorkFirstBar = document.querySelector("#fractionCalcWorkFirstBar");
@@ -4961,10 +5006,19 @@
           const numerator = first.numerator * (operator === "multiply" ? second.numerator : second.denominator);
           const denominator = first.denominator * (operator === "multiply" ? second.denominator : second.numerator);
           const common = gcd(numerator, denominator);
-          if (kind.startsWith("fractions") && common !== 1) return;
-          candidates.push({ kind, first, second, operator, needsReciprocal,
+          if ((kind.startsWith("fractions") || kind.startsWith("mixed")) && common !== 1) return;
+          candidates.push({ kind, first, second, operator, needsReciprocal, needsImproper: kind.startsWith("mixed"),
             answer: { numerator: numerator / common, denominator: denominator / common } });
         };
+        if (kind.startsWith("mixed")) {
+          const improper = fractions.filter(value => value.numerator > value.denominator);
+          for (const first of improper) {
+            for (const second of improper) {
+              add(first, second, kind === "mixedMultiply" ? "multiply" : "divide", kind === "mixedDivide");
+            }
+          }
+          return candidates;
+        }
         for (const value of fractions) {
           if (kind.startsWith("fractions")) {
             for (const second of fractions) add(value, second, kind === "fractionsMultiply" ? "multiply" : "divide");
@@ -4991,9 +5045,10 @@
           used.add(fractionCalculationProblemText(item));
           return item;
         };
-        const kinds = ["multiplyRight", "multiplyLeft", "multiplyRight", "multiplyLeft",
-          "divideExact", "divideExact", "divideFraction", "divideFraction", "divideInteger"];
-        const first = randomInt(0, 3);
+        const kinds = ["multiplyRight", "multiplyLeft",
+          "divideExact", "divideExact", "divideFraction", "divideFraction", "divideInteger",
+          "mixedMultiply", "mixedDivide"];
+        const first = randomInt(0, 1);
         const deck = [pick(kinds.splice(first, 1)[0]), ...shuffle(kinds).map(pick)];
         const tail = Math.random() < 0.5
           ? ["fractionsMultiply", "fractionsDivide", "fractionsMultiply"]
@@ -8428,7 +8483,9 @@
       function fractionCalculationProblemText(item = fractionCalculationProblem) {
         if (!item) return "";
         const sign = item.operator === "multiply" ? "\u00d7" : "\u00f7";
-        const text = value => value.denominator === 1 ? String(value.numerator) : `${value.numerator}/${value.denominator}`;
+        const text = value => item.needsImproper
+          ? Math.floor(value.numerator / value.denominator) + " " + (value.numerator % value.denominator) + "/" + value.denominator
+          : value.denominator === 1 ? String(value.numerator) : `${value.numerator}/${value.denominator}`;
         return `${text(item.first)}${sign}${text(item.second)}`;
       }
 
@@ -9103,6 +9160,12 @@
           ["fractionCalcWorkSecondNumerator", String(item.second.denominator)],
           ["fractionCalcWorkSecondDenominator", String(item.second.numerator)],
         ] : []);
+        if (item?.needsImproper) {
+          expectedValues.set("fractionCalcImproperFirstNumerator", String(item.first.numerator));
+          expectedValues.set("fractionCalcImproperFirstDenominator", String(item.first.denominator));
+          expectedValues.set("fractionCalcImproperSecondNumerator", String(item.second.numerator));
+          expectedValues.set("fractionCalcImproperSecondDenominator", String(item.second.denominator));
+        }
         [
           [FRACTION_CALC_DENOMINATOR_SLOTS, answer.denominator],
           [FRACTION_CALC_NUMERATOR_SLOTS, answer.numerator],
@@ -9123,9 +9186,11 @@
       }
 
       function fractionCalculationSlotOrder() {
+        const improper = fractionCalculationProblem?.needsImproper ? FRACTION_CALC_IMPROPER_SLOTS : [];
+        if (fractionCalculationStage === "improper") return improper;
         const work = fractionCalculationWorkSlots();
-        if (fractionCalculationStage === "work") return work;
-        return [...work,
+        if (fractionCalculationStage === "work") return [...improper, ...work];
+        return [...improper, ...work,
           ...fractionCalculationValueSlots(FRACTION_CALC_NUMERATOR_SLOTS, FRACTION_CALC_DENOMINATOR_SLOTS, fractionCalculationUnreducedAnswer()),
           ...(fractionCalculationStage === "reduced"
             ? fractionCalculationValueSlots(FRACTION_CALC_REDUCED_NUMERATOR_SLOTS, FRACTION_CALC_REDUCED_DENOMINATOR_SLOTS, fractionCalculationAnswer()) : [])];
@@ -9139,13 +9204,18 @@
       }
 
       function resetFractionCalculationEntry() {
-        fractionCalculationStage = fractionCalculationProblem?.needsReciprocal ? "work" : "answer";
+        fractionCalculationStage = fractionCalculationProblem?.needsImproper ? "improper"
+          : fractionCalculationProblem?.needsReciprocal ? "work" : "answer";
+        fractionCalculationProblemLine.scrollTop = 0;
         updateFractionCalculationSlots();
       }
 
       function renderFractionCalculationProblem() {
         const item = fractionCalculationProblem;
-        const display = value => value.denominator === 1 ? String(value.numerator) : fraction(value.numerator, value.denominator);
+        const display = value => item.needsImproper
+          ? '<span class="fractionCalcMixedNumber"><span>' + Math.floor(value.numerator / value.denominator)
+            + '</span>' + fraction(value.numerator % value.denominator, value.denominator) + '</span>'
+          : value.denominator === 1 ? String(value.numerator) : fraction(value.numerator, value.denominator);
         const sign = item.operator === "multiply" ? "\u00d7" : "\u00f7";
         fractionCalculationQuestion.innerHTML = `${display(item.first)}<span class="fractionCalcOperator">${sign}</span>${display(item.second)}`;
         resetFractionCalculationEntry();
@@ -9156,14 +9226,21 @@
         const answer = fractionCalculationUnreducedAnswer();
         const reduced = fractionCalculationAnswer();
         const needsReduction = fractionCalculationNeedsReduction();
+        const mixed = Boolean(fractionCalculationProblem.needsImproper);
         const work = fractionCalculationProblem.needsReciprocal;
-        const showAnswer = fractionCalculationStage !== "work";
+        const showWork = work && fractionCalculationStage !== "improper";
+        const showAnswer = fractionCalculationStage === "answer" || fractionCalculationStage === "reduced";
         const showReduced = fractionCalculationStage === "reduced";
         const firstIsInteger = fractionCalculationProblem.first.denominator === 1;
         fractionCalculationProblemLine.classList.toggle("withReciprocal", Boolean(work));
         fractionCalculationProblemLine.classList.toggle("withReduction", needsReduction);
-        fractionCalcWorkEquals.hidden = !work;
-        fractionCalcWork.hidden = !work;
+        fractionCalculationProblemLine.classList.toggle("withMixed", mixed);
+        fractionCalcImproperEquals.hidden = !mixed;
+        fractionCalcImproper.hidden = !mixed;
+        fractionCalcImproperOperator.textContent = fractionCalculationProblem.operator === "multiply" ? "×" : "÷";
+        FRACTION_CALC_IMPROPER_SLOTS.forEach(slot => { inputs[slot].hidden = !mixed; });
+        fractionCalcWorkEquals.hidden = !showWork;
+        fractionCalcWork.hidden = !showWork;
         fractionCalcWorkFirst.classList.toggle("integerResult", firstIsInteger);
         fractionCalcWorkFirstBar.hidden = firstIsInteger;
         fractionCalcWorkFirstDenominatorRow.hidden = firstIsInteger;
@@ -9177,7 +9254,7 @@
           inputs[slot].hidden = !showAnswer || !visible.has(slot);
         });
         const workSlots = fractionCalculationWorkSlots();
-        FRACTION_CALC_WORK_SLOTS.forEach(slot => { inputs[slot].hidden = !workSlots.includes(slot); });
+        FRACTION_CALC_WORK_SLOTS.forEach(slot => { inputs[slot].hidden = !showWork || !workSlots.includes(slot); });
         fractionCalcReducedEquals.hidden = !showReduced;
         fractionCalcReducedAnswer.hidden = !showReduced;
         fractionCalcReducedAnswer.classList.toggle("integerResult", reduced.denominator === 1);
@@ -11186,13 +11263,15 @@
         const correctDecimal = !needsDecimalPoint || selectedDoubleDecimalPosition === expectedDoubleDecimalPosition();
         const correct = correctDigits && correctDecimal;
 
-        if (selectedApp === "fractionCalculation" && (fractionCalculationStage === "work"
+        if (selectedApp === "fractionCalculation" && (fractionCalculationStage === "improper" || fractionCalculationStage === "work"
           || (fractionCalculationStage === "answer" && fractionCalculationNeedsReduction()))) {
           if (!correct) {
             showWrongConfirmation(answerSignature(), clearIncorrectAnswers);
             return;
           }
-          fractionCalculationStage = fractionCalculationStage === "work" ? "answer" : "reduced";
+          fractionCalculationStage = fractionCalculationStage === "improper"
+            ? fractionCalculationProblem.needsReciprocal ? "work" : "answer"
+            : fractionCalculationStage === "work" ? "answer" : "reduced";
           updateFractionCalculationSlots();
           setActive(activeSlotOrder().find(slot => getAnswerValue(slot) !== expected(slot)));
           return;
