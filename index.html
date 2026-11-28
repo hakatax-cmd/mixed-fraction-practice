@@ -5825,7 +5825,7 @@
           ozConversion(quarterWeight, quarterWeight / 7, 4, 1, "ozQuarter"),
           ozConversion(3.5 * eighthNumerator, eighthNumerator, 8, 10, "ozEighth"),
         ];
-        const mixedGoWhole = Math.random() < 0.5 ? 1 : 2;
+        const mixedGoWhole = 1 + Math.floor(Math.random() * 3);
         const mixedGoNumerator = mixedGoWhole * 2 + 1;
         const mixedGoProduct = 15 * mixedGoNumerator;
         const go = [
@@ -5873,8 +5873,11 @@
             steps, answerText),
           lengthKey,
         });
-        const mixedCandidates = [[7, 2], [7, 4], [7, 6], [8, 4], [8, 6], [9, 4], [9, 6]]
-          .map(([feet, inches]) => ({ feet, inches, key: `mixed:${feet}:${inches}` }));
+        const mixedCandidates = Array.from({ length: 6 }, (_, index) => index + 5).flatMap(feet =>
+          Array.from({ length: 11 }, (_, index) => {
+            const inches = index + 1;
+            return { feet, inches, key: "mixed:" + feet + ":" + inches };
+          }));
         const mixedLength = Array.from({ length: 2 }, (_, index) => {
           const { feet, inches, key } = chooseLength(mixedCandidates);
           const footCm = feet * 30;
@@ -5900,7 +5903,7 @@
           ], `${feet} feet ${inches} inch`, key);
         });
         return [
-          ozMultiplication[0], ozDivision[0], ozMultiplication[1], ozDivision[1],
+          ozMultiplication[0], ozDivision[0], ozMultiplication[1 + Math.floor(Math.random() * 2)], ozDivision[1],
           go[0], go[1], go[2], go[3],
           ...mixedLength,
         ];
